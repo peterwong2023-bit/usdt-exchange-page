@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>波币 | 数字化指挥内核</title>
+    <!-- 引入高标准字体 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Exo+2:wght@300;400;600&family=JetBrains+Mono:wght@400;700&family=Noto+Sans+SC:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #22D3EE;
+            --primary-glow: rgba(34, 211, 238, 0.4);
+            --bg-base: #020617;
+            --glass-bg: rgba(15, 23, 42, 0.7);
+            --glass-border: rgba(34, 211, 238, 0.2);
+            --text-1: #F8FAFC;
+            --text-2: #94A3B8;
+            --text-3: #64748B;
+            --font-head: 'Orbitron', sans-serif;
+            --font-body: 'Exo+2', 'Noto Sans SC', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--bg-base);
+            color: var(--text-1);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ===== 背景系统 (Matrix + Mesh) ===== */
+        .bg-system {
+            position: fixed; inset: 0; z-index: -1;
+            background: radial-gradient(circle at 50% 50%, #0f172a 0%, #020617 100%);
+        }
+        .bg-mesh {
+            position: absolute; inset: 0;
+            background-image: 
+                linear-gradient(to right, rgba(34, 211, 238, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(34, 211, 238, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            mask-image: radial-gradient(ellipse at center, black, transparent 80%);
+        }
+        .matrix-effect {
+            position: absolute; inset: 0; opacity: 0.05;
+            pointer-events: none;
+        }
+
+        /* ===== 玻璃态布局 ===== */
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+        }
+
+        /* ===== HEADER: 高级悬浮感 ===== */
+        .header {
+            height: 64px; border-bottom: 1px solid var(--glass-border);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 32px; background: rgba(2, 6, 23, 0.8); z-index: 1000;
+        }
+        .logo-area { display: flex; align-items: center; gap: 16px; }
+        .logo-text { font-family: var(--font-head); font-size: 20px; font-weight: 700; letter-spacing: 2px; color: #FFF; text-shadow: 0 0 10px var(--primary-glow); }
+        
+        .top-nav { display: flex; gap: 8px; margin-left: 48px; height: 100%; }
+        .top-nav a {
+            color: var(--text-2); text-decoration: none; font-size: 14px; font-weight: 500;
+            padding: 0 24px; height: 100%; display: flex; align-items: center; transition: 0.3s;
+            position: relative;
+        }
+        .top-nav a:hover { color: var(--primary); background: rgba(34, 211, 238, 0.03); }
+        .top-nav a.active { color: var(--primary); font-weight: 700; }
+        .top-nav a.active::after { 
+            content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; 
+            background: var(--primary); box-shadow: 0 0 15px var(--primary);
+        }
+
+        /* ===== LAYOUT: 侧边栏 + 主内容 ===== */
+        .container { display: flex; flex: 1; overflow: hidden; }
+
+        .sidebar {
+            width: 240px; border-right: 1px solid var(--glass-border);
+            background: rgba(2, 6, 23, 0.4); display: flex; flex-direction: column;
+            transition: 0.3s;
+        }
+        .sidebar-section { font-size: 11px; text-transform: uppercase; color: var(--primary); padding: 24px 24px 12px; letter-spacing: 2px; opacity: 0.5; font-weight: 700; }
+        .side-link {
+            padding: 14px 24px; font-size: 14px; color: var(--text-2);
+            display: flex; align-items: center; gap: 12px; transition: 0.3s; cursor: pointer;
+        }
+        .side-link:hover { color: #FFF; background: rgba(255,255,255,0.03); }
+        .side-link.active { color: var(--primary); background: linear-gradient(90deg, rgba(34,211,238,0.1), transparent); border-right: 3px solid var(--primary); }
+        
+        .main-stage { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: rgba(0,0,0,0.1); }
+        .tab-bar { height: 40px; background: rgba(0,0,0,0.3); display: flex; align-items: center; padding: 0 20px; border-bottom: 1px solid var(--glass-border); }
+        .tab-item { 
+            font-size: 11px; color: var(--primary); background: rgba(34, 211, 238, 0.1); 
+            padding: 4px 14px; border-radius: 4px; display: flex; align-items: center; gap: 8px; border: 1px solid var(--glass-border);
+        }
+
+        .view-port { flex: 1; overflow-y: auto; padding: 32px; }
+
+        /* ===== 筛选中心: Bento 风格控制栏 ===== */
+        .control-grid {
+            display: grid; grid-template-columns: auto 1fr; gap: 24px; margin-bottom: 32px; align-items: end;
+        }
+        .filter-glass {
+            padding: 24px; border-radius: 16px; display: flex; flex-wrap: wrap; gap: 20px; align-items: center;
+        }
+        .input-group { display: flex; flex-direction: column; gap: 8px; }
+        .label-tech { font-size: 11px; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: 1px; }
+        
+        .tech-select, .tech-input {
+            background: #000; border: 1px solid var(--glass-border);
+            color: #FFF; padding: 10px 16px; border-radius: 8px; font-size: 13px; outline: none;
+            transition: 0.3s; font-family: var(--font-mono);
+        }
+        .tech-select:focus, .tech-input:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(34, 211, 238, 0.2); }
+
+        .btn-tech { 
+            background: linear-gradient(135deg, var(--primary), #0ea5e9); color: #000;
+            border: none; padding: 12px 28px; border-radius: 8px; font-weight: 800;
+            font-size: 13px; cursor: pointer; text-transform: uppercase; transition: 0.3s;
+            box-shadow: 0 4px 15px rgba(34, 211, 238, 0.3);
+        }
+        .btn-tech:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(34, 211, 238, 0.5); }
+        
+        .btn-sub { 
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-2); padding: 11px 18px; border-radius: 8px; font-size: 13px; cursor: pointer; transition: 0.3s;
+        }
+        .btn-sub:hover { border-color: var(--primary); color: #FFF; }
+        .btn-sub.active { border-color: var(--primary); color: var(--primary); background: rgba(34, 211, 238, 0.1); }
+
+        /* ===== 卡片系统: 深度多维呈现 ===== */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 32px; }
+        .card-pro {
+            border-radius: 24px; padding: 32px; position: relative; overflow: hidden;
+            transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card-pro:hover { transform: translateY(-10px); border-color: var(--primary); box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+        
+        /* 科技装饰线 */
+        .card-pro::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%;
+            background: var(--primary); opacity: 0.3;
+        }
+        .card-scan {
+            position: absolute; inset: 0; pointer-events: none;
+            background: linear-gradient(to bottom, transparent, rgba(34, 211, 238, 0.05) 50%, transparent);
+            animation: scan-vertical 4s linear infinite;
+        }
+        @keyframes scan-vertical { 0% { transform: translateY(-100%); } 100% { transform: translateY(100%); } }
+
+        .card-header-pro { display: flex; align-items: center; gap: 24px; margin-bottom: 28px; }
+        .icon-shield {
+            width: 72px; height: 72px; background: rgba(0,0,0,0.3);
+            border: 1px solid var(--glass-border); border-radius: 18px;
+            display: flex; align-items: center; justify-content: center;
+            position: relative;
+        }
+        .icon-shield::after { content: ''; position: absolute; inset: -4px; border: 1px solid var(--primary); border-radius: 22px; opacity: 0.1; }
+        
+        .card-title-pro { font-family: var(--font-head); font-size: 20px; font-weight: 700; color: #FFF; letter-spacing: 1px; }
+        
+        .data-list { display: flex; flex-direction: column; gap: 14px; }
+        .data-item { 
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .data-label { font-size: 14px; color: var(--text-2); font-weight: 500; }
+        .data-val { font-family: var(--font-mono); font-size: 20px; font-weight: 700; color: #FFF; }
+
+        /* 用户状态 */
+        .user-hub { display: flex; align-items: center; gap: 16px; }
+        .user-avatar { 
+            width: 42px; height: 42px; border-radius: 12px; border: 2px solid var(--primary); 
+            padding: 2px; background: rgba(0,0,0,0.5); box-shadow: 0 0 15px var(--primary-glow);
+        }
+        .pulse-indicator { width: 8px; height: 8px; background: #10B981; border-radius: 50%; display: inline-block; margin-right: 8px; box-shadow: 0 0 10px #10B981; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
+    </style>
+</head>
+<body>
+    <div class="bg-system">
+        <div class="bg-mesh"></div>
+        <canvas id="matrix" class="matrix-effect"></canvas>
+    </div>
+
+    <header class="header">
+        <div class="logo-area">
+            <div class="logo-text">BOBI EXCHANGE</div>
+            <nav class="top-nav">
+                <a href="#" class="active">数据报表</a>
+                <a href="#">商户管理</a>
+                <a href="#">用户管理</a>
+                <a href="#">交易管理</a>
+                <a href="#">日志</a>
+                <a href="#">系统管理</a>
+            </nav>
+        </div>
+        <div class="user-hub">
+            <div style="text-align: right;">
+                <div style="font-size: 14px; font-weight: 700; color: #FFF;">ADMINISTRATOR</div>
+                <div id="clock" style="font-size: 11px; font-family: var(--font-mono); color: var(--primary);">2026-02-11 12:00:00</div>
+            </div>
+            <div class="user-avatar">
+                <img src="https://api.dicebear.com/7.x/identicon/svg?seed=admin&backgroundColor=020617" style="width:100%; border-radius:10px">
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar">
+            <div class="sidebar-section">Main Navigation</div>
+            <div class="side-link active">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
+                数据总表
+            </div>
+            <div class="side-link">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                平台金钱流水
+            </div>
+            <div class="side-link">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                用户金钱流水
+            </div>
+            <div class="side-link">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+                实时挂单统计
+            </div>
+            <div class="side-link">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 12h2a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></svg>
+                公司金钱流水
+            </div>
+            <div class="side-link">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                商户金钱流水
+            </div>
+            <div class="side-link">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                用户积分流水
+            </div>
+        </aside>
+
+        <main class="main-stage">
+            <div class="tab-bar">
+                <div class="tab-item">数据总表 <span style="cursor:pointer; font-size:14px; opacity:0.6">×</span></div>
+            </div>
+
+            <div class="view-port">
+                <div style="margin-bottom: 32px;">
+                    <h1 style="font-family: var(--font-head); font-size: 24px; font-weight: 700; color: #FFF; display: flex; align-items: center; gap: 12px;">
+                        <span class="pulse-indicator"></span> 平台数据概览
+                    </h1>
+                </div>
+
+                <div class="control-grid">
+                    <div class="filter-glass glass-panel">
+                        <div class="input-group">
+                            <label class="label-tech">APP 标识</label>
+                            <select class="tech-select" style="min-width: 140px;">
+                                <option>全部节点</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label class="label-tech">统计区间</label>
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <input type="text" class="tech-input" value="2025-02-12" style="width: 120px;" readonly>
+                                <span style="color: var(--text-3); font-family: var(--font-mono)">>>></span>
+                                <input type="text" class="tech-input" value="2025-02-12" style="width: 120px;" readonly>
+                            </div>
+                        </div>
+                        <button class="btn-tech">执行查询</button>
+                        <div style="display:flex; gap:10px; margin-left: 10px;">
+                            <button class="btn-sub active">当日</button>
+                            <button class="btn-sub">上一日</button>
+                            <button class="btn-sub" disabled style="opacity:0.3; cursor:not-allowed">下一日</button>
+                        </div>
+                        <div style="color: var(--primary); font-size: 13px; font-weight: 700; cursor: pointer; border-bottom: 1px dashed var(--primary); margin-left: 10px;">更多高级筛选 ▾</div>
+                    </div>
+                    
+                    <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 12px;">
+                        <div style="font-size: 12px; color: #FACC15; background: rgba(250, 204, 21, 0.1); padding: 6px 16px; border-radius: 6px; border: 1px solid rgba(250, 204, 21, 0.2);">数据每15分钟更新</div>
+                        <button class="btn-tech">获取波币经营报表</button>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <!-- 提单核心卡片 -->
+                    <div class="card-pro glass-panel">
+                        <div class="card-scan"></div>
+                        <div class="card-header-pro">
+                            <div class="icon-shield">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"/><path d="m7 7-.01.01"/></svg>
+                            </div>
+                            <div>
+                                <div class="card-title-pro">提单中心</div>
+                                <div style="font-size: 12px; color: var(--text-3); margin-top: 4px;">ORDER DELIVERY CONTROL</div>
+                            </div>
+                        </div>
+                        <div class="data-list">
+                            <div class="data-item"><span class="data-label">挂单总数</span><span class="data-val">1,429</span></div>
+                            <div class="data-item"><span class="data-label">上架单数</span><span class="data-val">856</span></div>
+                            <div class="data-item"><span class="data-label">上架中波币</span><span class="data-val">42,050.00</span></div>
+                            <div class="data-item"><span class="data-label">下架波币</span><span class="data-val">120</span></div>
+                            <div class="data-item" style="border:none"><span class="data-label" style="color:#F43F5E">暂停波币</span><span class="data-val" style="color:#F43F5E">12</span></div>
+                        </div>
+                    </div>
+
+                    <!-- 工单核心卡片 -->
+                    <div class="card-pro glass-panel">
+                        <div class="card-scan"></div>
+                        <div class="card-header-pro">
+                            <div class="icon-shield">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/></svg>
+                            </div>
+                            <div>
+                                <div class="card-title-pro">工单监控</div>
+                                <div style="font-size: 12px; color: var(--text-3); margin-top: 4px;">TICKET MONITORING SYSTEM</div>
+                            </div>
+                        </div>
+                        <div class="data-list">
+                            <div class="data-item"><span class="data-label">完成笔数</span><span class="data-val">3,102</span></div>
+                            <div class="data-item"><span class="data-label">完成波币</span><span class="data-val">158,200.00</span></div>
+                            <div class="data-item"><span class="data-label">失败笔数</span><span class="data-val">45</span></div>
+                            <div class="data-item" style="border:none"><span class="data-label">失败波币</span><span class="data-val">1,240.50</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Matrix 数字化雨背景
+        const canvas = document.getElementById('matrix');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        const letters = "0101010101010101";
+        const fontSize = 14;
+        const columns = canvas.width / fontSize;
+        const drops = Array(Math.floor(columns)).fill(1);
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(2, 6, 23, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#22D3EE';
+            ctx.font = fontSize + 'px monospace';
+            for (let i = 0; i < drops.length; i++) {
+                const text = letters.charAt(Math.floor(Math.random() * letters.length));
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+                drops[i]++;
+            }
+        }
+        setInterval(drawMatrix, 50);
+
+        // 实时时钟
+        function updateClock() {
+            const now = new Date();
+            const pad = n => String(n).padStart(2, '0');
+            document.getElementById('clock').textContent = 
+                `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+        }
+        setInterval(updateClock, 1000); updateClock();
+
+        // 响应式画布
+        window.onresize = () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        };
+    </script>
+</body>
+</html>

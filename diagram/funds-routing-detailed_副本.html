@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voss资金路由图</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: "PingFang SC", "Microsoft YaHei", "Segoe UI", Arial, sans-serif;
+            background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 32px 16px;
+        }
+        .page-header { text-align: center; margin-bottom: 24px; }
+        .page-header h1 { font-size: 32px; font-weight: 800; color: #0f172a; margin-bottom: 8px; }
+        .page-header p { font-size: 14px; color: #64748b; }
+        .svg-container {
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 12px 48px rgba(15,23,42,0.12);
+            overflow: auto;
+            max-width: 100%;
+        }
+        .actions { margin-top: 24px; }
+        .btn {
+            background: #3b82f6; color: #fff; border: none;
+            padding: 14px 28px; font-size: 15px; font-weight: 600;
+            border-radius: 10px; cursor: pointer; transition: all 0.2s;
+        }
+        .btn:hover { background: #2563eb; transform: translateY(-2px); }
+    </style>
+</head>
+<body>
+    <div class="page-header">
+        <h1>Voss资金路由图</h1>
+        <p>入款 → KYT（写标签）→ 商户业务池 → 分桶归集 → 风险归集池 → 出款</p>
+    </div>
+
+    <div class="svg-container">
+        <svg id="diagram" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1700 1600" width="1700" height="1600">
+            <defs>
+                <marker id="arrowMain" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+                    <path d="M0,0 L10,5 L0,10 Z" fill="#94a3b8"/>
+                </marker>
+                <marker id="arrowDash" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+                    <path d="M0,0 L10,5 L0,10 Z" fill="#2563eb"/>
+                </marker>
+                <marker id="arrowDeny" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+                    <path d="M0,0 L10,5 L0,10 Z" fill="#dc2626"/>
+                </marker>
+                <marker id="arrowAllow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+                    <path d="M0,0 L10,5 L0,10 Z" fill="#16a34a"/>
+                </marker>
+                <marker id="arrowSevere" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+                    <path d="M0,0 L10,5 L0,10 Z" fill="#7f1d1d"/>
+                </marker>
+                <filter id="shadow" x="-10%" y="-10%" width="130%" height="130%">
+                    <feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="#1e293b" flood-opacity="0.1"/>
+                </filter>
+                <linearGradient id="gradLow" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#22c55e"/><stop offset="50%" stop-color="#4ade80"/><stop offset="100%" stop-color="#22c55e"/>
+                </linearGradient>
+                <linearGradient id="gradMid" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#f59e0b"/><stop offset="50%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#f59e0b"/>
+                </linearGradient>
+                <linearGradient id="gradHigh" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#ef4444"/><stop offset="50%" stop-color="#f87171"/><stop offset="100%" stop-color="#ef4444"/>
+                </linearGradient>
+                <linearGradient id="gradSevere" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#7f1d1d"/><stop offset="50%" stop-color="#991b1b"/><stop offset="100%" stop-color="#7f1d1d"/>
+                </linearGradient>
+                <linearGradient id="topLow" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#86efac"/><stop offset="100%" stop-color="#22c55e"/>
+                </linearGradient>
+                <linearGradient id="topMid" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#fde68a"/><stop offset="100%" stop-color="#f59e0b"/>
+                </linearGradient>
+                <linearGradient id="topHigh" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#fca5a5"/><stop offset="100%" stop-color="#ef4444"/>
+                </linearGradient>
+                <linearGradient id="topSevere" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#b91c1c"/><stop offset="100%" stop-color="#7f1d1d"/>
+                </linearGradient>
+                <linearGradient id="gradBiz" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#6366f1"/><stop offset="50%" stop-color="#818cf8"/><stop offset="100%" stop-color="#6366f1"/>
+                </linearGradient>
+                <linearGradient id="topBiz" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#a5b4fc"/><stop offset="100%" stop-color="#6366f1"/>
+                </linearGradient>
+            </defs>
+
+            <rect width="1650" height="1550" fill="#fafbfc"/>
+
+            <!-- ========== PHASE LABELS ========== -->
+            <g id="phase-labels">
+                <path d="M30,22 L180,22 L195,42 L180,62 L30,62 Q20,42 30,62 Z" fill="#3b82f6"/>
+                <text x="105" y="47" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">1 入款</text>
+                
+                <path d="M195,22 L360,22 L375,42 L360,62 L195,62 L210,42 Z" fill="#8b5cf6"/>
+                <text x="280" y="47" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">2 KYT风控</text>
+                
+                <path d="M375,22 L560,22 L575,42 L560,62 L375,62 L390,42 Z" fill="#6366f1"/>
+                <text x="470" y="47" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">3 商户业务池</text>
+                
+                <path d="M575,22 L850,22 L865,42 L850,62 L575,62 L590,42 Z" fill="#64748b"/>
+                <text x="715" y="47" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">4 分桶归集 & 风险池</text>
+                
+                <path d="M865,22 L1250,22 L1265,42 L1250,62 L865,62 L880,42 Z" fill="#059669"/>
+                <text x="1060" y="47" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">5 出款阶段</text>
+                
+                <path d="M1265,22 L1520,22 Q1535,42 1520,62 L1265,62 L1280,42 Z" fill="#0891b2"/>
+                <text x="1395" y="47" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">6 结算</text>
+            </g>
+
+            <!-- ========== ROW 1: A → B → C → D ========== -->
+            <!-- STEP A -->
+            <g id="step-a" filter="url(#shadow)">
+                <rect x="40" y="90" width="140" height="70" rx="10" fill="#fff" stroke="#3b82f6" stroke-width="2"/>
+                <text x="110" y="115" font-size="11" font-weight="700" fill="#1e293b" text-anchor="middle">A. 入款检测</text>
+                <text x="110" y="132" font-size="9" fill="#64748b" text-anchor="middle">• 监控区块链</text>
+                <text x="110" y="146" font-size="9" fill="#64748b" text-anchor="middle">• 检测入账交易</text>
+            </g>
+            <line x1="180" y1="125" x2="210" y2="125" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrowMain)"/>
+
+            <!-- STEP B -->
+            <g id="step-b" filter="url(#shadow)">
+                <rect x="220" y="90" width="140" height="70" rx="10" fill="#fff" stroke="#3b82f6" stroke-width="2"/>
+                <text x="290" y="115" font-size="11" font-weight="700" fill="#1e293b" text-anchor="middle">B. 交易确认</text>
+                <text x="290" y="132" font-size="9" fill="#64748b" text-anchor="middle">• 等待 N 个确认</text>
+                <text x="290" y="146" font-size="9" fill="#64748b" text-anchor="middle">• 交易已确认</text>
+            </g>
+            <line x1="360" y1="125" x2="390" y2="125" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrowMain)"/>
+
+            <!-- STEP C: 一次性 KYT -->
+            <g id="step-c" filter="url(#shadow)">
+                <rect x="400" y="85" width="170" height="80" rx="10" fill="#f5f3ff" stroke="#8b5cf6" stroke-width="2"/>
+                <text x="485" y="108" font-size="11" font-weight="700" fill="#7c3aed" text-anchor="middle">C. 一次性 KYT</text>
+                <text x="485" y="124" font-size="9" fill="#64748b" text-anchor="middle">• 调用 KYT 接口（仅一次）</text>
+                <text x="485" y="138" font-size="9" fill="#64748b" text-anchor="middle">• 输出 风险标签 写入入款记录</text>
+                <text x="485" y="152" font-size="8" fill="#8b5cf6" text-anchor="middle">(低 / 中 / 高 / 严重)</text>
+            </g>
+            <line x1="570" y1="125" x2="600" y2="125" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrowMain)"/>
+
+            <!-- STEP D: 商户业务池入账 (NOT into risk buckets yet) -->
+            <g id="step-d" filter="url(#shadow)">
+                <rect x="610" y="80" width="200" height="90" rx="10" fill="#eef2ff" stroke="#6366f1" stroke-width="2"/>
+                <text x="710" y="103" font-size="11" font-weight="700" fill="#4338ca" text-anchor="middle">D. 商户业务池入账（待归集）</text>
+                <text x="710" y="120" font-size="9" fill="#64748b" text-anchor="middle">• 资金进入商户业务池（待归集余额）</text>
+                <text x="710" y="135" font-size="9" fill="#64748b" text-anchor="middle">• 每笔入款记录写入 风险标签</text>
+                <text x="710" y="150" font-size="9" fill="#6366f1" text-anchor="middle">• ⚠ 此阶段不进入 低/中/高/严重</text>
+            </g>
+
+            <!-- ========== MERCHANT BUSINESS POOL (Cylinder) ========== -->
+            <g id="biz-pool" transform="translate(660, 200)">
+                <ellipse cx="50" cy="55" rx="55" ry="12" fill="#4338ca" opacity="0.25"/>
+                <rect x="-5" y="10" width="110" height="45" fill="url(#gradBiz)"/>
+                <ellipse cx="50" cy="55" rx="55" ry="12" fill="url(#gradBiz)"/>
+                <ellipse cx="50" cy="10" rx="55" ry="12" fill="url(#topBiz)"/>
+                <text x="50" y="38" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">商户业务池</text>
+            </g>
+            <text x="710" y="278" font-size="9" fill="#6366f1" text-anchor="middle" font-weight="600">待归集余额（含所有 风险标签）</text>
+            <path d="M710,170 L710,200" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#arrowMain)"/>
+
+            <!-- ========== ROW 2: E (归集触发) → E0 (分桶归集计划) ========== -->
+            <!-- Arrow from Biz Pool to E -->
+            <path d="M710,270 L710,310" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#arrowMain)"/>
+
+            <!-- STEP E: 归集触发 -->
+            <g id="step-e" filter="url(#shadow)">
+                <rect x="620" y="320" width="180" height="75" rx="10" fill="#fff" stroke="#64748b" stroke-width="2"/>
+                <text x="710" y="343" font-size="11" font-weight="700" fill="#1e293b" text-anchor="middle">E. 归集触发</text>
+                <text x="710" y="360" font-size="9" fill="#64748b" text-anchor="middle">• 达到阈值 / 闲置归集 / 手动触发</text>
+                <text x="710" y="375" font-size="9" fill="#64748b" text-anchor="middle">• 严重：确认后可即时归集</text>
+            </g>
+            <line x1="800" y1="357" x2="840" y2="357" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrowMain)"/>
+
+            <!-- STEP E0: 分桶归集计划 -->
+            <g id="step-e0" filter="url(#shadow)">
+                <rect x="850" y="315" width="200" height="85" rx="10" fill="#fefce8" stroke="#ca8a04" stroke-width="2"/>
+                <text x="950" y="338" font-size="11" font-weight="700" fill="#a16207" text-anchor="middle">E0. 分桶归集计划（按 风险标签）</text>
+                <text x="950" y="356" font-size="9" fill="#64748b" text-anchor="middle">• 从商户业务池挑选待归集入款</text>
+                <text x="950" y="370" font-size="9" fill="#64748b" text-anchor="middle">• 按 风险标签 分为 低/中/高/严重 四组</text>
+                <text x="950" y="384" font-size="9" fill="#ca8a04" text-anchor="middle">• ⚠ 归集阶段不做 KYT</text>
+            </g>
+
+            <!-- ========== ARROWS FROM E0 TO FOUR BUCKETS ========== -->
+            <path d="M950,400 L950,430 L420,430 L420,480" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#arrowMain)"/>
+            <path d="M950,400 L950,430 L570,430 L570,480" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#arrowMain)"/>
+            <path d="M950,400 L950,430 L720,430 L720,480" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#arrowMain)"/>
+            <path d="M950,400 L950,430 L870,430 L870,480" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#arrowMain)"/>
+            <circle cx="950" cy="430" r="4" fill="#94a3b8"/>
+            <circle cx="720" cy="430" r="3" fill="#94a3b8"/>
+            <circle cx="570" cy="430" r="3" fill="#94a3b8"/>
+
+            <!-- ========== FOUR RISK COLLECTION POOLS (Cylinders) ========== -->
+            <text x="645" y="460" font-size="10" font-weight="700" fill="#475569" text-anchor="middle">风险归集池（目标桶）</text>
+            <text x="645" y="472" font-size="8" fill="#94a3b8" text-anchor="middle" font-style="italic">Collection destinations (no KYT here)</text>
+
+            <!-- 低风险池 -->
+            <g id="cyl-low" transform="translate(370, 490)">
+                <ellipse cx="50" cy="50" rx="45" ry="11" fill="#166534" opacity="0.25"/>
+                <rect x="5" y="10" width="90" height="40" fill="url(#gradLow)"/>
+                <ellipse cx="50" cy="50" rx="45" ry="11" fill="url(#gradLow)"/>
+                <ellipse cx="50" cy="10" rx="45" ry="11" fill="url(#topLow)"/>
+                <text x="50" y="35" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">低</text>
+            </g>
+            <text x="420" y="560" font-size="8" fill="#16a34a" text-anchor="middle">0~20</text>
+
+            <!-- 中风险池 -->
+            <g id="cyl-mid" transform="translate(520, 490)">
+                <ellipse cx="50" cy="50" rx="45" ry="11" fill="#92400e" opacity="0.25"/>
+                <rect x="5" y="10" width="90" height="40" fill="url(#gradMid)"/>
+                <ellipse cx="50" cy="50" rx="45" ry="11" fill="url(#gradMid)"/>
+                <ellipse cx="50" cy="10" rx="45" ry="11" fill="url(#topMid)"/>
+                <text x="50" y="35" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">中</text>
+            </g>
+            <text x="570" y="560" font-size="8" fill="#d97706" text-anchor="middle">20~50</text>
+
+            <!-- 高风险池 -->
+            <g id="cyl-high" transform="translate(670, 490)">
+                <ellipse cx="50" cy="50" rx="45" ry="11" fill="#991b1b" opacity="0.25"/>
+                <rect x="5" y="10" width="90" height="40" fill="url(#gradHigh)"/>
+                <ellipse cx="50" cy="50" rx="45" ry="11" fill="url(#gradHigh)"/>
+                <ellipse cx="50" cy="10" rx="45" ry="11" fill="url(#topHigh)"/>
+                <text x="50" y="35" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">高</text>
+            </g>
+            <text x="720" y="560" font-size="8" fill="#dc2626" text-anchor="middle">50~80</text>
+
+            <!-- 严重风险池 -->
+            <g id="cyl-severe" transform="translate(820, 490)">
+                <ellipse cx="50" cy="50" rx="45" ry="11" fill="#450a0a" opacity="0.25"/>
+                <rect x="5" y="10" width="90" height="40" fill="url(#gradSevere)"/>
+                <ellipse cx="50" cy="50" rx="45" ry="11" fill="url(#gradSevere)"/>
+                <ellipse cx="50" cy="10" rx="45" ry="11" fill="url(#topSevere)"/>
+                <text x="50" y="35" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">严重</text>
+            </g>
+            <text x="870" y="560" font-size="8" fill="#7f1d1d" text-anchor="middle">≥80</text>
+
+            <!-- SEVERE POOL NOTE -->
+            <rect x="815" y="565" width="110" height="20" rx="5" fill="#fef2f2" stroke="#dc2626" stroke-dasharray="3,2"/>
+            <text x="870" y="579" font-size="8" fill="#991b1b" text-anchor="middle" font-weight="600">🔒 严重池不借不贷</text>
+
+            <!-- ========== STEP F: 归集交易 ========== -->
+            <path d="M645,545 L645,600 L1000,600 L1000,640" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#arrowMain)"/>
+            <circle cx="645" cy="600" r="3" fill="#94a3b8"/>
+
+            <g id="step-f" filter="url(#shadow)">
+                <rect x="920" y="650" width="160" height="80" rx="10" fill="#fff" stroke="#64748b" stroke-width="2"/>
+                <text x="1000" y="673" font-size="11" font-weight="700" fill="#1e293b" text-anchor="middle">F. 归集交易</text>
+                <text x="1000" y="690" font-size="9" fill="#64748b" text-anchor="middle">• 执行链上归集转账</text>
+                <text x="1000" y="705" font-size="9" fill="#64748b" text-anchor="middle">• 归集阶段不做 KYT</text>
+                <text x="1000" y="720" font-size="9" fill="#64748b" text-anchor="middle">• 资金落入对应风险归集池</text>
+            </g>
+            <path d="M1080,690 L1120,690 L1120,745 L580,745" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#arrowMain)"/>
+
+            <!-- ========== PAYOUT STAGE LABEL ========== -->
+            <text x="550" y="680" font-size="9" fill="#059669" font-weight="700" text-anchor="middle">出款流程：KYA判定目标地址风险标签 → 同标签桶优先 → 不足时借款（仅L/M/H）</text>
+
+            <!-- ========== STEP G: 出款请求 ========== -->
+            <g id="step-g" filter="url(#shadow)">
+                <rect x="380" y="700" width="200" height="90" rx="10" fill="#fff" stroke="#059669" stroke-width="2"/>
+                <text x="480" y="723" font-size="11" font-weight="700" fill="#1e293b" text-anchor="middle">G. 出款请求</text>
+                <text x="480" y="740" font-size="8" fill="#64748b" text-anchor="middle">• 输入：目标地址 + 金额</text>
+                <text x="480" y="755" font-size="8" fill="#64748b" text-anchor="middle">• 常规出款：先 KYA 判定目标地址风险标签</text>
+                <text x="480" y="770" font-size="8" fill="#6366f1" text-anchor="middle">• 商户后台提款（仅Severe）：可任意地址</text>
+            </g>
+
+            <!-- G -> H arrow -->
+            <path d="M480,790 L480,830" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#arrowMain)"/>
+            <text x="490" y="815" font-size="7" fill="#64748b">常规出款</text>
+
+            <!-- ========== STEP H: KYA 四分类判定 ========== -->
+            <g id="step-h" filter="url(#shadow)">
+                <polygon points="480,840 590,920 480,1000 370,920" fill="#fff" stroke="#059669" stroke-width="2"/>
+                <text x="480" y="895" font-size="9" font-weight="700" fill="#1e293b" text-anchor="middle">H. KYA</text>
+                <text x="480" y="912" font-size="7" fill="#64748b" text-anchor="middle">判定目标地址风险标签</text>
+                <text x="480" y="928" font-size="7" fill="#059669" text-anchor="middle">Low / Mid / High / Severe</text>
+            </g>
+
+            <!-- H -> Low branch -->
+            <path d="M370,920 L320,920 L320,980" stroke="#22c55e" stroke-width="2" fill="none" marker-end="url(#arrowAllow)"/>
+            <rect x="275" y="905" width="40" height="14" rx="7" fill="#dcfce7"/>
+            <text x="295" y="915" font-size="7" fill="#166534" text-anchor="middle" font-weight="700">Low</text>
+
+            <!-- H -> Mid branch -->
+            <path d="M480,1000 L480,1040 L380,1040 L380,1050" stroke="#f59e0b" stroke-width="2" fill="none" marker-end="url(#arrowMain)"/>
+            <rect x="430" y="1010" width="40" height="14" rx="7" fill="#fef3c7"/>
+            <text x="450" y="1020" font-size="7" fill="#92400e" text-anchor="middle" font-weight="700">Mid</text>
+
+            <!-- H -> High branch -->
+            <path d="M480,1000 L480,1040 L540,1040 L540,1050" stroke="#ef4444" stroke-width="2" fill="none" marker-end="url(#arrowMain)"/>
+            <rect x="495" y="1010" width="40" height="14" rx="7" fill="#fee2e2"/>
+            <text x="515" y="1020" font-size="7" fill="#991b1b" text-anchor="middle" font-weight="700">High</text>
+
+            <!-- H -> Severe branch -->
+            <path d="M590,920 L640,920 L640,980" stroke="#7f1d1d" stroke-width="2" fill="none" marker-end="url(#arrowSevere)"/>
+            <rect x="595" y="905" width="50" height="14" rx="7" fill="#fef2f2"/>
+            <text x="620" y="915" font-size="7" fill="#7f1d1d" text-anchor="middle" font-weight="700">Severe</text>
+
+            <!-- Junction point for L/M/H -->
+            <circle cx="480" cy="1040" r="4" fill="#64748b"/>
+
+            <!-- ========== STEP H0: 出款池路由（同标签桶优先）========== -->
+            <g id="step-h0" filter="url(#shadow)">
+                <rect x="230" y="990" width="260" height="100" rx="10" fill="#f0fdf4" stroke="#22c55e" stroke-width="2"/>
+                <text x="360" y="1013" font-size="9" font-weight="700" fill="#166534" text-anchor="middle">H0. 出款池路由（同标签桶优先）</text>
+                <text x="360" y="1030" font-size="7" fill="#64748b" text-anchor="middle">• 目标标签=Low → 优先从 Low 桶出款</text>
+                <text x="360" y="1045" font-size="7" fill="#64748b" text-anchor="middle">• 目标标签=Mid → 优先从 Mid 桶出款</text>
+                <text x="360" y="1060" font-size="7" fill="#64748b" text-anchor="middle">• 目标标签=High → 优先从 High 桶出款</text>
+                <text x="360" y="1075" font-size="7" fill="#991b1b" text-anchor="middle">• 目标标签=Severe → 仅从 Severe 桶出款</text>
+            </g>
+
+            <!-- Low -> H0 -->
+            <path d="M320,980 L320,1020 L245,1020" stroke="#22c55e" stroke-width="2" fill="none" marker-end="url(#arrowAllow)"/>
+
+            <!-- H0 (LMH) -> I -->
+            <path d="M470,1040 L750,1040 L750,920 L800,920" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#arrowMain)"/>
+            <text x="610" y="1030" font-size="7" fill="#64748b">Low/Mid/High</text>
+
+            <!-- Severe -> I2 -->
+            <path d="M640,980 L640,1120 L750,1120" stroke="#7f1d1d" stroke-width="2" fill="none" marker-end="url(#arrowSevere)"/>
+            <text x="670" y="1050" font-size="7" fill="#7f1d1d" font-weight="600">Severe常规</text>
+
+            <!-- ========== STEP I: 余额检查 & 借款补足（仅Low/Mid/High）========== -->
+            <g id="step-i" filter="url(#shadow)">
+                <rect x="800" y="870" width="290" height="125" rx="10" fill="#fffbeb" stroke="#f59e0b" stroke-width="2"/>
+                <text x="945" y="890" font-size="9" font-weight="700" fill="#92400e" text-anchor="middle">I. 余额检查 & 借款补足（仅Low/Mid/High）</text>
+                <text x="945" y="907" font-size="7" fill="#64748b" text-anchor="middle">• 优先从"目标标签同桶"扣款</text>
+                <text x="945" y="922" font-size="7" fill="#64748b" text-anchor="middle">• 余额不足：按固定顺序向相近桶借款补足</text>
+                <text x="945" y="937" font-size="7" fill="#64748b" text-anchor="middle">  High不足 → 先借Mid → 再借Low</text>
+                <text x="945" y="952" font-size="7" fill="#64748b" text-anchor="middle">  Low不足 → 先借Mid → 再借High</text>
+                <text x="945" y="967" font-size="7" fill="#64748b" text-anchor="middle">  Mid不足 → 先借High → 再借Low</text>
+                <text x="945" y="982" font-size="7" fill="#f59e0b" text-anchor="middle">• 借款仅用于出款流动性；Severe不参与</text>
+            </g>
+
+            <!-- ========== STEP I2: 严重池余额检查（不可借款）========== -->
+            <g id="step-i2" filter="url(#shadow)">
+                <rect x="750" y="1080" width="220" height="80" rx="10" fill="#fef2f2" stroke="#991b1b" stroke-width="2"/>
+                <text x="860" y="1100" font-size="9" font-weight="700" fill="#991b1b" text-anchor="middle">I2. 严重池余额检查（不可借款）</text>
+                <text x="860" y="1118" font-size="7" fill="#64748b" text-anchor="middle">• 余额足：继续出款</text>
+                <text x="860" y="1133" font-size="7" fill="#64748b" text-anchor="middle">• 余额不足：拒绝</text>
+                <text x="860" y="1148" font-size="7" fill="#991b1b" text-anchor="middle">• 严重池不可借入/借出</text>
+            </g>
+
+            <!-- I2 insufficient -> Reject -->
+            <path d="M860,1160 L860,1200" stroke="#dc2626" stroke-width="2" fill="none" marker-end="url(#arrowDeny)"/>
+            <rect x="800" y="1210" width="120" height="40" rx="8" fill="#dc2626"/>
+            <text x="860" y="1228" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">❌ 拒绝</text>
+            <text x="860" y="1242" font-size="7" fill="#fecaca" text-anchor="middle">严重池余额不足</text>
+
+            <!-- I -> J -->
+            <path d="M1080,930 L1120,930" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#arrowMain)"/>
+
+            <!-- I2 -> J -->
+            <path d="M960,1120 L1050,1120 L1050,970 L1120,970" stroke="#7f1d1d" stroke-width="2" fill="none" marker-end="url(#arrowSevere)"/>
+
+            <!-- ========== STEP J: 出款交易 ========== -->
+            <g id="step-j" filter="url(#shadow)">
+                <rect x="1130" y="900" width="130" height="80" rx="10" fill="#fff" stroke="#059669" stroke-width="2"/>
+                <text x="1195" y="930" font-size="11" font-weight="700" fill="#1e293b" text-anchor="middle">J. 出款交易</text>
+                <text x="1195" y="950" font-size="9" fill="#64748b" text-anchor="middle">• 广播到链上</text>
+                <text x="1195" y="965" font-size="9" fill="#64748b" text-anchor="middle">• 等待链上确认</text>
+            </g>
+
+            <!-- J -> K -->
+            <path d="M1260,940 L1300,940" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#arrowMain)"/>
+
+            <!-- ========== STEP K: 账本更新 ========== -->
+            <g id="step-k" filter="url(#shadow)">
+                <rect x="1310" y="900" width="130" height="80" rx="10" fill="#f0f9ff" stroke="#0891b2" stroke-width="2"/>
+                <text x="1375" y="930" font-size="11" font-weight="700" fill="#0e7490" text-anchor="middle">K. 账本更新</text>
+                <text x="1375" y="950" font-size="9" fill="#64748b" text-anchor="middle">• 更新资金池余额</text>
+                <text x="1375" y="965" font-size="9" fill="#64748b" text-anchor="middle">• 写入审计日志</text>
+            </g>
+
+            <!-- K -> SUCCESS -->
+            <path d="M1375,980 L1375,1020" stroke="#16a34a" stroke-width="2" fill="none" marker-end="url(#arrowAllow)"/>
+            <rect x="1315" y="1030" width="120" height="40" rx="8" fill="#16a34a"/>
+            <text x="1375" y="1048" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">✓ 成功</text>
+            <text x="1375" y="1062" font-size="8" fill="#bbf7d0" text-anchor="middle">出款完成</text>
+
+            <!-- ========== MERCHANT CONSOLE PATH (bypasses H, H0) ========== -->
+            <!-- Branch from G to Merchant Console -->
+            <path d="M580,745 L720,745 L720,780" stroke="#6366f1" stroke-width="2" stroke-dasharray="6,3" fill="none" marker-end="url(#arrowMain)"/>
+            <text x="650" y="735" font-size="7" fill="#6366f1" font-weight="600">仅商户后台提款（Severe）</text>
+
+            <!-- Merchant Console Box -->
+            <g id="merchant-console" filter="url(#shadow)">
+                <rect x="610" y="790" width="220" height="80" rx="10" fill="#eef2ff" stroke="#6366f1" stroke-width="2"/>
+                <text x="720" y="810" font-size="8" font-weight="700" fill="#4338ca" text-anchor="middle">严重池（商户后台提款）</text>
+                <text x="720" y="823" font-size="8" font-weight="700" fill="#4338ca" text-anchor="middle">可提到任意地址</text>
+                <text x="720" y="840" font-size="7" fill="#64748b" text-anchor="middle">• 允许任意地址（不分标签）</text>
+                <text x="720" y="855" font-size="7" fill="#64748b" text-anchor="middle">• KYA可选：仅记录/提示，不拦截</text>
+                <text x="720" y="868" font-size="7" fill="#6366f1" text-anchor="middle">• 资金来源：Severe</text>
+            </g>
+
+            <!-- Merchant Console -> I2 -->
+            <path d="M720,870 L720,1050 L780,1050 L780,1080" stroke="#6366f1" stroke-width="2" stroke-dasharray="5,3" fill="none" marker-end="url(#arrowMain)"/>
+            <text x="680" y="970" font-size="7" fill="#6366f1" font-weight="600">绕过 H/H0</text>
+
+            <!-- ========== CONSTRAINTS BOX ========== -->
+            <g id="constraints-box">
+                <rect x="40" y="580" width="320" height="300" rx="12" fill="#fff" filter="url(#shadow)" stroke="#e2e8f0"/>
+                <rect x="40" y="580" width="320" height="28" rx="12" fill="#dc2626"/>
+                <rect x="40" y="595" width="320" height="13" fill="#dc2626"/>
+                <text x="200" y="600" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">核心约束</text>
+
+                <text x="55" y="625" font-size="9" font-weight="700" fill="#1e293b">1. 一次性 KYT（入款阶段）</text>
+                <text x="55" y="638" font-size="8" fill="#64748b">仅入款阶段写入风险标签（绑定每笔入款）</text>
+
+                <text x="55" y="658" font-size="9" font-weight="700" fill="#1e293b">2. 分桶发生在归集阶段</text>
+                <text x="55" y="671" font-size="8" fill="#64748b">按风险标签分桶归集到四个风险池（不做KYT）</text>
+
+                <text x="55" y="691" font-size="9" font-weight="700" fill="#1e293b">3. 禁止跨桶混合：入款/归集/记账不跨桶</text>
+
+                <text x="55" y="714" font-size="9" font-weight="700" fill="#059669">4. 出款KYA判定目标地址风险标签</text>
+                <text x="55" y="727" font-size="8" fill="#64748b">KYA输出 ∈ {Low, Mid, High, Severe}</text>
+                <text x="55" y="740" font-size="8" fill="#64748b">优先从与目标地址同标签的桶出款</text>
+
+                <text x="55" y="763" font-size="9" font-weight="700" fill="#f59e0b">5. 借款策略（仅Low/Mid/High）</text>
+                <text x="55" y="776" font-size="8" fill="#64748b">High不足：先借Mid→再借Low</text>
+                <text x="55" y="789" font-size="8" fill="#64748b">Low不足：先借Mid→再借High</text>
+                <text x="55" y="802" font-size="8" fill="#64748b">Mid不足：先借High→再借Low</text>
+                <text x="55" y="815" font-size="8" fill="#f59e0b">借款仅用于出款流动性；不改变入款归属标签</text>
+
+                <text x="55" y="838" font-size="9" font-weight="700" fill="#991b1b">6. Severe规则</text>
+                <text x="55" y="851" font-size="8" fill="#64748b">不参与借入/借出；常规出款仅目标标签=Severe</text>
+                <text x="55" y="864" font-size="8" fill="#64748b">商户后台提款：任意地址（KYA可选仅记录）</text>
+            </g>
+
+            <!-- ========== LEGEND ========== -->
+            <g id="legend" transform="translate(40, 1320)">
+                <rect x="0" y="0" width="950" height="55" rx="10" fill="#fff" stroke="#e2e8f0" filter="url(#shadow)"/>
+                <text x="475" y="16" font-size="10" font-weight="700" fill="#1e293b" text-anchor="middle">图例</text>
+                
+                <line x1="25" y1="38" x2="55" y2="38" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrowMain)"/>
+                <text x="67" y="42" font-size="9" fill="#64748b">主流程</text>
+
+                <line x1="120" y1="38" x2="150" y2="38" stroke="#22c55e" stroke-width="2" marker-end="url(#arrowAllow)"/>
+                <text x="162" y="42" font-size="9" fill="#64748b">Low</text>
+
+                <line x1="195" y1="38" x2="225" y2="38" stroke="#f59e0b" stroke-width="2"/>
+                <text x="237" y="42" font-size="9" fill="#64748b">Mid</text>
+
+                <line x1="270" y1="38" x2="300" y2="38" stroke="#ef4444" stroke-width="2"/>
+                <text x="312" y="42" font-size="9" fill="#64748b">High</text>
+
+                <line x1="350" y1="38" x2="380" y2="38" stroke="#7f1d1d" stroke-width="2" marker-end="url(#arrowSevere)"/>
+                <text x="392" y="42" font-size="9" fill="#64748b">Severe</text>
+
+                <line x1="445" y1="38" x2="475" y2="38" stroke="#dc2626" stroke-width="2" marker-end="url(#arrowDeny)"/>
+                <text x="487" y="42" font-size="9" fill="#64748b">拒绝</text>
+
+                <line x1="530" y1="38" x2="560" y2="38" stroke="#6366f1" stroke-width="2" stroke-dasharray="4,3"/>
+                <text x="572" y="42" font-size="9" fill="#64748b">商户后台</text>
+
+                <line x1="640" y1="26" x2="640" y2="50" stroke="#e2e8f0" stroke-width="1"/>
+                <text x="655" y="42" font-size="9" fill="#64748b">池:</text>
+                <circle cx="680" cy="38" r="6" fill="#6366f1"/><text x="692" y="42" font-size="8" fill="#64748b">业务</text>
+                <circle cx="730" cy="38" r="6" fill="#22c55e"/><text x="742" y="42" font-size="8" fill="#64748b">Low</text>
+                <circle cx="780" cy="38" r="6" fill="#f59e0b"/><text x="792" y="42" font-size="8" fill="#64748b">Mid</text>
+                <circle cx="835" cy="38" r="6" fill="#ef4444"/><text x="847" y="42" font-size="8" fill="#64748b">High</text>
+                <circle cx="890" cy="38" r="6" fill="#7f1d1d"/><text x="910" y="42" font-size="8" fill="#64748b">Severe</text>
+            </g>
+
+            <text x="825" y="1500" font-size="10" fill="#94a3b8" text-anchor="middle">Voss资金路由图 v5.0 — 同标签桶优先 + 借款补足策略</text>
+        </svg>
+    </div>
+
+    <div class="actions">
+        <button class="btn" onclick="downloadSVG()">下载 SVG</button>
+    </div>
+
+    <script>
+        function downloadSVG() {
+            const svg = document.getElementById('diagram');
+            const serializer = new XMLSerializer();
+            const source = serializer.serializeToString(svg);
+            const blob = new Blob([source], { type: 'image/svg+xml;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'funds-routing-v3.svg';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>

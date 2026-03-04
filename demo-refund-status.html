@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>退款中状态演示 - USDT购买法币</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 顶部导航 -->
+        <div class="header">
+            <button class="back-btn">←</button>
+            <h1>USDT购买法币</h1>
+            <div class="header-icons">
+                <span class="icon">⏱</span>
+                <span class="icon">⚙</span>
+            </div>
+        </div>
+
+        <!-- 交易中状态卡片（演示） -->
+        <div class="status-card trading-status" style="display: flex;">
+            <div class="status-left">
+                <div class="status-icon-circle trading">
+                    <span class="status-emoji">💱</span>
+                </div>
+                <div class="status-info">
+                    <div class="status-title">交易中</div>
+                    <div class="status-details">
+                        <div class="status-amount">买入数量 <strong>300</strong></div>
+                        <div class="status-time">等待卖家同意交易 <span class="countdown">00:09:53</span></div>
+                    </div>
+                </div>
+            </div>
+            <div class="status-arrow">›</div>
+        </div>
+
+        <!-- 退款中状态卡片（演示） -->
+        <div class="status-card refund-status" onclick="window.location.href='refund-processing.html'" style="display: flex;">
+            <div class="status-left">
+                <div class="status-icon-circle refunding">
+                    <span class="status-emoji">⏳</span>
+                </div>
+                <div class="status-info">
+                    <div class="status-title">退款中</div>
+                    <div class="status-details">
+                        <div class="status-amount">退款金额 <strong>50.00 USDT</strong></div>
+                        <div class="status-time">预计几分钟内完成 <span class="processing-dot">●</span></div>
+                    </div>
+                </div>
+            </div>
+            <div class="status-arrow">›</div>
+        </div>
+
+        <!-- 主卡片 -->
+        <div class="main-card">
+            <div class="card-title">USDT-TRC20</div>
+
+            <!-- 输入区域 -->
+            <div class="input-section">
+                <div class="input-row">
+                    <div class="coin-icon usdt-icon">₮</div>
+                    <span class="coin-label">USDT</span>
+                    <input type="number" id="usdtInput" class="amount-input" placeholder="请输入要兑换的USDT数量">
+                </div>
+
+                <div class="input-row">
+                    <div class="coin-icon cny-icon">¥</div>
+                    <span class="coin-label">CNY</span>
+                    <input type="number" id="cnyInput" class="amount-input" placeholder="请输入要兑换的CNY数量" readonly>
+                </div>
+            </div>
+
+            <!-- 汇率信息 -->
+            <div class="rate-info">
+                <div class="rate-row">
+                    <span class="rate-label">当前汇率</span>
+                    <span class="rate-value">1 USDT ≈ <span id="rateValue">7.20</span> CNY</span>
+                </div>
+                <div class="rate-row">
+                    <span class="rate-label">兑换金额</span>
+                    <span class="rate-value"><span id="exchangeAmount">0.00</span> USDT</span>
+                </div>
+                <div class="rate-row">
+                    <span class="rate-label">手续费</span>
+                    <span class="rate-value"><span id="feeAmount">0.00</span> USDT</span>
+                </div>
+                <div class="rate-row highlight">
+                    <span class="rate-label">实际付款</span>
+                    <span class="rate-value primary"><span id="totalAmount">0.00</span> USDT</span>
+                </div>
+            </div>
+
+            <!-- 提示信息 -->
+            <div class="notice-box">
+                <span class="notice-icon">⚠</span>
+                注：到账金额需不低于 <strong>10 USDT</strong>，否则无法处理。
+            </div>
+
+            <!-- 购买按钮 -->
+            <button class="buy-btn" id="buyBtn">立即购买</button>
+        </div>
+
+        <!-- 说明提示 -->
+        <div class="info-card" style="background: #f0f9ff; border: 2px solid #3b82f6;">
+            <div class="info-header">
+                <h3 style="color: #1e40af;">💡 演示说明</h3>
+            </div>
+            <p class="info-text" style="color: #1e3a8a;">
+                <strong>这是一个演示页面，展示了两种状态卡片：</strong><br><br>
+                
+                <strong style="color: #3b82f6;">🔵 交易中卡片</strong><br>
+                • 蓝色渐变背景，带脉冲动画<br>
+                • 显示交易数量和倒计时<br>
+                • 可点击查看详情<br><br>
+                
+                <strong style="color: #f59e0b;">🟡 退款中卡片</strong><br>
+                • 橙色渐变背景，带脉冲动画<br>
+                • 显示退款金额和处理提示<br>
+                • 点击可跳转到退款处理页面<br>
+                • 闪烁的圆点表示处理中<br><br>
+                
+                <strong>使用方法：</strong><br>
+                在实际应用中，通过JavaScript函数控制显示/隐藏：<br>
+                • <code>showRefundStatus('50.00 USDT')</code> - 显示退款中<br>
+                • <code>hideRefundStatus()</code> - 隐藏退款中<br>
+                • <code>showTradingStatus('300', '00:09:53')</code> - 显示交易中<br>
+                • <code>hideTradingStatus()</code> - 隐藏交易中
+            </p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

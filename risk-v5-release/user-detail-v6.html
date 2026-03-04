@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户风险详情（完整版） - 波币AI风险监控系统</title>
+    <link rel="stylesheet" href="styles-v4.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body style="background: #f8fafc;">
+    <!-- 顶部导航 -->
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <h1 class="logo">
+                    <img src="bob.png" alt="波币" class="logo-icon">
+                    <span class="logo-text">波币AI风险监控系统</span>
+                </h1>
+                <div class="subtitle-container">
+                    <span class="subtitle-cn">抓光所有骗子</span>
+                    <span class="subtitle-divider">·</span>
+                    <span class="subtitle-en">Anti Scammer · Observe Only</span>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="header-actions">
+                    <button class="btn btn-outline" onclick="window.history.back()">
+                        <i class="fas fa-arrow-left"></i> 返回
+                    </button>
+                    <button class="btn btn-primary" onclick="window.location.href='index-v4.html'">
+                        <i class="fas fa-home"></i> 返回首页
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主容器 -->
+    <div style="max-width: 1800px; margin: 0 auto; padding: 16px;">
+        <!-- 面包屑 -->
+        <div style="display: flex; align-items: center; gap: 8px; font-size: 14px; color: #64748b; margin-bottom: 20px;">
+            <a href="index-v4.html" style="color: #3b82f6; text-decoration: none;">首页</a>
+            <i class="fas fa-chevron-right" style="font-size: 10px;"></i>
+            <a href="users.html" style="color: #3b82f6; text-decoration: none;">风险处理队列</a>
+            <i class="fas fa-chevron-right" style="font-size: 10px;"></i>
+            <span>用户详情 - #9f3e_7A12345h78</span>
+        </div>
+
+        <!-- 用户基本信息 + 评分 -->
+        <div class="dashboard-card" style="margin-bottom: 8px;">
+            <div style="padding: 16px 20px; display: flex; align-items: center; gap: 20px;">
+                <img src="https://i.pravatar.cc/150?img=1" alt="avatar" style="width: 70px; height: 70px; border-radius: 14px; border: 2px solid #e2e8f0;">
+                <div style="flex: 1;">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                        <h1 style="font-size: 16px; font-weight: 900; color: #0f172a; margin: 0; font-family: 'JetBrains Mono', monospace;">#9f3e_7A12345h78</h1>
+                        <button class="btn btn-outline" style="font-size: 11px; padding: 4px 10px; background: #eff6ff; color: #3b82f6; border-color: #bfdbfe; font-weight: 700;" onclick="window.parent.app.openAuditDrawer('9f3e_7A12345h78', 'syndicate')">
+                            <i class="fas fa-project-diagram"></i> 关联关系分析
+                        </button>
+                    </div>
+                    <div style="font-size: 13px; color: #64748b; margin-bottom: 8px;">
+                        <i class="fas fa-map-marker-alt" style="color: #f59e0b;"></i> 深圳
+                        <span style="margin: 0 12px;">|</span>
+                        <i class="fas fa-globe" style="color: #3b82f6;"></i> 112.25.67.89
+                        <span style="margin: 0 12px;">|</span>
+                        <i class="fas fa-clock" style="color: #10b981;"></i> 2025-11-28 14:23:15
+                    </div>
+                    
+                </div>
+                <div style="text-align: center;">
+                    <div style="width: 110px; height: 110px; border-radius: 20px; background: linear-gradient(135deg, #dc2626, #991b1b); display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; box-shadow: 0 8px 20px rgba(220, 38, 38, 0.4); position: relative; overflow: hidden; border: 2px solid rgba(255,255,255,0.2);">
+                        <!-- 顶部的风险等级标签 -->
+                        <div style="position: absolute; top: 0; width: 100%; background: rgba(0,0,0,0.15); padding: 4px 0; font-size: 11px; font-weight: 800; letter-spacing: 1px;">
+                            高危
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <div style="font-size: 46px; font-weight: 900; font-family: 'JetBrains Mono', monospace; line-height: 1;">91</div>
+                            
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+
+        <!-- ⚠️ 为什么是高危？（核心区块） -->
+        <div class="dashboard-card" style="margin-bottom: 8px; background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border: 2px solid #fbbf24;">
+            <div style="padding: 14px 18px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <h2 style="font-size: 16px; font-weight: 900; color: #92400e; margin: 0;">
+                        <i class="fas fa-exclamation-triangle"></i> 为什么是高危？（5秒速览）
+                    </h2>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; max-width: 60%;">
+                        <button style="padding: 7px 14px; background: white; border: 2px solid #dc2626; border-radius: 6px; color: #dc2626; font-size: 12px; font-weight: 700; cursor: pointer;">
+                            <i class="fas fa-times-circle"></i> 标记诈骗
+                        </button>
+                        <button style="padding: 7px 14px; background: #10b981; border: 2px solid #10b981; border-radius: 6px; color: white; font-size: 12px; font-weight: 700; cursor: pointer;">
+                            <i class="fas fa-check-circle"></i> 标记正常
+                        </button>
+                        <button style="padding: 7px 14px; background: #64748b; border: 2px solid #64748b; border-radius: 6px; color: white; font-size: 12px; font-weight: 700; cursor: pointer;">
+                            <i class="fas fa-eye"></i> 继续观察
+                        </button>
+                        <button style="padding: 7px 14px; background: #f59e0b; border: 2px solid #f59e0b; border-radius: 6px; color: white; font-size: 12px; font-weight: 700; cursor: pointer;">
+                            <i class="fas fa-lock"></i> 冻结账户
+                        </button>
+                        <button style="padding: 7px 14px; background: #1e293b; border: 2px solid #1e293b; border-radius: 6px; color: white; font-size: 12px; font-weight: 700; cursor: pointer;">
+                            <i class="fas fa-ban"></i> 拉黑账户
+                        </button>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+                    <div class="dashboard-card" style="padding: 10px 12px; border-left: 4px solid #dc2626; cursor: pointer;" onclick="scrollToRuleAndHighlight('FAST_SELL')">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <span style="font-size: 12px; font-weight: 800; color: #0f172a;">1️⃣ 登录后立即卖单</span>
+                            <span style="font-size: 14px; font-weight: 900; color: #dc2626; font-family: 'JetBrains Mono', monospace;">-18</span>
+                        </div>
+                        <div style="font-size: 10px; color: #64748b;">5分钟内卖单 · 2次/7天</div>
+                    </div>
+                    <div class="dashboard-card" style="padding: 10px 12px; border-left: 4px solid #dc2626; cursor: pointer;" onclick="scrollToRuleAndHighlight('R-ATO-1')">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <span style="font-size: 12px; font-weight: 800; color: #0f172a;">2️⃣ 新设备+异地登录</span>
+                            <span style="font-size: 14px; font-weight: 900; color: #dc2626; font-family: 'JetBrains Mono', monospace;">-15</span>
+                        </div>
+                        <div style="font-size: 10px; color: #64748b;">DFP_445566 · 300km</div>
+                    </div>
+                    <div class="dashboard-card" style="padding: 10px 12px; border-left: 4px solid #f59e0b; cursor: pointer;" onclick="scrollToRuleAndHighlight('CANCEL_PROBE')">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <span style="font-size: 12px; font-weight: 800; color: #0f172a;">3️⃣ 高频取消订单</span>
+                            <span style="font-size: 14px; font-weight: 900; color: #f59e0b; font-family: 'JetBrains Mono', monospace;">-15</span>
+                        </div>
+                        <div style="font-size: 10px; color: #64748b;">3次/24h · 疑似探单</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 画像层（默认紧凑，可展开） -->
+        <div class="dashboard-card" style="margin-bottom: 16px;">
+            <div class="card-header" style="background: linear-gradient(135deg, #dbeafe, #bfdbfe); padding: 14px 20px; border-bottom: 2px solid #3b82f6; display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="font-size: 16px; font-weight: 800; color: #0f172a; margin: 0; display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-user-circle" style="color: #3b82f6; font-size: 14px;"></i> 画像层
+                </h3>
+                <button class="btn btn-outline" style="font-size: 12px; padding: 6px 14px; background: white; font-weight: 700;" onclick="toggleProfileDetails()">
+                    <i class="fas fa-expand-alt"></i> <span id="toggleBtnText">展开详情</span>
+                </button>
+            </div>
+            <div class="card-body" style="padding: 16px;">
+                
+                <!-- 默认显示：6个核心指标 -->
+                                <div id="profileSummary">
+                    <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px;">
+                        <!-- 1. 账户年龄 -->
+                        <div style="text-align: center; padding: 14px 12px; background: linear-gradient(135deg, #f8fafc, #ffffff); border-radius: 8px; border: 2px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.04); cursor: pointer; transition: all 0.3s;" onmouseover="this.style.transform='translateY(-3px)'; this.style.borderColor='#3b82f6'" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='#e2e8f0'">
+                            <div style="font-size: 22px; font-weight: 800; color: #3b82f6; margin-bottom: 4px; font-family: 'JetBrains Mono', monospace; line-height: 1; display: flex; align-items: baseline; justify-content: center; gap: 2px;">
+                                88<span style="font-size: 12px; opacity: 0.7;">天</span>
+                            </div>
+                            <div style="font-size: 12px; color: #64748b; font-weight: 600; line-height: 1.3;">账户年龄</div>
+                        </div>
+                        <!-- 2. 30天交易 -->
+                        <div style="text-align: center; padding: 14px 12px; background: linear-gradient(135deg, #f8fafc, #ffffff); border-radius: 8px; border: 2px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.04); cursor: pointer; transition: all 0.3s;" onmouseover="this.style.transform='translateY(-3px)'; this.style.borderColor='#3b82f6'" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='#e2e8f0'">
+                            <div style="font-size: 22px; font-weight: 800; color: #3b82f6; margin-bottom: 4px; font-family: 'JetBrains Mono', monospace; line-height: 1; display: flex; align-items: baseline; justify-content: center; gap: 2px;">
+                                52<span style="font-size: 12px; opacity: 0.7;">笔</span>
+                            </div>
+                            <div style="font-size: 12px; color: #64748b; font-weight: 600; line-height: 1.3;">30天交易</div>
+                        </div>
+                        <!-- 3. 总交易笔数 (新位置) -->
+                        <div style="text-align: center; padding: 14px 12px; background: linear-gradient(135deg, #f8fafc, #ffffff); border-radius: 8px; border: 2px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.04); cursor: pointer; transition: all 0.3s;" onmouseover="this.style.transform='translateY(-3px)'; this.style.borderColor='#8b5cf6'" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='#e2e8f0'">
+                            <div style="font-size: 22px; font-weight: 800; color: #8b5cf6; margin-bottom: 4px; font-family: 'JetBrains Mono', monospace; line-height: 1; display: flex; align-items: baseline; justify-content: center; gap: 2px;">
+                                156<span style="font-size: 12px; opacity: 0.7;">笔</span>
+                            </div>
+                            <div style="font-size: 12px; color: #64748b; font-weight: 600; line-height: 1.3;">总交易笔数</div>
+                        </div>
+                        <!-- 4. 活跃等级 -->
+                        <div style="text-align: center; padding: 14px 12px; background: linear-gradient(135deg, #fff7ed, #ffedd5); border-radius: 8px; border: 2px solid #fed7aa; box-shadow: 0 2px 4px rgba(0,0,0,0.04); cursor: pointer; transition: all 0.3s;" onmouseover="this.style.transform='translateY(-3px)'; this.style.borderColor='#f59e0b'" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='#fed7aa'">
+                            <div style="font-size: 22px; font-weight: 800; color: #f59e0b; margin-bottom: 4px; font-family: 'Inter', sans-serif; line-height: 1; display: flex; align-items: baseline; justify-content: center; gap: 2px;">高<span style="font-size: 11px; font-weight: 600; color: #f59e0b;">(高于70%用户)</span></div>
+                            <div style="font-size: 12px; color: #64748b; font-weight: 600; line-height: 1.3;">活跃等级</div>
+                        </div>
+                        <!-- 5. 资金流向 -->
+                        <div style="text-align: center; padding: 14px 12px; background: linear-gradient(135deg, #fee2e2, #fecaca); border-radius: 8px; border: 3px solid #dc2626; box-shadow: 0 2px 4px rgba(220,38,38,0.12); cursor: pointer; transition: all 0.3s;" onmouseover="this.style.transform='translateY(-3px) scale(1.02)'" onmouseout="this.style.transform='translateY(0) scale(1)'">
+                            <div style="font-size: 14px; font-weight: 800; color: #dc2626; margin-bottom: 4px; font-family: 'Inter', sans-serif; line-height: 1;">净流出</div>
+                            <div style="font-size: 12px; color: #991b1b; font-weight: 600; line-height: 1.3;">资金流向</div>
+                            <div style="font-size: 11px; color: #dc2626; margin-top: 2px; font-weight: 700; line-height: 1;">⚠️ 异常</div>
+                        </div>
+                        <!-- 6. 24h交易额 -->
+                        <div style="text-align: center; padding: 14px 12px; background: linear-gradient(135deg, #d1fae5, #a7f3d0); border-radius: 8px; border: 2px solid #6ee7b7; box-shadow: 0 2px 4px rgba(0,0,0,0.04); cursor: pointer; transition: all 0.3s;" onmouseover="this.style.transform='translateY(-3px)'; this.style.borderColor='#10b981'" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='#6ee7b7'">
+                            <div style="font-size: 22px; font-weight: 800; color: #10b981; margin-bottom: 4px; font-family: 'JetBrains Mono', monospace; line-height: 1; display: flex; align-items: baseline; justify-content: center; gap: 2px;">¥2.8万<span style="font-size: 11px; font-weight: 600; color: #10b981;">(活跃)</span></div>
+                            <div style="font-size: 12px; color: #64748b; font-weight: 600; line-height: 1.3;">24h交易额</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="profileDetails" style="display: none;">
+                
+                <!-- 1️⃣ 账户属性画像 -->
+                <div class="dashboard-card" style="margin-bottom: 18px; border-left: 5px solid #3b82f6;">
+                    <div style="padding: 18px; cursor: pointer;" onclick="toggleSection('profile-1')">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <h3 style="font-size: 16px; font-weight: 800; color: #0f172a; margin: 0;">
+                                1️⃣ 账户属性画像 
+                            </h3>
+                            <i class="fas fa-chevron-down" id="icon-1" style="color: #94a3b8; font-size: 14px; transition: transform 0.3s;"></i>
+                        </div>
+                    </div>
+                    <div id="profile-1" style="display: block; border-top: 2px solid #e2e8f0; padding: 16px; background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);">
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
+                            <div style="padding: 16px; background: white; border-radius: 12px; border: 2px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: all 0.3s;" onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='#3b82f6'; this.style.boxShadow='0 8px 20px rgba(59,130,246,0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='#e2e8f0'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.05)'">
+                                <div style="font-size: 13px; color: #64748b; margin-bottom: 6px; font-weight: 700;">
+                                    <i class="fas fa-calendar-alt" style="color: #3b82f6;"></i> 注册阶段
+                                </div>
+                                <div style="font-size: 18px; font-weight: 900; color: #3b82f6; margin-bottom: 6px; font-family: 'Inter', sans-serif;">成熟用户</div>
+                                <div style="font-size: 13px; color: #64748b;">注册 <strong style="color: #0f172a; font-size: 14px;">88天</strong> > 30天</div>
+                            </div>
+                            <div style="padding: 16px; background: white; border-radius: 12px; border: 2px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: all 0.3s;" onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='#10b981'; this.style.boxShadow='0 8px 20px rgba(16,185,129,0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='#e2e8f0'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.05)'">
+                                <div style="font-size: 13px; color: #64748b; margin-bottom: 6px; font-weight: 700;">
+                                    <i class="fas fa-exchange-alt" style="color: #10b981;"></i> 交易角色
+                                </div>
+                                <div style="font-size: 16px; font-weight: 900; color: #10b981; margin-bottom: 6px; font-family: 'Inter', sans-serif;">买卖双角色</div>
+                                <div style="font-size: 13px; color: #64748b;">买单 <strong style="color: #3b82f6; font-size: 14px;">28笔</strong> | 卖单 <strong style="color: #f59e0b; font-size: 14px;">24笔</strong></div>
+                            </div>
+                            <div style="padding: 16px; background: white; border-radius: 12px; border: 2px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                                <div style="font-size: 13px; color: #64748b; margin-bottom: 6px; font-weight: 700;">
+                                    <i class="fas fa-star" style="color: #64748b;"></i> 长期标签
+                                </div>
+                                <div style="font-size: 18px; font-weight: 900; color: #64748b; margin-bottom: 6px; font-family: 'Inter', sans-serif;">普通用户</div>
+                                <div style="font-size: 13px; color: #64748b;">资产 <strong style="color: #0f172a; font-size: 14px;">¥12,580</strong> < ¥50,000</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2️⃣ 活跃度画像 -->
+                <div class="dashboard-card" style="margin-bottom: 18px; border-left: 5px solid #f59e0b;">
+                    <div style="padding: 18px; cursor: pointer;" onclick="toggleSection('profile-2')">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <h3 style="font-size: 16px; font-weight: 800; color: #0f172a; margin: 0;">
+                                2️⃣ 活跃度画像 
+                            </h3>
+                            <i class="fas fa-chevron-down" id="icon-2" style="color: #94a3b8; font-size: 14px; transition: transform 0.3s;"></i>
+                        </div>
+                    </div>
+                    <div id="profile-2" style="display: block; border-top: 2px solid #e2e8f0; padding: 16px; background: linear-gradient(135deg, #fff7ed 0%, #ffffff 100%);">
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
+                            <div style="padding: 16px; background: white; border-radius: 12px; border: 2px solid #ffedd5; box-shadow: 0 2px 8px rgba(245, 158, 11, 0.1);">
+                                <div style="font-size: 13px; color: #64748b; margin-bottom: 8px; font-weight: 800;">
+                                    <i class="fas fa-chart-line" style="color: #f59e0b;"></i> 活跃度水平（30天）
+                                </div>
+                                <div style="font-size: 16px; font-weight: 900; color: #f59e0b; margin-bottom: 8px; font-family: 'Inter', sans-serif;">高活跃</div>
+                                <div style="font-size: 13px; color: #64748b; margin-bottom: 6px;">30天交易 <strong style="color: #0f172a; font-size: 15px;">52笔</strong> ≥ P70</div>
+                                <div style="width: 100%; height: 14px; background: #e2e8f0; border-radius: 7px; overflow: hidden; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);">
+                                    <div style="width: 85%; height: 100%; background: linear-gradient(90deg, #f59e0b, #ea580c); box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);"></div>
+                                </div>
+                                <div style="font-size: 16px; color: #f59e0b; margin-top: 8px; font-weight: 800;">
+                                    <i class="fas fa-arrow-up"></i> 85% 分位数
+                                </div>
+                            </div>
+                            <div style="padding: 16px; background: white; border-radius: 12px; border: 2px solid #d1fae5; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.1);">
+                                <div style="font-size: 13px; color: #64748b; margin-bottom: 8px; font-weight: 800;">
+                                    <i class="fas fa-history" style="color: #10b981;"></i> 活跃周期
+                                </div>
+                                <div style="font-size: 16px; font-weight: 900; color: #10b981; margin-bottom: 8px; font-family: 'Inter', sans-serif;">持续活跃</div>
+                                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                    <span style="padding: 10px 18px; background: linear-gradient(135deg, #d1fae5, #a7f3d0); border: 2px solid #6ee7b7; color: #065f46; border-radius: 10px; font-size: 16px; font-weight: 800; box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);">
+                                        <i class="fas fa-check-circle"></i> 近30天
+                                    </span>
+                                    <span style="padding: 10px 18px; background: linear-gradient(135deg, #d1fae5, #a7f3d0); border: 2px solid #6ee7b7; color: #065f46; border-radius: 10px; font-size: 16px; font-weight: 800; box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);">
+                                        <i class="fas fa-check-circle"></i> 近60天
+                                    </span>
+                                    <span style="padding: 10px 18px; background: linear-gradient(135deg, #d1fae5, #a7f3d0); border: 2px solid #6ee7b7; color: #065f46; border-radius: 10px; font-size: 16px; font-weight: 800; box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);">
+                                        <i class="fas fa-check-circle"></i> 近90天
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3️⃣ 资金流向画像 -->
+                <div class="dashboard-card" style="margin-bottom: 18px; border-left: 5px solid #dc2626;">
+                    <div style="padding: 18px; cursor: pointer;" onclick="toggleSection('profile-3')">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <h3 style="font-size: 16px; font-weight: 800; color: #0f172a; margin: 0;">
+                                3️⃣ 资金流向画像  <span style="color: #dc2626; font-size: 16px; margin-left: 10px;">⚠️ 异常</span>
+                            </h3>
+                            <i class="fas fa-chevron-down" id="icon-3" style="color: #94a3b8; font-size: 14px; transition: transform 0.3s;"></i>
+                        </div>
+                    </div>
+                    <div id="profile-3" style="display: block; border-top: 2px solid #e2e8f0; padding: 16px; background: linear-gradient(135deg, #fee2e2 0%, #ffffff 100%);">
+                        <!-- 资金方向 -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                            <div style="padding: 16px; background: linear-gradient(135deg, #fee2e2, #fecaca); border-radius: 12px; border: 3px solid #dc2626; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.15);">
+                                <div style="font-size: 16px; color: #991b1b; margin-bottom: 6px; font-weight: 700;">
+                                    <i class="fas fa-arrow-down" style="color: #dc2626;"></i> 平台资金方向
+                                </div>
+                                <div style="font-size: 16px; font-weight: 900; color: #dc2626; margin-bottom: 6px; font-family: 'Inter', sans-serif;">净流出</div>
+                                <div style="font-size: 16px; color: #991b1b; margin-bottom: 6px;">充值 <strong>¥4.5万</strong> < 提现 <strong>¥6.8万</strong></div>
+                                <div style="padding: 10px 14px; background: rgba(255,255,255,0.9); border-radius: 8px;">
+                                    <span style="font-size: 15px; color: #dc2626; font-weight: 800;">⚠️ 净流出¥23K，需关注</span>
+                                </div>
+                            </div>
+                            <div style="padding: 16px; background: white; border-radius: 12px; border: 2px solid #dbeafe; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                                <div style="font-size: 13px; color: #64748b; margin-bottom: 6px; font-weight: 700;">
+                                    <i class="fas fa-balance-scale" style="color: #3b82f6;"></i> 平台内交易方向
+                                </div>
+                                <div style="font-size: 16px; font-weight: 900; color: #3b82f6; margin-bottom: 6px; font-family: 'Inter', sans-serif;">平衡</div>
+                                <div style="font-size: 13px; color: #64748b;">买入 <strong style="color: #10b981; font-size: 14px;">¥7.8万</strong> | 卖出 <strong style="color: #f59e0b; font-size: 14px;">¥7.6万</strong></div>
+                            </div>
+                        </div>
+                        
+                        <!-- 30天数值指标 -->
+                        <div style="background: white; padding: 16px; border-radius: 12px; border: 2px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                            <div style="font-size: 14px; font-weight: 800; color: #0f172a; margin-bottom: 8px;">
+                                <i class="fas fa-coins"></i> 30天资金数值指标
+                            </div>
+                            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px;">
+                                <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #eff6ff, #dbeafe); border-radius: 12px; border: 2px solid #bfdbfe; box-shadow: 0 2px 6px rgba(59,130,246,0.1);">
+                                    <div style="font-size: 12px; color: #64748b; margin-bottom: 6px; font-weight: 700;">充值总额</div>
+                                    <div style="font-size: 18px; font-weight: 900; color: #3b82f6; font-family: 'JetBrains Mono', monospace;">¥4.5万</div>
+                                </div>
+                                <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #fee2e2, #fecaca); border-radius: 12px; border: 2px solid #fca5a5; box-shadow: 0 2px 6px rgba(220,38,38,0.1);">
+                                    <div style="font-size: 12px; color: #64748b; margin-bottom: 6px; font-weight: 700;">提现总额</div>
+                                    <div style="font-size: 18px; font-weight: 900; color: #dc2626; font-family: 'JetBrains Mono', monospace;">¥6.8万</div>
+                                </div>
+                                <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #d1fae5, #a7f3d0); border-radius: 12px; border: 2px solid #6ee7b7; box-shadow: 0 2px 6px rgba(16,185,129,0.1);">
+                                    <div style="font-size: 12px; color: #64748b; margin-bottom: 6px; font-weight: 700;">买入总额</div>
+                                    <div style="font-size: 18px; font-weight: 900; color: #10b981; font-family: 'JetBrains Mono', monospace;">¥7.8万</div>
+                                </div>
+                                <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #ffedd5, #fed7aa); border-radius: 12px; border: 2px solid #fdba74; box-shadow: 0 2px 6px rgba(234,88,12,0.1);">
+                                    <div style="font-size: 12px; color: #64748b; margin-bottom: 6px; font-weight: 700;">卖出总额</div>
+                                    <div style="font-size: 18px; font-weight: 900; color: #ea580c; font-family: 'JetBrains Mono', monospace;">¥7.6万</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 异常行为标签 -->
+                        <div style="margin-top: 16px; padding: 14px 18px; background: #fffbeb; border-radius: 10px; border: 2px solid #fde68a;">
+                            <div style="font-size: 16px; color: #92400e; font-weight: 800; margin-bottom: 6px;">
+                                ⚠️ 异常行为标签
+                            </div>
+                            <span class="region-risk-tag" style="font-size: 15px; padding: 8px 16px;">高频提现（15次/30天）</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4️⃣ 交易习惯画像 -->
+                <div class="dashboard-card" style="margin-bottom: 18px; border-left: 5px solid #ea580c;">
+                    <div style="padding: 18px; cursor: pointer;" onclick="toggleSection('profile-4')">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <h3 style="font-size: 16px; font-weight: 800; color: #0f172a; margin: 0;">
+                                4️⃣ 交易习惯画像 (Trading Pattern) <span style="color: #dc2626; font-size: 16px; margin-left: 10px;">⚠️ 异常</span>
+                            </h3>
+                            <i class="fas fa-chevron-down" id="icon-4" style="color: #94a3b8; font-size: 14px; transition: transform 0.3s;"></i>
+                        </div>
+                    </div>
+                    <div id="profile-4" style="display: block; border-top: 2px solid #e2e8f0; padding: 16px; background: linear-gradient(135deg, #fff7ed 0%, #ffffff 100%);">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1.5fr; gap: 20px; margin-bottom: 20px;">
+                            <div style="padding: 20px; background: white; border-radius: 12px; border: 2px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                                <div style="font-size: 12px; color: #64748b; margin-bottom: 6px; font-weight: 700;">交易规模</div>
+                                <div style="font-size: 16px; font-weight: 900; color: #3b82f6; margin-bottom: 6px;">中等规模</div>
+                                <div style="font-size: 15px; color: #64748b;">平均 <strong style="color: #0f172a;">¥3,000</strong>/笔</div>
+                            </div>
+                            <div style="padding: 20px; background: white; border-radius: 12px; border: 2px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                                <div style="font-size: 12px; color: #64748b; margin-bottom: 6px; font-weight: 700;">交易粒度</div>
+                                <div style="font-size: 16px; font-weight: 900; color: #10b981; margin-bottom: 6px;">正常</div>
+                                <div style="font-size: 15px; color: #64748b;">小额占比 <strong>15%</strong></div>
+                            </div>
+                            <div style="padding: 20px; background: linear-gradient(135deg, #fee2e2, #fecaca); border-radius: 14px; border: 4px solid #dc2626; box-shadow: 0 6px 20px rgba(220, 38, 38, 0.25); position: relative; overflow: hidden;">
+                                <div style="position: absolute; top: -30px; right: -30px; width: 100px; height: 100px; background: rgba(220, 38, 38, 0.1); border-radius: 50%;"></div>
+                                <div style="font-size: 14px; color: #991b1b; margin-bottom: 6px; font-weight: 900; position: relative; z-index: 1;">
+                                    <i class="fas fa-exclamation-triangle" style="color: #dc2626; font-size: 16px;"></i> 交易集中度
+                                </div>
+                                <div style="font-size: 24px; font-weight: 900; color: #dc2626; margin-bottom: 6px; font-family: 'JetBrains Mono', monospace; line-height: 1; position: relative; z-index: 1;">84%</div>
+                                <div style="font-size: 17px; color: #991b1b; font-weight: 800; position: relative; z-index: 1;">
+                                    ⚠️ 严重异常：≥70% 过度集中
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 策略和节律 -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            <div style="padding: 20px; background: white; border-radius: 12px; border: 2px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                                <div style="font-size: 12px; color: #64748b; margin-bottom: 6px; font-weight: 700;">交易策略</div>
+                                <div style="font-size: 16px; font-weight: 900; color: #f59e0b; margin-bottom: 6px;">快进快出</div>
+                                <div style="font-size: 15px; color: #64748b;">持币时间 <strong style="color: #0f172a;">< 24h</strong></div>
+                            </div>
+                            <div style="padding: 20px; background: #fffbeb; border-radius: 12px; border: 3px solid #fde68a; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                                <div style="font-size: 12px; color: #64748b; margin-bottom: 6px; font-weight: 700;">交易节律</div>
+                                <div style="font-size: 16px; font-weight: 900; color: #d97706; margin-bottom: 6px;">固定时段</div>
+                                <div style="font-size: 16px; color: #92400e; font-weight: 700;">⚠️ 23:00-02:00集中62%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5️⃣ 安全画像 -->
+                <div class="dashboard-card" style="border-left: 5px solid #d97706;">
+                    <div style="padding: 18px; cursor: pointer;" onclick="toggleSection('profile-5')">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <h3 style="font-size: 16px; font-weight: 800; color: #0f172a; margin: 0;">
+                                5️⃣ 安全画像 (Security Profile)
+                            </h3>
+                            <i class="fas fa-chevron-down" id="icon-5" style="color: #94a3b8; font-size: 14px; transition: transform 0.3s;"></i>
+                        </div>
+                    </div>
+                    <div id="profile-5" style="display: block; border-top: 2px solid #e2e8f0; padding: 16px; background: linear-gradient(135deg, #fff7ed 0%, #ffffff 100%);">
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
+                            <div style="padding: 20px; background: white; border-radius: 12px; border: 2px solid #d1fae5; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                                <div style="font-size: 12px; color: #64748b; margin-bottom: 6px; font-weight: 700;">黑名单状态</div>
+                                <div style="font-size: 16px; font-weight: 900; color: #10b981; margin-bottom: 6px;">✓ 全部正常</div>
+                                <div style="font-size: 14px; color: #64748b; line-height: 1.6;">
+                                    IP黑名单：<strong>无</strong><br>
+                                    设备黑名单：<strong>无</strong><br>
+                                    支付黑名单：<strong>无</strong>
+                                </div>
+                            </div>
+                            <div style="padding: 20px; background: #fff7ed; border-radius: 12px; border: 2px solid #fed7aa; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                                <div style="font-size: 12px; color: #64748b; margin-bottom: 6px; font-weight: 700;">处置历史</div>
+                                <div style="font-size: 16px; font-weight: 900; color: #ea580c; margin-bottom: 6px;">有记录</div>
+                                <div style="font-size: 14px; color: #9a3412; line-height: 1.6;">
+                                    冻结次数：<strong>1次</strong><br>
+                                    拉黑次数：<strong>0次</strong><br>
+                                    身份证关联：<strong>1个</strong>
+                                </div>
+                            </div>
+                            <div style="padding: 20px; background: #fff7ed; border-radius: 12px; border: 2px solid #fed7aa; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                                <div style="font-size: 12px; color: #64748b; margin-bottom: 6px; font-weight: 700;">行为信号</div>
+                                <div style="font-size: 16px; font-weight: 900; color: #dc2626; margin-bottom: 6px;">⚠️ 异常</div>
+                                <div style="font-size: 14px; color: #991b1b; line-height: 1.6;">
+                                    被举报：<strong>2次</strong><br>
+                                    人脸验证失败：<strong>0次</strong><br>
+                                    异常取消：<strong>3次</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                </div>
+                <!-- End of profileDetails -->
+            </div>
+        </div>
+
+        <!-- 主内容：左侧规则，右侧时间轴 -->
+        <div style="display: grid; grid-template-columns: 1fr 400px; gap: 20px;">
+            <!-- 左侧：规则详情 -->
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                
+                
+                
+                <!-- 🛡️ 安全层 -->
+                <div class="dashboard-card" id="SEC" style="margin-bottom: 16px; height: auto !important; min-height: fit-content; overflow: visible !important;">
+                    <div class="card-header" style="background: linear-gradient(135deg, #fee2e2, #fecaca); padding: 12px 20px; border-bottom: 2px solid #dc2626; display: flex; justify-content: space-between; align-items: center;">
+                        <h3 style="font-size: 16px; font-weight: 800; color: #0f172a; margin: 0; display: flex; align-items: center; gap: 8px;">
+                            <i class="fas fa-shield-alt" style="color: #dc2626;"></i> 安全层
+                        </h3>
+                        <div style="background: rgba(220, 38, 38, 0.12); padding: 6px 14px; border-radius: 10px; border: 1.5px solid rgba(220, 38, 38, 0.3); display: flex; align-items: baseline; gap: 2px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                            <span style="font-size: 16px; font-weight: 900; color: #dc2626; font-family: 'JetBrains Mono', monospace; line-height: 1;">38</span>
+                            <span style="font-size: 14px; font-weight: 700; color: #dc2626; opacity: 0.5; font-family: 'JetBrains Mono', monospace;">/40</span>
+                        </div>
+                    </div>
+                    <div style="padding: 12px 12px 24px 12px; display: flex; flex-direction: column; gap: 12px;">
+                        <!-- R-ATO-1 -->
+                        <div style="padding: 12px; background: white; border-radius: 8px; border: 1px solid #e2e8f0; border-left: 4px solid #dc2626; display: flex; justify-content: space-between; align-items: center; cursor: pointer;" onclick="toggleRule(this)">
+                            <div>
+                                <div style="font-size: 14px; font-weight: 700; color: #0f172a;">新设备 + 异地登录</div>
+                                <div style="font-size: 11px; color: #94a3b8; font-family: 'JetBrains Mono', monospace;">R-ATO-1</div>
+                                <div style="font-size: 12px; color: #64748b; margin-top: 4px;">触发：新设备DFP_445566 + 跨城市300km</div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <span style="font-size: 11px; padding: 3px 8px; background: #fee2e2; color: #991b1b; border-radius: 4px; font-weight: 700;">严重</span>
+                                <span style="font-size: 18px; font-weight: 900; color: #dc2626; font-family: 'JetBrains Mono', monospace;">-15</span>
+                            </div>
+                        </div>
+                        <!-- R-ATO-2 -->
+                        <div style="padding: 12px; background: white; border-radius: 8px; border: 1px solid #e2e8f0; border-left: 4px solid #f59e0b; display: flex; justify-content: space-between; align-items: center; cursor: pointer;" onclick="toggleRule(this)">
+                            <div>
+                                <div style="font-size: 14px; font-weight: 700; color: #0f172a;">新设备 + 低置信度</div>
+                                <div style="font-size: 11px; color: #94a3b8; font-family: 'JetBrains Mono', monospace;">R-ATO-2</div>
+                                <div style="font-size: 12px; color: #64748b; margin-top: 4px;">触发：置信度 0.72 < 0.85</div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <span style="font-size: 11px; padding: 3px 8px; background: #ffedd5; color: #9a3412; border-radius: 4px; font-weight: 700;">命中</span>
+                                <span style="font-size: 18px; font-weight: 900; color: #f59e0b; font-family: 'JetBrains Mono', monospace;">-12</span>
+                            </div>
+                        </div>
+                        <!-- R-GROUP-1 -->
+                        <div style="padding: 12px; background: white; border-radius: 8px; border: 1px solid #e2e8f0; border-left: 4px solid #f59e0b; display: flex; justify-content: space-between; align-items: center; cursor: pointer;" onclick="toggleRule(this)">
+                            <div>
+                                <div style="font-size: 14px; font-weight: 700; color: #0f172a;">同设备多账号（7天）</div>
+                                <div style="font-size: 11px; color: #94a3b8; font-family: 'JetBrains Mono', monospace;">R-GROUP-1</div>
+                                <div style="font-size: 12px; color: #64748b; margin-top: 4px;">触发：设备被2个账号共享使用</div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <span style="font-size: 11px; padding: 3px 8px; background: #ffedd5; color: #9a3412; border-radius: 4px; font-weight: 700;">命中</span>
+                                <span style="font-size: 18px; font-weight: 900; color: #f59e0b; font-family: 'JetBrains Mono', monospace;">-11</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                
+                <!-- 🔨 交易层 -->
+                <div class="dashboard-card" id="TRADE" style="margin-bottom: 16px; height: auto !important; min-height: fit-content; overflow: visible !important;">
+                    <div class="card-header" style="background: linear-gradient(135deg, #ffedd5, #fed7aa); padding: 12px 20px; border-bottom: 2px solid #ea580c; display: flex; justify-content: space-between; align-items: center;">
+                        <h3 style="font-size: 16px; font-weight: 800; color: #0f172a; margin: 0; display: flex; align-items: center; gap: 8px;">
+                            <i class="fas fa-exchange-alt" style="color: #ea580c;"></i> 交易层
+                        </h3>
+                        <div style="background: rgba(234, 88, 12, 0.12); padding: 6px 14px; border-radius: 10px; border: 1.5px solid rgba(234, 88, 12, 0.3); display: flex; align-items: baseline; gap: 2px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                            <span style="font-size: 16px; font-weight: 900; color: #ea580c; font-family: 'JetBrains Mono', monospace; line-height: 1;">33</span>
+                            <span style="font-size: 14px; font-weight: 700; color: #ea580c; opacity: 0.5; font-family: 'JetBrains Mono', monospace;">/35</span>
+                        </div>
+                    </div>
+                    <div style="padding: 12px 12px 24px 12px; display: flex; flex-direction: column; gap: 12px;">
+                        <div style="padding: 12px; background: white; border-radius: 8px; border: 1px solid #e2e8f0; border-left: 4px solid #dc2626; display: flex; justify-content: space-between; align-items: center; cursor: pointer;" onclick="toggleRule(this)">
+                            <div>
+                                <div style="font-size: 14px; font-weight: 700; color: #0f172a;">登录后快速卖单</div>
+                                <div style="font-size: 11px; color: #94a3b8; font-family: 'JetBrains Mono', monospace;">FAST_SELL_AFTER_LOGIN</div>
+                                <div style="font-size: 12px; color: #64748b; margin-top: 4px;">触发：5分钟内发起卖单，2次/7天</div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <span style="font-size: 11px; padding: 3px 8px; background: #fee2e2; color: #991b1b; border-radius: 4px; font-weight: 700;">严重</span>
+                                <span style="font-size: 18px; font-weight: 900; color: #dc2626; font-family: 'JetBrains Mono', monospace;">-18</span>
+                            </div>
+                        </div>
+                        <div style="padding: 12px; background: white; border-radius: 8px; border: 1px solid #e2e8f0; border-left: 4px solid #f59e0b; display: flex; justify-content: space-between; align-items: center; cursor: pointer;" onclick="toggleRule(this)">
+                            <div>
+                                <div style="font-size: 14px; font-weight: 700; color: #0f172a;">高频取消订单</div>
+                                <div style="font-size: 11px; color: #94a3b8; font-family: 'JetBrains Mono', monospace;">CANCEL_PROBE_PATTERN</div>
+                                <div style="font-size: 12px; color: #64748b; margin-top: 4px;">触发：3次/24h，疑似探单</div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <span style="font-size: 11px; padding: 3px 8px; background: #ffedd5; color: #9a3412; border-radius: 4px; font-weight: 700;">命中</span>
+                                <span style="font-size: 18px; font-weight: 900; color: #f59e0b; font-family: 'JetBrains Mono', monospace;">-15</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                
+                <!-- 👥 团伙层 -->
+                <div class="dashboard-card" id="GROUP" style="margin-bottom: 16px; height: auto !important; min-height: fit-content; overflow: visible !important;">
+                    <div class="card-header" style="background: linear-gradient(135deg, #fef3c7, #fde68a); padding: 12px 20px; border-bottom: 2px solid #d97706; display: flex; justify-content: space-between; align-items: center;">
+                        <h3 style="font-size: 16px; font-weight: 800; color: #0f172a; margin: 0; display: flex; align-items: center; gap: 8px;">
+                            <i class="fas fa-users" style="color: #d97706;"></i> 团伙层
+                        </h3>
+                        <div style="background: rgba(217, 119, 6, 0.12); padding: 6px 14px; border-radius: 10px; border: 1.5px solid rgba(217, 119, 6, 0.3); display: flex; align-items: baseline; gap: 2px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                            <span style="font-size: 16px; font-weight: 900; color: #d97706; font-family: 'JetBrains Mono', monospace; line-height: 1;">15</span>
+                            <span style="font-size: 14px; font-weight: 700; color: #d97706; opacity: 0.5; font-family: 'JetBrains Mono', monospace;">/20</span>
+                        </div>
+                    </div>
+                    <div style="padding: 12px;">
+                        <div style="padding: 12px; background: white; border-radius: 8px; border: 1px solid #e2e8f0; border-left: 4px solid #fbbf24; display: flex; justify-content: space-between; align-items: center; cursor: pointer;" onclick="toggleRule(this)">
+                            <div>
+                                <div style="font-size: 14px; font-weight: 700; color: #0f172a;">支付中心型团伙</div>
+                                <div style="font-size: 11px; color: #94a3b8; font-family: 'JetBrains Mono', monospace;">PAYMENT_CENTER_GROUP</div>
+                                <div style="font-size: 12px; color: #64748b; margin-top: 4px;">触发：QR_889922被3个账号共享</div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <span style="font-size: 11px; padding: 3px 8px; background: #fef3c7; color: #92400e; border-radius: 4px; font-weight: 700;">观察</span>
+                                <span style="font-size: 18px; font-weight: 900; color: #d97706; font-family: 'JetBrains Mono', monospace;">-15</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- 右侧：分数贡献时间轴 -->
+            <div class="dashboard-card" style="height: fit-content;">
+                <div class="card-header" style="background: #f8fafc; padding: 16px 20px; border-bottom: 2px solid #e2e8f0;">
+                    <h3 style="font-size: 14px; font-weight: 800; color: #0f172a; margin: 0;">
+                        <i class="fas fa-history" style="color: #3b82f6;"></i> 分数贡献时间轴
+                    </h3>
+                    <div style="margin-top: 8px; font-size: 13px; color: #64748b;">
+                        共触发6条规则，累计扣分-91
+                    </div>
+                </div>
+                <div style="padding: 16px; max-height: 800px; overflow-y: auto;">
+                    <div style="position: relative; padding-left: 30px;">
+                        <div style="position: absolute; left: 8px; top: 0; bottom: 0; width: 2px; background: #e2e8f0;"></div>
+                        
+                        <!-- 事件列表 -->
+                        <div style="position: relative; margin-bottom: 16px; cursor: pointer;" onclick="scrollToRule('FAST_SELL')">
+                            <div style="position: absolute; left: -26px; top: 4px; width: 16px; height: 16px; border-radius: 50%; background: #dc2626; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"></div>
+                            <div style="background: white; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; transition: all 0.2s;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                    <div style="font-size: 15px; font-weight: 700; color: #0f172a;">登录后快速卖单</div>
+                                    <div style="font-size: 16px; font-weight: 800; color: #dc2626; font-family: 'JetBrains Mono', monospace;">-18</div>
+                                </div>
+                                <div style="font-size: 11px; color: #94a3b8; font-family: 'JetBrains Mono', monospace; margin-bottom: 4px;">FAST_SELL_AFTER_LOGIN</div>
+                                <div style="font-size: 12px; color: #64748b;">2025-11-28 08:10 | 触发2次</div>
+                            </div>
+                        </div>
+
+                        <div style="position: relative; margin-bottom: 16px; cursor: pointer;" onclick="scrollToRule('R-ATO-1')">
+                            <div style="position: absolute; left: -26px; top: 4px; width: 16px; height: 16px; border-radius: 50%; background: #dc2626; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"></div>
+                            <div style="background: white; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                    <div style="font-size: 15px; font-weight: 700; color: #0f172a;">新设备+异地</div>
+                                    <div style="font-size: 16px; font-weight: 800; color: #dc2626; font-family: 'JetBrains Mono', monospace;">-15</div>
+                                </div>
+                                <div style="font-size: 11px; color: #94a3b8; font-family: 'JetBrains Mono', monospace; margin-bottom: 4px;">R-ATO-1</div>
+                                <div style="font-size: 12px; color: #64748b;">2025-11-27 15:30 | 跨城300km</div>
+                            </div>
+                        </div>
+
+                        <div style="position: relative; margin-bottom: 16px; cursor: pointer;" onclick="scrollToRule('CANCEL_PROBE')">
+                            <div style="position: absolute; left: -26px; top: 4px; width: 16px; height: 16px; border-radius: 50%; background: #f59e0b; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"></div>
+                            <div style="background: white; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                    <div style="font-size: 15px; font-weight: 700; color: #0f172a;">高频取消探测</div>
+                                    <div style="font-size: 16px; font-weight: 800; color: #f59e0b; font-family: 'JetBrains Mono', monospace;">-15</div>
+                                </div>
+                                <div style="font-size: 11px; color: #94a3b8; font-family: 'JetBrains Mono', monospace; margin-bottom: 4px;">CANCEL_PROBE_PATTERN</div>
+                                <div style="font-size: 12px; color: #64748b;">2025-11-28 08:20 | 3次取消</div>
+                            </div>
+                        </div>
+
+                        <div style="position: relative; margin-bottom: 16px; cursor: pointer;" onclick="scrollToRule('R-ATO-2')">
+                            <div style="position: absolute; left: -26px; top: 4px; width: 16px; height: 16px; border-radius: 50%; background: #f59e0b; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"></div>
+                            <div style="background: white; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                    <div style="font-size: 15px; font-weight: 700; color: #0f172a;">新设备+低置信</div>
+                                    <div style="font-size: 16px; font-weight: 800; color: #f59e0b; font-family: 'JetBrains Mono', monospace;">-12</div>
+                                </div>
+                                <div style="font-size: 11px; color: #94a3b8; font-family: 'JetBrains Mono', monospace; margin-bottom: 4px;">R-ATO-2</div>
+                                <div style="font-size: 12px; color: #64748b;">2025-11-27 19:45 | 置信度0.72</div>
+                            </div>
+                        </div>
+
+                        <div style="position: relative; margin-bottom: 16px; cursor: pointer;" onclick="scrollToRule('R-GROUP-1')">
+                            <div style="position: absolute; left: -26px; top: 4px; width: 16px; height: 16px; border-radius: 50%; background: #f59e0b; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"></div>
+                            <div style="background: white; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                    <div style="font-size: 15px; font-weight: 700; color: #0f172a;">同设备多账号</div>
+                                    <div style="font-size: 16px; font-weight: 800; color: #f59e0b; font-family: 'JetBrains Mono', monospace;">-11</div>
+                                </div>
+                                <div style="font-size: 11px; color: #94a3b8; font-family: 'JetBrains Mono', monospace; margin-bottom: 4px;">R-GROUP-1</div>
+                                <div style="font-size: 12px; color: #64748b;">2025-11-27 14:30 | 2账号共享</div>
+                            </div>
+                        </div>
+
+                        <div style="position: relative;">
+                            <div style="position: absolute; left: -26px; top: 4px; width: 16px; height: 16px; border-radius: 50%; background: #fbbf24; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"></div>
+                            <div style="background: white; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                    <div style="font-size: 15px; font-weight: 700; color: #0f172a;">支付中心团伙</div>
+                                    <div style="font-size: 16px; font-weight: 800; color: #d97706; font-family: 'JetBrains Mono', monospace;">-15</div>
+                                </div>
+                                <div style="font-size: 11px; color: #94a3b8; font-family: 'JetBrains Mono', monospace; margin-bottom: 4px;">PAYMENT_CENTER_GROUP</div>
+                                <div style="font-size: 12px; color: #64748b;">2025-11-27 14:30 | 小团伙3人</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        
+            
+    
+        <!-- 新版专业页脚 -->
+        <footer style="margin-top: 60px; padding: 40px 0; border-top: 1px solid #e2e8f0; text-align: center;">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 16px; opacity: 0.6;">
+                <img src="bob.png" alt="logo" style="width: 24px; height: 24px; filter: grayscale(100%);">
+                <span style="font-size: 14px; font-weight: 800; color: #0f172a; letter-spacing: 1px; text-transform: uppercase;">Anti Scammer AI System</span>
+            </div>
+            <div style="display: flex; justify-content: center; gap: 24px; margin-bottom: 16px;">
+                <div style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: #94a3b8;">
+                    <span style="width: 6px; height: 6px; border-radius: 50%; background: #10b981;"></span> AI 引擎在线
+                </div>
+                <div style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: #94a3b8;">
+                    <span style="width: 6px; height: 6px; border-radius: 50%; background: #10b981;"></span> 数据实时同步
+                </div>
+                <div style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: #94a3b8;">
+                    <span style="width: 6px; height: 6px; border-radius: 50%; background: #10b981;"></span> 策略版本 v2.4.1
+                </div>
+            </div>
+            <div style="font-size: 12px; color: #cbd5e1; font-weight: 500;">
+                © 2026 波币 (BOB) 风险监控实验室 · 仅供内部运营审计使用
+            </div>
+        </footer>
+</div>
+
+    <script>
+        function scrollTo(layerId) {
+            const element = document.getElementById(layerId);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                element.style.boxShadow = '0 0 0 4px rgba(59, 130, 246, 0.2)';
+                setTimeout(() => {
+                    element.style.boxShadow = '';
+                }, 2000);
+            }
+        }
+
+        function scrollToRule(ruleId) {
+            const element = document.getElementById(ruleId);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                element.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.3)';
+                setTimeout(() => {
+                    element.style.boxShadow = '';
+                }, 3000);
+                
+                // 自动展开
+                const detail = element.querySelector('.rule-detail');
+                if (detail && (detail.style.display === 'none' || !detail.style.display)) {
+                    toggleRule(element);
+                }
+            }
+        }
+
+        function toggleRule(card) {
+            if (event) event.stopPropagation();
+            const detail = card.querySelector('.rule-detail');
+            const icon = card.querySelector('.fa-chevron-down');
+            
+            if (detail) {
+                if (detail.style.display === 'none' || !detail.style.display) {
+                    detail.style.display = 'block';
+                    if (icon) icon.style.transform = 'rotate(180deg)';
+                } else {
+                    detail.style.display = 'none';
+                    if (icon) icon.style.transform = 'rotate(0deg)';
+                }
+            }
+        }
+
+        // 页面加载时默认展开第一条规则
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                const firstRule = document.getElementById('R-ATO-1');
+                if (firstRule) toggleRule(firstRule);
+            }, 500);
+        });
+
+        // 用户画像整体展开/收起
+        function toggleProfileDetails() {
+            const summary = document.getElementById('profileSummary');
+            const details = document.getElementById('profileDetails');
+            const btnText = document.getElementById('toggleBtnText');
+            const btn = event.target.closest('button');
+            
+            if (details.style.display === 'none') {
+                summary.style.display = 'none';
+                details.style.display = 'block';
+                btnText.textContent = '收起详情';
+                btn.querySelector('i').className = 'fas fa-compress-alt';
+            } else {
+                summary.style.display = 'block';
+                details.style.display = 'none';
+                btnText.textContent = '展开详情';
+                btn.querySelector('i').className = 'fas fa-expand-alt';
+            }
+        }
+
+        // 用户画像维度展开/收起
+        function toggleSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            const icon = document.getElementById('icon-' + sectionId.split('-')[1]);
+            
+            if (section && icon) {
+                if (section.style.display === 'none') {
+                    section.style.display = 'block';
+                    icon.style.transform = 'rotate(180deg)';
+                } else {
+                    section.style.display = 'none';
+                    icon.style.transform = 'rotate(0deg)';
+                }
+            }
+        }
+    </script>
+    <script>
+        // 如果在 iframe 中（作为抽屉显示），隐藏顶部导航和面包屑
+        if (window.self !== window.top) {
+            document.querySelector('.header').style.display = 'none';
+            document.querySelector('div[style*="max-width: 1800px"]').style.paddingTop = '0';
+            // 隐藏面包屑
+            const breadcrumb = document.querySelector('div[style*="display: flex; align-items: center; gap: 8px"]');
+            if (breadcrumb) breadcrumb.style.display = 'none';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商户统计报表 - VOSS Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
+            background: #f5f7fa;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        /* 顶部筛选栏 */
+        .filter-bar {
+            padding: 20px;
+            background: #fafbfc;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .filter-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .date-input {
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 13px;
+            font-family: inherit;
+            color: #374151;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #64748b;
+            border: 1px solid #d1d5db;
+        }
+
+        .btn-secondary:hover {
+            background: #f8fafc;
+        }
+
+        /* 表格 */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #f8fafc;
+        }
+
+        thead tr {
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        th {
+            padding: 14px 12px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 700;
+            color: #475569;
+            white-space: nowrap;
+            border-right: 1px solid #f1f5f9;
+        }
+
+        th:last-child {
+            border-right: none;
+        }
+
+        th.group-header {
+            background: #e0f2fe;
+            color: #0369a1;
+            font-weight: 700;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #f1f5f9;
+            transition: background 0.2s;
+        }
+
+        tbody tr:hover {
+            background: #fafbfc;
+        }
+
+        tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        td {
+            padding: 12px;
+            font-size: 13px;
+            text-align: center;
+            border-right: 1px solid #f8fafc;
+        }
+
+        td:last-child {
+            border-right: none;
+        }
+
+        td.merchant-name {
+            text-align: left;
+            font-weight: 600;
+            color: #1e293b;
+            padding-left: 20px;
+        }
+
+        td.merchant-id {
+            font-weight: 600;
+            color: #3b82f6;
+            padding-left: 20px;
+        }
+
+        /* 币种数值单元格 */
+        .currency-cell {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .currency-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            width: 100%;
+            min-width: 110px;
+        }
+
+        .currency-label {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            min-width: 38px;
+            text-align: center;
+        }
+
+        .currency-label.trx {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .currency-label.usdt {
+            background: #d1fae5;
+            color: #059669;
+        }
+
+        .currency-label.usdd {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+
+        .currency-label.usdc {
+            background: #e0e7ff;
+            color: #4f46e5;
+        }
+
+        .currency-amount {
+            font-weight: 600;
+            color: #1e293b;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            flex: 1;
+            text-align: right;
+        }
+
+        .currency-amount.zero {
+            color: #cbd5e1;
+        }
+
+        /* 分隔线样式 */
+        .divider-cell {
+            background: #f1f5f9;
+            padding: 0 !important;
+        }
+
+        /* 合计行 */
+        tbody tr.total-row {
+            background: #fef3c7;
+            border-top: 2px solid #fbbf24;
+            border-bottom: 2px solid #fbbf24;
+            font-weight: 700;
+        }
+
+        tbody tr.total-row td {
+            color: #92400e;
+            background: #fef3c7;
+        }
+
+        tbody tr.total-row:hover {
+            background: #fef3c7;
+        }
+
+        tbody tr.total-row:hover td {
+            background: #fef3c7;
+        }
+
+        /* 分页 */
+        .pagination {
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #e5e7eb;
+            background: #fafbfc;
+        }
+
+        .page-info {
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        .page-controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .page-btn {
+            width: 32px;
+            height: 32px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            background: white;
+            color: #64748b;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .page-btn:hover:not(:disabled) {
+            background: #f8fafc;
+            border-color: #3b82f6;
+            color: #3b82f6;
+        }
+
+        .page-btn.active {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+
+        .page-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        /* 紧凑布局优化 */
+        .compact-value {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .compact-value.zero {
+            color: #cbd5e1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 筛选栏 -->
+        <div class="filter-bar">
+            <div class="filter-title">统计报表</div>
+            <div class="filter-group">
+                <select class="date-input" style="width: 140px;">
+                    <option>选择账户</option>
+                    <option>全部账户</option>
+                    <option>7门店数</option>
+                    <option>711服务</option>
+                </select>
+                <input type="date" class="date-input" value="2025-11-10">
+                <span style="color: #94a3b8;">~</span>
+                <input type="date" class="date-input" value="2025-11-10">
+            </div>
+            <button class="btn btn-primary">
+                <i class="fas fa-search"></i>
+                查询
+            </button>
+            <button class="btn btn-secondary">
+                <i class="fas fa-redo"></i>
+                重置
+            </button>
+        </div>
+
+        <!-- 表格 -->
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th rowspan="2" style="vertical-align: middle;">商户 ID</th>
+                        <th rowspan="2" style="vertical-align: middle;">商户名称</th>
+                        <th rowspan="2" style="vertical-align: middle;">链包总数</th>
+                        <th colspan="2" class="group-header">总余额</th>
+                        <th colspan="2" class="group-header">待确认金额</th>
+                        <th colspan="2" class="group-header">异常入金额</th>
+                        <th colspan="2" class="group-header">入款金额</th>
+                        <th colspan="2" class="group-header">入款笔数</th>
+                        <th colspan="2" class="group-header">出款金额</th>
+                        <th colspan="2" class="group-header">出款笔数</th>
+                        <th colspan="2" class="group-header">归集金额</th>
+                        <th colspan="2" class="group-header">归集笔数</th>
+                    </tr>
+                    <tr>
+                        <!-- 总余额 -->
+                        <th style="background: #fef2f2; color: #dc2626; font-size: 12px;">TRX</th>
+                        <th style="background: #ecfdf5; color: #059669; font-size: 12px;">USDT</th>
+                        <!-- 待确认 -->
+                        <th style="background: #fef2f2; color: #dc2626; font-size: 12px;">TRX</th>
+                        <th style="background: #ecfdf5; color: #059669; font-size: 12px;">USDT</th>
+                        <!-- 异常入金额 -->
+                        <th style="background: #fef2f2; color: #dc2626; font-size: 12px;">TRX</th>
+                        <th style="background: #ecfdf5; color: #059669; font-size: 12px;">USDT</th>
+                        <!-- 入款金额 -->
+                        <th style="background: #fef2f2; color: #dc2626; font-size: 12px;">TRX</th>
+                        <th style="background: #ecfdf5; color: #059669; font-size: 12px;">USDT</th>
+                        <!-- 入款笔数 -->
+                        <th style="background: #fef2f2; color: #dc2626; font-size: 12px;">TRX</th>
+                        <th style="background: #ecfdf5; color: #059669; font-size: 12px;">USDT</th>
+                        <!-- 出款金额 -->
+                        <th style="background: #fef2f2; color: #dc2626; font-size: 12px;">TRX</th>
+                        <th style="background: #ecfdf5; color: #059669; font-size: 12px;">USDT</th>
+                        <!-- 出款笔数 -->
+                        <th style="background: #fef2f2; color: #dc2626; font-size: 12px;">TRX</th>
+                        <th style="background: #ecfdf5; color: #059669; font-size: 12px;">USDT</th>
+                        <!-- 归集金额 -->
+                        <th style="background: #fef2f2; color: #dc2626; font-size: 12px;">TRX</th>
+                        <th style="background: #ecfdf5; color: #059669; font-size: 12px;">USDT</th>
+                        <!-- 归集笔数 -->
+                        <th style="background: #fef2f2; color: #dc2626; font-size: 12px;">TRX</th>
+                        <th style="background: #ecfdf5; color: #059669; font-size: 12px;">USDT</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- 商户 1001 -->
+                    <tr>
+                        <td class="merchant-id">1001</td>
+                        <td class="merchant-name">7门店数</td>
+                        <td class="compact-value">0</td>
+                        <!-- 总余额 -->
+                        <td class="compact-value zero">0</td>
+                        <td class="compact-value zero">0</td>
+                        <!-- 待确认 -->
+                        <td class="compact-value zero">0</td>
+                        <td class="compact-value zero">0</td>
+                        <!-- 异常入金额 -->
+                        <td class="compact-value zero">0</td>
+                        <td class="compact-value zero">0</td>
+                        <!-- 入款金额 -->
+                        <td class="compact-value zero">0</td>
+                        <td class="compact-value zero">0</td>
+                        <!-- 入款笔数 -->
+                        <td class="compact-value zero">0</td>
+                        <td class="compact-value zero">0</td>
+                        <!-- 出款金额 -->
+                        <td class="compact-value zero">0</td>
+                        <td class="compact-value zero">0</td>
+                        <!-- 出款笔数 -->
+                        <td class="compact-value zero">0</td>
+                        <td class="compact-value zero">0</td>
+                        <!-- 归集金额 -->
+                        <td class="compact-value zero">0</td>
+                        <td class="compact-value zero">0</td>
+                        <!-- 归集笔数 -->
+                        <td class="compact-value zero">0</td>
+                        <td class="compact-value zero">0</td>
+                    </tr>
+
+                    <!-- 商户 1002 - 有数据 -->
+                    <tr>
+                        <td class="merchant-id">1002</td>
+                        <td class="merchant-name">出发客户归集</td>
+                        <td class="compact-value">3</td>
+                        <!-- 总余额 -->
+                        <td class="compact-value">926.95</td>
+                        <td class="compact-value zero">0</td>
+                        <!-- 待确认 -->
+                        <td class="compact-value zero">0</td>
+                        <td class="compact-value zero">0</td>
+                        <!-- 异常入金额 -->
+                        <td class="compact-value">50.25</td>
+                        <td class="compact-value">15.80</td>
+                        <!-- 入款金额 -->
+                        <td class="compact-value">1250.50</td>
+                        <td class="compact-value">425.60</td>
+                        <!-- 入款笔数 -->
+                        <td class="compact-value">35</td>
+                        <td class="compact-value">28</td>
+                        <!-- 出款金额 -->
+                        <td class="compact-value">800.20</td>
+                        <td class="compact-value">320.50</td>
+                        <!-- 出款笔数 -->
+                        <td class="compact-value">18</td>
+                        <td class="compact-value">12</td>
+                        <!-- 归集金额 -->
+                        <td class="compact-value">450.30</td>
+                        <td class="compact-value">105.10</td>
+                        <!-- 归集笔数 -->
+                        <td class="compact-value">8</td>
+                        <td class="compact-value">5</td>
+                    </tr>
+
+                    <!-- 商户 1004 -->
+                    <tr>
+                        <td class="merchant-id">1004</td>
+                        <td class="merchant-name">711服务归集</td>
+                        <td class="compact-value">1</td>
+                        <!-- 总余额 -->
+                        <td class="compact-value">628.64</td>
+                        <td class="compact-value zero">0</td>
+                        <!-- 待确认 -->
+                        <td class="compact-value zero">0</td>
+                        <td class="compact-value zero">0</td>
+                        <!-- 异常入金额 -->
+                        <td class="compact-value zero">0</td>
+                        <td class="compact-value zero">0</td>
+                        <!-- 入款金额 -->
+                        <td class="compact-value">850.75</td>
+                        <td class="compact-value">280.30</td>
+                        <!-- 入款笔数 -->
+                        <td class="compact-value">25</td>
+                        <td class="compact-value">18</td>
+                        <!-- 出款金额 -->
+                        <td class="compact-value">222.11</td>
+                        <td class="compact-value">280.30</td>
+                        <!-- 出款笔数 -->
+                        <td class="compact-value">12</td>
+                        <td class="compact-value">18</td>
+                        <!-- 归集金额 -->
+                        <td class="compact-value zero">0</td>
+                        <td class="compact-value zero">0</td>
+                        <!-- 归集笔数 -->
+                        <td class="compact-value zero">0</td>
+                        <td class="compact-value zero">0</td>
+                    </tr>
+
+                    <!-- 商户 1005 -->
+                    <tr>
+                        <td class="merchant-id">1005</td>
+                        <td class="merchant-name">711服务</td>
+                        <td class="compact-value">1</td>
+                        <!-- 总余额 -->
+                        <td class="compact-value">2.64</td>
+                        <td class="compact-value zero">0</td>
+                        <!-- 待确认 -->
+                        <td class="compact-value zero">0</td>
+                        <td class="compact-value zero">0</td>
+                        <!-- 异常入金额 -->
+                        <td class="compact-value zero">0</td>
+                        <td class="compact-value zero">0</td>
+                        <!-- 入款金额 -->
+                        <td class="compact-value">150.25</td>
+                        <td class="compact-value">85.50</td>
+                        <!-- 入款笔数 -->
+                        <td class="compact-value">8</td>
+                        <td class="compact-value">6</td>
+                        <!-- 出款金额 -->
+                        <td class="compact-value">147.61</td>
+                        <td class="compact-value">85.50</td>
+                        <!-- 出款笔数 -->
+                        <td class="compact-value">8</td>
+                        <td class="compact-value">6</td>
+                        <!-- 归集金额 -->
+                        <td class="compact-value zero">0</td>
+                        <td class="compact-value zero">0</td>
+                        <!-- 归集笔数 -->
+                        <td class="compact-value zero">0</td>
+                        <td class="compact-value zero">0</td>
+                    </tr>
+
+                    <!-- 商户 1007 -->
+                    <tr>
+                        <td class="merchant-id">1007</td>
+                        <td class="merchant-name">711客户归集</td>
+                        <td class="compact-value">1</td>
+                        <!-- 总余额 -->
+                        <td class="compact-value">1985.58</td>
+                        <td class="compact-value">1.5</td>
+                        <!-- 待确认 -->
+                        <td class="compact-value zero">0</td>
+                        <td class="compact-value zero">0</td>
+                        <!-- 异常入金额 -->
+                        <td class="compact-value">125.30</td>
+                        <td class="compact-value">48.90</td>
+                        <!-- 入款金额 -->
+                        <td class="compact-value">3250.80</td>
+                        <td class="compact-value">856.40</td>
+                        <!-- 入款笔数 -->
+                        <td class="compact-value">68</td>
+                        <td class="compact-value">42</td>
+                        <!-- 出款金额 -->
+                        <td class="compact-value">1265.22</td>
+                        <td class="compact-value">854.90</td>
+                        <!-- 出款笔数 -->
+                        <td class="compact-value">35</td>
+                        <td class="compact-value">42</td>
+                        <!-- 归集金额 -->
+                        <td class="compact-value">1890.50</td>
+                        <td class="compact-value">425.75</td>
+                        <!-- 归集笔数 -->
+                        <td class="compact-value">15</td>
+                        <td class="compact-value">8</td>
+                    </tr>
+
+                    <!-- 合计行 -->
+                    <tr class="total-row">
+                        <td colspan="2" style="text-align: left; padding-left: 20px;">合计</td>
+                        <td>13</td>
+                        <!-- 总余额 -->
+                        <td class="compact-value">3543.82</td>
+                        <td class="compact-value">1.50</td>
+                        <!-- 待确认 -->
+                        <td class="compact-value zero">0</td>
+                        <td class="compact-value zero">0</td>
+                        <!-- 异常入金额 -->
+                        <td class="compact-value">175.55</td>
+                        <td class="compact-value">64.70</td>
+                        <!-- 入款金额 -->
+                        <td class="compact-value">5502.30</td>
+                        <td class="compact-value">1647.80</td>
+                        <!-- 入款笔数 -->
+                        <td class="compact-value">136</td>
+                        <td class="compact-value">94</td>
+                        <!-- 出款金额 -->
+                        <td class="compact-value">2435.14</td>
+                        <td class="compact-value">1541.20</td>
+                        <!-- 出款笔数 -->
+                        <td class="compact-value">73</td>
+                        <td class="compact-value">78</td>
+                        <!-- 归集金额 -->
+                        <td class="compact-value">2340.80</td>
+                        <td class="compact-value">530.85</td>
+                        <!-- 归集笔数 -->
+                        <td class="compact-value">23</td>
+                        <td class="compact-value">13</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 分页 -->
+        <div class="pagination">
+            <div class="page-info">共 215 条</div>
+            <div class="page-controls">
+                <button class="page-btn" disabled>
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="page-btn active">1</button>
+                <button class="page-btn">2</button>
+                <button class="page-btn">3</button>
+                <button class="page-btn">4</button>
+                <button class="page-btn">5</button>
+                <span style="color: #94a3b8; padding: 0 4px;">···</span>
+                <button class="page-btn">22</button>
+                <button class="page-btn">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+                <select class="date-input" style="width: 100px; margin-left: 8px;">
+                    <option>10 条/页</option>
+                    <option>20 条/页</option>
+                    <option>50 条/页</option>
+                    <option>100 条/页</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+
+

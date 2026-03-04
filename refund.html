@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>风险退款 - USDT兑换</title>
+    <link rel="stylesheet" href="refund.css">
+</head>
+<body>
+    <div class="refund-container">
+        <!-- 顶部导航 -->
+        <div class="refund-header">
+            <button class="back-btn" onclick="window.history.back()">←</button>
+            <h1>风险退款</h1>
+            <div style="width: 40px;"></div>
+        </div>
+
+        <!-- 退款表单 -->
+        <div class="form-container">
+            <!-- 顶部蓝卡 - 退款金额 -->
+            <div class="amount-card">
+                <div class="amount-label">退款金额</div>
+                <div class="amount-value" id="displayAmount">50.00 USDT</div>
+            </div>
+
+            <!-- 说明卡片 - 黄色/橙色背景 -->
+            <div class="risk-warning-card">
+                <div class="warning-title">⚠️ 检测到风险入款</div>
+                <p class="warning-desc">系统检测到该笔交易存在高风险行为，暂未入账。</p>
+                <div class="warning-info">
+                    <span class="info-label">风险等级：</span>
+                    <span class="info-value">高（99分）</span>
+                </div>
+                <div class="warning-info">
+                    <span class="info-label">关联原因：</span>
+                    <span class="info-value">与疑似灰产地址相关。</span>
+                </div>
+            </div>
+
+            <!-- 退款说明区 - 白底灰边 -->
+            <div class="refund-input-card">
+                <div class="input-label">退款地址：</div>
+                <input type="text" id="refundAddress" class="refund-address-input" placeholder="请输入USDT-TRC20地址（以T开头）" required>
+                <div class="input-warning">⚠️ 地址填写错误将导致资金无法找回。</div>
+            </div>
+
+            <!-- 提示区 - 淡黄卡 -->
+            <div class="tips-card">
+                <div class="tip-item">💡 退款将全额退回，无需扣除任何手续费</div>
+                <div class="tip-item">确认后预计几分钟内到账</div>
+                <div class="tip-item">退款地址提交后不可修改，请仔细核对</div>
+            </div>
+
+            <!-- 操作按钮 -->
+            <button class="refund-submit-btn" id="submitRefund">确认退款</button>
+        </div>
+    </div>
+
+    <!-- 确认退款弹窗 -->
+    <div class="confirm-modal" id="confirmModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <h3>确认退款</h3>
+            <div class="confirm-info">
+                <p>请仔细核对退款信息：</p>
+                <div class="confirm-item">
+                    <span>退款金额:</span>
+                    <span id="confirmAmount">--</span>
+                </div>
+                <div class="confirm-item">
+                    <span>退款地址:</span>
+                    <span id="confirmAddress" class="address-text">--</span>
+                </div>
+            </div>
+            <p style="font-size: 13px; color: #ef4444; text-align: center; margin: 16px 0;">
+                ⚠️ 退款地址一经提交无法修改，请务必仔细核对
+            </p>
+            <div class="modal-actions">
+                <button class="cancel-btn" id="cancelSubmit">取消</button>
+                <button class="confirm-submit-btn" id="confirmSubmit">确认退款</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 成功提示 -->
+    <div class="success-modal" id="successModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content success">
+            <div class="success-icon">✓</div>
+            <h3>退款成功</h3>
+            <p>您的退款已成功处理</p>
+            <div class="success-info">
+                <div class="info-row">
+                    <span>交易编号:</span>
+                    <span id="applicationId">--</span>
+                </div>
+                <div class="info-row">
+                    <span>预计到账时间:</span>
+                    <span>几分钟内</span>
+                </div>
+            </div>
+            <p class="success-note">资金将退回至您指定的USDT地址，请注意查收</p>
+            <button class="done-btn" id="doneBtn">完成</button>
+        </div>
+    </div>
+
+    <!-- Toast提示 -->
+    <div class="toast" id="toast"></div>
+
+    <script src="refund.js"></script>
+</body>
+</html>

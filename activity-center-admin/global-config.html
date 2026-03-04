@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>全局配置 - 活动中心管理后台</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="global-config-page">
+    <!-- 顶部通知栏 -->
+    <div class="notification-bar" id="notificationBar">
+        <div class="notification-content">
+            <span class="notification-dot"></span>
+            <span>全新的活动主题上线，全新的活动Banner，供您查看</span>
+        </div>
+        <button class="notification-close" onclick="closeNotification()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <div class="app-container">
+        <!-- 侧边栏 -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <rect x="3" y="3" width="7" height="7" rx="2" fill="#fff"/>
+                            <rect x="14" y="3" width="7" height="7" rx="2" fill="#fff" opacity="0.7"/>
+                            <rect x="3" y="14" width="7" height="7" rx="2" fill="#fff" opacity="0.7"/>
+                            <rect x="14" y="14" width="7" height="7" rx="2" fill="#fff" opacity="0.5"/>
+                        </svg>
+                    </div>
+                    <div class="logo-text">
+                        <span class="logo-title">活动中心</span>
+                        <span class="logo-subtitle">CAMPAIGN CENTER</span>
+                    </div>
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <a href="dashboard.html" class="nav-item">
+                        <i class="fas fa-chart-pie"></i>
+                        <span>仪表板</span>
+                    </a>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">业务</div>
+                    <a href="index.html" class="nav-item">
+                        <i class="fas fa-layer-group"></i>
+                        <span>平台列表</span>
+                    </a>
+                    <a href="merchant-list.html" class="nav-item">
+                        <i class="fas fa-store"></i>
+                        <span>商户列表</span>
+                    </a>
+                    <a href="activity-list.html" class="nav-item">
+                        <i class="fas fa-list-alt"></i>
+                        <span>活动列表</span>
+                    </a>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">日志</div>
+                    <a href="mining-flow.html" class="nav-item">
+                        <i class="fas fa-coins"></i>
+                        <span>挖矿流水</span>
+                    </a>
+                    <a href="item-receipt.html" class="nav-item">
+                        <i class="fas fa-gift"></i>
+                        <span>物品领取</span>
+                    </a>
+                    <a href="platform-log.html" class="nav-item">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>平台日志</span>
+                    </a>
+                    <a href="audit-log.html" class="nav-item">
+                        <i class="fas fa-clipboard-check"></i>
+                        <span>审核日志</span>
+                    </a>
+                    <a href="operation-log.html" class="nav-item">
+                        <i class="fas fa-history"></i>
+                        <span>操作日志</span>
+                    </a>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">平台数据</div>
+                    <a href="claim-data.html" class="nav-item">
+                        <i class="fas fa-download"></i>
+                        <span>领取数据</span>
+                    </a>
+                    <a href="user-behavior.html" class="nav-item">
+                        <i class="fas fa-chart-line"></i>
+                        <span>用户行为</span>
+                    </a>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">用户列表</div>
+                    <a href="user-data.html" class="nav-item">
+                        <i class="fas fa-id-card"></i>
+                        <span>用户数据</span>
+                    </a>
+                    <a href="user-detail.html" class="nav-item">
+                        <i class="fas fa-user-circle"></i>
+                        <span>用户详情</span>
+                    </a>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">系统</div>
+                    <a href="account-management.html" class="nav-item">
+                        <i class="fas fa-users"></i>
+                        <span>账号管理</span>
+                    </a>
+                    <a href="global-config.html" class="nav-item active">
+                        <i class="fas fa-globe"></i>
+                        <span>全局配置</span>
+                    </a>
+                </div>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <button class="sidebar-toggle" onclick="toggleSidebar()">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+        </aside>
+
+        <!-- 主内容区 -->
+        <main class="main-content" style="padding: 0;">
+            <!-- 顶部工作区标签页 -->
+            <div class="admin-tabs">
+                <div class="admin-tab" onclick="location.href='index.html'">平台列表 <i class="fas fa-times" onclick="closeTab(this); event.stopPropagation();"></i></div>
+                <div class="admin-tab" onclick="location.href='merchant-list.html'">商户列表(Live) <i class="fas fa-times" onclick="closeTab(this); event.stopPropagation();"></i></div>
+                <div class="admin-tab" onclick="location.href='dashboard.html'">仪表板 <i class="fas fa-times" onclick="closeTab(this); event.stopPropagation();"></i></div>
+                <div class="admin-tab" onclick="location.href='user-data.html'">用户数据 <i class="fas fa-times" onclick="closeTab(this); event.stopPropagation();"></i></div>
+                <div class="admin-tab active" onclick="location.href='global-config.html'">全局配置 <i class="fas fa-times" onclick="closeTab(this); event.stopPropagation();"></i></div>
+                <div class="admin-tab" onclick="location.href='audit-log.html'">审核日志 <i class="fas fa-times" onclick="closeTab(this); event.stopPropagation();"></i></div>
+                <div class="admin-tab" onclick="location.href='operation-log.html'">操作日志 <i class="fas fa-times" onclick="closeTab(this); event.stopPropagation();"></i></div>
+                <div class="admin-tabs-close-all" onclick="closeAllTabs()">
+                    <span>全部</span>
+                    <i class="fas fa-times"></i>
+                </div>
+            </div>
+
+            <div class="page-content" style="padding: 24px;">
+                <!-- 页面标题 -->
+                <div class="page-header">
+                    <div class="page-title">
+                        <h1>全局配置</h1>
+                        <p class="page-description">管理系统级别的参数设置与功能开关</p>
+                    </div>
+                </div>
+
+                <!-- Section 1: 全局配置 -->
+                <div class="config-section">
+                    <h4 class="config-section-title">全局配置</h4>
+                    <div class="config-item-list">
+                        <!-- 第一行 -->
+                        <div class="config-row">
+                            <input type="text" class="config-key-input" value="全局通知_01" readonly>
+                            <i class="fas fa-edit config-icon-btn"></i>
+                            <input type="text" class="config-value-input" value="全新的活动主题上线，全新的活动Banner，供您查看">
+                            <i class="fas fa-trash config-icon-btn delete"></i>
+                        </div>
+                        <!-- 第二行 -->
+                        <div class="config-row">
+                            <input type="text" class="config-key-input" value="MIN_PRIZE_SET_ID" readonly>
+                            <i class="fas fa-edit config-icon-btn"></i>
+                            <input type="text" class="config-value-input" value="3300">
+                            <i class="fas fa-trash config-icon-btn delete"></i>
+                        </div>
+                        <!-- 第三行 -->
+                        <div class="config-row">
+                            <input type="text" class="config-key-input" value="123" readonly>
+                            <i class="fas fa-edit config-icon-btn"></i>
+                            <input type="text" class="config-value-input" value="123">
+                            <i class="fas fa-trash config-icon-btn delete"></i>
+                        </div>
+                        <!-- 第四行 -->
+                        <div class="config-row">
+                            <input type="text" class="config-key-input" value="招待码" readonly>
+                            <i class="fas fa-edit config-icon-btn"></i>
+                            <input type="text" class="config-value-input" value="666">
+                            <i class="fas fa-trash config-icon-btn delete"></i>
+                        </div>
+                        <!-- 第五行 -->
+                        <div class="config-row">
+                            <input type="text" class="config-key-input" value="CAMPAIGN_MINER_ALLOW_CHANNEL" readonly>
+                            <i class="fas fa-edit config-icon-btn"></i>
+                            <input type="text" class="config-value-input" value="long">
+                            <i class="fas fa-trash config-icon-btn delete"></i>
+                        </div>
+                        <!-- 第六行 -->
+                        <div class="config-row">
+                            <input type="text" class="config-key-input" value="CAMPAIGN_PRIZE_SIX_ALLOW_CHANNEL" readonly>
+                            <i class="fas fa-edit config-icon-btn"></i>
+                            <input type="text" class="config-value-input" value="tu1, 10, long, yma00223, 100, dablu, komlub, yma004, retestv2, test-new, gg-gg">
+                            <i class="fas fa-trash config-icon-btn delete"></i>
+                        </div>
+                        <!-- 第七行 -->
+                        <div class="config-row">
+                            <input type="text" class="config-key-input" value="MAX_PRIZE_SET_IDssss" readonly>
+                            <i class="fas fa-edit config-icon-btn"></i>
+                            <input type="text" class="config-value-input" value="9100000">
+                            <i class="fas fa-trash config-icon-btn delete"></i>
+                        </div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <button class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> 添加</button>
+                        <button class="btn btn-primary"><i class="fas fa-save"></i> 保存</button>
+                    </div>
+                </div>
+
+                <!-- Section 2: 活动启用或停用(维护) -->
+                <div class="config-section" style="margin-top: 40px;">
+                    <div class="config-section-title">
+                        活动启用或停用(维护)
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: 12px; font-weight: normal; color: var(--text-secondary);">全部启用</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="activity-status-grid">
+                        <!-- 第一排 -->
+                        <div class="activity-status-item">
+                            <div class="activity-status-header">
+                                <div style="display: flex; flex-direction: column;">
+                                    <span class="activity-name-label">显示</span>
+                                    <span class="activity-code-label">display</span>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="activity-status-item">
+                            <div class="activity-status-header">
+                                <div style="display: flex; flex-direction: column;">
+                                    <span class="activity-name-label">广告</span>
+                                    <span class="activity-code-label">advertisement</span>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="activity-status-item">
+                            <div class="activity-status-header">
+                                <div style="display: flex; flex-direction: column;">
+                                    <span class="activity-name-label">升级模式</span>
+                                    <span class="activity-code-label">level</span>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="activity-status-item">
+                            <div class="activity-status-header">
+                                <div style="display: flex; flex-direction: column;">
+                                    <span class="activity-name-label">每日有效下注</span>
+                                    <span class="activity-code-label">rolling</span>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="activity-status-item">
+                            <div class="activity-status-header">
+                                <div style="display: flex; flex-direction: column;">
+                                    <span class="activity-name-label">救援金</span>
+                                    <span class="activity-code-label">relief</span>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <!-- 第二排 -->
+                        <div class="activity-status-item">
+                            <div class="activity-status-header">
+                                <div style="display: flex; flex-direction: column;">
+                                    <span class="activity-name-label">每日存款</span>
+                                    <span class="activity-code-label">daily_recharge</span>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="activity-status-item">
+                            <div class="activity-status-header">
+                                <div style="display: flex; flex-direction: column;">
+                                    <span class="activity-name-label">每周充值</span>
+                                    <span class="activity-code-label">weekly_recharge</span>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="activity-status-item">
+                            <div class="activity-status-header">
+                                <div style="display: flex; flex-direction: column;">
+                                    <span class="activity-name-label">每日返水</span>
+                                    <span class="activity-code-label">daily_rebate</span>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="activity-status-item">
+                            <div class="activity-status-header">
+                                <div style="display: flex; flex-direction: column;">
+                                    <span class="activity-name-label">节日礼金</span>
+                                    <span class="activity-code-label">festival</span>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="activity-status-item">
+                            <div class="activity-status-header">
+                                <div style="display: flex; flex-direction: column;">
+                                    <span class="activity-name-label">红包雨</span>
+                                    <span class="activity-code-label">red_pocket</span>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 3: 领取限制配置 -->
+                <div class="config-section" style="margin-top: 40px;">
+                    <h4 class="config-section-title">领取限制配置</h4>
+                    <div class="limit-config-section">
+                        <div class="limit-row-grid">
+                            <!-- 左列 -->
+                            <div class="limit-column">
+                                <div class="limit-item-row">
+                                    <select class="form-select-sm limit-select-activity"><option>显示</option></select>
+                                    <select class="form-select-sm limit-select-type"><option>默认</option></select>
+                                    <input type="text" class="form-input-sm limit-input-value" value="1">
+                                    <select class="form-select-sm limit-select-period"><option>每天</option></select>
+                                    <i class="fas fa-trash config-icon-btn delete"></i>
+                                </div>
+                                <div class="limit-item-row">
+                                    <select class="form-select-sm limit-select-activity"><option>升级模式</option></select>
+                                    <select class="form-select-sm limit-select-type"><option>每周</option></select>
+                                    <input type="text" class="form-input-sm limit-input-value" value="111">
+                                    <select class="form-select-sm limit-select-period"><option>每周</option></select>
+                                    <i class="fas fa-trash config-icon-btn delete"></i>
+                                </div>
+                                <div class="limit-item-row">
+                                    <select class="form-select-sm limit-select-activity"><option>每日有效下注</option></select>
+                                    <select class="form-select-sm limit-select-type"><option>默认</option></select>
+                                    <input type="text" class="form-input-sm limit-input-value" value="1111">
+                                    <select class="form-select-sm limit-select-period"><option>每天</option></select>
+                                    <i class="fas fa-trash config-icon-btn delete"></i>
+                                </div>
+                                <div class="limit-item-row">
+                                    <select class="form-select-sm limit-select-activity"><option>每日存款</option></select>
+                                    <select class="form-select-sm limit-select-type"><option>默认</option></select>
+                                    <input type="text" class="form-input-sm limit-input-value" value="1111">
+                                    <select class="form-select-sm limit-select-period"><option>每天</option></select>
+                                    <i class="fas fa-trash config-icon-btn delete"></i>
+                                </div>
+                                <div class="limit-item-row">
+                                    <select class="form-select-sm limit-select-activity"><option>每日返水</option></select>
+                                    <select class="form-select-sm limit-select-type"><option>默认</option></select>
+                                    <input type="text" class="form-input-sm limit-input-value" value="111">
+                                    <select class="form-select-sm limit-select-period"><option>每天</option></select>
+                                    <i class="fas fa-trash config-icon-btn delete"></i>
+                                </div>
+                            </div>
+                            <!-- 右列 -->
+                            <div class="limit-column">
+                                <div class="limit-item-row">
+                                    <select class="form-select-sm limit-select-activity"><option>广告</option></select>
+                                    <select class="form-select-sm limit-select-type"><option>默认</option></select>
+                                    <input type="text" class="form-input-sm limit-input-value" value="1111">
+                                    <select class="form-select-sm limit-select-period"><option>每天</option></select>
+                                    <i class="fas fa-trash config-icon-btn delete"></i>
+                                </div>
+                                <div class="limit-item-row">
+                                    <select class="form-select-sm limit-select-activity"><option>升级模式</option></select>
+                                    <select class="form-select-sm limit-select-type"><option>每月</option></select>
+                                    <input type="text" class="form-input-sm limit-input-value" value="111">
+                                    <select class="form-select-sm limit-select-period"><option>每月</option></select>
+                                    <i class="fas fa-trash config-icon-btn delete"></i>
+                                </div>
+                                <div class="limit-item-row">
+                                    <select class="form-select-sm limit-select-activity"><option>救援金</option></select>
+                                    <select class="form-select-sm limit-select-type"><option>默认</option></select>
+                                    <input type="text" class="form-input-sm limit-input-value" value="1111">
+                                    <select class="form-select-sm limit-select-period"><option>每天</option></select>
+                                    <i class="fas fa-trash config-icon-btn delete"></i>
+                                </div>
+                                <div class="limit-item-row">
+                                    <select class="form-select-sm limit-select-activity"><option>每周充值</option></select>
+                                    <select class="form-select-sm limit-select-type"><option>默认</option></select>
+                                    <input type="text" class="form-input-sm limit-input-value" value="222">
+                                    <select class="form-select-sm limit-select-period"><option>每天</option></select>
+                                    <i class="fas fa-trash config-icon-btn delete"></i>
+                                </div>
+                                <div class="limit-item-row">
+                                    <select class="form-select-sm limit-select-activity"><option>节日彩金</option></select>
+                                    <select class="form-select-sm limit-select-type"><option>默认</option></select>
+                                    <input type="text" class="form-input-sm limit-input-value" value="1000">
+                                    <select class="form-select-sm limit-select-period"><option>每天</option></select>
+                                    <i class="fas fa-trash config-icon-btn delete"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+                            <button class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> 添加领取限制</button>
+                            <button class="btn btn-primary"><i class="fas fa-save"></i> 保存</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- 删除确认弹窗 -->
+    <div class="modal-overlay" id="deleteConfirmModal">
+        <div class="modal modal-sm">
+            <div class="modal-header">
+                <h3 class="modal-title">确认删除</h3>
+                <button class="modal-close" onclick="closeModal('deleteConfirmModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" style="padding: 24px; text-align: center;">
+                <div style="font-size: 48px; color: var(--warning-color); margin-bottom: 16px;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <p style="font-size: 15px; color: var(--text-primary); margin-bottom: 8px;">确定要删除此配置项吗？</p>
+                <p id="deleteItemName" style="font-size: 13px; color: var(--text-secondary);"></p>
+            </div>
+            <div class="modal-footer" style="display: flex; gap: 12px; justify-content: center; padding: 16px 24px; border-top: 1px solid var(--border-light);">
+                <button class="btn btn-secondary" onclick="closeModal('deleteConfirmModal')">取消</button>
+                <button class="btn btn-danger" onclick="confirmDelete()">
+                    <i class="fas fa-trash"></i> 确认删除
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script>
+        // 删除确认相关
+        let pendingDeleteElement = null;
+
+        // 绑定删除按钮点击事件
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.config-icon-btn.delete').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    pendingDeleteElement = this;
+                    
+                    // 获取要删除的项目名称
+                    const row = this.closest('.config-row') || this.closest('.limit-item-row');
+                    let itemName = '';
+                    if (row) {
+                        const keyInput = row.querySelector('.config-key-input');
+                        const selectActivity = row.querySelector('.limit-select-activity');
+                        if (keyInput) {
+                            itemName = keyInput.value;
+                        } else if (selectActivity) {
+                            itemName = selectActivity.options[selectActivity.selectedIndex].text;
+                        }
+                    }
+                    
+                    document.getElementById('deleteItemName').textContent = itemName ? `"${itemName}"` : '';
+                    openModal('deleteConfirmModal');
+                });
+            });
+        });
+
+        function confirmDelete() {
+            if (pendingDeleteElement) {
+                // 这里不实际删除，只显示提示
+                showToast('删除操作已取消（演示模式）', 'info');
+                closeModal('deleteConfirmModal');
+                pendingDeleteElement = null;
+            }
+        }
+    </script>
+</body>
+</html>

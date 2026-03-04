@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VOSS Admin - 出款审核</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: #F5F5F5;
+            min-height: 100vh;
+            padding-bottom: 20px;
+        }
+
+        /* 顶部状态栏 */
+        .status-bar {
+            background: white;
+            padding: 8px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 17px;
+            font-weight: 600;
+        }
+
+        .time {
+            color: #000;
+        }
+
+        .status-icons {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            color: #000;
+            font-size: 16px;
+        }
+
+        /* 头部导航 */
+        .header {
+            background: white;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #F0F0F0;
+        }
+
+        .header-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: #000;
+            flex: 1;
+            text-align: center;
+        }
+
+        .header-icon {
+            width: 24px;
+            height: 24px;
+            font-size: 20px;
+            color: #000;
+            cursor: pointer;
+        }
+
+        /* 主容器 */
+        .container {
+            padding: 20px 16px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* 主卡片 */
+        .main-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            margin-bottom: 20px;
+        }
+
+        /* 金额区域 */
+        .amount-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #F0F0F0;
+        }
+
+        .amount-info {
+            flex: 1;
+        }
+
+        .amount-label {
+            font-size: 15px;
+            color: #666;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .amount-value {
+            font-size: 40px;
+            font-weight: 700;
+            color: #FF3B30;
+            letter-spacing: -1px;
+        }
+
+        .amount-currency {
+            font-size: 20px;
+            color: #FF3B30;
+            font-weight: 600;
+            margin-left: 6px;
+        }
+
+        .coin-logo {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #FFE8E8, #FFD5D5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .coin-logo-text {
+            font-size: 12px;
+            font-weight: 700;
+            color: #FF6B6B;
+            text-align: center;
+        }
+
+        /* 信息列表 */
+        .info-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            font-size: 15px;
+        }
+
+        .info-label {
+            color: #666;
+            font-weight: 500;
+            min-width: 100px;
+            flex-shrink: 0;
+        }
+
+        .info-value {
+            color: #000;
+            font-weight: 500;
+            text-align: right;
+            flex: 1;
+            word-break: break-all;
+        }
+
+        .info-value.highlight {
+            font-weight: 600;
+        }
+
+        /* 地址行特殊样式 */
+        .address-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .address-box {
+            background: #F8F9FA;
+            border: 1px solid #E5E7EB;
+            border-radius: 8px;
+            padding: 10px 12px;
+            flex: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .address-text {
+            font-family: 'SF Mono', 'Monaco', monospace;
+            font-size: 13px;
+            color: #000;
+            word-break: break-all;
+            flex: 1;
+        }
+
+        .copy-btn {
+            background: none;
+            border: none;
+            color: #666;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 4px;
+            flex-shrink: 0;
+        }
+
+        .copy-btn:active {
+            transform: scale(0.9);
+        }
+
+        /* 拒绝理由输入框 */
+        .reject-section {
+            background: white;
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            margin-bottom: 20px;
+        }
+
+        .reject-input {
+            width: 100%;
+            min-height: 80px;
+            border: 1px solid #E5E7EB;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 15px;
+            font-family: inherit;
+            resize: vertical;
+            outline: none;
+        }
+
+        .reject-input::placeholder {
+            color: #999;
+        }
+
+        .reject-input:focus {
+            border-color: #FF3B30;
+        }
+
+        /* 操作按钮 */
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border: none;
+        }
+
+        .btn-approve {
+            background: #34C759;
+            color: white;
+        }
+
+        .btn-approve:active {
+            background: #2DA94B;
+            transform: scale(0.98);
+        }
+
+        .btn-reject {
+            background: white;
+            color: #FF3B30;
+            border: 2px solid #FF3B30;
+        }
+
+        .btn-reject:active {
+            background: #FFF5F5;
+            transform: scale(0.98);
+        }
+
+        /* Toast提示 */
+        .toast {
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 20px;
+            font-size: 15px;
+            font-weight: 500;
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 1000;
+            white-space: nowrap;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 375px) {
+            .amount-value {
+                font-size: 36px;
+            }
+
+            .coin-logo {
+                width: 56px;
+                height: 56px;
+            }
+
+            .info-label {
+                min-width: 80px;
+                font-size: 14px;
+            }
+
+            .info-value {
+                font-size: 14px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            body {
+                background: #E5E5E5;
+            }
+
+            .container {
+                max-width: 500px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .status-bar,
+            .header {
+                max-width: 500px;
+                margin: 0 auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部状态栏 -->
+    <div class="status-bar">
+        <span class="time" id="currentTime">9:50</span>
+        <div class="status-icons">
+            <i class="fas fa-signal"></i>
+            <i class="fas fa-wifi"></i>
+            <i class="fas fa-battery-three-quarters"></i>
+        </div>
+    </div>
+
+    <!-- 头部 -->
+    <div class="header">
+        <div style="width: 24px;"></div>
+        <h1 class="header-title">大额审核</h1>
+        <div class="header-icon">
+            <i class="fas fa-ellipsis-h"></i>
+        </div>
+    </div>
+
+    <!-- 主内容 -->
+    <div class="container">
+        <!-- 主信息卡片 -->
+        <div class="main-card">
+            <!-- 金额显示 -->
+            <div class="amount-section">
+                <div class="amount-info">
+                    <div class="amount-label">出款金额</div>
+                    <div>
+                        <span class="amount-value">-100,000</span>
+                        <span class="amount-currency">USDT</span>
+                    </div>
+                </div>
+                <div class="coin-logo">
+                    <div class="coin-logo-text">TRON</div>
+                </div>
+            </div>
+
+            <!-- 信息列表 -->
+            <div class="info-list">
+                <div class="info-row">
+                    <span class="info-label">订单号:</span>
+                    <span class="info-value highlight">MC17617258661</span>
+                </div>
+
+                <div class="info-row">
+                    <span class="info-label">商户名:</span>
+                    <span class="info-value">测试商户 GJ归集 (1204)</span>
+                </div>
+
+                <div class="info-row">
+                    <span class="info-label">USDT汇率:</span>
+                    <span class="info-value">1 USDT = 7.20 CNY</span>
+                </div>
+
+                <div class="info-row">
+                    <span class="info-label">波币金额:</span>
+                    <span class="info-value">720,000 BOB</span>
+                </div>
+
+                <div class="info-row">
+                    <span class="info-label">收款方式:</span>
+                    <span class="info-value">USDT-TRC20</span>
+                </div>
+
+                <div class="info-row">
+                    <span class="info-label">账户:</span>
+                    <div class="address-box">
+                        <span class="address-text" id="walletAddress">TXt429bbMm9dXuRxHjoc7LQpn3uckG1SuC</span>
+                        <button class="copy-btn" onclick="copyAddress()">
+                            <i class="far fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="info-row">
+                    <span class="info-label">发起时间:</span>
+                    <span class="info-value">2025年10月28日 下午10:55:47</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 拒绝理由 -->
+        <div class="reject-section">
+            <textarea
+                class="reject-input"
+                id="rejectReason"
+                placeholder="拒绝理由（可选）"
+            ></textarea>
+        </div>
+
+        <!-- 操作按钮 -->
+        <div class="action-buttons">
+            <button class="btn btn-approve" onclick="handleApprove()">
+                <i class="fas fa-check-circle"></i>
+                <span>批准</span>
+            </button>
+            <button class="btn btn-reject" onclick="handleReject()">
+                <i class="fas fa-times-circle"></i>
+                <span>拒绝</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Toast提示 -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // 更新时间
+        function updateTime() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('currentTime').textContent = `${hours}:${minutes}`;
+        }
+        updateTime();
+        setInterval(updateTime, 60000);
+
+        // 显示Toast
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        // 复制地址
+        function copyAddress() {
+            const address = document.getElementById('walletAddress').textContent;
+
+            // 使用现代API
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(address).then(() => {
+                    showToast('地址已复制');
+                });
+            } else {
+                // 降级方案
+                const tempInput = document.createElement('input');
+                tempInput.value = address;
+                document.body.appendChild(tempInput);
+                tempInput.select();
+                document.execCommand('copy');
+                document.body.removeChild(tempInput);
+                showToast('地址已复制');
+            }
+        }
+
+        // 批准
+        function handleApprove() {
+            showToast('出款已批准');
+            // 这里添加实际的API调用
+            console.log('批准出款');
+        }
+
+        // 拒绝
+        function handleReject() {
+            const reason = document.getElementById('rejectReason').value;
+            if (reason.trim() === '') {
+                showToast('请输入拒绝理由');
+                return;
+            }
+            showToast('出款已拒绝');
+            // 这里添加实际的API调用
+            console.log('拒绝出款:', reason);
+        }
+    </script>
+</body>
+</html>

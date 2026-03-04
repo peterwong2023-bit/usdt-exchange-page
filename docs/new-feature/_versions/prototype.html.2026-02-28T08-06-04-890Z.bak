@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Sticky - Market便签原型</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --primary: #2563eb;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --glass-bg: rgba(15, 23, 42, 0.85);
+            --glass-border: rgba(148, 163, 184, 0.15);
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+        }
+
+        body {
+            font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0a0e1a 0%, #1a1d29 25%, #2d3748 75%, #0a0e1a 100%);
+            height: 100vh;
+            overflow: hidden;
+            color: var(--text-primary);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* 菜单栏 */
+        .menubar {
+            height: 32px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .menu-item {
+            padding: 6px 14px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            color: var(--text-secondary);
+        }
+
+        .menu-item:hover {
+            background: rgba(255,255,255,0.08);
+            color: var(--text-primary);
+        }
+
+        .menu-item.active {
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+        }
+
+        /* 桌面工作区 */
+        .desktop {
+            position: absolute;
+            top: 32px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+
+        /* 便签窗口通用样式 */
+        .sticky-window {
+            position: absolute;
+            background: var(--glass-bg);
+            backdrop-filter: blur(24px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: default;
+            display: flex;
+            flex-direction: column;
+            min-width: 220px;
+            min-height: 140px;
+        }
+
+        .sticky-window:hover {
+            box-shadow: 0 32px 64px -12px rgba(0, 0, 0, 0.35);
+            transform: translateY(-1px);
+        }
+
+        .sticky-window.alert {
+            border-color: var(--danger);
+            box-shadow: 0 25px 50px -12px rgba(239, 68, 68, 0.4);
+        }
+
+        .sticky-window.dragging {
+            z-index: 1000;
+            transform: rotate(2deg) scale(1.02);
+        }
+
+        .sticky-window.resizing {
+            transition: none;
+        }
+
+        /* 缩放手柄 */
+        .resize-handle {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 20px;
+            height: 20px;
+            cursor: nw-resize;
+            background: linear-gradient(-45deg, transparent 0%, transparent 40%, rgba(255,255,255,0.1) 40%, rgba(255,255,255,0.1) 60%, transparent 60%);
+        }
+
+        .resize-handle:hover {
+            background: linear-gradient(-45deg, transparent 0%, transparent 35%, rgba(255,255,255,0.2) 35%, rgba(255,255,255,0.2) 65%, transparent 65%);
+        }
+
+        /* 便签头部 */
+        .sticky-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 18px;
+            background: rgba(51, 65, 85, 0.3);
+            border-bottom: 1px solid var(--glass-border);
+            cursor: grab;
+            user-select: none;
+            height: 48px;
+            flex-shrink: 0;
+        }
+
+        .sticky-header:active {
+            cursor: grabbing;
+        }
+
+        .traffic-lights {
+            display: flex;
+            gap: 8px;
+        }
+
+        .traffic-light {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .traffic-light:hover {
+            transform: scale(1.1);
+        }
+
+        .traffic-light.close { background: #ff5f57; }
+        .traffic-light.minimize { background: #ffbd2e; }
+        .traffic-light.maximize { background: #28ca42; }
+
+        .sticky-title-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+            justify-content: center;
+        }
+
+        .sticky-type-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .sticky-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .sticky-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .sticky-action-btn {
+            width: 28px;
+            height: 28px;
+            border: none;
+            background: rgba(255,255,255,0.08);
+            color: rgba(255,255,255,0.7);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sticky-action-btn:hover {
+            background: rgba(255,255,255,0.15);
+            color: #fff;
+            transform: scale(1.05);
+        }
+
+        /* 便签内容区 */
+        .sticky-body {
+            padding: 20px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        /* 便签底部 */
+        .sticky-footer {
+            padding: 10px 18px;
+            background: rgba(0,0,0,0.15);
+            border-top: 1px solid rgba(255,255,255,0.08);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 12px;
+            color: rgba(255,255,255,0.7);
+            height: 36px;
+            flex-shrink: 0;
+        }
+
+        .footer-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .health-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+        }
+
+        .health-indicator.error { 
+            background: var(--danger); 
+            box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+        }
+
+        .footer-action-btn {
+            background: none;
+            border: none;
+            color: var(--primary);
+            font-size: 11px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+
+        .footer-action-btn:hover {
+            background: rgba(37, 99, 235, 0.2);
+        }
+
+        /* Market便签样式 - 多币种列表 */
+        .market-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .market-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 12px;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            align-items: center;
+        }
+
+        .market-row:hover {
+            background: rgba(255,255,255,0.05);
+            border-radius: 6px;
+            padding: 8px 8px;
+            margin: 0 -8px;
+        }
+
+        .market-row:last-child {
+            border-bottom: none;
+        }
+
+        .market-pair {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .market-price {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            text-align: right;
+        }
+
+        .market-change {
+            font-size: 12px;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+            text-align: right;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .market-change.up { 
+            color: var(--success); 
+            background: rgba(16, 185, 129, 0.1);
+        }
+        
+        .market-change.down { 
+            color: var(--danger); 
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .market-change-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 6px;
+        }
+
+        .market-change-amount {
+            font-size: 16px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .market-change-pct {
+            font-size: 16px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .market-change-amount.up, .market-change-pct.up { color: var(--success); }
+        .market-change-amount.down, .market-change-pct.down { color: var(--danger); }
+
+        .market-change-simple {
+            font-size: 18px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            margin-top: 4px;
+        }
+
+        .market-change-simple.up { color: var(--success); }
+        .market-change-simple.down { color: var(--danger); }
+
+        .market-source {
+            font-size: 11px;
+            color: rgba(255,255,255,0.5);
+            font-weight: 500;
+            margin-top: 8px;
+        }
+
+        .market-high-low {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin: 16px 0;
+        }
+
+        .market-hl-item {
+            text-align: center;
+        }
+
+        .market-hl-label {
+            font-size: 11px;
+            color: rgba(255,255,255,0.6);
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .market-hl-value {
+            font-size: 15px;
+            font-weight: 700;
+            color: #fff;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Sparkline 样式 - 趋势为辅 */
+        .sparkline-container {
+            position: relative;
+            margin-top: 16px;
+            height: 50px;
+        }
+
+        .sparkline-label {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            font-size: 9px;
+            color: rgba(255,255,255,0.4);
+            font-weight: 500;
+            background: rgba(0,0,0,0.2);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .sparkline-chart {
+            width: 100%;
+            height: 40px;
+            opacity: 0.3;
+            stroke: rgba(16, 185, 129, 0.8);
+            stroke-width: 1px;
+            fill: none;
+        }
+
+        .sparkline-container-xl {
+            position: relative;
+            margin-top: 20px;
+            height: 80px;
+        }
+
+        .sparkline-label-xl {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            font-size: 10px;
+            color: rgba(255,255,255,0.4);
+            font-weight: 500;
+            background: rgba(0,0,0,0.3);
+            padding: 3px 8px;
+            border-radius: 6px;
+        }
+
+        .sparkline-chart-xl {
+            width: 100%;
+            height: 60px;
+            opacity: 0.3;
+            stroke: rgba(16, 185, 129, 0.8);
+            stroke-width: 1px;
+            fill: none;
+        }
+
+        /* 更多菜单 */
+        .more-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            width: 180px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(30px);
+            border-radius: 10px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            padding: 8px;
+            z-index: 150;
+            display: none;
+        }
+
+        .more-menu.show {
+            display: block;
+        }
+
+        .more-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 13px;
+            color: rgba(255,255,255,0.9);
+        }
+
+        .more-menu-item:hover {
+            background: rgba(255,255,255,0.08);
+        }
+
+        .more-menu-item i {
+            width: 16px;
+            text-align: center;
+            color: var(--primary);
+        }
+
+        .checkmark {
+            margin-left: auto;
+            color: var(--success);
+            font-size: 12px;
+        }
+
+        /* 告警角标 */
+        .alert-badge {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: var(--danger);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 10px;
+            animation: alertPulse 1.5s infinite;
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+        }
+
+        @keyframes alertPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* 失败态样式 */
+        .market-offline .market-price-main,
+        .market-offline .market-change-amount,
+        .market-offline .market-change-pct,
+        .market-offline .market-hl-value {
+            color: rgba(255,255,255,0.4);
+        }
+
+        .market-offline .sparkline-chart,
+        .market-offline .sparkline-chart-xl {
+            opacity: 0.1;
+            stroke-dasharray: 3,3;
+        }
+
+        .market-key-missing .sparkline-chart,
+        .market-key-missing .sparkline-chart-xl {
+            display: none;
+        }
+
+        /* 档位特殊样式 */
+        #market-s .market-price-main { font-size: 36px; }
+        #market-s .sticky-body { padding: 16px; }
+        #market-xl .market-price-main { font-size: 48px; }
+
+        /* 其他便签样式 */
+        .note-content {
+            width: 100%;
+            height: 120px;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-size: 14px;
+            line-height: 1.5;
+            resize: none;
+            outline: none;
+        }
+
+        .note-content::placeholder {
+            color: rgba(255,255,255,0.4);
+        }
+
+        .weather-temp {
+            font-size: 48px;
+            font-weight: 800;
+            color: #fff;
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+
+        .weather-desc {
+            font-size: 16px;
+            color: rgba(255,255,255,0.8);
+            margin-bottom: 12px;
+        }
+
+        .weather-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            font-size: 13px;
+        }
+
+        .traffic-eta {
+            font-size: 36px;
+            font-weight: 800;
+            color: var(--warning);
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+
+        .traffic-route {
+            font-size: 14px;
+            color: rgba(255,255,255,0.8);
+            margin-bottom: 12px;
+        }
+
+        .traffic-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+        }
+
+        .traffic-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--warning);
+        }
+    </style>
+</head>
+<body>
+    <!-- 菜单栏 -->
+    <div class="menubar">
+        <div class="menu-item active">AI Sticky</div>
+        <div class="menu-item">文件</div>
+        <div class="menu-item">编辑</div>
+        <div class="menu-item">视图</div>
+        <div class="menu-item">窗口</div>
+        <div class="menu-item">帮助</div>
+    </div>
+
+    <!-- 桌面工作区 -->
+    <div class="desktop" id="desktop">
+        <!-- Market-S 最小档 -->
+        <div class="sticky-window" id="market-s" style="left: 60px; top: 60px; width: 240px; height: 160px;">
+            <div class="sticky-header" onmousedown="startDrag(event, 'market-s')">
+                <div class="traffic-lights">
+                    <div class="traffic-light close" onclick="closeSticky('market-s')"></div>
+                    <div class="traffic-light minimize"></div>
+                    <div class="traffic-light maximize"></div>
+                </div>
+                <div class="sticky-title-area">
+                    <div class="sticky-type-icon" style="background: var(--warning);">
+                        <i class="fab fa-bitcoin"></i>
+                    </div>
+                    <div class="sticky-title">BTC</div>
+                </div>
+                <div class="sticky-actions">
+                    <button class="sticky-action-btn" onclick="refreshSticky('market-s')">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <div style="position: relative;">
+                        <button class="sticky-action-btn" onclick="toggleMoreMenu(this)">
+                            <i class="fas fa-ellipsis"></i>
+                        </button>
+                        <div class="more-menu" id="market-s-more-menu">
+                            <div class="more-menu-item" onclick="resizeToS()">
+                                <i class="fas fa-check"></i>
+                                尺寸：S
+                            </div>
+                            <div class="more-menu-item" onclick="resizeToM()">
+                                <i class="fas fa-expand"></i>
+                                尺寸：M
+                            </div>
+                            <div class="more-menu-item" onclick="resizeToL()">
+                                <i class="fas fa-expand"></i>
+                                尺寸：L
+                            </div>
+                            <div class="more-menu-item" onclick="resizeToXL()">
+                                <i class="fas fa-expand-arrows-alt"></i>
+                                尺寸：XL
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="sticky-body">
+                <div class="market-list">
+                    <div class="market-row" onclick="clickMarketRow('BTC/USDT', 'market-s')">
+                        <span class="market-pair">BTC/USDT</span>
+                        <span class="market-price">$43,267</span>
+                        <span class="market-change up">+2.40%</span>
+                    </div>
+                    <div class="market-row" onclick="clickMarketRow('ETH/USDT', 'market-s')">
+                        <span class="market-pair">ETH/USDT</span>
+                        <span class="market-price">$2,456</span>
+                        <span class="market-change down">-1.23%</span>
+                    </div>
+                </div>
+            </div>
+            <div class="sticky-footer">
+                <span>2分钟前</span>
+                <div class="footer-status">
+                    <div class="health-indicator"></div>
+                    <span>正常</span>
+                </div>
+            </div>
+            <div class="resize-handle" onmousedown="startResize(event, 'market-s')"></div>
+        </div>
+
+        <!-- Market-M 标准档 -->
+        <div class="sticky-window alert" id="market-m" style="left: 320px; top: 60px; width: 320px; height: 220px;">
+            <div class="alert-badge">!</div>
+            <div class="sticky-header" onmousedown="startDrag(event, 'market-m')">
+                <div class="traffic-lights">
+                    <div class="traffic-light close" onclick="closeSticky('market-m')"></div>
+                    <div class="traffic-light minimize"></div>
+                    <div class="traffic-light maximize"></div>
+                </div>
+                <div class="sticky-title-area">
+                    <div class="sticky-type-icon" style="background: var(--warning);">
+                        <i class="fab fa-bitcoin"></i>
+                    </div>
+                    <div class="sticky-title">BTC/USDT</div>
+                </div>
+                <div class="sticky-actions">
+                    <button class="sticky-action-btn" onclick="refreshSticky('market-m')">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <button class="sticky-action-btn" onclick="openSettings('market-m')">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                    <div style="position: relative;">
+                        <button class="sticky-action-btn" onclick="toggleMoreMenu(this)">
+                            <i class="fas fa-ellipsis"></i>
+                        </button>
+                        <div class="more-menu" id="market-m-more-menu">
+                            <div class="more-menu-item" onclick="resizeToS()">
+                                <i class="fas fa-compress"></i>
+                                尺寸：S
+                            </div>
+                            <div class="more-menu-item" onclick="resizeToM()">
+                                <i class="fas fa-check"></i>
+                                尺寸：M
+                            </div>
+                            <div class="more-menu-item" onclick="resizeToL()">
+                                <i class="fas fa-expand"></i>
+                                尺寸：L
+                            </div>
+                            <div class="more-menu-item" onclick="resizeToXL()">
+                                <i class="fas fa-expand-arrows-alt"></i>
+                                尺寸：XL
+                            </div>
+                            <div style="height: 1px; background: rgba(255,255,255,0.08); margin: 6px 0;"></div>
+                            <div class="more-menu-item" onclick="togglePin('market-m')">
+                                <i class="fas fa-thumbtack"></i>
+                                置顶
+                                <span class="checkmark" id="market-m-pin-check" style="display: none;">✓</span>
+                            </div>
+                            <div class="more-menu-item" onclick="toggleLock('market-m')">
+                                <i class="fas fa-lock"></i>
+                                锁定位置
+                                <span class="checkmark" id="market-m-lock-check" style="display: none;">✓</span>
+                            </div>
+                            <div class="more-menu-item" onclick="copySticky('market-m')">
+                                <i class="fas fa-copy"></i>
+                                复制便签
+                            </div>
+                            <div class="more-menu-item" onclick="closeSticky('market-m')">
+                                <i class="fas fa-times"></i>
+                                关闭
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="sticky-body">
+                <div class="market-price-main">$43,267.50</div>
+                <div class="market-change-row">
+                    <span class="market-change-amount up">+$1,012.34</span>
+                    <span class="market-change-pct up">+2.40%</span>
+                </div>
+                <div class="market-source">Binance · 实时</div>
+            </div>
+            <div class="sticky-footer">
+                <span>最后更新：2 分钟前</span>
+                <div class="footer-status">
+                    <div class="health-indicator error"></div>
+                    <span>Key失效</span>
+                    <button class="footer-action-btn" onclick="fixKey('market-m')">修复Key</button>
+                </div>
+            </div>
+            <div class="resize-handle" onmousedown="startResize(event, 'market-m')"></div>
+        </div>
+
+        <!-- Market-L 带Sparkline -->
+        <div class="sticky-window" id="market-l" style="left: 660px; top: 60px; width: 420px; height: 300px;">
+            <div class="sticky-header" onmousedown="startDrag(event, 'market-l')">
+                <div class="traffic-lights">
+                    <div class="traffic-light close" onclick="closeSticky('market-l')"></div>
+                    <div class="traffic-light minimize"></div>
+                    <div class="traffic-light maximize"></div>
+                </div>
+                <div class="sticky-title-area">
+                    <div class="sticky-type-icon" style="background: var(--warning);">
+                        <i class="fab fa-bitcoin"></i>
+                    </div>
+                    <div class="sticky-title">BTC/USDT</div>
+                </div>
+                <div class="sticky-actions">
+                    <button class="sticky-action-btn" onclick="refreshSticky('market-l')">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <button class="sticky-action-btn" onclick="openSettings('market-l')">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                    <div style="position: relative;">
+                        <button class="sticky-action-btn" onclick="toggleMoreMenu(this)">
+                            <i class="fas fa-ellipsis"></i>
+                        </button>
+                        <div class="more-menu" id="market-l-more-menu">
+                            <div class="more-menu-item" onclick="resizeToS()">
+                                <i class="fas fa-compress"></i>
+                                尺寸：S
+                            </div>
+                            <div class="more-menu-item" onclick="resizeToM()">
+                                <i class="fas fa-compress"></i>
+                                尺寸：M
+                            </div>
+                            <div class="more-menu-item" onclick="resizeToL()">
+                                <i class="fas fa-check"></i>
+                                尺寸：L
+                            </div>
+                            <div class="more-menu-item" onclick="resizeToXL()">
+                                <i class="fas fa-expand"></i>
+                                尺寸：XL
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="sticky-body">
+                <div class="market-price-main">$43,267.50</div>
+                <div class="market-change-row">
+                    <span class="market-change-amount up">+$1,012.34</span>
+                    <span class="market-change-pct up">+2.40%</span>
+                </div>
+                <div class="market-high-low">
+                    <div class="market-hl-item">
+                        <div class="market-hl-label">24h 高</div>
+                        <div class="market-hl-value">$44,120.00</div>
+                    </div>
+                    <div class="market-hl-item">
+                        <div class="market-hl-label">24h 低</div>
+                        <div class="market-hl-value">$42,890.50</div>
+                    </div>
+                </div>
+                <!-- L档位也是纯数值列表，不画趋势图 -->
+            </div>
+            <div class="sticky-footer">
+                <span>最后更新：1 分钟前</span>
+                <div class="footer-status">
+                    <div class="health-indicator"></div>
+                    <span>正常</span>
+                </div>
+            </div>
+            <div class="resize-handle" onmousedown="startResize(event, 'market-l')"></div>
+        </div>
+
+        <!-- Market-XL 最大档 -->
+        <div class="sticky-window" id="market-xl" style="left: 60px; top: 240px; width: 560px; height: 380px;">
+            <div class="sticky-header" onmousedown="startDrag(event, 'market-xl')">
+                <div class="traffic-lights">
+                    <div class="traffic-light close" onclick="closeSticky('market-xl')"></div>
+                    <div class="traffic-light minimize"></div>
+                    <div class="traffic-light maximize"></div>
+                </div>
+                <div class="sticky-title-area">
+                    <div class="sticky-type-icon" style="background: var(--warning);">
+                        <i class="fab fa-bitcoin"></i>
+                    </div>
+                    <div class="sticky-title">BTC/USDT</div>
+                </div>
+                <div class="sticky-actions">
+                    <button class="sticky-action-btn" onclick="refreshSticky('market-xl')">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <button class="sticky-action-btn" onclick="openSettings('market-xl')">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                    <div style="position: relative;">
+                        <button class="sticky-action-btn" onclick="toggleMoreMenu(this)">
+                            <i class="fas fa-ellipsis"></i>
+                        </button>
+                        <div class="more-menu" id="market-xl-more-menu">
+                            <div class="more-menu-item" onclick="resizeToS()">
+                                <i class="fas fa-compress"></i>
+                                尺寸：S
+                            </div>
+                            <div class="more-menu-item" onclick="resizeToM()">
+                                <i class="fas fa-compress"></i>
+                                尺寸：M
+                            </div>
+                            <div class="more-menu-item" onclick="resizeToL()">
+                                <i class="fas fa-compress"></i>
+                                尺寸：L
+                            </div>
+                            <div class="more-menu-item" onclick="resizeToXL()">
+                                <i class="fas fa-check"></i>
+                                尺寸：XL
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="sticky-body">
+                <div class="market-price-main">$43,267.50</div>
+                <div class="market-change-row">
+                    <span class="market-change-amount up">+$1,012.34</span>
+                    <span class="market-change-pct up">+2.40%</span>
+                </div>
+                <div class="market-high-low">
+                    <div class="market-hl-item">
+                        <div class="market-hl-label">24h 高</div>
+                        <div class="market-hl-value">$44,120.00</div>
+                    </div>
+                    <div class="market-hl-item">
+                        <div class="market-hl-label">24h 低</div>
+                        <div class="market-hl-value">$42,890.50</div>
+                    </div>
+                </div>
+                <div class="sparkline-container-xl">
+                    <div class="sparkline-label-xl">60m</div>
+                    <svg class="sparkline-chart-xl" viewBox="0 0 100 30">
+                        <path d="M0,20 Q10,18 20,15 T40,12 T60,8 T80,14 T100,10" />
+                    </svg>
+                </div>
+                <div class="market-source">Binance · 实时</div>
+            </div>
+            <div class="sticky-footer">
+                <span>最后更新：1 分钟前</span>
+                <div class="footer-status">
+                    <div class="health-indicator"></div>
+                    <span>正常</span>
+                </div>
+            </div>
+            <div class="resize-handle" onmousedown="startResize(event, 'market-xl')"></div>
+        </div>
+
+        <!-- 天气便签 -->
+        <div class="sticky-window" id="weather-sticky" style="left: 640px; top: 380px; width: 280px; height: 240px;">
+            <div class="sticky-header" onmousedown="startDrag(event, 'weather-sticky')">
+                <div class="traffic-lights">
+                    <div class="traffic-light close" onclick="closeSticky('weather-sticky')"></div>
+                    <div class="traffic-light minimize"></div>
+                    <div class="traffic-light maximize"></div>
+                </div>
+                <div class="sticky-title-area">
+                    <div class="sticky-type-icon" style="background: var(--primary);">
+                        <i class="fas fa-cloud-sun"></i>
+                    </div>
+                    <div class="sticky-title">北京天气</div>
+                </div>
+                <div class="sticky-actions">
+                    <button class="sticky-action-btn" onclick="refreshSticky('weather-sticky')">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <button class="sticky-action-btn" onclick="openSettings('weather-sticky')">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                    <div style="position: relative;">
+                        <button class="sticky-action-btn" onclick="toggleMoreMenu(this)">
+                            <i class="fas fa-ellipsis"></i>
+                        </button>
+                        <div class="more-menu" id="weather-more-menu">
+                            <div class="more-menu-item" onclick="togglePin('weather-sticky')">
+                                <i class="fas fa-thumbtack"></i>
+                                置顶
+                            </div>
+                            <div class="more-menu-item" onclick="toggleLock('weather-sticky')">
+                                <i class="fas fa-lock"></i>
+                                锁定位置
+                            </div>
+                            <div class="more-menu-item" onclick="copySticky('weather-sticky')">
+                                <i class="fas fa-copy"></i>
+                                复制便签
+                            </div>
+                            <div class="more-menu-item" onclick="closeSticky('weather-sticky')">
+                                <i class="fas fa-times"></i>
+                                关闭
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="sticky-body">
+                <div class="weather-temp">22°C</div>
+                <div class="weather-desc">多云转晴</div>
+                <div class="weather-details">
+                    <div>湿度: 65%</div>
+                    <div>风速: 12 km/h</div>
+                    <div>降雨: 10%</div>
+                    <div>紫外线: 中等</div>
+                </div>
+            </div>
+            <div class="sticky-footer">
+                <span>最后更新：5 分钟前</span>
+                <div class="footer-status">
+                    <div class="health-indicator"></div>
+                    <span>正常</span>
+                </div>
+            </div>
+            <div class="resize-handle" onmousedown="startResize(event, 'weather-sticky')"></div>
+        </div>
+
+        <!-- 记事便签 -->
+        <div class="sticky-window" id="note-sticky" style="left: 940px; top: 200px; width: 280px; height: 200px;">
+            <div class="sticky-header" onmousedown="startDrag(event, 'note-sticky')">
+                <div class="traffic-lights">
+                    <div class="traffic-light close" onclick="closeSticky('note-sticky')"></div>
+                    <div class="traffic-light minimize"></div>
+                    <div class="traffic-light maximize"></div>
+                </div>
+                <div class="sticky-title-area">
+                    <div class="sticky-type-icon" style="background: #8b5cf6;">
+                        <i class="fas fa-sticky-note"></i>
+                    </div>
+                    <div class="sticky-title">会议记录</div>
+                </div>
+                <div class="sticky-actions">
+                    <button class="sticky-action-btn" onclick="aiOrganize('note-sticky')">
+                        <i class="fas fa-magic"></i>
+                    </button>
+                    <button class="sticky-action-btn" onclick="openSettings('note-sticky')">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                    <div style="position: relative;">
+                        <button class="sticky-action-btn" onclick="toggleMoreMenu(this)">
+                            <i class="fas fa-ellipsis"></i>
+                        </button>
+                        <div class="more-menu" id="note-more-menu">
+                            <div class="more-menu-item" onclick="togglePin('note-sticky')">
+                                <i class="fas fa-thumbtack"></i>
+                                置顶
+                            </div>
+                            <div class="more-menu-item" onclick="toggleLock('note-sticky')">
+                                <i class="fas fa-lock"></i>
+                                锁定位置
+                            </div>
+                            <div class="more-menu-item" onclick="copySticky('note-sticky')">
+                                <i class="fas fa-copy"></i>
+                                复制便签
+                            </div>
+                            <div class="more-menu-item" onclick="closeSticky('note-sticky')">
+                                <i class="fas fa-times"></i>
+                                关闭
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="sticky-body">
+                <textarea class="note-content" placeholder="输入会议记录...">Market便签四档位确认：
+S档：仅价格+涨跌
+M档：价格+涨跌+来源
+L档：增加高低+趋势线
+XL档：更大趋势线显示</textarea>
+            </div>
+            <div class="sticky-footer">
+                <span>最后编辑：刚刚</span>
+                <div class="footer-status">
+                    <div class="health-indicator"></div>
+                    <span>已保存</span>
+                </div>
+            </div>
+            <div class="resize-handle" onmousedown="startResize(event, 'note-sticky')"></div>
+        </div>
+    </div>
+
+    <script>
+        // 全局变量
+        let isDragging = false;
+        let isResizing = false;
+        let dragElement = null;
+        let resizeElement = null;
+        let dragOffset = { x: 0, y: 0 };
+        let resizeStart = { x: 0, y: 0, width: 0, height: 0 };
+
+        // 拖拽功能
+        function startDrag(e, id) {
+            if (e.target.closest('.sticky-actions') || e.target.closest('.traffic-lights')) {
+                return;
+            }
+            
+            isDragging = true;
+            dragElement = document.getElementById(id);
+            
+            const rect = dragElement.getBoundingClientRect();
+            dragOffset.x = e.clientX - rect.left;
+            dragOffset.y = e.clientY - rect.top;
+            
+            dragElement.classList.add('dragging');
+            focusSticky(dragElement);
+            
+            e.preventDefault();
+        }
+
+        // 缩放功能
+        function startResize(e, id) {
+            e.stopPropagation();
+            isResizing = true;
+            resizeElement = document.getElementById(id);
+            
+            const rect = resizeElement.getBoundingClientRect();
+            resizeStart.x = e.clientX;
+            resizeStart.y = e.clientY;
+            resizeStart.width = rect.width;
+            resizeStart.height = rect.height;
+            
+            resizeElement.classList.add('resizing');
+            
+            e.preventDefault();
+        }
+
+        // 鼠标移动事件
+        document.addEventListener('mousemove', function(e) {
+            if (isDragging && dragElement) {
+                const newX = e.clientX - dragOffset.x;
+                const newY = e.clientY - dragOffset.y;
+                
+                dragElement.style.left = Math.max(0, newX) + 'px';
+                dragElement.style.top = Math.max(32, newY) + 'px';
+            }
+            
+            if (isResizing && resizeElement) {
+                const deltaX = e.clientX - resizeStart.x;
+                const deltaY = e.clientY - resizeStart.y;
+                
+                const newWidth = Math.max(220, resizeStart.width + deltaX);
+                const newHeight = Math.max(140, resizeStart.height + deltaY);
+                
+                resizeElement.style.width = newWidth + 'px';
+                resizeElement.style.height = newHeight + 'px';
+            }
+        });
+
+        // 鼠标释放事件
+        document.addEventListener('mouseup', function() {
+            if (isDragging && dragElement) {
+                dragElement.classList.remove('dragging');
+                isDragging = false;
+                dragElement = null;
+            }
+            
+            if (isResizing && resizeElement) {
+                resizeElement.classList.remove('resizing');
+                isResizing = false;
+                resizeElement = null;
+            }
+        });
+
+        // 便签聚焦
+        function focusSticky(element) {
+            document.querySelectorAll('.sticky-window').forEach(sticky => {
+                sticky.style.zIndex = '1';
+            });
+            element.style.zIndex = '100';
+        }
+
+        // 更多菜单切换
+        function toggleMoreMenu(button) {
+            const menu = button.nextElementSibling;
+            const isShow = menu.classList.contains('show');
+            
+            // 关闭所有菜单
+            document.querySelectorAll('.more-menu').forEach(m => m.classList.remove('show'));
+            
+            if (!isShow) {
+                menu.classList.add('show');
+            }
+        }
+
+        // 关闭菜单
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.sticky-action-btn')) {
+                document.querySelectorAll('.more-menu').forEach(menu => {
+                    menu.classList.remove('show');
+                });
+            }
+        });
+
+        // 便签操作函数
+        function closeSticky(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+
+        function refreshSticky(id) {
+            console.log('刷新便签:', id);
+        }
+
+        function openSettings(id) {
+            console.log('打开设置:', id);
+        }
+
+        function togglePin(id) {
+            const checkmark = document.getElementById(id + '-pin-check');
+            if (checkmark) {
+                checkmark.style.display = checkmark.style.display === 'none' ? 'inline' : 'none';
+            }
+        }
+
+        function toggleLock(id) {
+            const checkmark = document.getElementById(id + '-lock-check');
+            if (checkmark) {
+                checkmark.style.display = checkmark.style.display === 'none' ? 'inline' : 'none';
+            }
+        }
+
+        function copySticky(id) {
+            console.log('复制便签:', id);
+        }
+
+        function fixKey(id) {
+            console.log('修复Key:', id);
+        }
+
+        function aiOrganize(id) {
+            console.log('AI整理:', id);
+        }
+
+        // 尺寸切换函数
+        function resizeToS() {
+            console.log('切换到S尺寸');
+        }
+
+        function resizeToM() {
+            console.log('切换到M尺寸');
+        }
+
+        function resizeToL() {
+            console.log('切换到L尺寸');
+        }
+
+        function resizeToXL() {
+            console.log('切换到XL尺寸');
+        }
+
+        // 点击便签聚焦
+        document.addEventListener('click', function(e) {
+            const sticky = e.target.closest('.sticky-window');
+            if (sticky) {
+                focusSticky(sticky);
+            }
+        });
+    </script>
+</body>
+</html>

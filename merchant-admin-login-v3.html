@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>商户管理后台 - 科技版</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config({
+      theme: {
+        extend: {
+          colors: {
+            primary: '#0F172A',
+            accent: '#22d3ee', // Neon Cyan
+            cta: '#0891b2',
+            glass: 'rgba(255, 255, 255, 0.05)',
+            'glass-border': 'rgba(255, 255, 255, 0.15)',
+          },
+          fontFamily: {
+            heading: ['Orbitron', 'sans-serif'],
+            body: ['Exo 2', 'sans-serif'],
+          },
+          animation: {
+            'glow-pulse': 'glow 4s ease-in-out infinite',
+            'float': 'float 6s ease-in-out infinite',
+            'scan': 'scan 8s linear infinite',
+          },
+          keyframes: {
+            glow: {
+              '0%, 100%': { opacity: 0.3, transform: 'scale(1)' },
+              '50%': { opacity: 0.6, transform: 'scale(1.1)' },
+            },
+            float: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-20px)' },
+            },
+            scan: {
+              '0%': { transform: 'translateY(-100%)' },
+              '100%': { transform: 'translateY(100%)' },
+            }
+          }
+        },
+      },
+    });
+  </script>
+  <style>
+    /* 回退与基础样式 */
+    body { background-color: #020617; color: #fff; margin: 0; font-family: 'Exo 2', sans-serif; overflow: hidden; }
+    
+    .bg-video {
+      position: fixed;
+      right: 0;
+      bottom: 0;
+      min-width: 100%;
+      min-height: 100%;
+      z-index: -1;
+      object-fit: cover;
+      filter: brightness(0.4) contrast(1.2);
+    }
+
+    .cyber-grid {
+      background-image: linear-gradient(to right, rgba(34, 211, 238, 0.05) 1px, transparent 1px),
+                        linear-gradient(to bottom, rgba(34, 211, 238, 0.05) 1px, transparent 1px);
+      background-size: 50px 50px;
+    }
+
+    .glow-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      z-index: 0;
+    }
+
+    .glass-card {
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(34, 211, 238, 0.2);
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+      position: relative;
+    }
+
+    /* 科技感边框角落 */
+    .glass-card::before, .glass-card::after,
+    .card-corner::before, .card-corner::after {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      border: 2px solid #22d3ee;
+      z-index: 2;
+    }
+    .glass-card::before { top: -1px; left: -1px; border-right: none; border-bottom: none; }
+    .glass-card::after { top: -1px; right: -1px; border-left: none; border-bottom: none; }
+    .card-corner::before { bottom: -1px; left: -1px; border-right: none; border-top: none; }
+    .card-corner::after { bottom: -1px; right: -1px; border-left: none; border-top: none; }
+
+    .input-cyber {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .input-cyber:focus {
+      border-color: #22d3ee;
+      box-shadow: 0 0 15px rgba(34, 211, 238, 0.2);
+      background: rgba(34, 211, 238, 0.05);
+      outline: none;
+    }
+
+    .btn-cyber {
+      background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%);
+      box-shadow: 0 4px 15px rgba(8, 145, 178, 0.3);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-cyber::after {
+      content: '';
+      position: absolute;
+      top: -50%; left: -50%; width: 200%; height: 200%;
+      background: linear-gradient(transparent, rgba(255,255,255,0.1), transparent);
+      transform: rotate(45deg);
+      transition: 0.5s;
+      opacity: 0;
+    }
+    .btn-cyber:hover::after { opacity: 1; left: 100%; top: 100%; }
+    .btn-cyber:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(8, 145, 178, 0.5); }
+
+    @media (prefers-reduced-motion: reduce) {
+      .animate-float, .animate-glow-pulse, .animate-scan { animation: none !important; }
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-[#020617] flex items-center justify-center p-4">
+  <!-- Interactive Canvas Background -->
+  <canvas id="canvas" class="fixed inset-0 z-0"></canvas>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    const particleCount = 80;
+    
+    function init() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      particles = [];
+      for (let i = 0; i < particleCount; i++) {
+        particles.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          vx: (Math.random() - 0.5) * 0.5,
+          vy: (Math.random() - 0.5) * 0.5,
+          size: Math.random() * 2
+        });
+      }
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      ctx.beginPath();
+      for (let i = 0; i < particleCount; i++) {
+        let p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        
+        if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+        if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+        
+        ctx.fillStyle = 'rgba(34, 211, 238, 0.5)';
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+        
+        for (let j = i + 1; j < particleCount; j++) {
+          let p2 = particles[j];
+          let dist = Math.hypot(p.x - p2.x, p.y - p2.y);
+          if (dist < 150) {
+            ctx.strokeStyle = `rgba(34, 211, 238, ${0.15 * (1 - dist / 150)})`;
+            ctx.lineWidth = 0.5;
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.stroke();
+          }
+        }
+      }
+      requestAnimationFrame(animate);
+    }
+
+    window.addEventListener('resize', init);
+    init();
+    animate();
+  </script>
+
+  <!-- Immersive Background -->
+  <div class="fixed inset-0 cyber-grid" aria-hidden="true"></div>
+  <div class="fixed inset-0 bg-gradient-to-b from-transparent via-[#020617]/50 to-[#020617]" aria-hidden="true"></div>
+  
+  <!-- HUD Scanline -->
+  <div class="fixed inset-0 pointer-events-none z-10 overflow-hidden">
+    <div class="w-full h-[2px] bg-accent/10 animate-scan"></div>
+  </div>
+
+  <main class="relative z-20 w-full max-w-md animate-float">
+    <div class="glass-card rounded-lg p-10 md:p-12">
+      <div class="card-corner"></div> <!-- For bottom corners -->
+
+      <!-- Header -->
+      <header class="text-center mb-10">
+        <div class="relative inline-block mb-6">
+          <!-- Blockchain Cube + Stats Line Icon -->
+          <div class="absolute inset-0 bg-accent/20 rounded-full blur-xl animate-pulse"></div>
+          <div class="relative w-20 h-20 mx-auto flex items-center justify-center">
+             <svg class="w-12 h-12 text-accent drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+               <!-- Isometric Cube -->
+               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.2" d="M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3z" />
+               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.2" d="M12 12l8-4.5M12 12v9M12 12L4 7.5" />
+               <!-- Dynamic Stats Line -->
+               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 14l3-3 4 4 4-4" class="animate-pulse" style="filter: drop-shadow(0 0 4px #22d3ee)" />
+               <!-- Corner Accents -->
+               <circle cx="12" cy="12" r="1" fill="currentColor" />
+               <circle cx="12" cy="3" r="0.5" fill="currentColor" opacity="0.5" />
+               <circle cx="20" cy="7.5" r="0.5" fill="currentColor" opacity="0.5" />
+               <circle cx="4" cy="7.5" r="0.5" fill="currentColor" opacity="0.5" />
+             </svg>
+          </div>
+        </div>
+        <h1 class="font-heading text-2xl md:text-3xl font-bold tracking-widest text-white uppercase">
+          商户管理<span class="text-accent">后台</span>
+        </h1>
+        <div class="mt-2 flex items-center justify-center gap-3">
+          <span class="h-[1px] w-8 bg-accent/30"></span>
+          <p class="text-[10px] font-heading tracking-[0.2em] text-accent uppercase">安全区块链节点</p>
+          <span class="h-[1px] w-8 bg-accent/30"></span>
+        </div>
+      </header>
+
+      <!-- Form -->
+      <form class="space-y-6" action="#" method="post">
+        <div class="space-y-2">
+          <label for="id" class="text-[10px] font-heading tracking-widest text-accent uppercase px-1">访问账号</label>
+          <div class="relative group">
+            <input id="id" type="text" placeholder="请输入用户名或邮箱" required
+              class="input-cyber w-full py-4 px-5 rounded text-sm text-white placeholder-white/20">
+            <div class="absolute right-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-accent transition-colors">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <label for="pin" class="text-[10px] font-heading tracking-widest text-accent uppercase px-1">安全密码</label>
+          <div class="relative group">
+            <input id="pin" type="password" placeholder="请输入登录密码" required
+              class="input-cyber w-full py-4 px-5 rounded text-sm text-white placeholder-white/20">
+            <div class="absolute right-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-accent transition-colors">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between text-[10px] font-heading uppercase tracking-widest">
+          <label class="flex items-center gap-2 cursor-pointer text-white/50 hover:text-accent transition-colors">
+            <input type="checkbox" class="w-3 h-3 bg-transparent border-white/20 rounded focus:ring-offset-0 focus:ring-accent checked:bg-accent">
+            <span>同步会话</span>
+          </label>
+          <a href="#" class="text-accent/60 hover:text-accent transition-colors">忘记凭据？</a>
+        </div>
+
+        <button type="submit" class="btn-cyber w-full py-4 rounded text-xs font-heading text-white tracking-[0.3em]">
+          开启认证
+        </button>
+      </form>
+
+      <!-- Footer Info -->
+      <footer class="mt-10 pt-6 border-t border-white/5 flex justify-between items-center text-[8px] font-heading uppercase tracking-[0.2em] text-white/30">
+        <span>地区：亚太/香港</span>
+        <span class="text-accent/40">状态：已加密</span>
+        <span class="text-white/20">BUILD: v3.0-TECH</span>
+        <span>版本 v2.4.0</span>
+      </footer>
+    </div>
+  </main>
+</body>
+</html>

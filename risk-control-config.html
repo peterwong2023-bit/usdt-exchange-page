@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>风控配置 - VOSS Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    </style>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+            padding-bottom: 40px;
+        }
+
+        /* 顶部状态栏 */
+        .status-bar {
+            background: white;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            font-weight: 600;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+            position: relative;
+            z-index: 10;
+        }
+
+        .time {
+            color: #1e293b;
+            letter-spacing: 0.5px;
+            font-weight: 500;
+        }
+
+        .status-icons {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            color: #64748b;
+        }
+
+        /* 头部 */
+        .header {
+            background: white;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .header-title {
+            font-size: 19px;
+            font-weight: 700;
+            color: #1e293b;
+            flex: 1;
+            text-align: center;
+            letter-spacing: 0.3px;
+        }
+
+        .back-btn {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            font-size: 18px;
+            cursor: pointer;
+            color: #64748b;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .back-btn:hover {
+            background: #1e293b;
+            color: white;
+            border-color: #1e293b;
+        }
+
+        .back-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* 主容器 */
+        .container {
+            padding: 24px 16px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* 卡片样式 */
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e5e7eb;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-title i {
+            color: #3b82f6;
+        }
+
+        /* 风控提供商选择 */
+        .provider-section {
+            margin-bottom: 20px;
+        }
+
+        .provider-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+        }
+
+        .provider-card {
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .provider-card:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+        }
+
+        .provider-card.selected {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+
+        .provider-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .provider-name {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .provider-flag {
+            font-size: 24px;
+        }
+
+        .provider-checkbox {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #cbd5e1;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        .provider-card.selected .provider-checkbox {
+            background: #3b82f6;
+            border-color: #3b82f6;
+            color: white;
+        }
+
+        .provider-checkbox i {
+            font-size: 14px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .provider-card.selected .provider-checkbox i {
+            opacity: 1;
+        }
+
+        .provider-info {
+            font-size: 13px;
+            color: #64748b;
+            line-height: 1.5;
+        }
+
+        /* 路由策略模式选择 */
+        .strategy-mode {
+            margin-bottom: 24px;
+        }
+
+        .mode-toggle {
+            display: flex;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: left;
+        }
+
+        .mode-btn:hover {
+            border-color: #3b82f6;
+        }
+
+        .mode-btn.active {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+
+        .mode-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .mode-desc {
+            font-size: 13px;
+            color: #64748b;
+            line-height: 1.5;
+        }
+
+        /* 路由规则配置 */
+        .routing-rules {
+            margin-top: 24px;
+        }
+
+        .rule-item {
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .rule-item:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .rule-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .rule-number {
+            font-size: 14px;
+            font-weight: 700;
+            color: #3b82f6;
+            background: #dbeafe;
+            padding: 6px 12px;
+            border-radius: 8px;
+        }
+
+        .rule-delete {
+            background: #fee2e2;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            cursor: pointer;
+            color: #dc2626;
+            font-size: 16px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .rule-delete:hover {
+            background: #dc2626;
+            color: white;
+        }
+
+        .rule-content {
+            display: grid;
+            gap: 16px;
+        }
+
+        .rule-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        @media (max-width: 600px) {
+            .rule-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #475569;
+        }
+
+        .form-input {
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s;
+            background: white;
+            font-family: inherit;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-select {
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s;
+            background: white;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+
+        .amount-range {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .amount-range input {
+            flex: 1;
+        }
+
+        .range-separator {
+            color: #94a3b8;
+            font-weight: 600;
+        }
+
+        /* 添加规则按钮 */
+        .add-rule-btn {
+            width: 100%;
+            padding: 16px;
+            border: 2px dashed #cbd5e1;
+            border-radius: 12px;
+            background: white;
+            color: #3b82f6;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .add-rule-btn:hover {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+
+        .add-rule-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* 默认提供商选择 */
+        .default-provider {
+            margin-top: 24px;
+        }
+
+        .info-box {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 12px;
+        }
+
+        .info-box-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #92400e;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-box-text {
+            font-size: 13px;
+            color: #78350f;
+            line-height: 1.5;
+        }
+
+        /* 保存按钮 */
+        .save-btn {
+            width: 100%;
+            padding: 18px;
+            border: none;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 32px;
+        }
+
+        .save-btn:hover {
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .save-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Toast提示 */
+        .toast {
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-150px);
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 16px 28px;
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: 600;
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 2000;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .toast.success {
+            background: rgba(16, 185, 129, 0.95);
+        }
+
+        .toast.error {
+            background: rgba(220, 38, 38, 0.95);
+        }
+
+        /* 隐藏类 */
+        .hidden {
+            display: none !important;
+        }
+
+        /* 规则预览 */
+        .rule-preview {
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 16px;
+        }
+
+        .preview-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #0c4a6e;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .preview-text {
+            font-size: 13px;
+            color: #075985;
+            line-height: 1.6;
+        }
+
+        .preview-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .preview-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .preview-badge {
+            background: #3b82f6;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部状态栏 -->
+    <div class="status-bar">
+        <span class="time" id="currentTime">11:56</span>
+        <div class="status-icons">
+            <span><i class="fas fa-signal"></i></span>
+            <span>5G</span>
+            <span><i class="fas fa-battery-three-quarters"></i></span>
+        </div>
+    </div>
+
+    <!-- 头部 -->
+    <div class="header">
+        <button class="back-btn" onclick="goBack()"><i class="fas fa-arrow-left"></i></button>
+        <h1 class="header-title">风控配置</h1>
+        <div style="width: 36px;"></div>
+    </div>
+
+    <!-- 主容器 -->
+    <div class="container">
+        <!-- 风控提供商选择 -->
+        <div class="card">
+            <div class="card-title">
+                <i class="fas fa-shield-alt"></i>
+                <span>风控提供商</span>
+            </div>
+            
+            <div class="provider-section">
+                <div class="provider-options">
+                    <!-- Bitrace -->
+                    <div class="provider-card" id="provider-hk" onclick="toggleProvider('hk')">
+                        <div class="provider-header">
+                            <div class="provider-name">
+                                <span class="provider-flag">🇭🇰</span>
+                                <span>Bitrace</span>
+                            </div>
+                            <div class="provider-checkbox">
+                                <i class="fas fa-check"></i>
+                            </div>
+                        </div>
+                        <div class="provider-info">
+                            成本低廉，响应迅速，适合中小额交易
+                        </div>
+                    </div>
+
+                    <!-- Chainalysis -->
+                    <div class="provider-card" id="provider-us" onclick="toggleProvider('us')">
+                        <div class="provider-header">
+                            <div class="provider-name">
+                                <span class="provider-flag">🇺🇸</span>
+                                <span>Chainalysis</span>
+                            </div>
+                            <div class="provider-checkbox">
+                                <i class="fas fa-check"></i>
+                            </div>
+                        </div>
+                        <div class="provider-info">
+                            成本较高，行业权威，适合大额及高风险交易
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 路由策略配置 -->
+        <div class="card" id="routing-config">
+            <div class="card-title">
+                <i class="fas fa-route"></i>
+                <span>路由策略</span>
+            </div>
+
+            <!-- 策略模式选择 -->
+            <div class="strategy-mode">
+                <div class="mode-toggle">
+                    <div class="mode-btn" id="mode-simple" onclick="setStrategyMode('simple')">
+                        <div class="mode-title">
+                            <i class="fas fa-bolt"></i>
+                            简单模式
+                        </div>
+                        <div class="mode-desc">同时使用所有选中的提供商</div>
+                    </div>
+                    <div class="mode-btn active" id="mode-advanced" onclick="setStrategyMode('advanced')">
+                        <div class="mode-title">
+                            <i class="fas fa-sliders-h"></i>
+                            智能路由
+                        </div>
+                        <div class="mode-desc">根据交易金额自动选择提供商</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 简单模式提示 -->
+            <div class="info-box hidden" id="simple-mode-info">
+                <div class="info-box-title">
+                    <i class="fas fa-info-circle"></i>
+                    <span>简单模式说明</span>
+                </div>
+                <div class="info-box-text" id="simple-mode-text">
+                    所有选中的风控提供商将同时进行风险检查，任何一家检测到风险都会触发预警。
+                </div>
+            </div>
+
+            <!-- 路由规则列表 -->
+            <div class="routing-rules" id="routing-rules">
+                <div class="rule-item">
+                    <div class="rule-header">
+                        <span class="rule-number">规则 1</span>
+                        <button class="rule-delete" onclick="deleteRule(0)">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    <div class="rule-content">
+                        <div class="form-group">
+                            <label class="form-label">交易金额范围 (USDT)</label>
+                            <div class="amount-range">
+                                <input type="number" class="form-input" placeholder="最小金额" value="100" onchange="updateRulePreview()">
+                                <span class="range-separator">-</span>
+                                <input type="number" class="form-input" placeholder="最大金额" value="1000" onchange="updateRulePreview()">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">使用提供商</label>
+                            <select class="form-select" onchange="updateRulePreview()">
+                                <option value="hk">🇭🇰 Bitrace</option>
+                                <option value="us">🇺🇸 Chainalysis</option>
+                                <option value="both">🌐 同时使用两家</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rule-item">
+                    <div class="rule-header">
+                        <span class="rule-number">规则 2</span>
+                        <button class="rule-delete" onclick="deleteRule(1)">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    <div class="rule-content">
+                        <div class="form-group">
+                            <label class="form-label">交易金额范围 (USDT)</label>
+                            <div class="amount-range">
+                                <input type="number" class="form-input" placeholder="最小金额" value="1000" onchange="updateRulePreview()">
+                                <span class="range-separator">-</span>
+                                <input type="number" class="form-input" placeholder="最大金额 (留空=无上限)" onchange="updateRulePreview()">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">使用提供商</label>
+                            <select class="form-select" onchange="updateRulePreview()">
+                                <option value="hk">🔷 Bitrace</option>
+                                <option value="us" selected>🔶 Chainalysis</option>
+                                <option value="both">🌐 同时使用两家</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 添加规则按钮 -->
+            <button class="add-rule-btn" onclick="addRule()">
+                <i class="fas fa-plus-circle"></i>
+                <span>添加路由规则</span>
+            </button>
+
+            <!-- 规则预览 -->
+            <div class="rule-preview">
+                <div class="preview-title">
+                    <i class="fas fa-eye"></i>
+                    <span>配置预览</span>
+                </div>
+                <div class="preview-text" id="rule-preview-content">
+                    <div class="preview-item">
+                        <span class="preview-badge">100-1000 USDT</span>
+                        <span>→ Bitrace</span>
+                    </div>
+                    <div class="preview-item">
+                        <span class="preview-badge">1000+ USDT</span>
+                        <span>→ Chainalysis</span>
+                    </div>
+                    <div class="preview-item" style="opacity: 0.7;">
+                        <span class="preview-badge" style="background: #94a3b8;">其他金额</span>
+                        <span>→ 不进行风险检测</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 保存按钮 -->
+        <button class="save-btn" onclick="saveConfig()">
+            <i class="fas fa-save"></i>
+            <span>保存配置</span>
+        </button>
+    </div>
+
+    <!-- Toast提示 -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // 全局状态
+        let config = {
+            providers: {
+                hk: false,
+                us: false
+            },
+            strategyMode: 'advanced', // 'simple' or 'advanced'
+            routingRules: []
+        };
+
+        // 更新时间
+        function updateTime() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('currentTime').textContent = `${hours}:${minutes}`;
+        }
+        updateTime();
+        setInterval(updateTime, 60000);
+
+        // 显示Toast
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast show';
+            if (type) {
+                toast.classList.add(type);
+            }
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    toast.className = 'toast';
+                }, 400);
+            }, 3000);
+        }
+
+        // 返回
+        function goBack() {
+            window.history.back();
+        }
+
+        // 切换提供商选择
+        function toggleProvider(provider) {
+            const card = document.getElementById(`provider-${provider}`);
+            card.classList.toggle('selected');
+            config.providers[provider] = card.classList.contains('selected');
+            
+            // 更新UI状态
+            updateUIState();
+        }
+
+        // 设置策略模式
+        function setStrategyMode(mode) {
+            config.strategyMode = mode;
+            
+            // 更新按钮状态
+            document.getElementById('mode-simple').classList.remove('active');
+            document.getElementById('mode-advanced').classList.remove('active');
+            document.getElementById(`mode-${mode}`).classList.add('active');
+            
+            // 如果选择智能路由模式，自动勾选两家提供商
+            if (mode === 'advanced') {
+                const selectedCount = Object.values(config.providers).filter(v => v).length;
+                if (selectedCount < 2) {
+                    // 自动勾选所有提供商
+                    config.providers.hk = true;
+                    config.providers.us = true;
+                    document.getElementById('provider-hk').classList.add('selected');
+                    document.getElementById('provider-us').classList.add('selected');
+                    showToast('已自动选择两家提供商以启用智能路由', 'success');
+                }
+            }
+            
+            // 更新UI显示
+            const routingRules = document.getElementById('routing-rules').parentElement.parentElement;
+            const simpleModeInfo = document.getElementById('simple-mode-info');
+            const simpleModeText = document.getElementById('simple-mode-text');
+            
+            if (mode === 'simple') {
+                // 简单模式：隐藏路由规则和预览
+                document.getElementById('routing-rules').classList.add('hidden');
+                document.querySelector('.add-rule-btn').classList.add('hidden');
+                document.querySelector('.rule-preview').classList.add('hidden');
+                simpleModeInfo.classList.remove('hidden');
+                
+                // 根据选中的提供商数量更新提示文字
+                const selectedCount = Object.values(config.providers).filter(v => v).length;
+                if (selectedCount === 1) {
+                    const selectedProvider = Object.keys(config.providers).find(k => config.providers[k]);
+                    const providerNames = { 'hk': 'Bitrace', 'us': 'Chainalysis' };
+                    simpleModeText.textContent = `当前仅选择了 ${providerNames[selectedProvider]}，所有交易将使用该提供商进行风险检查。`;
+                } else {
+                    simpleModeText.textContent = '所有选中的风控提供商将同时进行风险检查，任何一家检测到风险都会触发预警。';
+                }
+            } else {
+                // 智能路由模式：显示路由规则和预览
+                document.getElementById('routing-rules').classList.remove('hidden');
+                document.querySelector('.add-rule-btn').classList.remove('hidden');
+                document.querySelector('.rule-preview').classList.remove('hidden');
+                simpleModeInfo.classList.add('hidden');
+            }
+        }
+
+        // 添加规则
+        function addRule() {
+            const rulesContainer = document.getElementById('routing-rules');
+            const ruleCount = rulesContainer.children.length;
+            
+            const ruleHTML = `
+                <div class="rule-item">
+                    <div class="rule-header">
+                        <span class="rule-number">规则 ${ruleCount + 1}</span>
+                        <button class="rule-delete" onclick="deleteRule(${ruleCount})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    <div class="rule-content">
+                        <div class="form-group">
+                            <label class="form-label">交易金额范围 (USDT)</label>
+                            <div class="amount-range">
+                                <input type="number" class="form-input" placeholder="最小金额" onchange="updateRulePreview()">
+                                <span class="range-separator">-</span>
+                                <input type="number" class="form-input" placeholder="最大金额" onchange="updateRulePreview()">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">使用提供商</label>
+                            <select class="form-select" onchange="updateRulePreview()">
+                                <option value="hk">🇭🇰 Bitrace</option>
+                                <option value="us">🇺🇸 Chainalysis</option>
+                                <option value="both">🌐 同时使用两家</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            rulesContainer.insertAdjacentHTML('beforeend', ruleHTML);
+            updateRulePreview();
+            showToast('规则添加成功', 'success');
+        }
+
+        // 删除规则
+        function deleteRule(index) {
+            const rulesContainer = document.getElementById('routing-rules');
+            const rules = rulesContainer.children;
+            
+            if (rules.length <= 1) {
+                showToast('至少需要保留一条规则', 'error');
+                return;
+            }
+            
+            rules[index].remove();
+            
+            // 重新编号
+            Array.from(rulesContainer.children).forEach((rule, i) => {
+                rule.querySelector('.rule-number').textContent = `规则 ${i + 1}`;
+                rule.querySelector('.rule-delete').setAttribute('onclick', `deleteRule(${i})`);
+            });
+            
+            updateRulePreview();
+            showToast('规则已删除', 'success');
+        }
+
+        // 更新规则预览
+        function updateRulePreview() {
+            const rulesContainer = document.getElementById('routing-rules');
+            const rules = Array.from(rulesContainer.children);
+            const previewContent = document.getElementById('rule-preview-content');
+            
+            let previewHTML = '';
+            
+            rules.forEach((rule, index) => {
+                const inputs = rule.querySelectorAll('.form-input');
+                const select = rule.querySelector('.form-select');
+                
+                const minAmount = inputs[0].value || '?';
+                const maxAmount = inputs[1].value || '∞';
+                const provider = select.value;
+                
+                const providerText = {
+                    'hk': 'Bitrace',
+                    'us': 'Chainalysis',
+                    'both': '两家同时检查'
+                };
+                
+                const rangeText = maxAmount === '∞' ? `${minAmount}+ USDT` : `${minAmount}-${maxAmount} USDT`;
+                
+                previewHTML += `
+                    <div class="preview-item">
+                        <span class="preview-badge">${rangeText}</span>
+                        <span>→ ${providerText[provider]}</span>
+                    </div>
+                `;
+            });
+            
+            // 添加提示：不匹配规则的交易不检测
+            previewHTML += `
+                <div class="preview-item" style="opacity: 0.7;">
+                    <span class="preview-badge" style="background: #94a3b8;">其他金额</span>
+                    <span>→ 不进行风险检测</span>
+                </div>
+            `;
+            
+            previewContent.innerHTML = previewHTML;
+        }
+
+        // 更新UI状态
+        function updateUIState() {
+            const selectedCount = Object.values(config.providers).filter(v => v).length;
+            const routingConfig = document.getElementById('routing-config');
+            const strategyMode = document.querySelector('.strategy-mode');
+            
+            if (selectedCount === 0) {
+                // 没有选择任何提供商，禁用路由配置
+                routingConfig.style.opacity = '0.5';
+                routingConfig.style.pointerEvents = 'none';
+            } else if (selectedCount === 1) {
+                // 只选择一家提供商，自动切换到简单模式并隐藏模式选择
+                routingConfig.style.opacity = '1';
+                routingConfig.style.pointerEvents = 'auto';
+                strategyMode.style.display = 'none';
+                setStrategyMode('simple');
+            } else {
+                // 选择两家提供商，显示模式选择
+                routingConfig.style.opacity = '1';
+                routingConfig.style.pointerEvents = 'auto';
+                strategyMode.style.display = 'block';
+            }
+        }
+
+        // 保存配置
+        function saveConfig() {
+            // 验证至少选择一个提供商
+            const selectedProviders = Object.values(config.providers).filter(v => v);
+            if (selectedProviders.length === 0) {
+                showToast('请至少选择一个风控提供商', 'error');
+                return;
+            }
+            
+            // 收集路由规则
+            if (config.strategyMode === 'advanced') {
+                const rulesContainer = document.getElementById('routing-rules');
+                const rules = Array.from(rulesContainer.children);
+                
+                config.routingRules = rules.map((rule, index) => {
+                    const inputs = rule.querySelectorAll('.form-input');
+                    const select = rule.querySelector('.form-select');
+                    
+                    return {
+                        minAmount: parseFloat(inputs[0].value) || 0,
+                        maxAmount: inputs[1].value ? parseFloat(inputs[1].value) : null,
+                        provider: select.value
+                    };
+                });
+                
+                
+                // 验证规则
+                for (let i = 0; i < config.routingRules.length; i++) {
+                    const rule = config.routingRules[i];
+                    if (rule.maxAmount && rule.minAmount >= rule.maxAmount) {
+                        showToast(`规则 ${i + 1}: 最小金额不能大于或等于最大金额`, 'error');
+                        return;
+                    }
+                }
+            }
+            
+            // 保存配置（这里可以添加API调用）
+            console.log('保存配置:', config);
+            
+            showToast('配置保存成功！', 'success');
+            
+            // 可以在这里添加跳转或其他逻辑
+            setTimeout(() => {
+                // window.location.href = 'some-page.html';
+            }, 1500);
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            updateRulePreview();
+        });
+    </script>
+</body>
+</html>
+

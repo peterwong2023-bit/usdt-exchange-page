@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>波币AI风险监控系统 - 风险处理队列</title>
+    <link rel="stylesheet" href="styles-v4.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <h1 class="logo">
+                    <img src="../bob.png" alt="波币" class="logo-icon">
+                    <span class="logo-text">波币AI风险监控系统</span>
+                </h1>
+                <div class="subtitle-container">
+                    <span class="subtitle-cn">抓光所有骗子</span>
+                    <span class="subtitle-divider">·</span>
+                    <span class="subtitle-en">Anti Scammer</span>
+                </div>
+            </div>
+            
+            <div class="header-center">
+                <div class="quick-search">
+                    <i class="fas fa-search"></i>
+                    <input type="text" 
+                           placeholder="搜索: 用户ID / 设备指纹 / 支付QR / 银行账号 / IP地址" 
+                           id="quickSearch"
+                           class="search-input">
+                    <button class="search-btn" id="executeSearch">
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="header-right">
+                <div class="header-actions">
+                    <button class="btn btn-icon alert-bell" id="alertBellBtn" title="告警通知">
+                        <i class="fas fa-bell"></i>
+                        <span class="badge pulse" id="alertBadge">5</span>
+                    </button>
+                    <button class="btn btn-primary" onclick="window.location.href='index-v4.html'">
+                        <i class="fas fa-home"></i>
+                        返回首页
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主内容区域 -->
+    <main class="main-content" style="max-width: 1920px; margin: 0 auto; padding: 24px;">
+        <!-- 过滤器面板 -->
+        <div class="filter-panel-users">
+            <div class="filter-group">
+                <label>风险等级</label>
+                <select class="filter-select" id="filterRiskLevel">
+                    <option value="">全部</option>
+                    <option value="critical">紧急风险</option>
+                    <option value="high">高风险</option>
+                    <option value="medium">中风险</option>
+                    <option value="low">低风险</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>风险类型</label>
+                <select class="filter-select" id="filterRiskType">
+                    <option value="">全部</option>
+                    <option value="device">设备风险</option>
+                    <option value="ip">IP风险</option>
+                    <option value="payment">支付风险</option>
+                    <option value="trade">交易风险</option>
+                    <option value="syndicate">团伙风险</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>用户搜索</label>
+                <input type="text" class="filter-input" id="filterUserSearch" placeholder="用户ID/手机/设备ID">
+            </div>
+            <div class="filter-actions">
+                <button class="btn btn-primary" id="applyFilters">
+                    <i class="fas fa-search"></i> 搜索
+                </button>
+                <button class="btn btn-outline" id="resetFilters">
+                    <i class="fas fa-redo"></i> 重置
+                </button>
+                <button class="btn btn-outline" id="exportUsers">
+                    <i class="fas fa-download"></i> 导出
+                </button>
+            </div>
+        </div>
+
+        <!-- 用户列表表格 -->
+        <div class="table-card-users">
+            <div class="table-header-users">
+                <h3>
+                    <i class="fas fa-users"></i>
+                    风险用户处理队列
+                    <span class="count-badge" id="userTotalCount">0</span>
+                </h3>
+                <div class="table-actions">
+                    <button class="btn btn-outline" id="refreshList">
+                        <i class="fas fa-sync-alt"></i> 刷新
+                    </button>
+                </div>
+            </div>
+            <table class="data-table-users" id="usersTable">
+                <thead>
+                    <tr>
+                        <th width="40"><input type="checkbox" id="selectAll"></th>
+                        <th>用户ID</th>
+                        <th>头像</th>
+                        <th>风险评分</th>
+                        <th>风险等级</th>
+                        <th>主要风险</th>
+                        <th>地区</th>
+                        <th>最后登录IP</th>
+                        <th>最后登录时间</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                    <!-- 数据将通过JS动态加载 -->
+                </tbody>
+            </table>
+            <div class="table-pagination-users">
+                <div class="pagination-info">
+                    显示 <span id="userStartRecord">1</span> - <span id="userEndRecord">10</span> 条，共 <span id="userTotalRecords">0</span> 条
+                </div>
+                <div class="pagination-controls">
+                    <button class="btn-pagination" id="prevPage">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <span class="page-numbers" id="pageNumbers"></span>
+                    <button class="btn-pagination" id="nextPage">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 脚本文件 -->
+    <script>
+        // 用户数据（内嵌）
+        const riskUsersList = [
+            {
+                user_id: '9f3e_7A12345h78',
+                avatar: 'https://i.pravatar.cc/150?img=1',
+                risk_score: 95,
+                risk_level: 'critical',
+                main_risks: ['团伙嫌疑', '收款码共享', '多账号同设备'],
+                city: '深圳',
+                last_ip: '112.25.67.89',
+                last_login_at: '2025-11-28 14:23:15'
+            },
+            {
+                user_id: '2c7b_4E67890j23',
+                avatar: 'https://i.pravatar.cc/150?img=2',
+                risk_score: 91,
+                risk_level: 'critical',
+                main_risks: ['大额异常交易', '高频取消'],
+                city: '广州',
+                last_ip: '58.33.142.90',
+                last_login_at: '2025-11-28 13:15:42'
+            },
+            {
+                user_id: '5d8a_9B45678k01',
+                avatar: 'https://i.pravatar.cc/150?img=3',
+                risk_score: 87,
+                risk_level: 'high',
+                main_risks: ['多设备共享', 'IP异常'],
+                city: '上海',
+                last_ip: '121.77.88.156',
+                last_login_at: '2025-11-28 12:32:18'
+            },
+            {
+                user_id: '8e4f_3C23456m89',
+                avatar: 'https://i.pravatar.cc/150?img=4',
+                risk_score: 82,
+                risk_level: 'high',
+                main_risks: ['支付方式异常'],
+                city: '北京',
+                last_ip: '183.45.199.123',
+                last_login_at: '2025-11-28 11:47:33'
+            },
+            {
+                user_id: '1a9d_6F78901n45',
+                avatar: 'https://i.pravatar.cc/150?img=5',
+                risk_score: 78,
+                risk_level: 'high',
+                main_risks: ['IP频繁变更'],
+                city: '杭州',
+                last_ip: '220.167.88.45',
+                last_login_at: '2025-11-28 10:28:50'
+            },
+            {
+                user_id: '7b2c_8D34567p12',
+                avatar: 'https://i.pravatar.cc/150?img=6',
+                risk_score: 75,
+                risk_level: 'medium',
+                main_risks: ['高取消率'],
+                city: '成都',
+                last_ip: '114.88.156.78',
+                last_login_at: '2025-11-28 09:15:27'
+            },
+            {
+                user_id: '4f6e_2A90123q67',
+                avatar: 'https://i.pravatar.cc/150?img=7',
+                risk_score: 71,
+                risk_level: 'medium',
+                main_risks: ['新户大额'],
+                city: '重庆',
+                last_ip: '61.55.234.90',
+                last_login_at: '2025-11-28 08:42:11'
+            },
+            {
+                user_id: '3d5b_5G56789r34',
+                avatar: 'https://i.pravatar.cc/150?img=8',
+                risk_score: 68,
+                risk_level: 'medium',
+                main_risks: ['实名认证疑点'],
+                city: '武汉',
+                last_ip: '202.178.45.123',
+                last_login_at: '2025-11-28 07:20:08'
+            },
+            {
+                user_id: '9h2k_8L34567s90',
+                avatar: 'https://i.pravatar.cc/150?img=9',
+                risk_score: 65,
+                risk_level: 'low',
+                main_risks: ['关联账户异常'],
+                city: '长沙',
+                last_ip: '119.123.45.67',
+                last_login_at: '2025-11-28 06:10:33'
+            },
+            {
+                user_id: '2m4n_6P90123t12',
+                avatar: 'https://i.pravatar.cc/150?img=10',
+                risk_score: 62,
+                risk_level: 'low',
+                main_risks: ['频繁修改密码'],
+                city: '郑州',
+                last_ip: '61.187.56.78',
+                last_login_at: '2025-11-28 05:45:12'
+            }
+        ];
+
+        // 简单的用户列表加载逻辑
+        function loadUsersList() {
+            const tbody = document.getElementById('usersTableBody');
+            if (!tbody) return;
+
+            tbody.innerHTML = riskUsersList.map(user => {
+                const riskLevelClass = user.risk_score >= 85 ? 'critical' : user.risk_score >= 75 ? 'high' : user.risk_score >= 60 ? 'medium' : 'low';
+                const riskLevelText = user.risk_score >= 85 ? '紧急' : user.risk_score >= 75 ? '高危' : user.risk_score >= 60 ? '中等' : '低';
+                
+                return `
+                    <tr>
+                        <td><input type="checkbox" class="user-checkbox" value="${user.user_id}"></td>
+                        <td><strong class="user-id-cell">#${user.user_id}</strong></td>
+                        <td><img src="${user.avatar}" alt="avatar" class="table-avatar"></td>
+                        <td><span class="risk-score-badge ${riskLevelClass}">${user.risk_score}</span></td>
+                        <td><span class="risk-level-badge ${riskLevelClass}">${riskLevelText}</span></td>
+                        <td>
+                            <div class="risk-tags-cell">
+                                ${user.main_risks.map(risk => `<span class="risk-tag-small">${risk}</span>`).join('')}
+                            </div>
+                        </td>
+                        <td>${user.city}</td>
+                        <td><code class="ip-code">${user.last_ip}</code></td>
+                        <td style="font-size: 12px;">${user.last_login_at}</td>
+                        <td>
+                            <button class="btn-table btn-primary" onclick="window.open('user-detail-v6.html?user_id=${user.user_id}', '_blank')">
+                                <i class="fas fa-eye"></i> 详情
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            // 更新统计信息
+            document.getElementById('userTotalCount').textContent = riskUsersList.length;
+            document.getElementById('userStartRecord').textContent = 1;
+            document.getElementById('userEndRecord').textContent = riskUsersList.length;
+            document.getElementById('userTotalRecords').textContent = riskUsersList.length;
+        }
+
+        // 页面加载时执行
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUsersList();
+
+            // 绑定事件
+            document.getElementById('resetFilters')?.addEventListener('click', () => {
+                document.getElementById('filterRiskLevel').value = '';
+                document.getElementById('filterRiskType').value = '';
+                document.getElementById('filterUserSearch').value = '';
+            });
+
+            document.getElementById('refreshList')?.addEventListener('click', loadUsersList);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>USDT充值 - 极简专业版</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #1890ff;
+            --success-color: #52c41a;
+            --danger-color: #ff4d4f;
+            --warning-color: #faad14;
+            --text-main: #1a1a1a;
+            --text-secondary: #666;
+            --text-muted: #999;
+            --bg-light: #f5f7fa;
+            --bg-white: #fff;
+            --border-color: #e8e8e8;
+            --border-light: #f0f0f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+            background: var(--bg-light);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            color: var(--text-main);
+            line-height: 1.5;
+        }
+
+        .container {
+            background: var(--bg-white);
+            border-radius: 20px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+            max-width: 560px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .header {
+            padding: 20px 24px;
+            text-align: center;
+            border-bottom: 1px solid var(--border-light);
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: -0.2px;
+        }
+
+        .close-icon {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #ccc;
+            cursor: pointer;
+            font-size: 18px;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .close-icon:hover {
+            background: var(--bg-light);
+            color: var(--text-main);
+        }
+
+        .content {
+            padding: 20px 24px 24px;
+        }
+
+        /* 顶部横幅 */
+        .banner {
+            background: linear-gradient(135deg, #f0f7ff 0%, #e6f4ff 100%);
+            border: 1px solid #d6e8fa;
+            border-radius: 12px;
+            padding: 14px 16px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .banner:hover {
+            border-color: #91caff;
+            box-shadow: 0 2px 8px rgba(24, 144, 255, 0.1);
+        }
+
+        .banner-icon {
+            width: 36px;
+            height: 36px;
+            background: var(--primary-color);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .banner-info { flex: 1; }
+
+        .banner-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .badge-new {
+            background: #ff4d4f;
+            color: white;
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        .banner-desc {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 3px;
+        }
+
+        .banner-arrow {
+            color: #bfbfbf;
+            font-size: 16px;
+        }
+
+        /* 订单详情 */
+        .order-details {
+            background: var(--bg-light);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            font-size: 14px;
+        }
+
+        .order-item:not(:last-child) {
+            border-bottom: 1px dashed var(--border-color);
+        }
+
+        .order-label { 
+            color: var(--text-secondary);
+        }
+
+        .order-value { 
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* 支付卡片 */
+        .payment-card {
+            background: var(--bg-white);
+            border: 1px solid var(--border-light);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .qr-container {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 24px;
+            padding: 10px;
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .qr-image {
+            width: 100%;
+            height: 100%;
+            border-radius: 4px;
+        }
+
+        .qr-placeholder-img { 
+            filter: grayscale(1) opacity(0.25);
+        }
+
+        /* 地址区域 */
+        .address-section {
+            text-align: left;
+            display: none;
+        }
+
+        .address-section.active { display: block; }
+
+        .address-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .address-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .address-box-inner {
+            background: var(--bg-light);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            padding: 4px;
+            transition: border-color 0.2s;
+        }
+
+        .address-box-inner:hover {
+            border-color: #d0d0d0;
+        }
+
+        .address-text {
+            flex: 1;
+            font-family: 'JetBrains Mono', 'Monaco', monospace;
+            font-size: 14px;
+            padding: 12px 14px;
+            word-break: break-all;
+            color: var(--text-main);
+            line-height: 1.5;
+        }
+
+        .btn-copy-mini {
+            padding: 10px 16px;
+            background: var(--primary-color);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-copy-mini:hover {
+            background: #40a9ff;
+        }
+
+        .btn-copy-mini.copied {
+            background: var(--success-color);
+        }
+
+        .btn-switch-link {
+            font-size: 14px;
+            color: var(--primary-color);
+            text-decoration: none;
+            margin-top: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 500;
+        }
+
+        .btn-switch-link:hover {
+            text-decoration: underline;
+        }
+
+        /* 风险分数 */
+        .risk-score-wrapper {
+            display: inline-flex;
+            align-items: center;
+            gap: 0;
+        }
+
+        .refresh-tooltip {
+            position: absolute;
+            bottom: calc(100% + 10px);
+            right: -10px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #f0f0f0;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 12px;
+            width: 160px;
+            display: none;
+            z-index: 200;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: left;
+        }
+
+        .refresh-tooltip::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            right: 16px;
+            border: 6px solid transparent;
+            border-top-color: #16213e;
+            border-bottom: none;
+        }
+
+        .btn-refresh-risk:hover .refresh-tooltip {
+            display: block;
+        }
+
+        .tooltip-title {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: white;
+        }
+
+        .tooltip-count {
+            display: block;
+            color: #4ade80;
+            margin-bottom: 4px;
+        }
+
+        .tooltip-count.warning {
+            color: #fbbf24;
+        }
+
+        .tooltip-count.danger {
+            color: #f87171;
+        }
+
+        .tooltip-hint {
+            display: block;
+            font-size: 11px;
+            color: #8b949e;
+        }
+
+        /* Toast 提示 */
+        .toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 16px 28px;
+            border-radius: 12px;
+            color: white;
+            font-size: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .toast.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .toast-icon {
+            font-size: 16px;
+        }
+
+        .risk-score {
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 6px;
+            cursor: help;
+            position: relative;
+        }
+
+        .risk-safe { 
+            background: #e6ffed;
+            color: #52c41a;
+        }
+
+        .risk-warning { 
+            background: #fff7e6;
+            color: #faad14;
+        }
+
+        .risk-danger { 
+            background: #fff1f0;
+            color: #ff4d4f;
+        }
+
+        .risk-score::after {
+            content: attr(data-detail);
+            position: absolute;
+            bottom: calc(100% + 12px);
+            right: 0;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #f0f0f0;
+            padding: 14px 18px;
+            border-radius: 12px;
+            font-size: 13px;
+            white-space: pre-wrap;
+            width: 200px;
+            display: none;
+            z-index: 100;
+            font-weight: 400;
+            line-height: 1.8;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .risk-score::before {
+            content: '';
+            position: absolute;
+            bottom: calc(100% + 4px);
+            right: 16px;
+            border: 6px solid transparent;
+            border-top-color: #1a1a2e;
+            display: none;
+            z-index: 100;
+        }
+
+        .risk-score:hover::after,
+        .risk-score:hover::before { display: block; }
+
+        .btn-ai-check {
+            border: 1px solid var(--border-color);
+            background: var(--bg-white);
+            border-radius: 6px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+            margin-left: 8px;
+            padding: 4px 10px;
+            font-size: 12px;
+            font-weight: 500;
+            vertical-align: middle;
+            position: relative;
+        }
+
+        .btn-ai-check:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            background: #f0f7ff;
+        }
+
+        .btn-ai-check.loading svg {
+            animation: spin 1s linear infinite;
+        }
+
+        .btn-ai-check.loading span {
+            opacity: 0.6;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* 警告提示 */
+        .warning-text {
+            font-size: 13px;
+            color: #d48806;
+            background: #fffbe6;
+            border: 1px solid #ffe58f;
+            padding: 14px 16px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        /* 主按钮 */
+        .btn-main {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: var(--primary-color);
+            color: white;
+            box-shadow: 0 4px 12px rgba(24, 144, 255, 0.2);
+        }
+
+        .btn-main:hover {
+            background: #40a9ff;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(24, 144, 255, 0.25);
+        }
+
+        .btn-main:active {
+            transform: translateY(0);
+        }
+
+        /* 骨架屏 */
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            color: transparent !important;
+            border-radius: 4px;
+        }
+
+        /* 弹窗 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.45);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal {
+            background: white;
+            padding: 28px;
+            border-radius: 16px;
+            width: 380px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal h2 {
+            font-size: 17px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .modal p {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+
+        .modal-btns {
+            display: flex;
+            gap: 12px;
+        }
+
+        .modal-btns .btn-main {
+            flex: 1;
+        }
+
+        .btn-secondary {
+            flex: 1;
+            padding: 12px;
+            background: var(--bg-light);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background: #eee;
+            color: var(--text-main);
+        }
+
+        /* Logo */
+        .usdt-logo, .tron-logo { 
+            width: 16px;
+            height: 16px;
+        }
+
+        .new-addr-badge {
+            background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%);
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            margin-left: 8px;
+            animation: pulse-new 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-new {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* 风险详情弹窗 */
+        .risk-detail-modal {
+            text-align: center;
+            max-width: 420px;
+        }
+
+        .risk-modal-icon {
+            width: 72px;
+            height: 72px;
+            background: #ff4d4f;
+            border-radius: 50%;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 36px;
+        }
+
+        .risk-modal-title {
+            color: #ff4d4f;
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .risk-modal-desc {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+
+        .risk-info-rows {
+            background: var(--bg-light);
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 16px;
+            text-align: left;
+        }
+
+        .risk-info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+        }
+
+        .risk-info-row:not(:last-child) {
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .risk-info-label {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .risk-info-value {
+            color: var(--text-main);
+            font-size: 14px;
+            font-weight: 500;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .risk-warning-box {
+            background: #fff7e6;
+            border: 1px solid #ffd591;
+            padding: 16px;
+            border-radius: 10px;
+            text-align: left;
+            margin-bottom: 16px;
+        }
+
+        .risk-warning-title {
+            font-weight: 600;
+            color: #fa8c16;
+            margin-bottom: 6px;
+            font-size: 14px;
+        }
+
+        .risk-warning-desc {
+            font-size: 13px;
+            color: #ad6800;
+            line-height: 1.6;
+        }
+
+        .risk-tags-section {
+            text-align: left;
+            margin-bottom: 24px;
+        }
+
+        .risk-tags-label {
+            font-size: 14px;
+            color: var(--text-main);
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+
+        .risk-tags {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .risk-type-tag {
+            background: #fff7e6;
+            border: 1px solid #ffd591;
+            color: #fa8c16;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <span class="close-icon">✕</span>
+            <h1>订单充值</h1>
+        </div>
+
+        <div class="content">
+            <!-- 订单信息 -->
+            <div class="order-details">
+                <div class="order-item">
+                    <span class="order-label">收款商户</span>
+                    <span class="order-value">woceshi10</span>
+                </div>
+                <div class="order-item">
+                    <span class="order-label">当前汇率</span>
+                    <span class="order-value">1 USDT ≈ 7.34 CNY</span>
+                </div>
+                <div class="order-item">
+                    <span class="order-label">支付协议</span>
+                    <div class="order-value">
+                        <img src="https://cryptologos.cc/logos/tron-trx-logo.svg?v=025" class="tron-logo" alt="TRON">
+                        <span>TRON (TRC20)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 支付卡片 -->
+            <div class="payment-card">
+                <div class="qr-container" id="qrContainer">
+                    <img id="qrImage" class="qr-image qr-placeholder-img" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=placeholder" alt="QR Code">
+                </div>
+
+                <div class="address-section" id="addressBox">
+                    <div class="address-header">
+                        <span class="address-label">
+                            <img src="https://cryptologos.cc/logos/tether-usdt-logo.svg?v=025" class="usdt-logo" alt="USDT">
+                            USDT 收款地址
+                            <span class="new-addr-badge" id="newAddrBadge" style="display: none;">新地址</span>
+                        </span>
+                        <span class="risk-score-wrapper">
+                            <span id="riskBadge" class="risk-score"></span>
+                            <button class="btn-ai-check" id="refreshRiskBtn">
+                                <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M5 2l1.5 4.5L11 8 6.5 9.5 5 14l-1.5-4.5L-1 8l4.5-1.5L5 2zm14 6l1 3 3 1-3 1-1 3-1-3-3-1 3-1 1-3z"/></svg>
+                                <span>AI 地址检查</span>
+                                <span class="refresh-tooltip" id="refreshTooltip">
+                                    <span class="tooltip-title">重新检测风险</span>
+                                    <span class="tooltip-count">今日剩余 <b id="remainCount">10</b>/10 次</span>
+                                    <span class="tooltip-hint">与自测工具共用次数</span>
+                                </span>
+                            </button>
+                        </span>
+                    </div>
+                    <div class="address-box-inner">
+                        <div class="address-text" id="addressValue">加载中...</div>
+                        <button class="btn-copy-mini" id="copyBtn">复制</button>
+                    </div>
+                    <div style="text-align: right;">
+                        <a href="address-management.html" class="btn-switch-link">切换其它地址 →</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="warning-text">
+                ⚠️ 请核对地址无误后再转账。如地址不一致，请联系财务处理。
+            </div>
+
+            <!-- 底部自测工具 -->
+            <div class="banner" style="margin-bottom: 0;">
+                <div class="banner-info">
+                    <div class="banner-title">地址安全自测工具 <span class="badge-new">推荐</span></div>
+                    <div class="banner-desc">检测转账地址风险，避免风控退款</div>
+                </div>
+                <div class="banner-arrow">›</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 获取新地址确认 -->
+    <div class="modal-overlay" id="confirmModal">
+        <div class="modal">
+            <h2>获取新收款地址</h2>
+            <p>确定要获取新地址吗？旧地址将保留在管理列表中。</p>
+            <div class="modal-btns">
+                <button class="btn-secondary" id="cancelGetBtn">取消</button>
+                <button class="btn-main" id="confirmGetBtn">确认获取</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast 提示 -->
+    <div class="toast" id="toast">
+        <span class="toast-icon" id="toastIcon">✓</span>
+        <span id="toastText">检测完成</span>
+    </div>
+
+    <!-- 风险详情弹窗 -->
+    <div class="modal-overlay" id="riskDetailModal">
+        <div class="modal risk-detail-modal">
+            <div class="risk-modal-icon">✕</div>
+            <h2 class="risk-modal-title">高风险地址</h2>
+            <p class="risk-modal-desc">该地址被标记为高风险，可能导致充值失败</p>
+            
+            <div class="risk-info-rows">
+                <div class="risk-info-row">
+                    <span class="risk-info-label">检测地址</span>
+                    <span class="risk-info-value" id="riskModalAddr">TH6VUNgmf9...AgABnS1a</span>
+                </div>
+                <div class="risk-info-row">
+                    <span class="risk-info-label">检测次数</span>
+                    <span class="risk-info-value">1/10 次</span>
+                </div>
+            </div>
+
+            <div class="risk-warning-box">
+                <div class="risk-warning-title">高风险</div>
+                <div class="risk-warning-desc">为了您的资金安全，强烈建议您更换其他钱包地址进行充值。</div>
+            </div>
+
+            <div class="risk-tags-section">
+                <div class="risk-tags-label">风险类型</div>
+                <div class="risk-tags">
+                    <span class="risk-type-tag">网赌</span>
+                    <span class="risk-type-tag">黑灰产</span>
+                </div>
+            </div>
+
+            <button class="btn-main" onclick="document.getElementById('riskDetailModal').style.display='none'">我知道了</button>
+        </div>
+    </div>
+
+    <script>
+        const MERCHANT_ID = 'woceshi10';
+        const addressBox = document.getElementById('addressBox');
+        const addressValue = document.getElementById('addressValue');
+        const riskBadge = document.getElementById('riskBadge');
+        const qrImage = document.getElementById('qrImage');
+        const confirmModal = document.getElementById('confirmModal');
+        const cancelGetBtn = document.getElementById('cancelGetBtn');
+        const confirmGetBtn = document.getElementById('confirmGetBtn');
+        const riskDetailModal = document.getElementById('riskDetailModal');
+
+        function init() {
+            // 自动获取地址
+            addressBox.classList.add('active');
+            addressValue.classList.add('skeleton');
+            qrImage.classList.add('skeleton');
+            
+            setTimeout(() => {
+                let addresses = JSON.parse(localStorage.getItem(`addresses_${MERCHANT_ID}`) || '[]');
+                if (addresses.length === 0) {
+                    const d = new Date(); d.setDate(d.getDate()-2);
+                    addresses = [{ address: 'TRiskAddr1mB6Cf7qdiTnsBozNhq8ksABC', score: 85, createdAt: d.toISOString() }];
+                    localStorage.setItem(`addresses_${MERCHANT_ID}`, JSON.stringify(addresses));
+                }
+                
+                // 检查是否有已选择的地址
+                let selected = localStorage.getItem(`selected_address_${MERCHANT_ID}`);
+                if (selected) {
+                    selected = JSON.parse(selected);
+                } else {
+                    selected = addresses[0];
+                    localStorage.setItem(`selected_address_${MERCHANT_ID}`, JSON.stringify(selected));
+                }
+                
+                addressValue.classList.remove('skeleton');
+                qrImage.classList.remove('skeleton');
+                showAddress(selected);
+            }, 800);
+        }
+
+        function showAddress(addrObj) {
+            addressBox.classList.add('active');
+            addressValue.textContent = addrObj.address;
+            
+            // 显示/隐藏新地址角标
+            const newBadge = document.getElementById('newAddrBadge');
+            if (addrObj.isNew) {
+                newBadge.style.display = 'inline';
+            } else {
+                newBadge.style.display = 'none';
+            }
+            
+            riskBadge.className = 'risk-score';
+            if (addrObj.score < 30) {
+                riskBadge.classList.add('risk-safe');
+                riskBadge.textContent = `安全 ${addrObj.score}`;
+                riskBadge.setAttribute('data-detail', '风险级别：安全\n风险分数：' + addrObj.score + '\n关联类型：无');
+                riskBadge.onclick = null;
+            } else if (addrObj.score < 70) {
+                riskBadge.classList.add('risk-warning');
+                riskBadge.textContent = `中危 ${addrObj.score}`;
+                riskBadge.setAttribute('data-detail', '风险级别：中危\n风险分数：' + addrObj.score + '\n关联类型：小额混币');
+                riskBadge.onclick = null;
+            } else {
+                riskBadge.classList.add('risk-danger');
+                riskBadge.textContent = `高危 ${addrObj.score}`;
+                riskBadge.setAttribute('data-detail', '风险级别：高危\n风险分数：' + addrObj.score + '\n关联类型：网赌、黑灰产');
+                riskBadge.onclick = () => {
+                    // 更新弹窗中的地址显示
+                    const addr = addrObj.address;
+                    const shortAddr = addr.length > 20 ? addr.substring(0, 10) + '...' + addr.substring(addr.length - 8) : addr;
+                    document.getElementById('riskModalAddr').textContent = shortAddr;
+                    riskDetailModal.style.display = 'flex';
+                };
+            }
+
+            qrImage.classList.remove('qr-placeholder-img');
+            qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${addrObj.address}`;
+            actionBtn.textContent = '获取充值地址';
+        }
+
+        function checkDailyLimit() {
+            const addresses = JSON.parse(localStorage.getItem(`addresses_${MERCHANT_ID}`) || '[]');
+            const today = new Date().toDateString();
+            return addresses.some(addr => new Date(addr.createdAt).toDateString() === today && addr.isNew);
+        }
+
+
+        confirmGetBtn.onclick = () => {
+            confirmModal.style.display = 'none';
+            
+            setTimeout(() => {
+                const newAddrStr = 'T' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+                const addresses = JSON.parse(localStorage.getItem(`addresses_${MERCHANT_ID}`) || '[]');
+                const newObj = { 
+                    address: newAddrStr, 
+                    score: Math.floor(Math.random() * 20) + 1, 
+                    createdAt: new Date().toISOString(), 
+                    isNew: true,
+                    source: 'manual' // 手动获取，计入每日限制
+                };
+                addresses.unshift(newObj);
+                localStorage.setItem(`addresses_${MERCHANT_ID}`, JSON.stringify(addresses));
+                showToast('新地址已获取，可在地址管理中切换', '✓', 3000);
+            }, 800);
+        };
+        
+        // 系统自动替换脏地址（不占用每日次数）
+        function autoReplaceAddress() {
+            const newAddrStr = 'T' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+            const addresses = JSON.parse(localStorage.getItem(`addresses_${MERCHANT_ID}`) || '[]');
+            const newObj = { 
+                address: newAddrStr, 
+                score: Math.floor(Math.random() * 15) + 1, 
+                createdAt: new Date().toISOString(), 
+                isNew: true,
+                source: 'auto' // 系统自动替换，不计入每日限制
+            };
+            addresses.unshift(newObj);
+            localStorage.setItem(`addresses_${MERCHANT_ID}`, JSON.stringify(addresses));
+            localStorage.setItem(`selected_address_${MERCHANT_ID}`, JSON.stringify(newObj));
+            return newObj;
+        }
+
+        cancelGetBtn.onclick = () => confirmModal.style.display = 'none';
+
+        document.getElementById('copyBtn').onclick = function() {
+            const btn = this;
+            navigator.clipboard.writeText(addressValue.textContent).then(() => {
+                btn.textContent = '已复制';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.textContent = '复制';
+                    btn.classList.remove('copied');
+                }, 1500);
+            });
+        };
+
+        // 检测次数管理
+        const MAX_CHECKS = 10;
+        const remainCountEl = document.getElementById('remainCount');
+        const tooltipCount = document.querySelector('.tooltip-count');
+        const toast = document.getElementById('toast');
+        const toastText = document.getElementById('toastText');
+        const toastIcon = document.getElementById('toastIcon');
+        
+        function showToast(text, icon = '✓', duration = 2500) {
+            toastText.textContent = text;
+            toastIcon.textContent = icon;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), duration);
+        }
+        
+        function getCheckCount() {
+            const data = JSON.parse(localStorage.getItem(`check_count_${MERCHANT_ID}`) || '{}');
+            const today = new Date().toDateString();
+            if (data.date !== today) {
+                return MAX_CHECKS;
+            }
+            return data.remaining !== undefined ? data.remaining : MAX_CHECKS;
+        }
+        
+        function useCheck() {
+            const today = new Date().toDateString();
+            let remaining = getCheckCount();
+            if (remaining > 0) {
+                remaining--;
+                localStorage.setItem(`check_count_${MERCHANT_ID}`, JSON.stringify({ date: today, remaining }));
+            }
+            return remaining;
+        }
+        
+        function updateCheckCountDisplay() {
+            const remaining = getCheckCount();
+            remainCountEl.textContent = remaining;
+            
+            tooltipCount.classList.remove('warning', 'danger');
+            if (remaining <= 3 && remaining > 0) {
+                tooltipCount.classList.add('warning');
+            } else if (remaining === 0) {
+                tooltipCount.classList.add('danger');
+            }
+        }
+        
+        // 刷新风险分数
+        document.getElementById('refreshRiskBtn').onclick = function(e) {
+            e.stopPropagation();
+            const remaining = getCheckCount();
+            if (remaining <= 0) {
+                showToast('今日检测次数已用完，请明日再试', '⚠️', 3000);
+                return;
+            }
+            
+            const btn = this;
+            btn.classList.add('loading');
+            riskBadge.textContent = '检测中...';
+            riskBadge.className = 'risk-score';
+            
+            setTimeout(() => {
+                btn.classList.remove('loading');
+                const newRemaining = useCheck();
+                updateCheckCountDisplay();
+                
+                const selected = JSON.parse(localStorage.getItem(`selected_address_${MERCHANT_ID}`));
+                if (selected) {
+                    const newScore = Math.max(1, Math.min(100, selected.score + Math.floor(Math.random() * 11) - 5));
+                    selected.score = newScore;
+                    localStorage.setItem(`selected_address_${MERCHANT_ID}`, JSON.stringify(selected));
+                    
+                    const addresses = JSON.parse(localStorage.getItem(`addresses_${MERCHANT_ID}`) || '[]');
+                    const idx = addresses.findIndex(a => a.address === selected.address);
+                    if (idx !== -1) {
+                        addresses[idx].score = newScore;
+                        localStorage.setItem(`addresses_${MERCHANT_ID}`, JSON.stringify(addresses));
+                    }
+                    
+                    showAddress(selected);
+                    showToast(`检测完成，今日剩余 ${newRemaining} 次`, '✓');
+                }
+            }, 1500);
+        };
+        
+        updateCheckCountDisplay();
+
+        init();
+    </script>
+</body>
+</html>

@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户风险详情 - 波币AI风险监控系统</title>
+    <link rel="stylesheet" href="styles-v4.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #f8fafc;
+        }
+        
+        /* 顶部导航条 */
+        .detail-header {
+            background: white;
+            border-bottom: 2px solid #e2e8f0;
+            padding: 16px 24px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .detail-breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        .detail-breadcrumb a {
+            color: #3b82f6;
+            text-decoration: none;
+        }
+
+        .detail-breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        .detail-actions {
+            display: flex;
+            gap: 12px;
+        }
+        
+        <style>
+        /* 用户详情页专用样式 */
+        .user-detail-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        /* 顶部用户信息卡片 */
+        .user-header-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+        }
+
+        .user-basic-info {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .user-avatar-large {
+            width: 80px;
+            height: 80px;
+            border-radius: 16px;
+            object-fit: cover;
+            border: 3px solid #e2e8f0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .user-info-text h1 {
+            font-size: 24px;
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 8px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .user-meta-row {
+            display: flex;
+            gap: 24px;
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        .risk-score-large {
+            width: 100px;
+            height: 100px;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            font-weight: 900;
+            color: white;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+            position: relative;
+        }
+
+        .risk-score-large.critical { background: linear-gradient(135deg, #dc2626, #b91c1c); }
+        .risk-score-large.high { background: linear-gradient(135deg, #f59e0b, #d97706); }
+
+        .risk-score-label {
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        /* Risk Summary 风险总结条 */
+        .risk-summary-panel {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border: 2px solid #fbbf24;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .summary-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #92400e;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .top3-reasons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .reason-card {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 4px solid #f59e0b;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .reason-card:hover {
+            transform: translateX(4px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .reason-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: #0f172a;
+            margin-bottom: 4px;
+        }
+
+        .reason-value {
+            font-size: 12px;
+            color: #64748b;
+            margin-bottom: 4px;
+        }
+
+        .reason-score {
+            font-size: 18px;
+            font-weight: 700;
+            color: #dc2626;
+        }
+
+        .evidence-summary {
+            background: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #475569;
+            margin-bottom: 12px;
+        }
+
+        .suggest-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .suggest-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .suggest-btn.recommend {
+            background: #dc2626;
+            color: white;
+        }
+
+        .suggest-btn.secondary {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .suggest-btn.tertiary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        /* 主内容区域 */
+        .detail-content {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 24px;
+        }
+
+        /* 左侧规则列表 */
+        .rules-section {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .layer-group {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .layer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+
+        .layer-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #0f172a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .layer-score {
+            font-size: 20px;
+            font-weight: 700;
+            color: #dc2626;
+        }
+
+        .layer-top-contributors {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        .contributor-tag {
+            padding: 4px 10px;
+            background: #fef3c7;
+            border: 1px solid #fde68a;
+            color: #92400e;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .contributor-tag:hover {
+            background: #fde68a;
+        }
+
+        /* 规则卡片 */
+        .rule-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .rule-card.highlight {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+            animation: highlight-pulse 2s ease-in-out;
+        }
+
+        @keyframes highlight-pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        .rule-card.severe { border-left: 4px solid #dc2626; }
+        .rule-card.hit { border-left: 4px solid #f59e0b; }
+        .rule-card.watch { border-left: 4px solid #fbbf24; }
+        .rule-card.none { border-left: 4px solid #e2e8f0; }
+
+        .rule-header {
+            padding: 12px 16px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+        }
+
+        .rule-header:hover {
+            background: #f8fafc;
+        }
+
+        .rule-header-left {
+            flex: 1;
+        }
+
+        .rule-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 4px;
+        }
+
+        .rule-reason-code {
+            font-size: 11px;
+            color: #94a3b8;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .rule-current-value {
+            font-size: 13px;
+            color: #64748b;
+            margin-top: 6px;
+        }
+
+        .rule-header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .rule-status-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .rule-status-badge.severe { background: #fee2e2; color: #dc2626; }
+        .rule-status-badge.hit { background: #ffedd5; color: #ea580c; }
+        .rule-status-badge.watch { background: #fef3c7; color: #b45309; }
+        .rule-status-badge.none { background: #f1f5f9; color: #64748b; }
+
+        .rule-score-delta {
+            font-size: 20px;
+            font-weight: 800;
+            color: #dc2626;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .expand-icon {
+            font-size: 14px;
+            color: #94a3b8;
+            transition: transform 0.3s;
+        }
+
+        .rule-card.expanded .expand-icon {
+            transform: rotate(180deg);
+        }
+
+        /* 规则展开内容 */
+        .rule-expanded-content {
+            display: none;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .rule-card.expanded .rule-expanded-content {
+            display: block;
+        }
+
+        .rule-tabs {
+            display: flex;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .rule-tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 600;
+            color: #64748b;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .rule-tab:hover {
+            background: #f1f5f9;
+        }
+
+        .rule-tab.active {
+            color: #3b82f6;
+            border-bottom-color: #3b82f6;
+            background: white;
+        }
+
+        .rule-tab-content {
+            display: none;
+            padding: 16px;
+            background: white;
+        }
+
+        .rule-tab-content.active {
+            display: block;
+        }
+
+        /* 证据列表 */
+        .evidence-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .evidence-item {
+            padding: 10px 12px;
+            background: #f8fafc;
+            border-radius: 6px;
+            border-left: 3px solid #3b82f6;
+            font-size: 12px;
+        }
+
+        .evidence-time {
+            color: #94a3b8;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .evidence-detail {
+            color: #475569;
+        }
+
+        /* 计算说明 */
+        .calc-explain {
+            background: #f8fafc;
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .calc-item {
+            margin-bottom: 12px;
+        }
+
+        .calc-label {
+            font-size: 12px;
+            color: #64748b;
+            margin-bottom: 4px;
+        }
+
+        .calc-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #0f172a;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* 建议动作 */
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            background: white;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .action-btn.recommend {
+            background: #dc2626;
+            color: white;
+            border-color: #dc2626;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        /* 右侧时间轴 */
+        .timeline-section {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #e2e8f0;
+            max-height: 1200px;
+            overflow-y: auto;
+        }
+
+        .timeline-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #e2e8f0;
+        }
+
+        .timeline-event {
+            position: relative;
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: -26px;
+            top: 4px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            z-index: 1;
+        }
+
+        .timeline-dot.severe { background: #dc2626; }
+        .timeline-dot.hit { background: #f59e0b; }
+        .timeline-dot.watch { background: #fbbf24; }
+        .timeline-dot.none { background: #94a3b8; }
+
+        .timeline-content {
+            background: #f8fafc;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s;
+        }
+
+        .timeline-event:hover .timeline-content {
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .timeline-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .timeline-event-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .timeline-score {
+            font-size: 16px;
+            font-weight: 700;
+            color: #dc2626;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .timeline-reason {
+            font-size: 11px;
+            color: #64748b;
+            margin-bottom: 4px;
+        }
+
+        .timeline-time {
+            font-size: 11px;
+            color: #94a3b8;
+        }
+
+        /* 返回按钮 */
+        .back-button {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            transition: all 0.2s;
+            z-index: 100;
+        }
+
+        .back-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="user-detail-container">
+        <!-- 顶部用户信息卡片 -->
+        <div class="user-header-card">
+            <div class="user-basic-info">
+                <img src="https://i.pravatar.cc/150?img=1" alt="avatar" class="user-avatar-large">
+                <div class="user-info-text">
+                    <h1>#9f3e_7A12345h78</h1>
+                    <div class="user-meta-row">
+                        <span><i class="fas fa-map-marker-alt"></i> 深圳</span>
+                        <span><i class="fas fa-globe"></i> 112.25.67.89</span>
+                        <span><i class="fas fa-clock"></i> 2025-11-28 14:23:15</span>
+                    </div>
+                </div>
+                <div class="risk-score-large critical">
+                    <div>91</div>
+                    <div class="risk-score-label">风险分</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Risk Summary 风险总结条 -->
+        <div class="risk-summary-panel">
+            <div class="summary-title">
+                <i class="fas fa-exclamation-triangle"></i>
+                风险总结 - 为什么91分高危
+            </div>
+            
+            <div class="top3-reasons">
+                <div class="reason-card" onclick="scrollToRule('SEC_DEVICE_FP_CHANGE')">
+                    <div class="reason-name">设备指纹24h变化</div>
+                    <div class="reason-value">触发4次</div>
+                    <div class="reason-score">-32</div>
+                </div>
+                <div class="reason-card" onclick="scrollToRule('SEC_IP_CITY_DRIFT')">
+                    <div class="reason-name">24h跨城市登录</div>
+                    <div class="reason-value">跨越4次，最远962km</div>
+                    <div class="reason-score">-24</div>
+                </div>
+                <div class="reason-card" onclick="scrollToRule('TRADE_HIGH_CANCEL')">
+                    <div class="reason-name">频繁取消订单</div>
+                    <div class="reason-value">3次取消</div>
+                    <div class="reason-score">-20</div>
+                </div>
+            </div>
+
+            <div class="evidence-summary">
+                <strong>关键证据：</strong>
+                设备指纹24h内变化4次（DFP_889977→DFP_445566→DFP_778899→DFP_223344） | 
+                IP跨城市登录（上海→深圳→广州→北京） | 
+                24h内取消3笔订单（订单金额¥5800、¥6300、¥4500）
+            </div>
+
+            <div class="suggest-actions">
+                <button class="suggest-btn recommend">
+                    <i class="fas fa-clipboard-check"></i>
+                    建议：进入待审核
+                </button>
+                <button class="suggest-btn secondary">
+                    <i class="fas fa-ban"></i>
+                    限制提现
+                </button>
+                <button class="suggest-btn tertiary">
+                    <i class="fas fa-folder-plus"></i>
+                    建立案件
+                </button>
+            </div>
+        </div>
+        
+        <!-- 主内容区域 -->
+        <div class="detail-content">
+            <!-- 左侧：规则列表 -->
+            <div class="rules-section">
+                <!-- 安全层 -->
+                <div class="layer-group">
+                    <div class="layer-header">
+                        <div class="layer-title">
+                            <i class="fas fa-shield-alt"></i>
+                            安全层
+        </div>
+                        <div class="layer-score">-56</div>
+                </div>
+
+                    <div class="layer-top-contributors">
+                        <div class="contributor-tag" onclick="scrollToRule('SEC_DEVICE_FP_CHANGE')">
+                            设备指纹变化 -32
+                        </div>
+                        <div class="contributor-tag" onclick="scrollToRule('SEC_IP_CITY_DRIFT')">
+                            跨城市登录 -24
+                        </div>
+                        </div>
+                        
+                    <!-- 规则卡片1：设备指纹24h变化 -->
+                    <div class="rule-card severe" id="SEC_DEVICE_FP_CHANGE" onclick="toggleRuleCard(this)">
+                        <div class="rule-header">
+                            <div class="rule-header-left">
+                                <div class="rule-title">设备指纹24h变化</div>
+                                <div class="rule-reason-code">SEC_DEVICE_FP_CHANGE_24H</div>
+                                <div class="rule-current-value">触发：4次/24h，距离最远962km</div>
+                            </div>
+                            <div class="rule-header-right">
+                                <span class="rule-status-badge severe">严重</span>
+                                <span class="rule-score-delta">-32</span>
+                                <i class="fas fa-chevron-down expand-icon"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="rule-expanded-content">
+                            <div class="rule-tabs">
+                                <div class="rule-tab active" onclick="switchTab(this, 'evidence')">证据 Evidence</div>
+                                <div class="rule-tab" onclick="switchTab(this, 'calc')">计算 Calc</div>
+                                <div class="rule-tab" onclick="switchTab(this, 'action')">建议 Action</div>
+                            </div>
+                            
+                            <div class="rule-tab-content active" data-tab="evidence">
+                                <div class="evidence-list">
+                                    <div class="evidence-item">
+                                        <div class="evidence-time">2025-11-27 10:00</div>
+                                        <div class="evidence-detail">上海 → 深圳 | IP: 112.25.67.89 | 设备: DFP_889977</div>
+                                    </div>
+                                    <div class="evidence-item">
+                                        <div class="evidence-time">2025-11-27 15:30</div>
+                                        <div class="evidence-detail">深圳 → 广州 | IP: 58.33.142.90 | 设备: DFP_445566</div>
+                                    </div>
+                                    <div class="evidence-item">
+                                        <div class="evidence-time">2025-11-27 19:45</div>
+                                        <div class="evidence-detail">广州 → 北京 | IP: 183.45.199.123 | 设备: DFP_778899</div>
+                                    </div>
+                                    <div class="evidence-item">
+                                        <div class="evidence-time">2025-11-28 02:15</div>
+                                        <div class="evidence-detail">北京 → 杭州 | IP: 220.167.88.45 | 设备: DFP_223344</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="rule-tab-content" data-tab="calc">
+                                <div class="calc-explain">
+                                    <div class="calc-item">
+                                        <div class="calc-label">时间窗口 Window</div>
+                                        <div class="calc-value">24小时（滚动窗口）</div>
+                                    </div>
+                                    <div class="calc-item">
+                                        <div class="calc-label">触发阈值 Threshold</div>
+                                        <div class="calc-value">
+                                            watch: count>=2 且 distance>300km (-8分) <br>
+                                            hit: count>=3 且 distance>500km (-16分) <br>
+                                            severe: count>=4 且 distance>800km (-24分)
+                                        </div>
+                                    </div>
+                                    <div class="calc-item">
+                                        <div class="calc-label">去重键 Dedup Key</div>
+                                        <div class="calc-value">from_city + to_city + device_fp</div>
+                                    </div>
+                                    <div class="calc-item">
+                                        <div class="calc-label">扣分上限 Cap</div>
+                                        <div class="calc-value">-32分/24h（已达上限）</div>
+                                    </div>
+                                    <div class="calc-item">
+                                        <div class="calc-label">衰减规则 Decay</div>
+                                        <div class="calc-value">6小时无新触发，分数回落20%</div>
+                                    </div>
+                                    <div class="calc-item">
+                                        <div class="calc-label">计算公式</div>
+                                        <div class="calc-value">count=4 && distance_max=962km >= 800 => -24 * 1.33 = -32 (capped at -32)</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="rule-tab-content" data-tab="action">
+                                <div class="action-buttons">
+                                    <button class="action-btn recommend">
+                                        <i class="fas fa-ban"></i><br>
+                                        限制交易
+                                    </button>
+                                    <button class="action-btn">
+                                        <i class="fas fa-clipboard-check"></i><br>
+                                        人工审核
+                                    </button>
+                                    <button class="action-btn">
+                                        <i class="fas fa-folder-plus"></i><br>
+                                        建立案件
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 规则卡片2：24h跨城市登录 -->
+                    <div class="rule-card hit" id="SEC_IP_CITY_DRIFT" onclick="toggleRuleCard(this)">
+                        <div class="rule-header">
+                            <div class="rule-header-left">
+                                <div class="rule-title">24h跨城市登录</div>
+                                <div class="rule-reason-code">SEC_IP_CITY_DRIFT_24H</div>
+                                <div class="rule-current-value">触发：4次/24h</div>
+                            </div>
+                            <div class="rule-header-right">
+                                <span class="rule-status-badge hit">命中</span>
+                                <span class="rule-score-delta">-24</span>
+                                <i class="fas fa-chevron-down expand-icon"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="rule-expanded-content">
+                            <div class="rule-tabs">
+                                <div class="rule-tab active" onclick="switchTab(this, 'evidence')">证据</div>
+                                <div class="rule-tab" onclick="switchTab(this, 'calc')">计算</div>
+                                <div class="rule-tab" onclick="switchTab(this, 'action')">建议</div>
+                            </div>
+                            
+                            <div class="rule-tab-content active" data-tab="evidence">
+                                <div class="evidence-list">
+                                    <div class="evidence-item">
+                                        <div class="evidence-time">2025-11-27 10:00</div>
+                                        <div class="evidence-detail">上海(121.48°N) → 深圳(114.06°N) | 距离: 1213km</div>
+                                    </div>
+                                    <div class="evidence-item">
+                                        <div class="evidence-time">2025-11-27 15:30</div>
+                                        <div class="evidence-detail">深圳 → 广州 | 距离: 134km</div>
+                                    </div>
+                                    <div class="evidence-item">
+                                        <div class="evidence-time">2025-11-27 19:45</div>
+                                        <div class="evidence-detail">广州 → 北京 | 距离: 1962km</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="rule-tab-content" data-tab="calc">
+                                <div class="calc-explain">
+                                    <div class="calc-item">
+                                        <div class="calc-label">窗口</div>
+                                        <div class="calc-value">24小时</div>
+                                    </div>
+                                    <div class="calc-item">
+                                        <div class="calc-label">阈值</div>
+                                        <div class="calc-value">count>=3 && distance>500km => -24 (cap -24)</div>
+                                    </div>
+                                    <div class="calc-item">
+                                        <div class="calc-label">去重键</div>
+                                        <div class="calc-value">from_city + to_city</div>
+                                </div>
+                                </div>
+                            </div>
+                            
+                            <div class="rule-tab-content" data-tab="action">
+                                <div class="action-buttons">
+                                    <button class="action-btn recommend">人工审核</button>
+                                    <button class="action-btn">限制登录</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+                <!-- 交易层 -->
+                <div class="layer-group">
+                    <div class="layer-header">
+                        <div class="layer-title">
+                            <i class="fas fa-exchange-alt"></i>
+                            交易层
+                </div>
+                        <div class="layer-score">-20</div>
+                        </div>
+                        
+                    <div class="layer-top-contributors">
+                        <div class="contributor-tag" onclick="scrollToRule('TRADE_HIGH_CANCEL')">
+                            频繁取消订单 -20
+                        </div>
+                    </div>
+                    
+                    <!-- 规则卡片：频繁取消订单 -->
+                    <div class="rule-card hit" id="TRADE_HIGH_CANCEL" onclick="toggleRuleCard(this)">
+                        <div class="rule-header">
+                            <div class="rule-header-left">
+                                <div class="rule-title">频繁取消订单</div>
+                                <div class="rule-reason-code">TRADE_FREQUENT_CANCEL_24H</div>
+                                <div class="rule-current-value">触发：3次/24h（排除对手方原因）</div>
+                            </div>
+                            <div class="rule-header-right">
+                                <span class="rule-status-badge hit">命中</span>
+                                <span class="rule-score-delta">-20</span>
+                                <i class="fas fa-chevron-down expand-icon"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="rule-expanded-content">
+                            <div class="rule-tabs">
+                                <div class="rule-tab active" onclick="switchTab(this, 'evidence')">证据</div>
+                                <div class="rule-tab" onclick="switchTab(this, 'calc')">计算</div>
+                                <div class="rule-tab" onclick="switchTab(this, 'action')">建议</div>
+                            </div>
+                            
+                            <div class="rule-tab-content active" data-tab="evidence">
+                                <div class="evidence-list">
+                                    <div class="evidence-item">
+                                        <div class="evidence-time">2025-11-27 12:30</div>
+                                        <div class="evidence-detail">订单ID: ORD_20251127001 | 金额: ¥5800 | 取消原因: 用户主动</div>
+                                    </div>
+                                    <div class="evidence-item">
+                                        <div class="evidence-time">2025-11-27 16:45</div>
+                                        <div class="evidence-detail">订单ID: ORD_20251127002 | 金额: ¥6300 | 取消原因: 用户主动</div>
+                                    </div>
+                                    <div class="evidence-item">
+                                        <div class="evidence-time">2025-11-28 08:20</div>
+                                        <div class="evidence-detail">订单ID: ORD_20251128001 | 金额: ¥4500 | 取消原因: 用户主动</div>
+                                    </div>
+                        </div>
+                    </div>
+                    
+                            <div class="rule-tab-content" data-tab="calc">
+                                <div class="calc-explain">
+                                    <div class="calc-item">
+                                        <div class="calc-label">窗口</div>
+                                        <div class="calc-value">24小时</div>
+                                    </div>
+                                    <div class="calc-item">
+                                        <div class="calc-label">阈值</div>
+                                        <div class="calc-value">
+                                            watch: 用户主动取消>=2次 => -8<br>
+                                            hit: 用户主动取消>=3次 => -20<br>
+                                            severe: 用户主动取消>=5次 => -40
+                                        </div>
+                                    </div>
+                                    <div class="calc-item">
+                                        <div class="calc-label">去重键</div>
+                                        <div class="calc-value">order_id</div>
+                                    </div>
+                                    <div class="calc-item">
+                                        <div class="calc-label">扣分上限</div>
+                                        <div class="calc-value">-40/24h</div>
+                                    </div>
+                                    <div class="calc-item">
+                                        <div class="calc-label">特殊处理</div>
+                                        <div class="calc-value">
+                                            ✓ 排除"对手方超时/拒绝"<br>
+                                            ✓ 新用户前10单降权50%<br>
+                                            ✓ 取消后重下同金额加权2x
+                                        </div>
+                                    </div>
+                </div>
+            </div>
+
+                            <div class="rule-tab-content" data-tab="action">
+                                <div class="action-buttons">
+                                    <button class="action-btn recommend">人工审核</button>
+                                    <button class="action-btn">限制发单</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 团伙层 -->
+                <div class="layer-group">
+                    <div class="layer-header">
+                        <div class="layer-title">
+                            <i class="fas fa-users"></i>
+                            团伙层
+                        </div>
+                        <div class="layer-score">-15</div>
+                        </div>
+                        
+                    <div class="layer-top-contributors">
+                        <div class="contributor-tag">
+                            收款码共享 -15
+                        </div>
+                    </div>
+                    
+                    <div class="rule-card watch" onclick="toggleRuleCard(this)">
+                        <div class="rule-header">
+                            <div class="rule-header-left">
+                                <div class="rule-title">支付二维码共享</div>
+                                <div class="rule-reason-code">SYNDICATE_SHARED_PAYMENT</div>
+                                <div class="rule-current-value">与3个账号共享</div>
+                            </div>
+                            <div class="rule-header-right">
+                                <span class="rule-status-badge watch">观察</span>
+                                <span class="rule-score-delta">-15</span>
+                                <i class="fas fa-chevron-down expand-icon"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="rule-expanded-content">
+                            <div class="rule-tabs">
+                                <div class="rule-tab active" onclick="switchTab(this, 'evidence')">证据</div>
+                                <div class="rule-tab" onclick="switchTab(this, 'calc')">计算</div>
+                                <div class="rule-tab" onclick="switchTab(this, 'action')">建议</div>
+                            </div>
+                            
+                            <div class="rule-tab-content active" data-tab="evidence">
+                                <div class="evidence-list">
+                                    <div class="evidence-item">
+                                        <div class="evidence-detail">
+                                            共享QR码: QR_889922<br>
+                                            关联账号: #2c7b_4E67890j23, #5d8a_9B45678k01, #8e4f_3C23456m89
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="rule-tab-content" data-tab="calc">
+                                <div class="calc-explain">
+                                    <div class="calc-item">
+                                        <div class="calc-label">阈值</div>
+                                        <div class="calc-value">shared_count>=2 => -15</div>
+                                    </div>
+                                    <div class="calc-item">
+                                        <div class="calc-label">去重键</div>
+                                        <div class="calc-value">payment_qr_id</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="rule-tab-content" data-tab="action">
+                                <div class="action-buttons">
+                                    <button class="action-btn recommend">查看关系图谱</button>
+                                    <button class="action-btn">标记团伙</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧：分数贡献时间轴 -->
+            <div class="timeline-section">
+                <div class="timeline-title">
+                    <i class="fas fa-history"></i>
+                    分数贡献时间轴
+                </div>
+                
+                <div class="timeline">
+                    <div class="timeline-event" onclick="scrollToRule('SEC_DEVICE_FP_CHANGE')">
+                        <div class="timeline-dot severe"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <div class="timeline-event-name">设备指纹变化</div>
+                                <div class="timeline-score">-32</div>
+                        </div>
+                            <div class="timeline-reason">SEC_DEVICE_FP_CHANGE_24H</div>
+                            <div class="timeline-time">2025-11-28 02:15 | 触发4次</div>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-event" onclick="scrollToRule('SEC_IP_CITY_DRIFT')">
+                        <div class="timeline-dot hit"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <div class="timeline-event-name">跨城市登录</div>
+                                <div class="timeline-score">-24</div>
+                            </div>
+                            <div class="timeline-reason">SEC_IP_CITY_DRIFT_24H</div>
+                            <div class="timeline-time">2025-11-27 19:45 | 最远1962km</div>
+                        </div>
+                        </div>
+                        
+                    <div class="timeline-event" onclick="scrollToRule('TRADE_HIGH_CANCEL')">
+                        <div class="timeline-dot hit"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <div class="timeline-event-name">频繁取消订单</div>
+                                <div class="timeline-score">-20</div>
+                            </div>
+                            <div class="timeline-reason">TRADE_FREQUENT_CANCEL_24H</div>
+                            <div class="timeline-time">2025-11-28 08:20 | 3次取消</div>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-event">
+                        <div class="timeline-dot watch"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <div class="timeline-event-name">支付二维码共享</div>
+                                <div class="timeline-score">-15</div>
+                </div>
+                            <div class="timeline-reason">SYNDICATE_SHARED_PAYMENT</div>
+                            <div class="timeline-time">2025-11-27 14:30 | 3个账号共享</div>
+            </div>
+        </div>
+
+                    <div class="timeline-event">
+                        <div class="timeline-dot none"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <div class="timeline-event-name">普通登录</div>
+                                <div class="timeline-score">0</div>
+                </div>
+                            <div class="timeline-reason">正常活动</div>
+                            <div class="timeline-time">2025-11-28 14:23</div>
+                </div>
+            </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 返回按钮 -->
+    <button class="back-button" onclick="window.history.back()">
+        <i class="fas fa-arrow-left"></i>
+    </button>
+
+    <script>
+        // 滚动到指定规则并高亮
+        function scrollToRule(ruleId) {
+            const ruleCard = document.getElementById(ruleId);
+            if (ruleCard) {
+                ruleCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                ruleCard.classList.add('highlight');
+                
+                // 如果未展开，则展开
+                if (!ruleCard.classList.contains('expanded')) {
+                    toggleRuleCard(ruleCard);
+                }
+                
+                // 3秒后移除高亮
+                setTimeout(() => {
+                    ruleCard.classList.remove('highlight');
+                }, 3000);
+            }
+        }
+
+        // 切换规则卡片展开/收起
+        function toggleRuleCard(card) {
+            event.stopPropagation();
+            card.classList.toggle('expanded');
+        }
+
+        // 切换Tab
+        function switchTab(tabElement, tabName) {
+            event.stopPropagation();
+            
+            const card = tabElement.closest('.rule-card');
+            const tabs = card.querySelectorAll('.rule-tab');
+            const contents = card.querySelectorAll('.rule-tab-content');
+            
+            tabs.forEach(tab => tab.classList.remove('active'));
+            contents.forEach(content => content.classList.remove('active'));
+            
+            tabElement.classList.add('active');
+            card.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+        }
+
+        // 页面加载时的动画效果
+        document.addEventListener('DOMContentLoaded', function() {
+            // 给所有reason-card添加从左滑入动画
+            const reasonCards = document.querySelectorAll('.reason-card');
+            reasonCards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateX(-20px)';
+                setTimeout(() => {
+                    card.style.transition = 'all 0.4s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateX(0)';
+                }, index * 100);
+            });
+        });
+    </script>
+</body>
+</html>

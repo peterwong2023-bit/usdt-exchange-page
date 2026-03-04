@@ -1,0 +1,602 @@
+/* ==================== 风险监控面板 - 合并版本 ==================== */
+
+/* 面板容器 */
+.risk-monitor-panel {
+    grid-column: span 12 !important; /* 占满整行 */
+    height: auto !important;
+    min-height: 800px !important;
+}
+
+.risk-monitor-panel .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px !important;
+    background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.risk-monitor-panel .card-header h3 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.risk-monitor-panel .card-header h3 .tab-count {
+    margin-left: 4px;
+}
+
+/* 标签页切换 - 简化版 */
+.panel-tabs {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.panel-tab-btn {
+    padding: 10px 20px;
+    border: 2px solid #e5e7eb;
+    border-radius: 10px;
+    background: white;
+    color: #6b7280;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.panel-tab-btn:hover {
+    border-color: #3b82f6;
+    color: #3b82f6;
+    background: #eff6ff;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+}
+
+.panel-tab-btn.active {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    border-color: #2563eb;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.panel-tab-btn i {
+    font-size: 14px;
+}
+
+.tab-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 26px;
+    height: 22px;
+    padding: 0 8px;
+    border-radius: 11px;
+    background: rgba(0, 0, 0, 0.1);
+    font-size: 12px;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.panel-tab-btn.active .tab-count {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+.card-header h3 .tab-count {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    border: 2px solid #e5e7eb;
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+}
+
+/* 列表容器 */
+.risk-monitor-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 0;
+}
+
+.risk-monitor-panel .card-body {
+    height: auto !important;
+    max-height: none !important;
+    overflow-y: visible !important;
+    padding: 24px !important;
+}
+
+/* 面板底部 - 查看全部按钮 */
+.risk-panel-footer {
+    display: flex;
+    justify-content: center;
+    padding: 20px 0 8px 0;
+    margin-top: 12px;
+}
+
+.btn-view-all {
+    padding: 12px 32px;
+    border: 2px solid #3b82f6;
+    border-radius: 10px;
+    background: white;
+    color: #3b82f6;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+}
+
+.btn-view-all:hover {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    border-color: #2563eb;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+}
+
+.btn-view-all i {
+    font-size: 12px;
+    transition: transform 0.3s ease;
+}
+
+.btn-view-all:hover i {
+    transform: translateY(2px);
+}
+
+/* ==================== 用户类型卡片 - 紧凑版 ==================== */
+.risk-item-user {
+    background: linear-gradient(to right, #ffffff 0%, #fef2f2 100%);
+    border: 2px solid #fecaca;
+    border-left: 6px solid #dc2626;
+    border-radius: 10px;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    min-height: 80px;
+}
+
+.risk-item-user:hover {
+    border-color: #dc2626;
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
+    transform: translateX(4px);
+}
+
+.risk-item-user.hidden {
+    display: none;
+}
+
+/* 用户头像 */
+.risk-user-avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%; /* 改为圆形 */
+    object-fit: cover;
+    border: 3px solid white;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    flex-shrink: 0;
+}
+
+/* 用户信息 - 单行紧凑布局 */
+.risk-user-info {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-width: 0;
+}
+
+.risk-user-id {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    font-weight: 800;
+    color: #111827;
+    white-space: nowrap;
+    min-width: 140px;
+}
+
+.risk-user-badge {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    margin-right: 6px;
+    border: 2px solid;
+}
+
+/* 主要标签（第一个）- 红色 */
+.risk-user-badge.primary {
+    color: #991b1b;
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    border-color: #fca5a5;
+}
+
+/* 次要标签 - 橙色 */
+.risk-user-badge.secondary {
+    color: #9a3412;
+    background: linear-gradient(135deg, #fff7ed 0%, #fed7aa 100%);
+    border-color: #fdba74;
+}
+
+.risk-user-meta {
+    display: flex;
+    gap: 20px;
+    font-size: 13px;
+    color: #374151;
+    font-weight: 500;
+    flex: 1;
+}
+
+.risk-user-meta span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.risk-user-meta i {
+    color: #9ca3af;
+    font-size: 12px;
+}
+
+/* 用户分数 */
+.risk-user-score {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 18px;
+    font-weight: 800;
+    color: white;
+    background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+    box-shadow: 0 4px 10px rgba(220, 38, 38, 0.35);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    flex-shrink: 0;
+}
+
+/* 用户操作按钮 */
+.risk-user-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.risk-action-btn {
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 2px solid;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.risk-action-btn.review {
+    background: white;
+    color: #3b82f6;
+    border-color: #3b82f6;
+}
+
+.risk-action-btn.review:hover {
+    background: #3b82f6;
+    color: white;
+}
+
+.risk-action-btn.release {
+    background: white;
+    color: #059669;
+    border-color: #059669;
+}
+
+.risk-action-btn.release:hover {
+    background: #059669;
+    color: white;
+}
+
+/* ==================== 团伙类型卡片 - 紧凑版 ==================== */
+.risk-item-syndicate {
+    background: linear-gradient(to right, #ffffff 0%, #fff7ed 100%);
+    border: 2px solid #fed7aa;
+    border-left: 6px solid #f97316;
+    border-radius: 10px;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    min-height: 80px;
+}
+
+.risk-item-syndicate:hover {
+    border-color: #f97316;
+    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.2);
+    transform: translateY(-2px);
+}
+
+.risk-item-syndicate.hidden {
+    display: none;
+}
+
+/* 团伙头像（图标样式） */
+.risk-syndicate-avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+    color: white;
+    font-size: 24px;
+    font-weight: 800;
+    border: 2px solid white;
+    box-shadow: 0 2px 6px rgba(249, 115, 22, 0.3);
+    flex-shrink: 0;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.risk-syndicate-avatar.top {
+    background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+    box-shadow: 0 2px 8px rgba(220, 38, 38, 0.4);
+}
+
+/* 团伙信息 - 单行紧凑布局 */
+.risk-syndicate-info {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-width: 0;
+}
+
+.risk-syndicate-id {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    font-weight: 800;
+    color: #111827;
+    white-space: nowrap;
+    min-width: 100px;
+}
+
+.risk-syndicate-status {
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: 2px solid;
+    white-space: nowrap;
+}
+
+.risk-syndicate-status.active {
+    background: #fee2e2;
+    color: #991b1b;
+    border-color: #fca5a5;
+}
+
+.risk-syndicate-status.monitoring {
+    background: #fef3c7;
+    color: #92400e;
+    border-color: #fcd34d;
+}
+
+.risk-syndicate-reason {
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #9a3412;
+    background: #fff7ed;
+    border: 2px solid #fdba74;
+    white-space: nowrap;
+}
+
+.risk-syndicate-stats {
+    display: flex;
+    gap: 20px;
+    flex: 1;
+}
+
+.risk-syndicate-stat {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    white-space: nowrap;
+}
+
+.risk-syndicate-stat i {
+    font-size: 12px;
+    color: #9ca3af;
+}
+
+.risk-syndicate-resources {
+    display: flex;
+    gap: 8px;
+}
+
+.risk-syndicate-chip {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #475569;
+    background: white;
+    border: 2px solid #cbd5e1;
+    font-family: 'JetBrains Mono', monospace;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+}
+
+.risk-syndicate-chip i {
+    font-size: 10px;
+    color: #64748b;
+}
+
+/* 团伙分数 */
+.risk-syndicate-score {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 18px;
+    font-weight: 800;
+    color: white;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    flex-shrink: 0;
+}
+
+.risk-syndicate-score.critical {
+    background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+    box-shadow: 0 4px 10px rgba(220, 38, 38, 0.35);
+}
+
+.risk-syndicate-score.high {
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+    box-shadow: 0 4px 10px rgba(249, 115, 22, 0.35);
+}
+
+.risk-syndicate-score.medium {
+    background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%);
+    box-shadow: 0 4px 10px rgba(234, 179, 8, 0.35);
+}
+
+/* ==================== 审核详情抽屉 (Audit Drawer) ==================== */
+.audit-drawer-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 2000;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.audit-drawer-overlay.active {
+    display: block;
+    opacity: 1;
+}
+
+.audit-drawer {
+    position: fixed;
+    top: 0;
+    right: -90%; /* 初始隐藏 */
+    width: 85%;
+    height: 100%;
+    background: #f1f5f9;
+    z-index: 2001;
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.2);
+    transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+}
+
+.audit-drawer.active {
+    right: 0;
+}
+
+.drawer-header {
+    padding: 16px 24px;
+    background: white;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.drawer-title {
+    font-size: 18px;
+    font-weight: 800;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.drawer-title i {
+    color: #3b82f6;
+}
+
+.drawer-close {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: #f1f5f9;
+    color: #64748b;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.drawer-close:hover {
+    background: #fee2e2;
+    color: #dc2626;
+    transform: rotate(90deg);
+}
+
+.drawer-body {
+    flex: 1;
+    overflow: hidden;
+}
+
+/* 响应式适配 */
+@media (max-width: 1200px) {
+    .audit-drawer {
+        width: 95%;
+    }
+}
+
+
+/* 风险分数等级颜色覆盖 */
+.risk-user-score.critical {
+    background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%) !important;
+    box-shadow: 0 4px 10px rgba(220, 38, 38, 0.35) !important;
+}
+.risk-user-score.high {
+    background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%) !important;
+    box-shadow: 0 4px 10px rgba(234, 88, 12, 0.35) !important;
+}
+.risk-user-score.medium {
+    background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%) !important;
+    box-shadow: 0 4px 10px rgba(59, 130, 246, 0.35) !important;
+}
+
+/* 卡片外框等级颜色覆盖 */
+.risk-item-user.critical { border-left-color: #dc2626 !important; background: linear-gradient(to right, #ffffff 0%, #fef2f2 100%) !important; border-color: #fecaca !important; }
+.risk-item-user.high { border-left-color: #ea580c !important; background: linear-gradient(to right, #ffffff 0%, #fff7ed 100%) !important; border-color: #fed7aa !important; }
+.risk-item-user.medium { border-left-color: #3b82f6 !important; background: linear-gradient(to right, #ffffff 0%, #eff6ff 100%) !important; border-color: #bfdbfe !important; }

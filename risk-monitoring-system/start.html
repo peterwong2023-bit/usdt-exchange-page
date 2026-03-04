@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI风险监控系统 - 版本选择</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 48px;
+            margin-bottom: 12px;
+            text-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .header p {
+            font-size: 20px;
+            opacity: 0.9;
+        }
+
+        .versions {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .version-card {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .version-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
+        }
+
+        .version-card.recommended::before {
+            content: '推荐';
+            position: absolute;
+            top: 20px;
+            right: -30px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 6px 40px;
+            font-size: 12px;
+            font-weight: 700;
+            transform: rotate(45deg);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .version-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .version-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: white;
+        }
+
+        .v1-icon {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .v2-icon {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .version-title {
+            flex: 1;
+        }
+
+        .version-title h2 {
+            font-size: 28px;
+            margin-bottom: 4px;
+            color: #1e293b;
+        }
+
+        .version-title .subtitle {
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        .version-features {
+            list-style: none;
+            margin: 24px 0;
+        }
+
+        .version-features li {
+            padding: 10px 0;
+            color: #475569;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .version-features li i {
+            color: #10b981;
+            font-size: 18px;
+            margin-top: 2px;
+        }
+
+        .version-features li.highlight {
+            color: #f5576c;
+            font-weight: 600;
+        }
+
+        .version-features li.highlight i {
+            color: #f5576c;
+        }
+
+        .btn-launch {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .btn-v1 {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-v1:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-v2 {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .btn-v2:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 24px rgba(245, 87, 108, 0.4);
+        }
+
+        .docs {
+            text-align: center;
+        }
+
+        .docs a {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: white;
+            color: #667eea;
+            text-decoration: none;
+            border-radius: 8px;
+            margin: 0 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .docs a:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .stats {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 40px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        @media (max-width: 768px) {
+            .versions {
+                grid-template-columns: 1fr;
+            }
+
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .header h1 {
+                font-size: 32px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>
+                <i class="fas fa-shield-halved"></i>
+                AI风险监控系统
+            </h1>
+            <p>选择适合您团队的版本</p>
+        </div>
+
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-value">4</div>
+                <div class="stat-label">可用版本</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">15+</div>
+                <div class="stat-label">核心功能</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">97%</div>
+                <div class="stat-label">效率提升</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">24/7</div>
+                <div class="stat-label">实时监控</div>
+            </div>
+        </div>
+
+        <div class="versions" style="grid-template-columns: repeat(2, 1fr);">
+            <!-- V1 版本 -->
+            <div class="version-card">
+                <div class="version-header">
+                    <div class="version-icon v1-icon">
+                        <i class="fas fa-layer-group"></i>
+                    </div>
+                    <div class="version-title">
+                        <h2>V1 基础版</h2>
+                        <div class="subtitle">适合小型团队</div>
+                    </div>
+                </div>
+
+                <ul class="version-features">
+                    <li><i class="fas fa-check-circle"></i> 风险用户列表展示</li>
+                    <li><i class="fas fa-check-circle"></i> 多维度过滤筛选</li>
+                    <li><i class="fas fa-check-circle"></i> 用户详情侧边栏</li>
+                    <li><i class="fas fa-check-circle"></i> 基础关系图谱</li>
+                    <li><i class="fas fa-check-circle"></i> 审计日志记录</li>
+                    <li><i class="fas fa-check-circle"></i> 简洁的操作界面</li>
+                    <li><i class="fas fa-check-circle"></i> 快速上手（15分钟）</li>
+                </ul>
+
+                <a href="index.html" class="btn-launch btn-v1">
+                    <i class="fas fa-rocket"></i>
+                    启动 V1 版本
+                </a>
+            </div>
+
+            <!-- V2 版本 -->
+            <div class="version-card recommended">
+                <div class="version-header">
+                    <div class="version-icon v2-icon">
+                        <i class="fas fa-wand-magic-sparkles"></i>
+                    </div>
+                    <div class="version-title">
+                        <h2>V2 运营版</h2>
+                        <div class="subtitle">专业运营团队首选</div>
+                    </div>
+                </div>
+
+                <ul class="version-features">
+                    <li class="highlight"><i class="fas fa-star"></i> <strong>5大专业视图</strong> (概览/用户/事件/关系图/操作台)</li>
+                    <li class="highlight"><i class="fas fa-star"></i> <strong>实时告警中心</strong> 紧急风险即时提醒</li>
+                    <li class="highlight"><i class="fas fa-star"></i> <strong>批量操作</strong> 效率提升10倍</li>
+                    <li><i class="fas fa-check-circle"></i> 可视化数据分析 (ECharts图表)</li>
+                    <li><i class="fas fa-check-circle"></i> Top风险用户排行</li>
+                    <li><i class="fas fa-check-circle"></i> 团伙网络监控</li>
+                    <li><i class="fas fa-check-circle"></i> 任务管理系统</li>
+                    <li><i class="fas fa-check-circle"></i> 交互式关系图谱</li>
+                    <li><i class="fas fa-check-circle"></i> 专业报表导出</li>
+                </ul>
+
+                <a href="index-v2.html" class="btn-launch btn-v2">
+                    <i class="fas fa-rocket"></i>
+                    启动 V2 版本
+                </a>
+            </div>
+
+            <!-- V3 版本 -->
+            <div class="version-card recommended">
+                <div class="version-header">
+                    <div class="version-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <div class="version-title">
+                        <h2>V3 弹窗版</h2>
+                        <div class="subtitle">右下角告警弹窗优化 🔥</div>
+                    </div>
+                </div>
+
+                <ul class="version-features">
+                    <li class="highlight"><i class="fas fa-star"></i> <strong>右下角告警弹窗</strong> 不遮挡主要内容</li>
+                    <li class="highlight"><i class="fas fa-star"></i> <strong>实时消息推送</strong> 新告警立即提醒</li>
+                    <li class="highlight"><i class="fas fa-star"></i> <strong>告警铃铛</strong> 未读数量一目了然</li>
+                    <li><i class="fas fa-check-circle"></i> 继承V2所有功能</li>
+                    <li><i class="fas fa-check-circle"></i> 告警展开/收起切换</li>
+                    <li><i class="fas fa-check-circle"></i> 一键标记已读</li>
+                    <li><i class="fas fa-check-circle"></i> 点击外部自动关闭</li>
+                    <li><i class="fas fa-check-circle"></i> 更符合运营人员使用习惯</li>
+                </ul>
+
+                <a href="index-v3.html" class="btn-launch" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                    <i class="fas fa-rocket"></i>
+                    启动 V3 版本
+                </a>
+            </div>
+        </div>
+
+        <div style="margin: 40px 0; text-align: center; color: white; font-size: 24px; font-weight: 700;">
+            <i class="fas fa-crown" style="color: #fbbf24;"></i> 最新推荐 <i class="fas fa-crown" style="color: #fbbf24;"></i>
+        </div>
+
+        <div class="versions" style="grid-template-columns: 1fr; max-width: 900px; margin: 0 auto;">
+            <!-- V4 版本 - 完整增强版 -->
+            <div class="version-card recommended" style="border: 3px solid #fbbf24;">
+                <div class="version-header">
+                    <div class="version-icon" style="background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);">
+                        <i class="fas fa-crown"></i>
+                    </div>
+                    <div class="version-title">
+                        <h2>V4 完整增强版</h2>
+                        <div class="subtitle">包含AI模型监控+系统健康+完整KPI 👑</div>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <ul class="version-features">
+                        <li class="highlight"><i class="fas fa-star"></i> <strong>AI模型质量监控</strong> 准确率/误报率</li>
+                        <li class="highlight"><i class="fas fa-star"></i> <strong>系统健康监控</strong> API/队列/日志</li>
+                        <li class="highlight"><i class="fas fa-star"></i> <strong>KPI概览仪表板</strong> 5大关键指标</li>
+                        <li class="highlight"><i class="fas fa-star"></i> <strong>地区风险热力图</strong> 城市风险分布</li>
+                        <li><i class="fas fa-check-circle"></i> 风险类型趋势分析</li>
+                        <li><i class="fas fa-check-circle"></i> 团伙热点榜</li>
+                    </ul>
+                    <ul class="version-features">
+                        <li><i class="fas fa-check-circle"></i> 实时告警流（可暂停）</li>
+                        <li><i class="fas fa-check-circle"></i> 快速搜索功能</li>
+                        <li><i class="fas fa-check-circle"></i> 数字动画效果</li>
+                        <li><i class="fas fa-check-circle"></i> 趋势百分比显示</li>
+                        <li><i class="fas fa-check-circle"></i> 继承V3右下角弹窗</li>
+                        <li><i class="fas fa-check-circle"></i> 完整的数据可视化</li>
+                    </ul>
+                </div>
+
+                <a href="index-v4.html" class="btn-launch" style="background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); font-size: 20px; padding: 20px;">
+                    <i class="fas fa-crown"></i>
+                    启动 V4 版本（最新推荐）⭐⭐⭐
+                </a>
+            </div>
+        </div>
+
+        <div class="docs">
+            <a href="README.md" target="_blank">
+                <i class="fas fa-book"></i>
+                项目文档
+            </a>
+            <a href="VERSION_COMPARISON.md" target="_blank">
+                <i class="fas fa-code-compare"></i>
+                版本对比
+            </a>
+            <a href="OPERATOR_GUIDE.md" target="_blank">
+                <i class="fas fa-graduation-cap"></i>
+                使用指南
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // 添加页面加载动画
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.version-card');
+            cards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateY(30px)';
+                    card.style.transition = 'all 0.6s ease';
+                    setTimeout(() => {
+                        card.style.opacity = '1';
+                        card.style.transform = 'translateY(0)';
+                    }, 50);
+                }, index * 200);
+            });
+        });
+    </script>
+</body>
+</html>

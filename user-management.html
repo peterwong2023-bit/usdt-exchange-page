@@ -1,0 +1,1756 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boinlive管理后台</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", Arial, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #e0e7ff 0%, #f0f9ff 50%, #fce7f3 100%);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+            font-size: 15px;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* 数字等宽 */
+        input[type="number"], .amount {
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* 顶部导航 */
+        .header {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            height: 64px;
+            display: flex;
+            align-items: center;
+            padding: 0 32px;
+            color: #fff;
+            justify-content: space-between;
+            font-size: 13px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 40px;
+        }
+
+        .logo {
+            color: #fff;
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .nav-items {
+            display: flex;
+            gap: 4px;
+        }
+
+        .nav-item {
+            padding: 11px 24px;
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.7);
+            transition: all 0.3s ease;
+            font-size: 16px;
+            border-radius: 14px;
+            font-weight: 500;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            transform: translateY(-1px);
+        }
+
+        .nav-item.active {
+            background: rgba(59, 130, 246, 0.2);
+            color: #fff;
+            font-weight: 600;
+            box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.3);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .status-tag {
+            background: rgba(59, 130, 246, 0.15);
+            padding: 5px 14px;
+            border-radius: 16px;
+            font-size: 13px;
+            font-weight: 600;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        /* 主体布局 */
+        .main-wrapper {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            background: #fff;
+            margin: 20px;
+            border-radius: 20px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        /* 侧边栏 */
+        .sidebar {
+            width: 240px;
+            background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            border-radius: 20px 0 0 20px;
+            border-right: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .sidebar-title {
+            padding: 24px 20px;
+            font-size: 12px;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .menu-group-title {
+            padding: 14px 20px;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            color: #cbd5e1;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin: 8px 16px 4px;
+            border-radius: 12px;
+        }
+
+        .menu-group-title:hover {
+            background: rgba(59, 130, 246, 0.1);
+            color: #fff;
+        }
+
+        .menu-group-title i {
+            font-size: 14px;
+            color: #64748b;
+            width: 18px;
+            text-align: center;
+        }
+
+        .menu-item {
+            padding: 11px 20px 11px 48px;
+            font-size: 15px;
+            color: #94a3b8;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin: 2px 16px;
+            border-radius: 10px;
+            font-weight: 500;
+        }
+
+        .menu-item:hover {
+            background: rgba(59, 130, 246, 0.1);
+            color: #e2e8f0;
+            transform: translateX(4px);
+        }
+
+        .menu-item.active {
+            color: #fff;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            font-weight: 600;
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3), 0 2px 4px -1px rgba(59, 130, 246, 0.2);
+        }
+
+        /* 内容区 */
+        .content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #f8fafc;
+            overflow: hidden;
+            border-radius: 0 20px 20px 0;
+        }
+
+        .tabs {
+            height: 56px;
+            background: #fff;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+        }
+
+        .tab {
+            padding: 14px 32px;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #fff;
+            border-radius: 16px 16px 0 0;
+            font-weight: 600;
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
+        }
+
+        /* 搜索栏 */
+        .search-bar {
+            padding: 22px 24px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            font-size: 15px;
+            background: #fff;
+            margin: 24px;
+            border-radius: 16px;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        }
+
+        .search-bar select, .search-bar input {
+            padding: 11px 18px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            outline: none;
+            transition: all 0.3s ease;
+            background: #f8fafc;
+            color: #1e293b;
+            font-size: 15px;
+        }
+
+        .search-bar select:hover, .search-bar input:hover {
+            border-color: #cbd5e0;
+            background: #fff;
+        }
+
+        .search-bar select:focus, .search-bar input:focus {
+            border-color: #3b82f6;
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+
+        .search-bar input::placeholder {
+            color: #94a3b8;
+        }
+
+        .btn-query {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: #fff;
+            border: none;
+            padding: 11px 32px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 15px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.4), 0 2px 4px -1px rgba(59, 130, 246, 0.2);
+        }
+
+        .btn-query:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.5), 0 4px 6px -2px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-query:active {
+            transform: translateY(0);
+        }
+
+        .btn-add {
+            background: #fff;
+            border: 2px solid #e2e8f0;
+            padding: 11px 32px;
+            border-radius: 12px;
+            cursor: pointer;
+            color: #475569;
+            transition: all 0.3s ease;
+            font-size: 15px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-add:hover {
+            border-color: #3b82f6;
+            color: #3b82f6;
+            background: #eff6ff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.1);
+        }
+
+        .btn-add:active {
+            transform: translateY(0);
+        }
+
+        /* 表格 */
+        .table-wrap {
+            flex: 1;
+            overflow: auto;
+            padding: 0 24px 24px;
+        }
+
+        .table-wrap::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        .table-wrap::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .table-wrap::-webkit-scrollbar-thumb {
+            background: #cbd5e0;
+            border-radius: 10px;
+            border: 2px solid #f8fafc;
+        }
+
+        .table-wrap::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 15px;
+            background: #fff;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        }
+
+        th {
+            text-align: left;
+            padding: 18px 20px;
+            color: #475569;
+            background: linear-gradient(to bottom, #f8fafc, #f1f5f9);
+            font-weight: 600;
+            border-bottom: 2px solid #e2e8f0;
+            font-size: 15px;
+        }
+
+        th:first-child {
+            border-radius: 16px 0 0 0;
+        }
+
+        th:last-child {
+            border-radius: 0 16px 0 0;
+        }
+
+        th input[type="checkbox"] {
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+            accent-color: #3b82f6;
+        }
+
+        tbody tr {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        tbody tr:hover {
+            background: linear-gradient(to right, #f8fafc, #fff);
+            transform: scale(1.001);
+        }
+
+        td {
+            padding: 18px 20px;
+            border-bottom: 1px solid #f1f5f9;
+            color: #334155;
+            font-size: 15px;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        tbody tr:last-child td:first-child {
+            border-radius: 0 0 0 16px;
+        }
+
+        tbody tr:last-child td:last-child {
+            border-radius: 0 0 16px 0;
+        }
+
+        td input[type="checkbox"] {
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+            accent-color: #3b82f6;
+        }
+
+        /* 按钮组 */
+        .action-buttons {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .act-btn {
+            padding: 7px 16px;
+            color: #fff;
+            border: none;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 10px;
+            font-weight: 600;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+
+        .act-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .act-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-blue { background: #3b82f6; }
+        .btn-green { background: #10b981; }
+        .btn-red { background: #ef4444; }
+        .btn-orange { background: #f59e0b; }
+        .btn-teal { background: #14b8a6; }
+        .btn-lightgreen { background: #22c55e; }
+        .btn-pink { background: #ec4899; }
+
+        /* 额度编辑弹窗优化样式 */
+        .quota-section {
+            margin-bottom: 24px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+            padding-left: 4px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .bar-blue { border-left: 4px solid #3b82f6; padding-left: 12px; }
+        .bar-green { border-left: 4px solid #10b981; padding-left: 12px; }
+
+        .input-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .usage-card {
+            padding: 16px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .usage-card.blue {
+            background: #f0f7ff;
+            border: 1px solid #dbeafe;
+        }
+
+        .usage-card.green {
+            background: #f0fdf4;
+            border: 1px solid #dcfce7;
+        }
+
+        .usage-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .usage-header.blue { color: #2563eb; }
+        .usage-header.green { color: #15803d; }
+
+        .usage-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .usage-label {
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        .usage-value {
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .usage-value.blue { color: #2563eb; }
+        .usage-value.green { color: #15803d; }
+        .usage-value.remaining { color: #10b981; }
+        .usage-value.remaining.warning { color: #f59e0b; }
+        .usage-value.remaining.danger { color: #ef4444; }
+
+        .progress-container {
+            height: 6px;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .progress-bar.blue { background: linear-gradient(90deg, #60a5fa, #3b82f6); }
+        .progress-bar.green { background: linear-gradient(90deg, #4ade80, #10b981); }
+
+        .unit-label {
+            font-size: 12px;
+            color: #94a3b8;
+            margin-left: 4px;
+            font-weight: normal;
+        }
+
+        /* 弹窗 */
+        .pagination {
+            height: 68px;
+            background: #fff;
+            margin: 0 24px 24px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 0 24px;
+            gap: 18px;
+            font-size: 15px;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            color: #64748b;
+        }
+
+        .pagination select {
+            padding: 9px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            outline: none;
+            cursor: pointer;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            background: #f8fafc;
+        }
+
+        .pagination select:hover {
+            border-color: #cbd5e0;
+            background: #fff;
+        }
+
+        .pagination button {
+            padding: 9px 20px;
+            border: 2px solid #e2e8f0;
+            background: #fff;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #475569;
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .pagination button:hover {
+            border-color: #3b82f6;
+            color: #3b82f6;
+            background: #eff6ff;
+            transform: translateY(-1px);
+        }
+
+        .pagination button.active {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: #fff;
+            border-color: transparent;
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
+        }
+
+        /* 弹窗 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #fff;
+            border-radius: 20px;
+            padding: 32px;
+            width: 540px;
+            max-width: 90%;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            animation: modalSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 28px;
+        }
+
+        .modal-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .modal-close {
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            background: #f1f5f9;
+            border: none;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+        }
+
+        .modal-close:hover {
+            background: linear-gradient(135deg, #fecaca 0%, #fee2e2 100%);
+            color: #ef4444;
+            transform: rotate(90deg);
+        }
+
+        .modal-body {
+            margin-bottom: 28px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 10px;
+            color: #334155;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            background: #f8fafc;
+            color: #0f172a;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:hover {
+            border-color: #cbd5e0;
+            background: #fff;
+        }
+
+        .form-input:focus {
+            border-color: #3b82f6;
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-input::placeholder {
+            color: #94a3b8;
+        }
+
+        .form-textarea {
+            height: 160px;
+            resize: vertical;
+            font-family: inherit;
+            line-height: 1.7;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        .btn-cancel {
+            padding: 13px 36px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            background: #fff;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .btn-cancel:hover {
+            background: #f8fafc;
+            border-color: #cbd5e0;
+            transform: translateY(-1px);
+        }
+
+        .btn-save {
+            padding: 13px 36px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            font-weight: 600;
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.4), 0 2px 4px -1px rgba(59, 130, 246, 0.2);
+        }
+
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.5), 0 4px 6px -2px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-save:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.4);
+        }
+
+        /* 视图切换 */
+        .view-section {
+            display: none;
+            flex: 1;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .view-section.active {
+            display: flex;
+        }
+
+        /* 参数配置特殊样式 */
+        #paramTable td {
+            vertical-align: top;
+        }
+
+        #paramTable td:nth-child(1) {
+            font-weight: 700;
+            color: #0f172a;
+            white-space: nowrap;
+            width: 260px;
+            font-size: 15px;
+            background: linear-gradient(135deg, #f8fafc 0%, #fff 100%);
+            padding: 20px 24px;
+            position: relative;
+        }
+
+        #paramTable td:nth-child(1)::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 20px;
+            bottom: 20px;
+            width: 2px;
+            background: linear-gradient(to bottom, transparent, #e2e8f0, transparent);
+        }
+
+        #paramTable td:nth-child(2) {
+            white-space: pre-wrap;
+            word-break: break-word;
+            color: #334155;
+            line-height: 2;
+            font-size: 15px;
+            padding: 20px 28px;
+            background: #fff;
+        }
+
+        #paramTable td:nth-child(3) {
+            text-align: center;
+            background: #fff;
+        }
+
+        #systemView th:nth-child(3) {
+            text-align: center;
+        }
+
+        #paramTable tr {
+            border-left: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        #paramTable tr:hover {
+            background: linear-gradient(to right, #f0f9ff, #fff);
+            border-left-color: #3b82f6;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        /* 参数配置页面的工具栏优化 */
+        #systemView .search-bar {
+            padding: 18px 24px;
+            justify-content: flex-start;
+        }
+
+        /* 参数配置表格优化 */
+        #systemView table {
+            border-collapse: collapse;
+        }
+
+        #systemView th {
+            font-size: 15px;
+            color: #1e293b;
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+        }
+
+        #systemView tbody tr {
+            border-bottom: 8px solid #f8fafc;
+        }
+
+        #systemView tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        /* 权限管理树形结构优化样式 */
+        .tree-container {
+            padding: 24px;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .tree-node {
+            margin: 0;
+            position: relative;
+        }
+        .tree-content {
+            display: flex;
+            align-items: center;
+            height: 40px;
+            padding: 0 12px;
+            border-radius: 8px;
+            transition: all 0.2s;
+            gap: 12px;
+        }
+        .tree-content:hover {
+            background: #f1f5f9;
+        }
+        .tree-arrow {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #94a3b8;
+            font-size: 10px;
+            transition: transform 0.2s;
+            flex-shrink: 0;
+        }
+        .tree-arrow.collapsed {
+            transform: rotate(-90deg);
+        }
+        .tree-checkbox {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            accent-color: #3b82f6;
+            flex-shrink: 0;
+            margin: 0;
+        }
+        .tree-label {
+            font-size: 14px;
+            color: #334155;
+            cursor: pointer;
+            user-select: none;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .tree-children {
+            margin-left: 10px;
+            padding-left: 20px;
+            border-left: 1px dashed #e2e8f0;
+        }
+        .tree-node.hidden > .tree-children {
+            display: none;
+        }
+        
+        /* 一级节点加粗 */
+        .tree-node > .tree-content > .tree-label {
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 15px;
+        }
+
+        /* 特殊权限样式 */
+        .special-root {
+            margin-top: 20px;
+            border-top: 1px solid #f1f5f9;
+            padding-top: 20px;
+        }
+        .special-root > .tree-content .tree-label {
+            color: #ef4444;
+            font-weight: 700;
+        }
+
+        /* 搜索栏布局修复 */
+        #permissionView .search-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            padding: 24px;
+            align-items: center;
+        }
+        .header-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-right: 20px;
+            border-right: 1px solid #e2e8f0;
+        }
+        .edit-section {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 15px;
+            flex: 1;
+        }
+        .field-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .field-item span {
+            font-size: 14px;
+            color: #64748b;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+        #permissionView input, #permissionView select {
+            height: 38px;
+            padding: 0 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            background: #fff;
+        }
+        .btn-icon {
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #fff;
+        }
+        .btn-icon.primary { background: #3b82f6; color: #fff; border: none; }
+        .btn-icon.danger { color: #ef4444; border-color: #fecaca; }
+        .btn-icon:hover { opacity: 0.9; transform: translateY(-1px); }
+
+    </style>
+</head>
+<body>
+
+    <!-- 顶部 -->
+    <div class="header">
+        <div class="header-left">
+            <div class="logo">Boinlive管理后台</div>
+            <div class="nav-items">
+                <span class="nav-item">直播</span>
+                <span class="nav-item">游戏</span>
+                <span class="nav-item">推广</span>
+                <span class="nav-item">资金</span>
+                <span class="nav-item">广告</span>
+                <span class="nav-item active" onclick="switchModule('account', this)">账号</span>
+                <span class="nav-item" onclick="switchModule('system', this)">系统</span>
+            </div>
+        </div>
+        <div class="header-right">
+            <span>入款提醒 <span class="status-tag">0</span></span>
+            <span>提现提醒 <span class="status-tag">0</span></span>
+            <span>剩余钻石: <span style="color: #fbbf24; font-weight: 600;">415248846</span></span>
+            <span>剩余等(W): <span style="color: #60a5fa; font-weight: 600;">338846</span></span>
+            <span>2025-12-27 03:42:15</span>
+            <span style="font-weight: 700;">tui1</span>
+        </div>
+    </div>
+
+    <div class="main-wrapper">
+        <!-- 侧边栏 -->
+        <div class="sidebar" id="sidebar">
+            <!-- 动态生成 -->
+        </div>
+
+        <!-- 内容区 -->
+        <div class="content">
+            <div class="tabs">
+                <div class="tab" id="currentTab">账号管理 <i class="fas fa-times" style="font-size: 10px; opacity: 0.5;"></i></div>
+            </div>
+
+            <!-- 账号管理视图 -->
+            <div id="accountView" class="view-section active">
+                <div class="search-bar">
+                    <span style="font-weight: 500; color: #475569;">商户:</span>
+                    <select style="width: 140px;"><option>全部</option></select>
+                    <span style="font-weight: 500; color: #475569;">子渠道:</span>
+                    <select style="width: 140px;"><option>全部</option></select>
+                    <input type="text" placeholder="请输入账号" style="width: 240px;">
+                    <button class="btn-query"><i class="fas fa-search"></i> 查询账号</button>
+                    <button class="btn-add"><i class="fas fa-plus"></i> 添加账号</button>
+                </div>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 50px;"><input type="checkbox"></th>
+                                <th style="width: 80px;">编号 <i class="fas fa-sort" style="color: #cbd5e0; font-size: 11px;"></i></th>
+                                <th style="width: 140px;">账号</th>
+                                <th style="width: 140px;">昵称</th>
+                                <th style="width: 120px;">商户</th>
+                                <th style="width: 140px;">子渠道</th>
+                                <th style="width: 140px;">权限分组</th>
+                                <th style="width: 180px;">添加时间 <i class="fas fa-sort" style="color: #cbd5e0; font-size: 11px;"></i></th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dataTable">
+                            <!-- 数据行将通过JS填充 -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="pagination">
+                    <span>每页显示: 
+                        <select>
+                            <option>20</option>
+                            <option>50</option>
+                        </select>
+                    </span>
+                    <div style="display: flex; gap: 6px;">
+                        <button>&lt;</button>
+                        <button class="active">第1页</button>
+                        <button>&gt;</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 账号安全操作视图 -->
+            <div id="securityView" class="view-section">
+                <div class="search-bar">
+                    <span style="font-weight: 500; color: #475569;">商户:</span>
+                    <select style="width: 140px;"><option>全部</option></select>
+                    <span style="font-weight: 500; color: #475569;">子渠道:</span>
+                    <select style="width: 140px;"><option>全部</option></select>
+                    <input type="text" placeholder="请输入账号" style="width: 240px;">
+                    <button class="btn-query"><i class="fas fa-search"></i> 查询账号</button>
+                </div>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 50px;"><input type="checkbox"></th>
+                                <th style="width: 80px;">编号 <i class="fas fa-sort" style="color: #cbd5e0; font-size: 11px;"></i></th>
+                                <th style="width: 140px;">账号</th>
+                                <th style="width: 140px;">昵称</th>
+                                <th style="width: 120px;">商户</th>
+                                <th style="width: 140px;">子渠道</th>
+                                <th style="width: 140px;">权限分组</th>
+                                <th style="width: 180px;">添加时间 <i class="fas fa-sort" style="color: #cbd5e0; font-size: 11px;"></i></th>
+                                <th>安全操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="securityTable">
+                            <!-- 数据行将通过JS填充 -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="pagination">
+                    <span>每页显示: 
+                        <select>
+                            <option>20</option>
+                            <option>50</option>
+                        </select>
+                    </span>
+                    <div style="display: flex; gap: 6px;">
+                        <button>&lt;</button>
+                        <button class="active">第1页</button>
+                        <button>&gt;</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 权限管理视图 -->
+            <div id="permissionView" class="view-section">
+                <div class="search-bar">
+                    <div class="header-section">
+                        <div class="field-item">
+                            <span>所属权限:</span>
+                            <select style="width: 150px;">
+                                <option>请选择权限组</option>
+                                <option>超级管理员</option>
+                                <option>商户管理员</option>
+                            </select>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <button class="btn-icon primary"><i class="fas fa-plus"></i></button>
+                            <button class="btn-icon danger"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                    <div class="edit-section">
+                        <div class="field-item">
+                            <span>权限ID:</span>
+                            <input type="text" style="width: 100px;" placeholder="例如: 1001">
+                        </div>
+                        <div class="field-item">
+                            <span>权限名称:</span>
+                            <input type="text" style="width: 180px;" placeholder="请输入组名称">
+                        </div>
+                        <div class="field-item">
+                            <span>商户:</span>
+                            <select style="width: 130px;"><option>全部商户</option></select>
+                        </div>
+                        <div style="flex: 1;"></div>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn-query" style="padding: 0 24px; height: 38px;"><i class="fas fa-save"></i> 保存设置</button>
+                            <button class="btn-add" style="padding: 0 24px; height: 38px;"><i class="fas fa-sync"></i> 重置</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-wrap">
+                    <div id="permissionTree" class="tree-container">
+                        <!-- 由JS渲染 -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 参数配置视图 -->
+            <div id="systemView" class="view-section">
+                <div class="search-bar">
+                    <button class="btn-query" onclick="location.reload()">
+                        <i class="fas fa-sync-alt"></i> 刷新数据
+                    </button>
+                    <div style="flex: 1;"></div>
+                    <div id="paramCount" style="background: linear-gradient(135deg, #dbeafe 0%, #e0e7ff 100%); padding: 10px 20px; border-radius: 12px; font-size: 14px; color: #1e40af; font-weight: 600;">
+                        <i class="fas fa-database"></i> 共 11 个参数配置项
+                    </div>
+                </div>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 260px;">参数名称</th>
+                                <th>参数内容</th>
+                                <th style="width: 140px; text-align: center;">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="paramTable">
+                            <!-- JS填充 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 额度编辑弹窗 -->
+    <div id="withdrawalModal" class="modal">
+        <div class="modal-content" style="width: 580px;">
+            <div class="modal-header">
+                <div class="modal-title">编辑额度</div>
+                <button class="modal-close" onclick="closeWithdrawalModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <!-- 提现额度部分 -->
+                <div class="quota-section">
+                    <div class="section-header bar-blue">
+                        <span class="section-title">提现额度</span>
+                    </div>
+                    <div class="input-grid">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label" style="font-size: 14px;">单笔额度上限</label>
+                            <input type="number" id="singleLimit" class="form-input" value="1000000" placeholder="请输入">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label" style="font-size: 14px;">单日额度上限</label>
+                            <input type="number" id="dailyLimit" class="form-input" value="5000000" placeholder="请输入">
+                        </div>
+                    </div>
+                    <div class="usage-card blue">
+                        <div class="usage-header blue">
+                            <i class="fas fa-chart-line"></i> 当日额度使用情况
+                        </div>
+                        <div class="usage-row">
+                            <span class="usage-label">当日已累计：</span>
+                            <span id="dailyUsed" class="usage-value blue">0</span>
+                        </div>
+                        <div class="usage-row" style="margin-bottom: 4px;">
+                            <span class="usage-label">剩余可用额度：</span>
+                            <span id="remainingQuota" class="usage-value remaining">5000000</span>
+                        </div>
+                        <div class="progress-container">
+                            <div id="withdrawalProgress" class="progress-bar blue" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 充值限额部分 -->
+                <div class="quota-section" style="margin-bottom: 0;">
+                    <div class="section-header bar-green">
+                        <span class="section-title">充值限额</span>
+                    </div>
+                    <div class="input-grid">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label" style="font-size: 14px;">单次手工充值限额</label>
+                            <input type="number" id="singleDepositLimit" class="form-input" value="20000" placeholder="请输入">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label" style="font-size: 14px;">每日手工充值限额</label>
+                            <input type="number" id="dailyDepositLimit" class="form-input" value="500000" placeholder="请输入">
+                        </div>
+                    </div>
+                    <div class="usage-card green">
+                        <div class="usage-header green">
+                            <i class="fas fa-chart-line"></i> 当日额度使用情况
+                        </div>
+                        <div class="usage-row">
+                            <span class="usage-label">当日已累计：</span>
+                            <span id="dailyDepositUsed" class="usage-value green">0</span>
+                        </div>
+                        <div class="usage-row" style="margin-bottom: 4px;">
+                            <span class="usage-label">剩余可用额度：</span>
+                            <span id="remainingDepositQuota" class="usage-value remaining">500000</span>
+                        </div>
+                        <div class="progress-container">
+                            <div id="depositProgress" class="progress-bar green" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" style="padding-top: 10px;">
+                <button class="btn-cancel" onclick="closeWithdrawalModal()" style="width: 120px;">取消</button>
+                <button class="btn-save" onclick="saveWithdrawal()" style="flex: 1;">储存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 参数编辑弹窗 -->
+    <div id="paramModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">修改参数</div>
+                <button class="modal-close" onclick="closeParamModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">参数名</label>
+                    <input type="text" id="editParamName" class="form-input" readonly style="background: #f3f4f6;">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">内容</label>
+                    <textarea id="editParamContent" class="form-input form-textarea"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeParamModal()">取消</button>
+                <button class="btn-save" onclick="saveParam()">提交</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const data = [
+            { id: 6, account: 'tui1', nickname: 'tui1账号', merchant: 'tui1', channel: '', role: '商户', time: '2020-12-04 04:21' },
+            { id: 14, account: 'tui1_caiwu', nickname: 'tui1', merchant: 'tui1', channel: '', role: '客服', time: '2020-12-30 01:54' },
+            { id: 29, account: 'tutu1', nickname: 'tutu1', merchant: 'tui1', channel: 'tui1_son1', role: '子渠道看数据', time: '2021-01-15 14:47' },
+            { id: 30, account: 'X1', nickname: 'X1', merchant: 'tui1', channel: 'X1', role: '子渠道看数据', time: '2021-01-15 20:07' },
+            { id: 32, account: 'kuaiji', nickname: '合计', merchant: 'tui1', channel: '', role: '商户看数据', time: '2021-01-17 01:17' },
+            { id: 41, account: 'KW', nickname: '客服', merchant: 'tui1', channel: '', role: '客服', time: '2021-02-22 22:42' },
+            { id: 42, account: 'JK', nickname: '监控', merchant: 'tui1', channel: '', role: '监控', time: '2021-02-22 22:43' },
+            { id: 43, account: 'admintui1', nickname: 'tui1111', merchant: 'tui1', channel: '', role: '商户', time: '2021-03-03 22:54' },
+            { id: 44, account: 'tui1a', nickname: 'tui1a', merchant: 'tui1', channel: '', role: '商户', time: '2021-03-05 04:39' },
+            { id: 45, account: 'tui1_JK', nickname: 'tui1_JK', merchant: 'tui1', channel: '', role: '监控', time: '2021-03-07 00:46' },
+            { id: 46, account: 'tui1_sun', nickname: 'tui1_sun', merchant: 'tui1', channel: 'default', role: '子渠道看数据', time: '2021-03-12 05:09' }
+        ];
+
+        const params = [
+            { name: "易商商户ID", content: "682bf2e062834545a7cc199e8383a0b0" },
+            { name: "风控行为校验开关键", content: "0" },
+            { name: "易商ID", content: "6553cd217063dd860a39ececc628a444" },
+            { name: "易商密钥", content: "bf93027b5c69522c75505c5d8d52cb67" },
+            { name: "支付宝提现说明", content: "1111\n1. 提现金额100至500\n2. 支付宝单日提现限制2笔;\n3. 手续费为充值金额的1%;\n4. 提现成功后到账时间1-30分钟，如未到账，请联系客服;\n5. 禁止在本平台进行洗黑钱、恶意套利等行为，如发现将永久封号处理" },
+            { name: "支付宝提现手续费 2代表2%", content: "2" },
+            { name: "绑定支付宝数量", content: "3" },
+            { name: "银行卡提现说明", content: "011110A0手持滚动文字，即可查看更多提现说明\n\n1. 请绑定您本人的银行卡，并确认银行卡信息正确无误，否则提现，无法到账。\n2. 提现金额100元起，如未正常到账，请联系24小时在线客服。\n3. 如果您使用的是身份登录，请您务必绑定手机号码，以免账号丢失。\n4. 提现成功后，到账时间1-30分钟，因网络或当地银行原因可能会延迟，请刷新银行余额，注意查收。\n5. 支付密码请在【我的】-【设置】-【支付密码】进行设置。\n6. 打码量指的是有效投注，例如：您充值100元，需要您有效投注100元或以上方可提交提现申请。" },
+            { name: "银行卡提现手续费 2代表2%", content: "2" },
+            { name: "发布提现说明", content: "11111手持滚动文字，即可查看更多提现说明\n\n1. 请绑定您本人的银行卡。\n2. 提现金额100元起。\n3. 禁止在本平台进行洗黑钱、恶意套利等行为，如发现将永久封号处理。" },
+            { name: "发布商户开关", content: "1" },
+            { name: "支付方式商品id及支付方式", content: "3" },
+            { name: "增加银行卡按钮", content: "2" },
+            { name: "支付宝到期检测开关", content: "[\"1880\",\"2900\"]" },
+            { name: "绑定+新加盟银行开关", content: "[\"1880\",\"28000000\"]" },
+            { name: "查找自动转卡按钮", content: "1" },
+            { name: "大交易提醒开关", content: "{\"total_recharge\":10000,\"level\":10}" },
+            { name: "取钱订单id", content: "3e31603fab01e8a05536d49c94382b620" },
+            { name: "绑付支付日志", content: "1" },
+            { name: "全程宝账单开关", content: "1" },
+            { name: "加密管理签名_alanwatson", content: "9e68c795cae44313b7814d44b53c48dd615547d0d9b207d80541d5bbb5413b369" },
+            { name: "传媒站管理员_id", content: "Y00652504129754465" },
+            { name: "扫码记录_oservId", content: "61c5447676761cb5874c113478989ff71" },
+            { name: "视频记录_securityKey", content: "5c66c28d2be46e930e466599b5bf58049" },
+            { name: "排成功率key", content: "" },
+            { name: "testGpg009", content: "test1cpg009" },
+            { name: "未绑定分类信息登记公示表", content: "1" },
+            { name: "联盟my", content: "Y00802260823714191" },
+            { name: "提现额度", content: "[\"1000000\",\"5000000\"]" }
+        ];
+
+        // 模块配置
+        const modules = {
+            account: {
+                sidebar: [
+                    { title: '账号管理', icon: 'fa-user-friends', items: ['账号管理', '权限管理', '账号安全操作', '修改密码'] }
+                ],
+                tabName: '账号管理',
+                defaultView: 'accountView'
+            },
+            system: {
+                sidebar: [
+                    { title: '短信管理', icon: 'fa-envelope', items: ['短信接口', '短信消息'] },
+                    { title: '客服管理', icon: 'fa-headset', items: ['客服接口', '客服入口配置'] },
+                    { title: '操作日志', icon: 'fa-file-alt', items: ['操作日志'] },
+                    { title: '代付厂商', icon: 'fa-industry', items: ['游戏代付厂商'] },
+                    { title: '参数配置', icon: 'fa-cog', items: ['参数配置'] },
+                    { title: '安装包管理', icon: 'fa-box', items: ['安装包列表'] }
+                ],
+                tabName: '参数配置',
+                defaultView: 'systemView'
+            }
+        };
+
+        // 页面视图映射
+        const viewMapping = {
+            '账号管理': 'accountView',
+            '权限管理': 'permissionView',
+            '账号安全操作': 'securityView',
+            '参数配置': 'systemView'
+        };
+
+        // 模块切换
+        function switchModule(modKey, targetEl) {
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            if (targetEl) {
+                targetEl.classList.add('active');
+            } else {
+                const navItems = document.querySelectorAll('.nav-item');
+                navItems.forEach(item => {
+                    if ((modKey === 'account' && item.textContent.trim() === '账号') ||
+                        (modKey === 'system' && item.textContent.trim() === '系统')) {
+                        item.classList.add('active');
+                    }
+                });
+            }
+
+            const mod = modules[modKey];
+            renderSidebar(modKey);
+            showView(mod.defaultView, mod.tabName);
+        }
+
+        // 渲染侧边栏
+        function renderSidebar(modKey) {
+            const mod = modules[modKey];
+            const sidebar = document.getElementById('sidebar');
+            sidebar.innerHTML = `<div class="sidebar-title"><i class="fas fa-chevron-right"></i> 导航</div>`;
+            
+            mod.sidebar.forEach(group => {
+                sidebar.innerHTML += `<div class="menu-group-title"><i class="fas ${group.icon}"></i> ${group.title} <i class="fas fa-chevron-up" style="margin-left: auto; font-size: 10px;"></i></div>`;
+                group.items.forEach(item => {
+                    const viewId = viewMapping[item] || '';
+                    const onClick = viewId ? `onclick="showView('${viewId}', '${item}')"` : '';
+                    sidebar.innerHTML += `<div class="menu-item" id="menu-${viewId}" ${onClick}>${item}</div>`;
+                });
+            });
+        }
+
+        // 显示特定视图
+        function showView(viewId, tabName) {
+            if (!viewId) return;
+            
+            // 切换视图显示
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            const targetView = document.getElementById(viewId);
+            if (targetView) targetView.classList.add('active');
+
+            // 切换菜单激活状态
+            document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
+            const menuItem = document.getElementById(`menu-${viewId}`);
+            if (menuItem) menuItem.classList.add('active');
+
+            // 更新页签文字
+            document.getElementById('currentTab').innerHTML = `${tabName} <i class="fas fa-times" style="font-size: 10px; opacity: 0.5;"></i>`;
+            
+            // 如果是安全视图，确保数据渲染
+            if (viewId === 'securityView') {
+                renderSecurityTable();
+            } else if (viewId === 'permissionView') {
+                renderPermissionTree();
+            }
+        }
+
+        // 渲染账号表格
+        function renderAccountTable() {
+            const tbody = document.getElementById('dataTable');
+            if (!tbody) return;
+            tbody.innerHTML = data.map(item => `
+                <tr>
+                    <td><input type="checkbox"></td>
+                    <td>${item.id}</td>
+                    <td>${item.account}</td>
+                    <td>${item.nickname}</td>
+                    <td>${item.merchant}</td>
+                    <td>${item.channel}</td>
+                    <td>${item.role}</td>
+                    <td>${item.time}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="act-btn btn-blue">修改</button>
+                            <button class="act-btn btn-blue">IP白名单</button>
+                            <button class="act-btn btn-green">密码重置</button>
+                            <button class="act-btn btn-red">删除</button>
+                            <button class="act-btn btn-orange">谷歌key</button>
+                            <button class="act-btn btn-teal">绑验证器</button>
+                            <button class="act-btn btn-lightgreen">删除验证器</button>
+                            <button class="act-btn btn-pink" onclick="openWithdrawalModal()">提现额度</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // 渲染安全操作表格
+        function renderSecurityTable() {
+            const tbody = document.getElementById('securityTable');
+            if (!tbody) return;
+            tbody.innerHTML = data.map(item => `
+                <tr>
+                    <td><input type="checkbox"></td>
+                    <td>${item.id}</td>
+                    <td>${item.account}</td>
+                    <td>${item.nickname}</td>
+                    <td>${item.merchant}</td>
+                    <td>${item.channel}</td>
+                    <td>${item.role}</td>
+                    <td>${item.time}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="act-btn btn-blue">IP白名单</button>
+                            <button class="act-btn btn-teal">绑验证器</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        const permissionTreeData = [
+            {
+                name: "后台账号管理",
+                children: [
+                    {
+                        name: "直播",
+                        children: [
+                            { name: "数据报表", children: [{name: "1001_数据总表"}, {name: "2003_经营报表"}, {name: "1002_钻石流水"}, {name: "1007_积分日志"}] },
+                            { name: "用户管理", children: [{name: "1101_用户列表"}, {name: "2102_绑定管理"}, {name: "1106_登录设备"}, {name: "1102_拉黑名单"}, {name: "1103_违规用户"}, {name: "1104_拉黑手机"}] },
+                            { name: "运营管理", children: [{name: "1201_在线直播"}, {name: "1202_公告管理"}, {name: "1203_系统消息"}, {name: "1204_邮件列表"}, {name: "1205_小秘书"}] }
+                        ]
+                    },
+                    {
+                        name: "游戏",
+                        children: [
+                            { name: "游戏报表", children: [{name: "2001_游戏数据"}, {name: "2002_数据详情"}, {name: "2004_主播业绩"}] },
+                            { name: "运营管理", children: [{name: "2201_游戏日志"}, {name: "2202_金钱日志"}, {name: "2203_上下分"}, {name: "2206_彩票开奖"}, {name: "2207_游戏精查"}, {name: "2208_红包活动"}, {name: "2204_自动下注"}] },
+                            { name: "活动管理", children: [{name: "2301_活动配置"}, {name: "2302_活动明细"}] }
+                        ]
+                    },
+                    {
+                        name: "资金",
+                        children: [
+                            { name: "支付配置", children: [{name: "4004_钻石价格列表"}, {name: "4001_支付方式列表"}, {name: "4002_支付价格列表"}, {name: "4003_支付接口列表"}, {name: "4005_公司入款配置"}, {name: "4006_支付层级配置"}, {name: "4009_公司入款黑名单"}] },
+                            { name: "支付管理", children: [{name: "4101_充值明细"}, {name: "4102_支付接口统计"}, {name: "4103_钻石兑换明细"}, {name: "4104_公司入款明细"}] },
+                            { name: "财务管理", children: [{name: "2401_提现管理"}, {name: "4201_充值管理"}, {name: "3302_积分兑换审核"}, {name: "4202_钱包额度"}, {name: "4203_钻石充值"}, {name: "4204_商户账单"}] }
+                        ]
+                    },
+                    {
+                        name: "广告",
+                        children: [
+                            { name: "广告管理", children: [{name: "5001_广告管理"}, {name: "5002_商户广告监控"}] }
+                        ]
+                    },
+                    {
+                        name: "账号",
+                        children: [
+                            { name: "账号管理", children: [{name: "6001_账号管理"}, {name: "6002_权限管理"}, {name: "6003_修改密码"}] },
+                            { name: "渠道管理", children: [{name: "6101_渠道管理"}, {name: "6102_子渠道管理"}] },
+                            { name: "星级评分", children: [{name: "6201_评分配置"}] }
+                        ]
+                    },
+                    {
+                        name: "系统",
+                        children: [
+                            { name: "短信管理", children: [{name: "7001_短信接口"}, {name: "7002_短信消息"}] },
+                            { name: "客服管理", children: [{name: "7401_客服接口"}, {name: "7402_客服入口配置"}] },
+                            { name: "操作日志", children: [{name: "7101_操作日志"}, {name: "7102_客户端日志"}] },
+                            { name: "代付厂商", children: [{name: "7202_游戏代付厂商"}] },
+                            { name: "参数配置", children: [{name: "7301_推广参数配置"}, {name: "7302_参数配置"}] },
+                            { name: "安装包管理", children: [{name: "7501_安装包列表"}] }
+                        ]
+                    },
+                    {
+                        name: "=======特殊权限=======",
+                        isSpecial: true,
+                        children: [
+                            {
+                                name: "用户操作权限",
+                                children: [
+                                    {name: "100001_用户编辑"}, {name: "100004_物品赠送"}, {name: "100005_拉黑"}, {name: "100007_送礼日志"}, {name: "100008_全局禁言"}, {name: "100009_IP白名单"}, {name: "100010_重置支付密码"}, {name: "100015_活动封号"}, {name: "100016_游戏封号"}, {name: "100017_查询设备码"}, {name: "100018_显示手机号码"}, {name: "100019_钻石不足提醒"}, {name: "100035_USDT不足提醒"}, {name: "100036_USDT充值"}, {name: "100037_购买钻石"}, {name: "100038_操作绑定管理"}, {name: "100039_操作在线直播"}, {name: "100040_操作在线直播排序"}, {name: "100041_操作在线直播跟随主渠道"}, {name: "100042_操作充值明细"}, {name: "100043_操作公司入款明细"}, {name: "100044_操作提现管理"}, {name: "100045_用户列表充值"}, {name: "100047_用户列表导出"}, {name: "100048_用户列表导出大数据"}, {name: "100046_推广更换父级"}, {name: "100049_小秘书发布渠道"}, {name: "100050_小秘书发布用户"}, {name: "100052_清理游戏断线重连信息"}, {name: "100053_账号安全操作权限"}
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ];
+
+        function renderPermissionTree() {
+            const container = document.getElementById('permissionTree');
+            if (!container) return;
+            container.innerHTML = createTreeHtml(permissionTreeData);
+        }
+
+        function createTreeHtml(nodes) {
+            return nodes.map(node => `
+                <div class="tree-node ${node.isSpecial ? 'special-root' : ''}">
+                    <div class="tree-content">
+                        ${node.children ? `<div class="tree-arrow" onclick="toggleTreeNode(this)"><i class="fas fa-chevron-down"></i></div>` : '<div style="width:20px"></div>'}
+                        <input type="checkbox" class="tree-checkbox">
+                        <span class="tree-label" onclick="toggleTreeNode(this.previousElementSibling.previousElementSibling)">${node.name}</span>
+                    </div>
+                    ${node.children ? `<div class="tree-children">${createTreeHtml(node.children)}</div>` : ''}
+                </div>
+            `).join('');
+        }
+
+        function toggleTreeNode(arrowEl) {
+            if (!arrowEl || !arrowEl.classList.contains('tree-arrow')) return;
+            const node = arrowEl.closest('.tree-node');
+            node.classList.toggle('hidden');
+            arrowEl.classList.toggle('collapsed');
+        }
+
+        // 渲染参数表格
+        function renderParamTable() {
+            const tbody = document.getElementById('paramTable');
+            tbody.innerHTML = params.map((p, i) => `
+                <tr>
+                    <td>${p.name}</td>
+                    <td>${p.content}</td>
+                    <td style="text-align: center; background: #fff;">
+                        <button class="act-btn btn-blue" onclick="openParamEdit(${i})" style="padding: 8px 22px; font-size: 14px; box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);">
+                            <i class="fas fa-edit"></i> 修改
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+            
+            // 更新参数数量显示
+            const countEl = document.getElementById('paramCount');
+            if (countEl) {
+                countEl.innerHTML = `<i class="fas fa-database"></i> 共 ${params.length} 个参数配置项`;
+            }
+        }
+
+        // 提现额度弹窗
+        function openWithdrawalModal() {
+            const modal = document.getElementById('withdrawalModal');
+            modal.classList.add('show');
+            
+            // 模拟提现已用额度
+            const dailyUsed = Math.floor(Math.random() * 2000000);
+            document.getElementById('dailyUsed').textContent = dailyUsed.toLocaleString();
+            updateWithdrawalStats();
+
+            // 模拟充值已用额度
+            const dailyDepositUsed = Math.floor(Math.random() * 200000);
+            document.getElementById('dailyDepositUsed').textContent = dailyDepositUsed.toLocaleString();
+            updateDepositStats();
+        }
+
+        function updateWithdrawalStats() {
+            const dailyLimit = parseInt(document.getElementById('dailyLimit').value) || 0;
+            const dailyUsedText = document.getElementById('dailyUsed').textContent.replace(/,/g, '');
+            const dailyUsed = parseInt(dailyUsedText) || 0;
+            const remaining = Math.max(0, dailyLimit - dailyUsed);
+            
+            const quotaEl = document.getElementById('remainingQuota');
+            quotaEl.textContent = remaining.toLocaleString();
+            
+            // 更新进度条
+            const percent = dailyLimit > 0 ? Math.min(100, (dailyUsed / dailyLimit) * 100) : 0;
+            const progressBar = document.getElementById('withdrawalProgress');
+            if (progressBar) progressBar.style.width = percent + '%';
+            
+            // 状态颜色
+            if (percent > 80) {
+                quotaEl.className = 'usage-value remaining danger';
+                if (progressBar) progressBar.style.background = '#ef4444';
+            } else if (percent > 50) {
+                quotaEl.className = 'usage-value remaining warning';
+                if (progressBar) progressBar.style.background = '#f59e0b';
+            } else {
+                quotaEl.className = 'usage-value remaining';
+                if (progressBar) progressBar.style.background = 'linear-gradient(90deg, #60a5fa, #3b82f6)';
+            }
+        }
+
+        function updateDepositStats() {
+            const dailyLimit = parseInt(document.getElementById('dailyDepositLimit').value) || 0;
+            const dailyUsedText = document.getElementById('dailyDepositUsed').textContent.replace(/,/g, '');
+            const dailyUsed = parseInt(dailyUsedText) || 0;
+            const remaining = Math.max(0, dailyLimit - dailyUsed);
+            
+            const quotaEl = document.getElementById('remainingDepositQuota');
+            if (quotaEl) quotaEl.textContent = remaining.toLocaleString();
+            
+            // 更新进度条
+            const percent = dailyLimit > 0 ? Math.min(100, (dailyUsed / dailyLimit) * 100) : 0;
+            const progressBar = document.getElementById('depositProgress');
+            if (progressBar) progressBar.style.width = percent + '%';
+            
+            // 状态颜色
+            if (percent > 80) {
+                if (quotaEl) quotaEl.className = 'usage-value remaining danger';
+                if (progressBar) progressBar.style.background = '#ef4444';
+            } else if (percent > 50) {
+                if (quotaEl) quotaEl.className = 'usage-value remaining warning';
+                if (progressBar) progressBar.style.background = '#f59e0b';
+            } else {
+                if (quotaEl) quotaEl.className = 'usage-value remaining';
+                if (progressBar) progressBar.style.background = 'linear-gradient(90deg, #4ade80, #10b981)';
+            }
+        }
+
+        function closeWithdrawalModal() {
+            document.getElementById('withdrawalModal').classList.remove('show');
+        }
+
+        function saveWithdrawal() {
+            const single = document.getElementById('singleLimit').value;
+            const daily = document.getElementById('dailyLimit').value;
+            const singleDep = document.getElementById('singleDepositLimit').value;
+            const dailyDep = document.getElementById('dailyDepositLimit').value;
+            
+            alert(`储存成功!\n\n提现 - 单笔: ${single}, 单日: ${daily}\n充值 - 单笔: ${singleDep}, 单日: ${dailyDep}`);
+            closeWithdrawalModal();
+        }
+
+        // 参数编辑
+        let currentParamIdx = -1;
+        function openParamEdit(idx) {
+            currentParamIdx = idx;
+            document.getElementById('editParamName').value = params[idx].name;
+            document.getElementById('editParamContent').value = params[idx].content;
+            document.getElementById('paramModal').classList.add('show');
+        }
+
+        function closeParamModal() {
+            document.getElementById('paramModal').classList.remove('show');
+        }
+
+        function saveParam() {
+            params[currentParamIdx].content = document.getElementById('editParamContent').value;
+            renderParamTable();
+            closeParamModal();
+            alert('修改成功！');
+        }
+
+        // 监听额度变化
+        window.addEventListener('DOMContentLoaded', function() {
+            const dailyLimitInput = document.getElementById('dailyLimit');
+            if (dailyLimitInput) dailyLimitInput.addEventListener('input', updateWithdrawalStats);
+
+            const dailyDepositLimitInput = document.getElementById('dailyDepositLimit');
+            if (dailyDepositLimitInput) dailyDepositLimitInput.addEventListener('input', updateDepositStats);
+        });
+
+        // 初始化
+        switchModule('account');
+        renderAccountTable();
+        renderParamTable();
+    </script>
+</body>
+</html>

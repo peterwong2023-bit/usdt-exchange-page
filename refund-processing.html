@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>退款处理中 - USDT兑换</title>
+    <link rel="stylesheet" href="refund.css">
+    <style>
+        /* 状态页面特殊样式 */
+        .status-container {
+            max-width: 640px;
+            margin: 0 auto;
+            padding-bottom: 40px;
+        }
+
+        .status-header {
+            background: white;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #333;
+            cursor: pointer;
+            padding: 0;
+            width: 40px;
+        }
+
+        .status-header h1 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        /* 状态卡片 */
+        .status-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            border: 1px solid #e5e7eb;
+        }
+
+        /* 状态图标 */
+        .status-icon-wrapper {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .status-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 16px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            position: relative;
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border: 3px solid #f59e0b;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .status-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 8px;
+        }
+
+        .status-subtitle {
+            font-size: 14px;
+            color: #718096;
+        }
+
+        /* 退款信息 */
+        .refund-info {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        .info-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a202c;
+            text-align: right;
+            max-width: 60%;
+            word-break: break-all;
+        }
+
+        .info-value.amount {
+            font-size: 20px;
+            color: #667eea;
+        }
+
+        /* 操作按钮 */
+        .action-btn {
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+        }
+
+        /* 提示信息 */
+        .info-tip {
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 24px;
+        }
+
+        .info-tip-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #92400e;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .info-tip-content {
+            font-size: 13px;
+            color: #78350f;
+            line-height: 1.6;
+        }
+
+        /* 加载动画 */
+        .loading-spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(245, 158, 11, 0.3);
+            border-radius: 50%;
+            border-top-color: #f59e0b;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="status-container">
+        <!-- 顶部导航 -->
+        <div class="status-header">
+            <button class="back-btn" onclick="window.history.back()">←</button>
+            <h1>退款处理中</h1>
+            <div style="width: 40px;"></div>
+        </div>
+
+        <!-- 状态卡片 -->
+        <div class="status-card">
+            <!-- 状态图标和标题 -->
+            <div class="status-icon-wrapper">
+                <div class="status-icon">
+                    <div class="loading-spinner"></div>
+                </div>
+                <div class="status-title">退款处理中</div>
+                <div class="status-subtitle">预计几分钟内完成</div>
+            </div>
+
+            <!-- 退款信息 -->
+            <div class="refund-info">
+                <div class="info-row">
+                    <span class="info-label">退款金额</span>
+                    <span class="info-value amount">50.00 USDT</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">退款地址</span>
+                    <span class="info-value" style="font-family: 'SF Mono', Monaco, monospace; font-size: 11px;">TXXXxxxXXXxxx...xxxXXX</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">申请时间</span>
+                    <span class="info-value">2024-01-20 14:30:25</span>
+                </div>
+            </div>
+
+            <!-- 操作按钮 -->
+            <div style="margin-top: 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <button class="action-btn" onclick="refreshStatus()" style="background: linear-gradient(135deg, #10b981, #059669); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
+                    🔄 刷新状态
+                </button>
+                <button class="action-btn secondary" onclick="window.location.href='index.html'" style="background: white; color: #667eea; border: 1px solid #667eea; box-shadow: none;">
+                    🏠 返回首页
+                </button>
+            </div>
+
+            <!-- 提示信息 -->
+            <div class="info-tip">
+                <div class="info-tip-title">
+                    ⏳ 处理中
+                </div>
+                <div class="info-tip-content">
+                    • 退款正在处理中，请稍候<br>
+                    • 预计几分钟内完成退款<br>
+                    • 点击"刷新状态"按钮查看最新进度
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast提示 -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // 显示Toast提示
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast show ${type}`;
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // 刷新状态
+        function refreshStatus() {
+            // 显示加载提示
+            showToast('正在刷新状态...', 'info');
+            
+            // 模拟从服务器获取最新状态
+            // 实际使用时应该调用API获取真实状态
+            setTimeout(() => {
+                // 模拟：这里可以根据实际返回的状态决定是否跳转
+                const isCompleted = Math.random() > 0.5; // 模拟50%概率完成
+                
+                if (isCompleted) {
+                    showToast('退款已完成！', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'refund-status.html';
+                    }, 1000);
+                } else {
+                    showToast('退款仍在处理中，请稍后再试', 'info');
+                }
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

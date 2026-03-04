@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商户统计报表</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
+            background: #f5f7fa;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        /* 顶部筛选栏 */
+        .filter-bar {
+            padding: 20px;
+            background: #fafbfc;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .filter-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .date-input {
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 13px;
+            font-family: inherit;
+            color: #374151;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #64748b;
+            border: 1px solid #d1d5db;
+        }
+
+        .btn-secondary:hover {
+            background: #f8fafc;
+        }
+
+        /* 表格 */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #f8fafc;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        th {
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 13px;
+            font-weight: 700;
+            color: #475569;
+            white-space: nowrap;
+        }
+
+        th:first-child {
+            padding-left: 20px;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #f1f5f9;
+            transition: background 0.2s;
+        }
+
+        tbody tr:hover {
+            background: #fafbfc;
+        }
+
+        tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        td {
+            padding: 16px;
+            font-size: 13px;
+            color: #334155;
+            vertical-align: top;
+        }
+
+        td:first-child {
+            padding-left: 20px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        /* 币种数据块 */
+        .currency-block {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .currency-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 10px;
+            background: #f8fafc;
+            border-radius: 6px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .currency-badge {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            min-width: 45px;
+            text-align: center;
+        }
+
+        .currency-badge.trx {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .currency-badge.usdt {
+            background: #d1fae5;
+            color: #059669;
+        }
+
+        .currency-badge.usdd {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+
+        .currency-value {
+            font-weight: 600;
+            color: #1e293b;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* 单值显示（没有多币种的列） */
+        .single-value {
+            font-weight: 600;
+            color: #1e293b;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* 合计行 */
+        tbody tr.total-row {
+            background: #fef3c7;
+            border-top: 2px solid #fbbf24;
+            border-bottom: 2px solid #fbbf24;
+            font-weight: 700;
+        }
+
+        tbody tr.total-row td {
+            color: #92400e;
+        }
+
+        tbody tr.total-row:hover {
+            background: #fef3c7;
+        }
+
+        /* 分页 */
+        .pagination {
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #e5e7eb;
+            background: #fafbfc;
+        }
+
+        .page-info {
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        .page-controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .page-btn {
+            width: 32px;
+            height: 32px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            background: white;
+            color: #64748b;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .page-btn:hover {
+            background: #f8fafc;
+            border-color: #3b82f6;
+            color: #3b82f6;
+        }
+
+        .page-btn.active {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+
+        .page-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .page-btn:disabled:hover {
+            background: white;
+            border-color: #d1d5db;
+            color: #64748b;
+        }
+
+        /* 空状态（0值）样式 */
+        .currency-value.zero {
+            color: #94a3b8;
+        }
+
+        /* 响应式 */
+        @media (max-width: 1200px) {
+            .filter-bar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            table {
+                font-size: 12px;
+            }
+            
+            th, td {
+                padding: 10px 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 筛选栏 -->
+        <div class="filter-bar">
+            <div class="filter-title">统计报表</div>
+            <div class="filter-group">
+                <select class="date-input" style="width: 120px;">
+                    <option>选择账户</option>
+                    <option>全部账户</option>
+                    <option>7门店数</option>
+                    <option>711服务</option>
+                </select>
+                <input type="date" class="date-input" value="2025-11-10">
+                <span style="color: #94a3b8;">~</span>
+                <input type="date" class="date-input" value="2025-11-10">
+            </div>
+            <button class="btn btn-primary">
+                <i class="fas fa-search"></i>
+                查询
+            </button>
+            <button class="btn btn-secondary">
+                <i class="fas fa-redo"></i>
+                重置
+            </button>
+        </div>
+
+        <!-- 表格 -->
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>商户 ID</th>
+                        <th>商户名称</th>
+                        <th>链包总数</th>
+                        <th>总余额</th>
+                        <th>待确认金额</th>
+                        <th>异常入金额</th>
+                        <th>入款金额</th>
+                        <th>入款笔数</th>
+                        <th>出款金额</th>
+                        <th>出款笔数</th>
+                        <th>归集金额</th>
+                        <th>归集笔数</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- 示例行 1 -->
+                    <tr>
+                        <td>1001</td>
+                        <td>7门店数</td>
+                        <td>0</td>
+                        <td>
+                            <div class="currency-block">
+                                <div class="currency-item">
+                                    <span class="currency-badge trx">TRX</span>
+                                    <span class="currency-value zero">0</span>
+                                </div>
+                                <div class="currency-item">
+                                    <span class="currency-badge usdt">USDT</span>
+                                    <span class="currency-value zero">0</span>
+                                </div>
+                                <div class="currency-item">
+                                    <span class="currency-badge usdd">资费</span>
+                                    <span class="currency-value zero">0</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="currency-block">
+                                <div class="currency-item">
+                                    <span class="currency-badge trx">TRX</span>
+                                    <span class="currency-value zero">0</span>
+                                </div>
+                                <div class="currency-item">
+                                    <span class="currency-badge usdt">USDT</span>
+                                    <span class="currency-value zero">0</span>
+                                </div>
+                                <div class="currency-item">
+                                    <span class="currency-badge usdd">资费</span>
+                                    <span class="currency-value zero">0</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td><span class="single-value">0 USDT</span></td>
+                        <td><span class="single-value">0 USDT</span></td>
+                        <td class="single-value">0</td>
+                        <td><span class="single-value">0 USDT</span></td>
+                        <td class="single-value">0</td>
+                        <td><span class="single-value">0 USDT</span></td>
+                        <td class="single-value">0</td>
+                    </tr>
+
+                    <!-- 示例行 2 - 有数据 -->
+                    <tr>
+                        <td>1002</td>
+                        <td>出发客户归集</td>
+                        <td>3</td>
+                        <td>
+                            <div class="currency-block">
+                                <div class="currency-item">
+                                    <span class="currency-badge trx">TRX</span>
+                                    <span class="currency-value">926.951386</span>
+                                </div>
+                                <div class="currency-item">
+                                    <span class="currency-badge usdt">USDT</span>
+                                    <span class="currency-value zero">0</span>
+                                </div>
+                                <div class="currency-item">
+                                    <span class="currency-badge usdd">资费</span>
+                                    <span class="currency-value">160000</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="currency-block">
+                                <div class="currency-item">
+                                    <span class="currency-badge trx">TRX</span>
+                                    <span class="currency-value zero">0</span>
+                                </div>
+                                <div class="currency-item">
+                                    <span class="currency-badge usdt">USDT</span>
+                                    <span class="currency-value zero">0</span>
+                                </div>
+                                <div class="currency-item">
+                                    <span class="currency-badge usdd">资费</span>
+                                    <span class="currency-value zero">0</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td><span class="single-value">0 USDT</span></td>
+                        <td><span class="single-value">0 USDT</span></td>
+                        <td class="single-value">0</td>
+                        <td><span class="single-value">0 USDT</span></td>
+                        <td class="single-value">0</td>
+                        <td><span class="single-value">0 USDT</span></td>
+                        <td class="single-value">0</td>
+                    </tr>
+
+                    <!-- 示例行 3 -->
+                    <tr>
+                        <td>1004</td>
+                        <td>711服务归集</td>
+                        <td>1</td>
+                        <td>
+                            <div class="currency-block">
+                                <div class="currency-item">
+                                    <span class="currency-badge trx">TRX</span>
+                                    <span class="currency-value">628.637686</span>
+                                </div>
+                                <div class="currency-item">
+                                    <span class="currency-badge usdt">USDT</span>
+                                    <span class="currency-value zero">0</span>
+                                </div>
+                                <div class="currency-item">
+                                    <span class="currency-badge usdd">资费</span>
+                                    <span class="currency-value">158700</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="currency-block">
+                                <div class="currency-item">
+                                    <span class="currency-badge trx">TRX</span>
+                                    <span class="currency-value zero">0</span>
+                                </div>
+                                <div class="currency-item">
+                                    <span class="currency-badge usdt">USDT</span>
+                                    <span class="currency-value zero">0</span>
+                                </div>
+                                <div class="currency-item">
+                                    <span class="currency-badge usdd">资费</span>
+                                    <span class="currency-value zero">0</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td><span class="single-value">0 USDT</span></td>
+                        <td><span class="single-value">0 USDT</span></td>
+                        <td class="single-value">0</td>
+                        <td><span class="single-value">0 USDT</span></td>
+                        <td class="single-value">0</td>
+                        <td><span class="single-value">0 USDT</span></td>
+                        <td class="single-value">0</td>
+                    </tr>
+
+                    <!-- 示例行 4 - 有入款和归集数据 -->
+                    <tr>
+                        <td>1007</td>
+                        <td>711客户归集</td>
+                        <td>1</td>
+                        <td>
+                            <div class="currency-block">
+                                <div class="currency-item">
+                                    <span class="currency-badge trx">TRX</span>
+                                    <span class="currency-value">1985.57903</span>
+                                </div>
+                                <div class="currency-item">
+                                    <span class="currency-badge usdt">USDT</span>
+                                    <span class="currency-value">1.5</span>
+                                </div>
+                                <div class="currency-item">
+                                    <span class="currency-badge usdd">资费</span>
+                                    <span class="currency-value">156000</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="currency-block">
+                                <div class="currency-item">
+                                    <span class="currency-badge trx">TRX</span>
+                                    <span class="currency-value zero">0</span>
+                                </div>
+                                <div class="currency-item">
+                                    <span class="currency-badge usdt">USDT</span>
+                                    <span class="currency-value zero">0</span>
+                                </div>
+                                <div class="currency-item">
+                                    <span class="currency-badge usdd">资费</span>
+                                    <span class="currency-value zero">0</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="currency-block">
+                                <div class="currency-item">
+                                    <span class="currency-badge trx">TRX</span>
+                                    <span class="currency-value">500.25</span>
+                                </div>
+                                <div class="currency-item">
+                                    <span class="currency-badge usdt">USDT</span>
+                                    <span class="currency-value">125.80</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="currency-block">
+                                <div class="currency-item">
+                                    <span class="currency-badge trx">TRX</span>
+                                    <span class="currency-value">12</span>
+                                </div>
+                                <div class="currency-item">
+                                    <span class="currency-badge usdt">USDT</span>
+                                    <span class="currency-value">8</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td><span class="single-value">0 USDT</span></td>
+                        <td><span class="single-value">0 USDT</span></td>
+                        <td class="single-value">0</td>
+                        <td>
+                            <div class="currency-block">
+                                <div class="currency-item">
+                                    <span class="currency-badge trx">TRX</span>
+                                    <span class="currency-value">850.50</span>
+                                </div>
+                                <div class="currency-item">
+                                    <span class="currency-badge usdt">USDT</span>
+                                    <span class="currency-value">95.20</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="currency-block">
+                                <div class="currency-item">
+                                    <span class="currency-badge trx">TRX</span>
+                                    <span class="currency-value">5</span>
+                                </div>
+                                <div class="currency-item">
+                                    <span class="currency-badge usdt">USDT</span>
+                                    <span class="currency-value">3</span>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- 合计行 -->
+                    <tr class="total-row">
+                        <td colspan="2">合计</td>
+                        <td>13</td>
+                        <td>
+                            <div class="currency-block">
+                                <div class="currency-item">
+                                    <span class="currency-badge trx">TRX</span>
+                                    <span class="currency-value">3560.308434</span>
+                                </div>
+                                <div class="currency-item">
+                                    <span class="currency-badge usdt">USDT</span>
+                                    <span class="currency-value">1.94</span>
+                                </div>
+                                <div class="currency-item">
+                                    <span class="currency-badge usdd">资费</span>
+                                    <span class="currency-value">474700</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="currency-block">
+                                <div class="currency-item">
+                                    <span class="currency-badge trx">TRX</span>
+                                    <span class="currency-value zero">0</span>
+                                </div>
+                                <div class="currency-item">
+                                    <span class="currency-badge usdt">USDT</span>
+                                    <span class="currency-value zero">0</span>
+                                </div>
+                                <div class="currency-item">
+                                    <span class="currency-badge usdd">资费</span>
+                                    <span class="currency-value zero">0</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="currency-block">
+                                <div class="currency-item">
+                                    <span class="currency-badge trx">TRX</span>
+                                    <span class="currency-value">500.25</span>
+                                </div>
+                                <div class="currency-item">
+                                    <span class="currency-badge usdt">USDT</span>
+                                    <span class="currency-value">125.80</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="currency-block">
+                                <div class="currency-item">
+                                    <span class="currency-badge trx">TRX</span>
+                                    <span class="currency-value">12</span>
+                                </div>
+                                <div class="currency-item">
+                                    <span class="currency-badge usdt">USDT</span>
+                                    <span class="currency-value">8</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td><span class="single-value">0 USDT</span></td>
+                        <td><span class="single-value">0 USDT</span></td>
+                        <td class="single-value">0</td>
+                        <td>
+                            <div class="currency-block">
+                                <div class="currency-item">
+                                    <span class="currency-badge trx">TRX</span>
+                                    <span class="currency-value">850.50</span>
+                                </div>
+                                <div class="currency-item">
+                                    <span class="currency-badge usdt">USDT</span>
+                                    <span class="currency-value">95.20</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="currency-block">
+                                <div class="currency-item">
+                                    <span class="currency-badge trx">TRX</span>
+                                    <span class="currency-value">5</span>
+                                </div>
+                                <div class="currency-item">
+                                    <span class="currency-badge usdt">USDT</span>
+                                    <span class="currency-value">3</span>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 分页 -->
+        <div class="pagination">
+            <div class="page-info">共 215 条 · 1-10 条/页</div>
+            <div class="page-controls">
+                <button class="page-btn" disabled>
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="page-btn active">1</button>
+                <button class="page-btn">2</button>
+                <button class="page-btn">3</button>
+                <button class="page-btn">4</button>
+                <button class="page-btn">5</button>
+                <span style="color: #94a3b8; padding: 0 8px;">···</span>
+                <button class="page-btn">22</button>
+                <button class="page-btn">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+
+

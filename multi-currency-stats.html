@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>多币种交易统计 - VOSS Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
+            background: #0f172a;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        /* 账户卡片 */
+        .account-card {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            border: 1px solid #334155;
+        }
+
+        .account-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .account-icon {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .account-name {
+            color: #e2e8f0;
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .account-balances {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .balance-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .currency-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .currency-icon.usdt {
+            background: #26a17b;
+            color: white;
+        }
+
+        .currency-icon.trx {
+            background: #ef4444;
+            color: white;
+        }
+
+        .currency-icon.usdd {
+            background: #0ea5e9;
+            color: white;
+        }
+
+        .currency-icon.usdc {
+            background: #2775ca;
+            color: white;
+        }
+
+        .balance-amount {
+            color: #f1f5f9;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* 交易统计卡片 */
+        .stats-card {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid #334155;
+        }
+
+        .stats-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .stats-icon {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+        }
+
+        .stats-title {
+            color: #e2e8f0;
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .stats-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 10px;
+            border: 1px solid rgba(51, 65, 85, 0.5);
+        }
+
+        .stat-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .stat-icon.deposit {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+        }
+
+        .stat-icon.withdraw {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+        }
+
+        .stat-icon.float {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+
+        .stat-icon.return {
+            background: linear-gradient(135deg, #64748b, #475569);
+        }
+
+        .stat-icon.possible {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+        }
+
+        .stat-content {
+            flex: 1;
+        }
+
+        .stat-label {
+            color: #94a3b8;
+            font-size: 12px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            color: #f1f5f9;
+            font-size: 14px;
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* 币种标签组 */
+        .currency-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 6px;
+        }
+
+        .currency-tag {
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .currency-tag.usdt {
+            background: rgba(38, 161, 123, 0.2);
+            color: #26a17b;
+            border: 1px solid rgba(38, 161, 123, 0.3);
+        }
+
+        .currency-tag.trx {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .currency-tag.usdd {
+            background: rgba(14, 165, 233, 0.2);
+            color: #0ea5e9;
+            border: 1px solid rgba(14, 165, 233, 0.3);
+        }
+
+        .currency-tag.usdc {
+            background: rgba(39, 117, 202, 0.2);
+            color: #2775ca;
+            border: 1px solid rgba(39, 117, 202, 0.3);
+        }
+
+        .currency-tag-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        .currency-tag.usdt .currency-tag-dot {
+            background: #26a17b;
+        }
+
+        .currency-tag.trx .currency-tag-dot {
+            background: #ef4444;
+        }
+
+        .currency-tag.usdd .currency-tag-dot {
+            background: #0ea5e9;
+        }
+
+        .currency-tag.usdc .currency-tag-dot {
+            background: #2775ca;
+        }
+
+        /* 统计数值 - 多币种显示 */
+        .multi-currency-value {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .currency-line {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: 'Courier New', monospace;
+        }
+
+        .currency-line .currency-symbol {
+            min-width: 45px;
+            font-size: 11px;
+            font-weight: 700;
+            opacity: 0.7;
+        }
+
+        .currency-line.usdt {
+            color: #26a17b;
+        }
+
+        .currency-line.trx {
+            color: #ef4444;
+        }
+
+        .currency-line.usdd {
+            color: #0ea5e9;
+        }
+
+        .currency-line.usdc {
+            color: #2775ca;
+        }
+
+        /* 分隔符 */
+        .divider {
+            height: 1px;
+            background: linear-gradient(to right, transparent, #334155, transparent);
+            margin: 12px 0;
+        }
+
+        /* 总计显示 */
+        .total-section {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(51, 65, 85, 0.5);
+        }
+
+        .total-label {
+            color: #f59e0b;
+            font-size: 11px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .total-value {
+            color: #fbbf24;
+            font-size: 15px;
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 账户卡片 -->
+        <div class="account-card">
+            <div class="account-header">
+                <div class="account-icon">📊</div>
+                <div class="account-name">BOB11-08</div>
+            </div>
+            <div class="account-balances">
+                <div class="balance-item">
+                    <div class="currency-icon usdt">₮</div>
+                    <div class="balance-amount">11111 U</div>
+                </div>
+                <div class="balance-item">
+                    <div class="currency-icon trx">T</div>
+                    <div class="balance-amount">16161 TRX</div>
+                </div>
+                <div class="balance-item">
+                    <div class="currency-icon usdd">D</div>
+                    <div class="balance-amount">5000 USDD</div>
+                </div>
+                <div class="balance-item">
+                    <div class="currency-icon usdc">C</div>
+                    <div class="balance-amount">3200 USDC</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 交易统计 -->
+        <div class="stats-card">
+            <div class="stats-header">
+                <div class="stats-icon">📈</div>
+                <div class="stats-title">交易统计</div>
+            </div>
+
+            <div class="stats-list">
+                <!-- 入款 -->
+                <div class="stat-item">
+                    <div class="stat-icon deposit">📥</div>
+                    <div class="stat-content">
+                        <div class="stat-label">入款</div>
+                        <div class="multi-currency-value">
+                            <div class="currency-line usdt">
+                                <span class="currency-symbol">USDT:</span>
+                                <span>11111 U/425笔</span>
+                            </div>
+                            <div class="currency-line trx">
+                                <span class="currency-symbol">TRX:</span>
+                                <span>8500 TRX/98笔</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 出款 -->
+                <div class="stat-item">
+                    <div class="stat-icon withdraw">📤</div>
+                    <div class="stat-content">
+                        <div class="stat-label">出款</div>
+                        <div class="multi-currency-value">
+                            <div class="currency-line usdt">
+                                <span class="currency-symbol">USDT:</span>
+                                <span>11111 U/122笔</span>
+                            </div>
+                            <div class="currency-line trx">
+                                <span class="currency-symbol">TRX:</span>
+                                <span>7200 TRX/56笔</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 净入 -->
+                <div class="stat-item">
+                    <div class="stat-icon float">💰</div>
+                    <div class="stat-content">
+                        <div class="stat-label">净入</div>
+                        <div class="multi-currency-value">
+                            <div class="currency-line usdt">
+                                <span class="currency-symbol">USDT:</span>
+                                <span>11111 U</span>
+                            </div>
+                            <div class="currency-line trx">
+                                <span class="currency-symbol">TRX:</span>
+                                <span>1300 TRX</span>
+                            </div>
+                            <div class="currency-line usdd">
+                                <span class="currency-symbol">USDD:</span>
+                                <span>850 USDD</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 归集 -->
+                <div class="stat-item">
+                    <div class="stat-icon return">🔄</div>
+                    <div class="stat-content">
+                        <div class="stat-label">归集</div>
+                        <div class="multi-currency-value">
+                            <div class="currency-line usdt">
+                                <span class="currency-symbol">USDT:</span>
+                                <span>11111 U/97笔</span>
+                            </div>
+                            <div class="currency-line usdc">
+                                <span class="currency-symbol">USDC:</span>
+                                <span>2100 USDC/23笔</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 可疑 -->
+                <div class="stat-item">
+                    <div class="stat-icon possible">⚠️</div>
+                    <div class="stat-content">
+                        <div class="stat-label">可疑</div>
+                        <div class="multi-currency-value">
+                            <div class="currency-line usdt">
+                                <span class="currency-symbol">USDT:</span>
+                                <span>635.51 U</span>
+                            </div>
+                        </div>
+                        <div class="total-section">
+                            <div class="total-label">折合总计 (USD)</div>
+                            <div class="total-value">$635.51</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+
+
+

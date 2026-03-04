@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>地址管理 - USDT</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #1890ff;
+            --success-color: #52c41a;
+            --danger-color: #ff4d4f;
+            --warning-color: #faad14;
+            --text-main: #1a1a1a;
+            --text-secondary: #666;
+            --text-muted: #999;
+            --bg-light: #f5f7fa;
+            --bg-white: #fff;
+            --border-color: #e8e8e8;
+            --border-light: #f0f0f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+            background: var(--bg-light);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            color: var(--text-main);
+            line-height: 1.5;
+        }
+
+        .container {
+            background: var(--bg-white);
+            border-radius: 20px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+            max-width: 640px;
+            width: 100%;
+            padding: 32px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .header-left h1 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .header-left .merchant-id {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .btn {
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+            box-shadow: 0 2px 8px rgba(24, 144, 255, 0.2);
+        }
+
+        .btn-primary:hover {
+            background: #40a9ff;
+        }
+
+        .btn-primary:disabled {
+            background: #d9d9d9;
+            color: #999;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        .btn-outline {
+            background: var(--bg-white);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .btn-outline:hover {
+            background: var(--bg-light);
+            color: var(--text-main);
+        }
+
+        .btn-danger {
+            background: #fff1f0;
+            border: 1px solid #ffccc7;
+            color: var(--danger-color);
+        }
+
+        .btn-danger:hover {
+            background: #ffeceb;
+        }
+
+        /* 工具栏 */
+        .toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            gap: 16px;
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 0;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .filter-tab {
+            padding: 8px 16px;
+            border: none;
+            background: var(--bg-white);
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+            border-right: 1px solid var(--border-color);
+        }
+
+        .filter-tab:last-child {
+            border-right: none;
+        }
+
+        .filter-tab:hover {
+            background: var(--bg-light);
+            color: var(--text-main);
+        }
+
+        .filter-tab.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .tab-count {
+            min-width: 18px;
+            height: 18px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.08);
+            padding: 0 5px;
+            border-radius: 9px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .filter-tab.active .tab-count {
+            background: rgba(255, 255, 255, 0.25);
+            color: white;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .btn-sm {
+            padding: 8px 12px;
+            font-size: 12px;
+        }
+
+        .address-list {
+            min-height: 300px;
+        }
+
+        /* 分页 */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-light);
+        }
+
+        .page-btn {
+            width: 36px;
+            height: 36px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-white);
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+        }
+
+        .page-btn:hover:not(:disabled) {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .page-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .page-btn.active {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+
+        .page-info {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin: 0 8px;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 48px 20px;
+            color: var(--text-muted);
+        }
+
+        .no-data-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+            display: block;
+            opacity: 0.6;
+        }
+
+        .no-data p {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        /* 地址卡片 */
+        .address-card {
+            background: var(--bg-white);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            margin-top: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s;
+            cursor: pointer;
+            position: relative;
+            overflow: visible;
+        }
+
+        .address-card:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 2px 8px rgba(24, 144, 255, 0.08);
+        }
+
+        .address-card.selected {
+            border-color: var(--primary-color);
+            background: #f0f7ff;
+        }
+
+        /* 当前使用：左侧蓝色竖条 */
+        .address-card.selected {
+            border-left: 3px solid var(--primary-color);
+            padding-left: 13px;
+        }
+
+        .selected-badge {
+            display: none;
+        }
+
+        /* 默认标签 */
+        .default-tag {
+            display: none;
+            background: #e6f4ff;
+            color: var(--primary-color);
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        .address-card.selected .default-tag {
+            display: inline-block;
+        }
+
+        /* 新地址：右上角角标 */
+        .new-badge {
+            position: absolute;
+            top: -8px;
+            right: 16px;
+            background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%);
+            color: white;
+            font-size: 10px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+            box-shadow: 0 2px 6px rgba(82, 196, 26, 0.3);
+        }
+
+        .address-info { flex: 1; min-width: 0; }
+
+        .address-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            color: var(--text-main);
+            margin-bottom: 10px;
+            word-break: break-all;
+            line-height: 1.5;
+        }
+
+        .address-meta {
+            display: flex;
+            gap: 16px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .risk-tag {
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: help;
+            position: relative;
+        }
+
+        .risk-tag::after {
+            content: attr(data-detail);
+            position: absolute;
+            bottom: calc(100% + 12px);
+            left: 0;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #f0f0f0;
+            padding: 14px 18px;
+            border-radius: 12px;
+            font-size: 13px;
+            white-space: pre-wrap;
+            width: 200px;
+            display: none;
+            z-index: 100;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+            font-weight: normal;
+            line-height: 1.8;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .risk-tag::before {
+            content: '';
+            position: absolute;
+            bottom: calc(100% + 4px);
+            left: 20px;
+            border: 6px solid transparent;
+            border-top-color: #1a1a2e;
+            display: none;
+            z-index: 100;
+        }
+
+        .risk-tag:hover::after,
+        .risk-tag:hover::before { display: block; }
+
+        .tag-safe { 
+            background: #e6ffed;
+            color: #52c41a;
+        }
+
+        .tag-warning { 
+            background: #fff7e6;
+            color: #faad14;
+        }
+
+        .tag-danger { 
+            background: #fff1f0;
+            color: #ff4d4f;
+        }
+
+        .date-info {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: var(--text-muted);
+        }
+
+        .btn-qr {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: var(--bg-light);
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text-secondary);
+            margin-left: 14px;
+            flex-shrink: 0;
+        }
+
+        .btn-qr:hover {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+
+        .limit-info {
+            margin-top: 16px;
+            padding: 14px 18px;
+            background: #fffbe6;
+            border: 1px solid #ffe58f;
+            border-radius: 10px;
+            font-size: 14px;
+            color: #d48806;
+            display: none;
+            line-height: 1.5;
+        }
+
+        .limit-info.active {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* 弹窗 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.45);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal {
+            background: white;
+            padding: 28px;
+            border-radius: 16px;
+            width: 400px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            right: 16px;
+            top: 16px;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            color: #ccc;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 16px;
+        }
+
+        .modal-close:hover {
+            background: var(--bg-light);
+            color: var(--text-main);
+        }
+
+        .modal h2 {
+            font-size: 17px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .modal p {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        .modal-btns {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .confirm-addr-box {
+            background: var(--bg-light);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 14px 16px;
+            margin-bottom: 24px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            color: var(--text-main);
+            text-align: center;
+            word-break: break-all;
+        }
+
+        /* QR弹窗 */
+        .qr-modal-content {
+            text-align: center;
+        }
+
+        .qr-modal-img-wrapper {
+            background: white;
+            padding: 12px;
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        .qr-modal-img-wrapper img {
+            width: 180px;
+            height: 180px;
+            display: block;
+        }
+
+        .qr-modal-address {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--text-main);
+            word-break: break-all;
+            background: var(--bg-light);
+            padding: 12px 14px;
+            border-radius: 10px;
+            margin-bottom: 24px;
+            line-height: 1.5;
+            border: 1px solid var(--border-light);
+        }
+
+        .qr-modal-btns {
+            display: flex;
+            gap: 10px;
+        }
+
+        .qr-modal-btns .btn {
+            flex: 1;
+            padding: 12px 16px;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: #333;
+            padding: 12px 24px;
+            border-radius: 10px;
+            color: white;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.3s ease;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .toast-icon {
+            width: 20px;
+            height: 20px;
+            background: var(--success-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-left">
+                <h1>地址管理</h1>
+                <div class="merchant-id">商户: woceshi10</div>
+            </div>
+            <button class="btn btn-outline" onclick="window.location.href='usdt-recharge-v2.html'">
+                ← 返回充值
+            </button>
+        </div>
+
+        <div class="toolbar">
+            <div class="filter-tabs">
+                <button class="filter-tab active" data-filter="all">全部 <span class="tab-count" id="allCount">0</span></button>
+                <button class="filter-tab" data-filter="safe">安全 <span class="tab-count" id="safeCount">0</span></button>
+                <button class="filter-tab" data-filter="risk">风险 <span class="tab-count" id="riskCount">0</span></button>
+            </div>
+            <div class="action-btns">
+                <button class="btn btn-outline btn-sm" id="genTestBtn">生成测试</button>
+                <button class="btn btn-danger btn-sm" id="resetBtn">重置</button>
+                <button class="btn btn-primary" id="addAddrBtn">+ 获取新地址</button>
+            </div>
+        </div>
+
+        <div class="limit-info" id="limitInfo">
+            ⚠️ 提示：每天每个商户仅可获取一个新地址。您今天已经操作过了。
+        </div>
+
+        <div class="address-list" id="addressList"></div>
+        
+        <div class="pagination" id="pagination"></div>
+    </div>
+
+    <!-- 切换地址确认弹窗 -->
+    <div class="modal-overlay" id="switchConfirmModal">
+        <div class="modal">
+            <span class="modal-close" onclick="cancelSwitchAddress()">✕</span>
+            <h2>确认切换地址</h2>
+            <p>确定要切换到以下收款地址吗？</p>
+            <div class="confirm-addr-box">
+                <span id="confirmAddrText">T1234...5678</span>
+            </div>
+            <div class="modal-btns">
+                <button class="btn btn-outline" onclick="cancelSwitchAddress()">取消</button>
+                <button class="btn btn-primary" onclick="confirmSwitchAddress()">确认切换</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 获取新地址确认弹窗 -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <span class="modal-close" onclick="document.getElementById('modalOverlay').style.display='none'">✕</span>
+            <h2>获取新收款地址</h2>
+            <p>确定要获取一个新的收款地址吗？获取后，系统将自动替换当前主地址，旧地址将保留在下方列表中。</p>
+            <div class="modal-btns">
+                <button class="btn btn-outline" id="cancelBtn">取消</button>
+                <button class="btn btn-primary" id="confirmBtn">确认获取</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 二维码弹窗 -->
+    <div class="modal-overlay" id="qrDisplayModal">
+        <div class="modal">
+            <span class="modal-close" onclick="document.getElementById('qrDisplayModal').style.display='none'">✕</span>
+            <div class="qr-modal-content">
+                <h2 style="margin-bottom: 20px;">收款二维码</h2>
+                <div class="qr-modal-img-wrapper">
+                    <img id="qrModalImg" src="" alt="QR Code">
+                </div>
+                <div class="qr-modal-address" id="qrModalAddr"></div>
+                <div class="qr-modal-btns">
+                    <button class="btn btn-outline" id="saveQRBtn">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        保存图片
+                    </button>
+                    <button class="btn btn-primary" id="copyQRAddrBtn">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                        复制地址
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast">
+        <span class="toast-icon">✓</span>
+        <span id="toastText">已切换收款地址</span>
+    </div>
+
+    <script>
+        const MERCHANT_ID = 'woceshi10';
+        const PAGE_SIZE = 8;
+        let currentPage = 1;
+        let currentFilterType = 'all'; // 'all', 'safe', 'risk'
+        
+        const addressList = document.getElementById('addressList');
+        const pagination = document.getElementById('pagination');
+        const addAddrBtn = document.getElementById('addAddrBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const genTestBtn = document.getElementById('genTestBtn');
+        const limitInfo = document.getElementById('limitInfo');
+        const allCountLabel = document.getElementById('allCount');
+        const safeCountLabel = document.getElementById('safeCount');
+        const riskCountLabel = document.getElementById('riskCount');
+        const filterTabs = document.querySelectorAll('.filter-tab');
+        const modalOverlay = document.getElementById('modalOverlay');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const confirmBtn = document.getElementById('confirmBtn');
+        const saveQRBtn = document.getElementById('saveQRBtn');
+        const copyQRAddrBtn = document.getElementById('copyQRAddrBtn');
+        const toast = document.getElementById('toast');
+        const toastText = document.getElementById('toastText');
+
+        function showToast(text) {
+            toastText.textContent = text;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+
+        saveQRBtn.onclick = () => {
+            const img = document.getElementById('qrModalImg');
+            const addr = document.getElementById('qrModalAddr').textContent;
+            const link = document.createElement('a');
+            link.href = img.src;
+            link.download = `USDT-QR-${addr.substring(0, 8)}.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast('图片已保存');
+        };
+
+        copyQRAddrBtn.onclick = () => {
+            const addr = document.getElementById('qrModalAddr').textContent;
+            navigator.clipboard.writeText(addr).then(() => {
+                showToast('地址已复制到剪贴板');
+            });
+        };
+
+        resetBtn.onclick = () => {
+            if (confirm('确定要清空所有数据吗？这将重置到初始状态（未获取地址）。')) {
+                localStorage.removeItem(`addresses_${MERCHANT_ID}`);
+                localStorage.removeItem(`selected_address_${MERCHANT_ID}`);
+                // 跳转回充值页面，重新开始
+                window.location.href = 'usdt-recharge-v2.html';
+            }
+        };
+
+        genTestBtn.onclick = () => {
+            generateTestData();
+        };
+
+        function loadAddresses(filterType = 'all', page = 1) {
+            currentFilterType = filterType;
+            currentPage = page;
+            
+            const addresses = JSON.parse(localStorage.getItem(`addresses_${MERCHANT_ID}`) || '[]');
+            const selectedAddr = JSON.parse(localStorage.getItem(`selected_address_${MERCHANT_ID}`) || 'null');
+            
+            // 统计各类型数量
+            const safeAddresses = addresses.filter(a => a.score < 30);
+            const riskAddresses = addresses.filter(a => a.score >= 30);
+            
+            allCountLabel.textContent = addresses.length;
+            safeCountLabel.textContent = safeAddresses.length;
+            riskCountLabel.textContent = riskAddresses.length;
+            
+            // 根据筛选类型过滤
+            let filteredAddresses = addresses;
+            if (filterType === 'safe') {
+                filteredAddresses = safeAddresses;
+            } else if (filterType === 'risk') {
+                filteredAddresses = riskAddresses;
+            }
+
+            // 分页计算
+            const totalPages = Math.ceil(filteredAddresses.length / PAGE_SIZE);
+            const startIndex = (page - 1) * PAGE_SIZE;
+            const endIndex = startIndex + PAGE_SIZE;
+            const pageAddresses = filteredAddresses.slice(startIndex, endIndex);
+
+            addressList.innerHTML = '';
+            
+            if (filteredAddresses.length === 0) {
+                addressList.innerHTML = `
+                    <div class="no-data">
+                        <span class="no-data-icon">📭</span>
+                        <p>${filter ? '未找到匹配的地址' : '暂无地址，请点击获取新地址'}</p>
+                    </div>
+                `;
+                pagination.innerHTML = '';
+                return;
+            }
+
+            pageAddresses.forEach((addr) => {
+                const card = document.createElement('div');
+                card.className = `address-card ${selectedAddr && selectedAddr.address === addr.address ? 'selected' : ''}`;
+                
+                const riskClass = addr.score < 30 ? 'tag-safe' : (addr.score < 70 ? 'tag-warning' : 'tag-danger');
+                const riskText = addr.score < 30 ? '安全' : (addr.score < 70 ? '中危' : '高危');
+                const riskDetail = addr.score < 30 ? '风险级别：安全\n风险分数：' + addr.score + '\n关联类型：无' : 
+                                  (addr.score < 70 ? '风险级别：中危\n风险分数：' + addr.score + '\n关联类型：小额混币' : 
+                                   '风险级别：高危\n风险分数：' + addr.score + '\n关联类型：网赌、黑灰产');
+
+                card.innerHTML = `
+                    ${addr.isNew ? '<div class="new-badge">新地址</div>' : ''}
+                    <div class="address-info">
+                        <div class="address-value">${addr.address}</div>
+                        <div class="address-meta">
+                            <span class="risk-tag ${riskClass}" data-detail="${riskDetail}">${riskText} ${addr.score}</span>
+                            <span class="default-tag">默认</span>
+                            <span class="date-info">
+                                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                                ${new Date(addr.createdAt).toLocaleDateString()}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="btn-qr" data-addr="${addr.address}">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <rect x="3" y="3" width="7" height="7" rx="1"/>
+                            <rect x="14" y="3" width="7" height="7" rx="1"/>
+                            <rect x="3" y="14" width="7" height="7" rx="1"/>
+                            <rect x="14" y="14" width="3" height="3"/>
+                            <rect x="18" y="14" width="3" height="3"/>
+                            <rect x="14" y="18" width="3" height="3"/>
+                            <rect x="18" y="18" width="3" height="3"/>
+                        </svg>
+                    </div>
+                `;
+
+                card.querySelector('.address-info').onclick = () => selectAddress(addr.address, addr);
+                card.querySelector('.btn-qr').onclick = (e) => {
+                    e.stopPropagation();
+                    showQRModal(addr.address);
+                };
+
+                addressList.appendChild(card);
+            });
+
+            // 渲染分页
+            renderPagination(totalPages, page);
+            checkDailyLimit();
+        }
+
+        function renderPagination(totalPages, currentPage) {
+            if (totalPages <= 1) {
+                pagination.innerHTML = '';
+                return;
+            }
+
+            let html = '';
+            
+            // 上一页
+            html += `<button class="page-btn" onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+            </button>`;
+            
+            // 页码
+            const maxVisible = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+            
+            if (endPage - startPage < maxVisible - 1) {
+                startPage = Math.max(1, endPage - maxVisible + 1);
+            }
+            
+            if (startPage > 1) {
+                html += `<button class="page-btn" onclick="goToPage(1)">1</button>`;
+                if (startPage > 2) html += `<span class="page-info">...</span>`;
+            }
+            
+            for (let i = startPage; i <= endPage; i++) {
+                html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
+            }
+            
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) html += `<span class="page-info">...</span>`;
+                html += `<button class="page-btn" onclick="goToPage(${totalPages})">${totalPages}</button>`;
+            }
+            
+            // 下一页
+            html += `<button class="page-btn" onclick="goToPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+            </button>`;
+            
+            pagination.innerHTML = html;
+        }
+
+        function goToPage(page) {
+            loadAddresses(currentFilterType, page);
+        }
+
+        // 筛选tab切换
+        filterTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                filterTabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                loadAddresses(tab.dataset.filter, 1);
+            });
+        });
+
+        let pendingAddress = null;
+        
+        function selectAddress(address, addrObj) {
+            pendingAddress = addrObj;
+            const shortAddr = address.length > 20 ? address.substring(0, 10) + '...' + address.substring(address.length - 8) : address;
+            document.getElementById('confirmAddrText').textContent = shortAddr;
+            document.getElementById('switchConfirmModal').style.display = 'flex';
+        }
+        
+        function confirmSwitchAddress() {
+            if (pendingAddress) {
+                localStorage.setItem(`selected_address_${MERCHANT_ID}`, JSON.stringify(pendingAddress));
+                document.getElementById('switchConfirmModal').style.display = 'none';
+                showToast('已切换收款地址');
+                setTimeout(() => {
+                    window.location.href = 'usdt-recharge-v2.html';
+                }, 800);
+            }
+        }
+        
+        function cancelSwitchAddress() {
+            pendingAddress = null;
+            document.getElementById('switchConfirmModal').style.display = 'none';
+        }
+
+        function showQRModal(address) {
+            const qrModal = document.getElementById('qrDisplayModal');
+            const qrModalAddr = document.getElementById('qrModalAddr');
+            const qrModalImg = document.getElementById('qrModalImg');
+            
+            qrModalAddr.textContent = address;
+            qrModalImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${address}`;
+            qrModal.style.display = 'flex';
+        }
+
+        function checkDailyLimit() {
+            const addresses = JSON.parse(localStorage.getItem(`addresses_${MERCHANT_ID}`) || '[]');
+            const today = new Date().toDateString();
+            // 只检查手动获取的地址（source: 'manual'），系统自动替换的不算
+            const manualAddedToday = addresses.some(addr => 
+                new Date(addr.createdAt).toDateString() === today && 
+                addr.isNew && 
+                addr.source === 'manual'
+            );
+            
+            if (manualAddedToday) {
+                addAddrBtn.disabled = true;
+                limitInfo.classList.add('active');
+            } else {
+                addAddrBtn.disabled = false;
+                limitInfo.classList.remove('active');
+            }
+        }
+
+        addAddrBtn.onclick = () => modalOverlay.style.display = 'flex';
+        cancelBtn.onclick = () => modalOverlay.style.display = 'none';
+
+        confirmBtn.onclick = () => {
+            confirmBtn.disabled = true;
+            confirmBtn.textContent = '获取中...';
+            
+            setTimeout(() => {
+                const prefix = 'T';
+                const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+                let randomAddr = prefix;
+                for (let i = 0; i < 33; i++) randomAddr += chars.charAt(Math.floor(Math.random() * chars.length));
+
+                const addresses = JSON.parse(localStorage.getItem(`addresses_${MERCHANT_ID}`) || '[]');
+                const newAddr = {
+                    address: randomAddr,
+                    score: Math.floor(Math.random() * 20) + 1,
+                    createdAt: new Date().toISOString(),
+                    isNew: true,
+                    source: 'manual' // 手动获取，计入每日限制
+                };
+
+                addresses.unshift(newAddr);
+                localStorage.setItem(`addresses_${MERCHANT_ID}`, JSON.stringify(addresses));
+
+                modalOverlay.style.display = 'none';
+                confirmBtn.disabled = false;
+                confirmBtn.textContent = '确认获取';
+                loadAddresses('all', 1);
+                showToast('新地址已获取，可点击切换使用');
+            }, 1500);
+        };
+        
+        // 系统自动替换脏地址（不占用每日次数）
+        function autoReplaceAddress(oldAddress) {
+            const prefix = 'T';
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let randomAddr = prefix;
+            for (let i = 0; i < 33; i++) randomAddr += chars.charAt(Math.floor(Math.random() * chars.length));
+
+            const addresses = JSON.parse(localStorage.getItem(`addresses_${MERCHANT_ID}`) || '[]');
+            const newAddr = {
+                address: randomAddr,
+                score: Math.floor(Math.random() * 15) + 1,
+                createdAt: new Date().toISOString(),
+                isNew: true,
+                source: 'auto' // 系统自动替换，不计入每日限制
+            };
+
+            addresses.unshift(newAddr);
+            localStorage.setItem(`addresses_${MERCHANT_ID}`, JSON.stringify(addresses));
+            localStorage.setItem(`selected_address_${MERCHANT_ID}`, JSON.stringify(newAddr));
+            
+            return newAddr;
+        }
+
+
+        // 生成测试数据（手动触发）
+        function generateTestData() {
+            const testAddresses = [];
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            
+            for (let i = 0; i < 35; i++) {
+                let addr = 'T';
+                for (let j = 0; j < 33; j++) {
+                    addr += chars.charAt(Math.floor(Math.random() * chars.length));
+                }
+                
+                // 随机风险分数：大部分安全，少部分中危，极少数高危
+                let score;
+                const rand = Math.random();
+                if (rand < 0.7) {
+                    score = Math.floor(Math.random() * 25) + 1; // 1-25 安全
+                } else if (rand < 0.9) {
+                    score = Math.floor(Math.random() * 35) + 35; // 35-69 中危
+                } else {
+                    score = Math.floor(Math.random() * 20) + 75; // 75-94 高危
+                }
+                
+                // 随机日期（过去30天内）
+                const date = new Date();
+                date.setDate(date.getDate() - Math.floor(Math.random() * 30));
+                
+                testAddresses.push({
+                    address: addr,
+                    score: score,
+                    createdAt: date.toISOString(),
+                    isNew: false
+                });
+            }
+            
+            // 按日期排序，最新的在前
+            testAddresses.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            
+            localStorage.setItem(`addresses_${MERCHANT_ID}`, JSON.stringify(testAddresses));
+            localStorage.setItem(`selected_address_${MERCHANT_ID}`, JSON.stringify(testAddresses[0]));
+            loadAddresses('', 1);
+            showToast('已生成35个测试地址');
+        }
+
+        loadAddresses('all', 1);
+    </script>
+</body>
+</html>

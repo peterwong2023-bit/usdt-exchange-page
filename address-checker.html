@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>USDT充值 - 地址安全检测</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 24px;
+        }
+
+        /* 步骤指示器 */
+        .steps {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 32px;
+            position: relative;
+        }
+
+        .steps::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 30px;
+            right: 30px;
+            height: 2px;
+            background: #e0e0e0;
+            z-index: 0;
+        }
+
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+            flex: 1;
+        }
+
+        .step-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e0e0e0;
+            color: #999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-bottom: 8px;
+            transition: all 0.3s;
+        }
+
+        .step.active .step-circle {
+            background: #667eea;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .step.completed .step-circle {
+            background: #4caf50;
+            color: white;
+        }
+
+        .step-label {
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+        }
+
+        .step.active .step-label {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        /* 检测区域 */
+        .check-section {
+            display: none;
+        }
+
+        .check-section.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .info-box {
+            background: #f5f7fa;
+            border-left: 4px solid #667eea;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+        }
+
+        .info-box h3 {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+
+        .info-box h3::before {
+            content: '💡';
+            margin-right: 8px;
+        }
+
+        .info-box p {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .info-box ul {
+            margin-top: 12px;
+            padding-left: 20px;
+        }
+
+        .info-box li {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.8;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group input.error {
+            border-color: #f44336;
+        }
+
+        .error-message {
+            color: #f44336;
+            font-size: 12px;
+            margin-top: 6px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        /* 检测按钮 */
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: #f5f7fa;
+            color: #666;
+            margin-top: 12px;
+        }
+
+        .btn-secondary:hover {
+            background: #e8ecf1;
+        }
+
+        /* 加载动画 */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        /* 结果显示 */
+        .result {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .result.active {
+            display: block;
+        }
+
+        .result-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+        }
+
+        .result.safe .result-icon {
+            background: #e8f5e9;
+        }
+
+        .result.warning .result-icon {
+            background: #fff3e0;
+        }
+
+        .result.danger .result-icon {
+            background: #ffebee;
+        }
+
+        .result h2 {
+            font-size: 22px;
+            margin-bottom: 12px;
+        }
+
+        .result.safe h2 {
+            color: #4caf50;
+        }
+
+        .result.warning h2 {
+            color: #ff9800;
+        }
+
+        .result.danger h2 {
+            color: #f44336;
+        }
+
+        .result-details {
+            background: #f5f7fa;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .detail-value {
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .risk-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .risk-badge.safe {
+            background: #e8f5e9;
+            color: #4caf50;
+        }
+
+        .risk-badge.warning {
+            background: #fff3e0;
+            color: #ff9800;
+        }
+
+        .risk-badge.danger {
+            background: #ffebee;
+            color: #f44336;
+        }
+
+        .recommendation {
+            background: #fff;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 16px;
+            text-align: left;
+        }
+
+        .recommendation h4 {
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .recommendation p {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        /* 充值区域 */
+        .deposit-section {
+            display: none;
+        }
+
+        .deposit-section.active {
+            display: block;
+        }
+
+        .qr-container {
+            text-align: center;
+            margin: 24px 0;
+        }
+
+        .qr-code {
+            width: 200px;
+            height: 200px;
+            background: #f5f7fa;
+            margin: 0 auto 16px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 100px;
+        }
+
+        .address-display {
+            background: #f5f7fa;
+            padding: 16px;
+            border-radius: 8px;
+            margin: 16px 0;
+            word-break: break-all;
+        }
+
+        .address-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .address-text {
+            color: #e91e63;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: monospace;
+        }
+
+        .warning-banner {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        .warning-banner p {
+            font-size: 13px;
+            color: #856404;
+            line-height: 1.6;
+        }
+
+        .merchant-info {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+        }
+
+        .merchant-info .label {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .merchant-info .value {
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>USDT充值</h1>
+            <p>安全快捷的数字货币充值服务</p>
+        </div>
+
+        <div class="content">
+            <!-- 步骤指示器 -->
+            <div class="steps">
+                <div class="step active" id="step1">
+                    <div class="step-circle">1</div>
+                    <div class="step-label">地址检测</div>
+                </div>
+                <div class="step" id="step2">
+                    <div class="step-circle">2</div>
+                    <div class="step-label">查看结果</div>
+                </div>
+                <div class="step" id="step3">
+                    <div class="step-circle">3</div>
+                    <div class="step-label">获取地址</div>
+                </div>
+            </div>
+
+            <!-- 步骤1: 地址检测说明和输入 -->
+            <div class="check-section active" id="checkInput">
+                <div class="info-box">
+                    <h3>为什么要检测转账地址？</h3>
+                    <p>为了保障资金安全和交易顺利，我们建议您在充值前检测转账地址的安全性。</p>
+                    <ul>
+                        <li>🔍 检测地址是否被标记为高风险</li>
+                        <li>⚠️ 避免因地址问题导致的退款延迟</li>
+                        <li>✅ 确保交易快速到账</li>
+                    </ul>
+                </div>
+
+                <div class="form-group">
+                    <label for="addressInput">请输入您的USDT转账地址</label>
+                    <div class="input-wrapper">
+                        <input 
+                            type="text" 
+                            id="addressInput" 
+                            placeholder="例如：TGcEXj1mB6Cf7qdiTnsBozNhq8ks8gcPLK"
+                            autocomplete="off"
+                        >
+                    </div>
+                    <div class="error-message" id="addressError">请输入有效的USDT地址</div>
+                </div>
+
+                <button class="btn btn-primary" id="checkBtn">
+                    <span>🔍 开始检测</span>
+                </button>
+
+                <button class="btn btn-secondary" id="skipBtn">
+                    <span>跳过检测，直接充值</span>
+                </button>
+            </div>
+
+            <!-- 加载中 -->
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>正在检测地址安全性...</p>
+                <p style="font-size: 12px; color: #999; margin-top: 8px;">预计需要3-5秒</p>
+            </div>
+
+            <!-- 步骤2: 检测结果 -->
+            <div class="result" id="result">
+                <div class="result-icon" id="resultIcon"></div>
+                <h2 id="resultTitle"></h2>
+                <p id="resultDesc"></p>
+
+                <div class="result-details">
+                    <div class="detail-row">
+                        <span class="detail-label">检测地址</span>
+                        <span class="detail-value" id="checkedAddress"></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">风险等级</span>
+                        <span class="detail-value" id="riskLevel"></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">历史交易</span>
+                        <span class="detail-value" id="txCount"></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">黑名单检测</span>
+                        <span class="detail-value" id="blacklistStatus"></span>
+                    </div>
+                </div>
+
+                <div class="recommendation" id="recommendation">
+                    <h4>💡 建议</h4>
+                    <p id="recommendationText"></p>
+                </div>
+
+                <button class="btn btn-primary" id="proceedBtn"></button>
+                <button class="btn btn-secondary" id="recheckBtn">重新检测其他地址</button>
+            </div>
+
+            <!-- 步骤3: 充值信息 -->
+            <div class="deposit-section" id="depositSection">
+                <div class="warning-banner">
+                    <p>⚠️ 请仔细核对后台与您确认账上的钱包地址是否一致，若不同，请找财务对接是否再充值。</p>
+                </div>
+
+                <div class="merchant-info">
+                    <span class="label">商户</span>
+                    <span class="value">woshishanghu</span>
+                </div>
+
+                <div class="merchant-info">
+                    <span class="label">当前汇率</span>
+                    <span class="value">7.34</span>
+                </div>
+
+                <div class="qr-container">
+                    <div class="qr-code">
+                        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2ZmZiIvPjxyZWN0IHg9IjIwIiB5PSIyMCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjIwIi8+PHJlY3QgeD0iNDAiIHk9IjIwIiB3aWR0aD0iMjAiIGhlaWdodD0iMjAiLz48cmVjdCB4PSI2MCIgeT0iMjAiIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIvPjxyZWN0IHg9IjgwIiB5PSIyMCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjIwIi8+PHJlY3QgeD0iMTAwIiB5PSIyMCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjIwIi8+PHJlY3QgeD0iMTIwIiB5PSIyMCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjIwIi8+PHJlY3QgeD0iMTQwIiB5PSIyMCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjIwIi8+PHJlY3QgeD0iMTYwIiB5PSIyMCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjIwIi8+PHJlY3QgeD0iMTgwIiB5PSIyMCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjIwIi8+PC9zdmc+" alt="QR Code" style="width: 100%; height: 100%;">
+                    </div>
+                </div>
+
+                <div class="address-display">
+                    <div class="address-label">USDT收款地址：</div>
+                    <div class="address-text" id="depositAddress">TGcEXj1mB6Cf7qdiTnsBozNhq8ks8gcPLK</div>
+                </div>
+
+                <div class="form-group">
+                    <label>钱包类型</label>
+                    <div style="display: flex; gap: 12px;">
+                        <label style="display: flex; align-items: center; cursor: pointer;">
+                            <input type="radio" name="wallet" value="tron" checked style="margin-right: 6px;">
+                            <span>TRC20 (推荐)</span>
+                        </label>
+                        <label style="display: flex; align-items: center; cursor: pointer;">
+                            <input type="radio" name="wallet" value="erc20" style="margin-right: 6px;">
+                            <span>ERC20</span>
+                        </label>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary">
+                    <span>获取钱包地址</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 步骤管理
+        const steps = {
+            current: 1,
+            updateStep(step) {
+                this.current = step;
+                // 更新步骤指示器
+                document.querySelectorAll('.step').forEach((el, index) => {
+                    const stepNum = index + 1;
+                    el.classList.remove('active', 'completed');
+                    if (stepNum < step) {
+                        el.classList.add('completed');
+                    } else if (stepNum === step) {
+                        el.classList.add('active');
+                    }
+                });
+            }
+        };
+
+        // 地址验证
+        function validateAddress(address) {
+            // TRC20 地址验证 (以T开头，34个字符)
+            const trc20Pattern = /^T[A-Za-z0-9]{33}$/;
+            // ERC20 地址验证 (以0x开头，42个字符)
+            const erc20Pattern = /^0x[A-Fa-f0-9]{40}$/;
+            
+            return trc20Pattern.test(address) || erc20Pattern.test(address);
+        }
+
+        // 模拟地址检测API
+        function checkAddressRisk(address) {
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    // 模拟不同的检测结果
+                    const random = Math.random();
+                    let result;
+
+                    if (random < 0.7) {
+                        // 70% 安全
+                        result = {
+                            status: 'safe',
+                            title: '✅ 地址安全',
+                            desc: '该地址未发现任何风险标记，可以安全使用',
+                            riskLevel: '低风险',
+                            txCount: Math.floor(Math.random() * 500) + 50,
+                            blacklisted: '未列入',
+                            recommendation: '您的地址安全性良好，可以继续进行充值操作。预计到账时间为5-15分钟。',
+                            canProceed: true
+                        };
+                    } else if (random < 0.9) {
+                        // 20% 警告
+                        result = {
+                            status: 'warning',
+                            title: '⚠️ 检测到潜在风险',
+                            desc: '该地址可能存在一些异常交易记录',
+                            riskLevel: '中风险',
+                            txCount: Math.floor(Math.random() * 100) + 10,
+                            blacklisted: '未列入',
+                            recommendation: '建议您：1) 确认该地址近期交易记录正常；2) 或使用其他钱包地址进行充值；3) 如果继续使用，到账时间可能会延长至1-2小时。',
+                            canProceed: true
+                        };
+                    } else {
+                        // 10% 高危
+                        result = {
+                            status: 'danger',
+                            title: '🚫 高风险地址',
+                            desc: '该地址被标记为高风险，可能导致充值失败或延迟',
+                            riskLevel: '高风险',
+                            txCount: Math.floor(Math.random() * 50),
+                            blacklisted: '已列入观察名单',
+                            recommendation: '为了您的资金安全，强烈建议您更换其他钱包地址进行充值。使用该地址可能导致：1) 自动触发风控审核；2) 充值退回，需要1-3个工作日处理；3) 需要额外的身份验证。',
+                            canProceed: false
+                        };
+                    }
+
+                    result.address = address;
+                    resolve(result);
+                }, 3000); // 模拟3秒检测时间
+            });
+        }
+
+        // UI元素
+        const checkInput = document.getElementById('checkInput');
+        const loading = document.getElementById('loading');
+        const result = document.getElementById('result');
+        const depositSection = document.getElementById('depositSection');
+        const addressInput = document.getElementById('addressInput');
+        const addressError = document.getElementById('addressError');
+        const checkBtn = document.getElementById('checkBtn');
+        const skipBtn = document.getElementById('skipBtn');
+        const recheckBtn = document.getElementById('recheckBtn');
+        const proceedBtn = document.getElementById('proceedBtn');
+
+        // 开始检测
+        checkBtn.addEventListener('click', async () => {
+            const address = addressInput.value.trim();
+
+            // 验证地址
+            if (!validateAddress(address)) {
+                addressInput.classList.add('error');
+                addressError.classList.add('show');
+                return;
+            }
+
+            addressInput.classList.remove('error');
+            addressError.classList.remove('show');
+
+            // 显示加载动画
+            checkInput.classList.remove('active');
+            loading.classList.add('active');
+
+            // 执行检测
+            const checkResult = await checkAddressRisk(address);
+
+            // 显示结果
+            loading.classList.remove('active');
+            result.classList.add('active');
+            result.className = `result active ${checkResult.status}`;
+            steps.updateStep(2);
+
+            // 填充结果数据
+            document.getElementById('resultIcon').textContent = 
+                checkResult.status === 'safe' ? '✅' : 
+                checkResult.status === 'warning' ? '⚠️' : '🚫';
+            document.getElementById('resultTitle').textContent = checkResult.title;
+            document.getElementById('resultDesc').textContent = checkResult.desc;
+            document.getElementById('checkedAddress').textContent = 
+                checkResult.address.substring(0, 10) + '...' + checkResult.address.substring(checkResult.address.length - 8);
+            document.getElementById('riskLevel').innerHTML = 
+                `<span class="risk-badge ${checkResult.status}">${checkResult.riskLevel}</span>`;
+            document.getElementById('txCount').textContent = checkResult.txCount + ' 笔';
+            document.getElementById('blacklistStatus').textContent = checkResult.blacklisted;
+            document.getElementById('recommendationText').textContent = checkResult.recommendation;
+
+            // 设置按钮
+            if (checkResult.canProceed) {
+                proceedBtn.textContent = checkResult.status === 'safe' ? '✅ 继续充值' : '⚠️ 了解风险，继续充值';
+                proceedBtn.onclick = () => showDepositSection();
+            } else {
+                proceedBtn.textContent = '❌ 风险过高，建议更换地址';
+                proceedBtn.onclick = () => {
+                    result.classList.remove('active');
+                    checkInput.classList.add('active');
+                    steps.updateStep(1);
+                    addressInput.value = '';
+                    addressInput.focus();
+                };
+            }
+        });
+
+        // 重新检测
+        recheckBtn.addEventListener('click', () => {
+            result.classList.remove('active');
+            checkInput.classList.add('active');
+            steps.updateStep(1);
+            addressInput.value = '';
+            addressInput.focus();
+        });
+
+        // 跳过检测
+        skipBtn.addEventListener('click', () => {
+            if (confirm('跳过检测可能导致充值延迟或退款，确定要跳过吗？')) {
+                showDepositSection();
+            }
+        });
+
+        // 显示充值区域
+        function showDepositSection() {
+            result.classList.remove('active');
+            depositSection.classList.add('active');
+            steps.updateStep(3);
+        }
+
+        // 输入时清除错误状态
+        addressInput.addEventListener('input', () => {
+            addressInput.classList.remove('error');
+            addressError.classList.remove('show');
+        });
+
+        // 回车触发检测
+        addressInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                checkBtn.click();
+            }
+        });
+    </script>
+</body>
+</html>
+
+

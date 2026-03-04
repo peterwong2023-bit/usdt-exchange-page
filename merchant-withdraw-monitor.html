@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能风控决策中心 - VOSS Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/antd/4.24.15/antd.min.css" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --v-primary: #3b82f6;
+            --v-success: #10b981;
+            --v-warning: #f59e0b;
+            --v-error: #ef4444;
+            --v-bg: #f8fafc;
+            --v-text-main: #0f172a;
+            --v-text-sec: #64748b;
+            --v-border: #e2e8f0;
+            --v-card-radius: 12px;
+        }
+        body { margin: 0; background-color: var(--v-bg); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: var(--v-text-main); -webkit-font-smoothing: antialiased; }
+        .v-sider { overflow: auto; height: 100vh; position: fixed; left: 0; z-index: 100; background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%) !important; box-shadow: 4px 0 20px rgba(0,0,0,0.1); }
+        .v-logo { height: 80px; padding: 0 24px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .v-logo-icon { width: 36px; height: 36px; background: var(--v-primary); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; font-weight: 900; }
+        .v-logo-text { font-size: 18px; font-weight: 800; color: white; line-height: 1.2; letter-spacing: 0.5px; }
+        .v-header { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); padding: 0 32px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 99; height: 64px; border-bottom: 1px solid var(--v-border); }
+        .v-main { padding: 32px; min-height: calc(100vh - 64px); }
+        .v-stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-bottom: 32px; }
+        .v-stat-card { background: #fff; border-radius: var(--v-card-radius); padding: 24px; border: 1px solid var(--v-border); display: flex; align-items: center; gap: 20px; transition: all 0.3s; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
+        .v-stat-card:hover { transform: translateY(-4px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        .v-stat-icon-wrap { width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+        .v-panel { background: #fff; border-radius: var(--v-card-radius); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); border: 1px solid var(--v-border); overflow: hidden; }
+        .v-filter-bar { padding: 24px 32px; background: #fff; border-bottom: 1px solid var(--v-border); }
+        .ant-table-thead > tr > th { background: #f8fafc !important; font-weight: 700 !important; color: #475569 !important; font-size: 12px !important; text-transform: uppercase; letter-spacing: 0.05em; }
+        .row-fuse { background-color: #fff1f0 !important; border-left: 4px solid var(--v-error); }
+        .row-warn { background-color: #fffbeb !important; border-left: 4px solid var(--v-warning); }
+        .row-normal:hover td { background-color: #f1f5f9 !important; }
+        .v-status-pill { display: inline-flex; align-items: center; padding: 4px 12px; border-radius: 99px; font-size: 12px; font-weight: 700; border: 1px solid transparent; }
+        .v-pill-fuse { background: #fee2e2; color: #991b1b; border-color: #fecaca; }
+        .v-pill-warn { background: #fef3c7; color: #92400e; border-color: #fde68a; }
+        .v-pill-normal { background: #dbeafe; color: #1e40af; border-color: #bfdbfe; }
+        .v-report-header { padding: 40px; background: linear-gradient(180deg, #f8fafc 0%, #fff 100%); border-bottom: 1px solid var(--v-border); }
+        .v-score-circle { width: 100px; height: 100px; border-radius: 50%; border: 6px solid #f1f5f9; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #fff; box-shadow: 0 10px 25px rgba(0,0,0,0.08); }
+        .v-score-circle.critical { border-color: var(--v-error); }
+        .v-score-circle.high { border-color: var(--v-warning); }
+        .v-verdict { background: #fffbeb; border: 1px solid #fef3c7; border-left: 4px solid var(--v-warning); padding: 20px; border-radius: 8px; margin: 24px 0; color: #92400e; line-height: 1.8; font-size: 14px; }
+        .v-rule-box { background: #fff; border: 1px solid var(--v-border); border-radius: 12px; padding: 20px; margin-bottom: 16px; transition: all 0.2s; }
+        .v-rule-box.hit { border-left: 4px solid var(--v-error); background: #fffcfc; }
+        .v-rule-box:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .v-prog-bar { height: 6px; background: #f1f5f9; border-radius: 99px; margin-top: 16px; overflow: hidden; }
+        .v-prog-fill { height: 100%; border-radius: 99px; transition: width 1s ease; }
+        .ant-btn { border-radius: 8px; font-weight: 700; height: 38px; }
+        .ant-input, .ant-select-selector { border-radius: 8px !important; }
+        .anticon { vertical-align: middle; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/antd/4.24.15/antd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+    <script src="https://unpkg.com/@ant-design/icons@4.7.0/dist/index.umd.min.js"></script>
+    <script type="text/babel">
+        const { useState, useEffect, useMemo } = React;
+        const { Table, Tag, Badge, Button, Input, Select, Space, Card, Row, Col, Switch, Drawer, Modal, Form, Tooltip, message, Typography, Statistic, Divider, Layout, Menu, Breadcrumb, Avatar, Progress, Collapse } = antd;
+        const { Header, Content, Sider } = Layout;
+        const { Text, Title, Paragraph } = Typography;
+        const { Panel } = Collapse;
+        const Icons = window.AntDesignIcons || {};
+        const Icon = ({ name, style = {} }) => {
+            const Comp = Icons[name];
+            return Comp ? React.createElement(Comp, { style }) : null;
+        };
+        const MOCK_MERCHANTS = [
+            { merchant_id: 'M001', name: '波币商户', risk_score: 125, risk_level: 'FUSE', top_reasons: [{ rule_key: 'sum', rule_name: '累计金额异常', strength: '4.2x' }, { rule_key: 'freq', rule_name: '出款频率激增', strength: '6次/m' }], snapshot: { sum: '4.2x', freq: '6次', top1: '85%' }, actions: { stop: true }, time: '11:20:05' },
+            { merchant_id: 'M002', name: '河南归集运营部', risk_score: 85, risk_level: 'WARN', top_reasons: [{ rule_key: 'small', rule_name: '小额密集交易', strength: '75%' }, { rule_key: 'addr', rule_name: '地址高度集中', strength: '72%' }], snapshot: { small: '75%', addr: '72%', top1: '72%' }, actions: { stop: false }, time: '10:45:12' },
+            { merchant_id: 'M003', name: '哥伦比亚分销中心', risk_score: 45, risk_level: 'WARN', top_reasons: [{ rule_key: 'mech', rule_name: '机械节奏检测', strength: 'sd=1.2s' }], snapshot: { mech: '1.2s', samples: '12笔' }, actions: { stop: false }, time: '08:12:30' },
+            { merchant_id: 'M004', name: 'BITDA 基础账户', risk_score: 12, risk_level: 'NORMAL', top_reasons: [], snapshot: { sum: '0.2x' }, actions: { stop: false }, time: '07:00:00' }
+        ];
+        const getDetailData = (id) => {
+            const m = MOCK_MERCHANTS.find(x => x.merchant_id === id) || MOCK_MERCHANTS[0];
+            const verdict = m.risk_level === 'FUSE' ? `高危拦截：总分 ${m.risk_score} 已超阈值，系统自动止血。` : `监控中：风险分 ${m.risk_score}，暂未触发熔断。`;
+            const rules = [{ name: '累计金额异常', hit: m.risk_level === 'FUSE', str: '4.2x', score: 72, desc: '10分钟窗口累计金额超出基准' }, { name: '出款频率异常', hit: m.risk_level === 'FUSE', str: '6次/m', score: 36, desc: '出款频次瞬时激增' }, { name: '小额高频', hit: m.merchant_id === 'M002', str: '75%', score: 40, desc: '小额订单占比达到 75%' }, { name: '机械节奏', hit: m.merchant_id === 'M003', str: '1.2s', score: 27, desc: '出款间隔符合脚本特征' }].sort((a,b) => b.score - a.score);
+            const samples = Array.from({length: 5}).map((_, i) => ({ key: i, time: '11:19:' + (50-i), amount: (Math.random()*5000+100).toFixed(2), addr: 'TTne...sj9b' + i, status: '成功' }));
+            return { ...m, verdict, rules, samples };
+        };
+        const StatusPill = ({ level }) => {
+            const cfg = { NORMAL: { cls: 'v-pill-normal', txt: '正常' }, WARN: { cls: 'v-pill-warn', txt: '警告' }, FUSE: { cls: 'v-pill-fuse', txt: '熔断' } };
+            const { cls, txt } = cfg[level] || { cls: '', txt: level };
+            return <div className={`v-status-pill ${cls}`}>{txt}</div>;
+        };
+        const App = () => {
+            const [loading, setLoading] = useState(false);
+            const [data, setData] = useState([]);
+            const [onlyRisk, setOnlyRisk] = useState(true);
+            const [drawer, setDrawer] = useState(false);
+            const [selected, setSelected] = useState(null);
+            const refresh = () => {
+                setLoading(true);
+                setTimeout(() => {
+                    const filtered = onlyRisk ? MOCK_MERCHANTS.filter(m => m.risk_level !== 'NORMAL') : MOCK_MERCHANTS;
+                    setData(filtered.sort((a,b) => { const order = { FUSE: 3, WARN: 2, NORMAL: 1 }; return order[b.risk_level] - order[a.risk_level] || b.risk_score - a.risk_score; }));
+                    setLoading(false);
+                }, 300);
+            };
+            useEffect(() => { refresh(); }, [onlyRisk]);
+            const columns = [
+                { title: '商户实体', render: r => <Space direction="vertical" size={0}><Text strong style={{ fontSize: 14 }}>{r.name}</Text><Text type="secondary" style={{ fontSize: 11, fontWeight: 600 }}>{r.merchant_id}</Text></Space>, width: 200 },
+                { title: '风险指数', align: 'center', render: r => <Space direction="vertical" size={2} align="center"><Text strong style={{ fontSize: 18, color: r.risk_score >= 100 ? 'var(--v-error)' : r.risk_score >= 40 ? 'var(--v-warning)' : 'var(--v-success)' }}>{r.risk_score}</Text><StatusPill level={r.risk_level} /></Space>, width: 120 },
+                { title: '风险因子', render: r => r.risk_level === 'NORMAL' ? <Text type="secondary">—</Text> : <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>{r.top_reasons.map(t => <Tag key={t.rule_key} color="orange" style={{ border: 'none', borderRadius: 4, fontWeight: 700 }}>{t.rule_name}</Tag>)}</div> },
+                { title: '决策快照', render: r => r.risk_level === 'NORMAL' ? <Text type="secondary">稳健</Text> : <div style={{ fontSize: 11, color: '#475569' }}>{r.snapshot.sum && <div>金额: <Text strong>{r.snapshot.sum}</Text></div>}{r.snapshot.freq && <div>频次: <Text strong>{r.snapshot.freq}</Text></div>}</div> },
+                { title: '执行动作', render: r => <Badge status={r.actions.stop ? 'error' : 'success'} text={r.actions.stop ? '系统熔断' : '正常放行'} />, width: 140 },
+                { title: '操作', fixed: 'right', width: 160, render: r => <Space><Button type="text" style={{ color: 'var(--v-primary)', fontWeight: 700 }} onClick={() => { setSelected(getDetailData(r.merchant_id)); setDrawer(true); }}>详情</Button>{r.risk_level === 'WARN' && <Button type="primary" danger size="small">熔断</Button>}{r.risk_level === 'FUSE' && <Button size="small">解封</Button>}</Space> }
+            ];
+            return (
+                <Layout style={{ minHeight: '100vh' }}>
+                    <Sider width={240} className="v-sider" theme="dark">
+                        <div className="v-logo"><div className="v-logo-icon"><Icon name="SafetyCertificateOutlined" /></div><div><div className="v-logo-text">DecisionHub</div><div style={{fontSize:10, opacity:0.4, color:'#fff'}}>AI RISK V5</div></div></div>
+                        <Menu theme="dark" mode="inline" defaultSelectedKeys={['risk']} defaultOpenKeys={['sys']}>
+                            <Menu.Item key="dash" icon={<Icon name="DashboardOutlined" />}>控制看板</Menu.Item>
+                            <Menu.SubMenu key="sys" icon={<Icon name="SecurityScanOutlined" />} title="风险指挥">
+                                <Menu.Item key="risk">实时熔断</Menu.Item>
+                                <Menu.Item key="cfg">引擎配置</Menu.Item>
+                            </Menu.SubMenu>
+                        </Menu>
+                    </Sider>
+                    <Layout style={{ marginLeft: 240 }}>
+                        <Header className="v-header"><Breadcrumb><Breadcrumb.Item>风险指挥</Breadcrumb.Item><Breadcrumb.Item><Text strong>实时熔断</Text></Breadcrumb.Item></Breadcrumb><Space size="large"><Badge count={3} size="small"><Icon name="BellOutlined" style={{ fontSize: 20 }} /></Badge><Space style={{ cursor: 'pointer', background: '#f1f5f9', padding: '6px 16px', borderRadius: 10 }}><Avatar size="small" style={{ background: 'var(--v-primary)' }} icon={<Icon name="UserOutlined" />} /><Text strong>Admin</Text></Space></Space></Header>
+                        <Content className="v-main">
+                            <div className="v-stats-row">
+                                <div className="v-stat-card"><div className="v-stat-icon-wrap" style={{ background: '#e6f7ff', color: '#1890ff' }}><Icon name="MonitorOutlined" /></div><div><Statistic title="监控商户" value={1284} /></div></div>
+                                <div className="v-stat-card"><div className="v-stat-icon-wrap" style={{ background: '#fffbe6', color: '#faad14' }}><Icon name="AlertOutlined" /></div><div><Statistic title="风险预警" value={12} valueStyle={{color:'#faad14'}} /></div></div>
+                                <div className="v-stat-card"><div className="v-stat-icon-wrap" style={{ background: '#fff1f0', color: '#ff4d4f' }}><Icon name="FireOutlined" /></div><div><Statistic title="已熔断" value={2} valueStyle={{color:'#ff4d4f'}} /></div></div>
+                                <div className="v-stat-card"><div className="v-stat-icon-wrap" style={{ background: '#f6ffed', color: '#52c41a' }}><Icon name="CheckCircleOutlined" /></div><div><Statistic title="放行率" value={98.5} suffix="%" /></div></div>
+                            </div>
+                            <div className="v-panel">
+                                <div className="v-filter-bar"><Row justify="space-between" align="middle"><Col><Space size="large"><Space><Text strong>待处理</Text><Switch checked={onlyRisk} onChange={setOnlyRisk} size="small" /></Space><Input prefix={<Icon name="SearchOutlined" style={{color:'#bfbfbf'}} />} placeholder="搜索商户 ID / 名称" style={{ width: 260 }} /></Space></Col><Col><Space><Button icon={<Icon name="ReloadOutlined" />} onClick={refresh}>同步</Button><Button type="primary">紧急止血</Button></Space></Col></Row></div>
+                                <Table columns={columns} dataSource={data} rowKey="merchant_id" loading={loading} pagination={{ pageSize: 8 }} rowClassName={r => `row-${r.risk_level.toLowerCase()}`} />
+                            </div>
+                        </Content>
+                    </Layout>
+                    <Drawer title={null} width={680} visible={drawer} onClose={() => setDrawer(false)} closable={false} bodyStyle={{ padding: 0 }}>
+                        {selected && (
+                            <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+                                <div className="v-report-header"><Row justify="space-between" align="middle"><Col><Space size={32}><div className={`v-score-circle ${selected.risk_score >= 100 ? 'critical' : 'high'}`}><Text type="secondary" style={{ fontSize: 10 }}>SCORE</Text><div style={{ fontSize: 32, fontWeight: 900, color: selected.risk_score >= 100 ? 'var(--v-error)' : 'var(--v-warning)' }}>{selected.risk_score}</div></div><div><Title level={3} style={{ margin: 0 }}>{selected.name}</Title><Text type="secondary">ID: {selected.merchant_id}</Text></div></Space></Col><Col style={{ textAlign: 'right' }}><Space direction="vertical" align="end">{selected.risk_level === 'FUSE' ? <Button type="primary">申请解除</Button> : <Button type="primary" danger>立即熔断</Button>}<Text type="secondary" style={{ fontSize: 11 }}>扫描时间: {selected.time}</Text></Space></Col></Row></div>
+                                <div style={{ padding: '40px', overflowY: 'auto', flex: 1 }}>
+                                    <div className="v-verdict"><Paragraph style={{ margin: 0, fontWeight:600 }}>{selected.verdict}</Paragraph></div>
+                                    <div style={{ margin: '40px 0 20px' }}><Text strong style={{ fontSize: 16 }}>风险因子拆解</Text></div>
+                                    {selected.rules.map(rule => (
+                                        <div key={rule.name} className={`v-rule-box ${rule.hit ? 'hit' : ''}`} style={{ opacity: rule.hit ? 1 : 0.5 }}>
+                                            <Row justify="space-between" align="middle"><Col span={16}><div style={{ fontWeight: 800, fontSize: 15 }}>{rule.name}</div><div style={{ fontSize: 12, color: '#64748b', marginTop: 6 }}>{rule.desc}</div></Col><Col span={8} style={{ textAlign: 'right' }}><div style={{ fontSize: 12 }}>强度: <Text strong>{rule.hit ? rule.str : '—'}</Text></div><div style={{ fontSize: 14, color: rule.hit ? 'var(--v-error)' : '#bfbfbf', marginTop: 6 }}>贡献: +{rule.score}</div></Col></Row>
+                                            {rule.hit && <div className="v-prog-bar"><div className="v-prog-fill" style={{ width: `${(rule.score/80)*100}%`, background: rule.score >= 50 ? 'var(--v-error)' : 'var(--v-warning)' }} /></div>}
+                                        </div>
+                                    ))}
+                                    <div style={{ marginTop: 40 }}><div style={{ marginBottom: 20 }}><Text strong style={{ fontSize: 16 }}>异常交易样本</Text></div><Table size="small" pagination={false} dataSource={selected.samples} columns={[{ title: '时间', dataIndex: 'time' }, { title: '金额', dataIndex: 'amount' }, { title: '地址', dataIndex: 'addr' }]} /></div>
+                                </div>
+                                <div style={{ padding: '24px 40px', borderTop: '1px solid var(--v-border)', textAlign: 'right' }}><Button size="large" block onClick={() => setDrawer(false)} style={{ height: 52 }}>关闭分析报告</Button></div>
+                            </div>
+                        )}
+                    </Drawer>
+                </Layout>
+            );
+        };
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

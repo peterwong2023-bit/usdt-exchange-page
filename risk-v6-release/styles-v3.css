@@ -1,0 +1,601 @@
+/* 高可用AI风险监控系统 V3 - 右下角告警弹窗优化版 */
+
+@import url('styles-v2.css');
+
+/* ==================== 告警铃铛按钮 ==================== */
+.alert-bell {
+    position: relative;
+    animation: bellShake 2s ease-in-out infinite;
+}
+
+.alert-bell .badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: var(--danger-color);
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 10px;
+    min-width: 18px;
+    text-align: center;
+}
+
+.alert-bell .badge.pulse {
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 0.8;
+    }
+}
+
+@keyframes bellShake {
+    0%, 90%, 100% {
+        transform: rotate(0deg);
+    }
+    92%, 96% {
+        transform: rotate(10deg);
+    }
+    94%, 98% {
+        transform: rotate(-10deg);
+    }
+}
+
+/* ==================== 右下角告警弹窗 ==================== */
+.alert-popup {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 420px;
+    max-height: 600px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    z-index: 1500;
+    transform: translateY(calc(100% + 24px));
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.alert-popup.show {
+    transform: translateY(0);
+    opacity: 1;
+    visibility: visible;
+}
+
+.alert-popup.minimized {
+    transform: translateY(calc(100% - 60px));
+}
+
+/* 告警弹窗头部 */
+.alert-popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-color);
+    background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+    color: white;
+    border-radius: 12px 12px 0 0;
+    cursor: pointer;
+    user-select: none;
+}
+
+.alert-popup-header h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.alert-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: 24px;
+    padding: 0 8px;
+    background: rgba(239, 68, 68, 0.9);
+    color: white;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 700;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+.alert-popup-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-icon-sm {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-icon-sm:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
+}
+
+/* 告警弹窗内容 */
+.alert-popup-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px;
+    max-height: 460px;
+}
+
+.alert-popup-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.alert-popup-body::-webkit-scrollbar-track {
+    background: var(--bg-tertiary);
+    border-radius: 3px;
+}
+
+.alert-popup-body::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 3px;
+}
+
+.alert-popup-body::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
+}
+
+/* 告警项 */
+.popup-alert-item {
+    display: flex;
+    gap: 12px;
+    padding: 12px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    border-left: 4px solid;
+    background: white;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    animation: slideInRight 0.3s ease;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.popup-alert-item:hover {
+    background: var(--bg-tertiary);
+    transform: translateX(-4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.popup-alert-item.critical {
+    border-left-color: var(--danger-color);
+    background: linear-gradient(90deg, rgba(220, 38, 38, 0.05) 0%, white 100%);
+}
+
+.popup-alert-item.high {
+    border-left-color: var(--warning-color);
+    background: linear-gradient(90deg, rgba(245, 158, 11, 0.05) 0%, white 100%);
+}
+
+.popup-alert-item.medium {
+    border-left-color: var(--info-color);
+    background: linear-gradient(90deg, rgba(14, 165, 233, 0.05) 0%, white 100%);
+}
+
+.popup-alert-item.read {
+    opacity: 0.6;
+    background: var(--bg-secondary);
+}
+
+.popup-alert-icon {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 18px;
+}
+
+.popup-alert-item.critical .popup-alert-icon {
+    background: rgba(220, 38, 38, 0.1);
+    color: var(--danger-color);
+}
+
+.popup-alert-item.high .popup-alert-icon {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--warning-color);
+}
+
+.popup-alert-item.medium .popup-alert-icon {
+    background: rgba(14, 165, 233, 0.1);
+    color: var(--info-color);
+}
+
+.popup-alert-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.popup-alert-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.popup-alert-level {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.popup-alert-level.critical {
+    background: rgba(220, 38, 38, 0.1);
+    color: var(--danger-color);
+}
+
+.popup-alert-level.high {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--warning-color);
+}
+
+.popup-alert-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.popup-alert-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.popup-alert-meta i {
+    font-size: 10px;
+}
+
+.popup-alert-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.btn-alert-action {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: white;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+}
+
+.btn-alert-action:hover {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+    transform: scale(1.1);
+}
+
+.btn-alert-action.success:hover {
+    background: var(--success-color);
+    border-color: var(--success-color);
+}
+
+.btn-alert-action.danger:hover {
+    background: var(--danger-color);
+    border-color: var(--danger-color);
+}
+
+/* 告警弹窗底部 */
+.alert-popup-footer {
+    padding: 12px 20px;
+    border-top: 1px solid var(--border-color);
+    background: var(--bg-tertiary);
+    border-radius: 0 0 12px 12px;
+    text-align: center;
+}
+
+.btn-text {
+    background: none;
+    border: none;
+    color: var(--primary-color);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.btn-text:hover {
+    background: var(--bg-secondary);
+    color: var(--primary-dark);
+}
+
+/* 空状态 */
+.alert-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+.alert-empty i {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.3;
+}
+
+.alert-empty p {
+    font-size: 14px;
+}
+
+/* 新告警通知动画 */
+@keyframes newAlertBounce {
+    0%, 100% {
+        transform: translateY(0) scale(1);
+    }
+    50% {
+        transform: translateY(-10px) scale(1.05);
+    }
+}
+
+.popup-alert-item.new {
+    animation: newAlertBounce 0.6s ease, slideInRight 0.3s ease;
+}
+
+/* 告警弹窗展开/收起指示器 */
+.alert-popup-toggle {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 24px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 12px 12px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+}
+
+.alert-popup-toggle:hover {
+    background: white;
+    height: 28px;
+    top: -14px;
+}
+
+.alert-popup-toggle i {
+    font-size: 12px;
+    color: var(--text-secondary);
+    transition: transform 0.3s ease;
+}
+
+.alert-popup.minimized .alert-popup-toggle i {
+    transform: rotate(180deg);
+}
+
+/* 响应式适配 */
+@media (max-width: 768px) {
+    .alert-popup {
+        width: calc(100vw - 32px);
+        right: 16px;
+        bottom: 16px;
+        max-height: 70vh;
+    }
+
+    .popup-alert-item {
+        padding: 10px;
+    }
+
+    .popup-alert-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 16px;
+    }
+
+    .popup-alert-title {
+        font-size: 13px;
+    }
+
+    .popup-alert-desc {
+        font-size: 12px;
+    }
+}
+
+/* 告警数量徽章动画 */
+@keyframes badgeGrow {
+    0% {
+        transform: scale(0);
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.alert-count.updated {
+    animation: badgeGrow 0.4s ease;
+}
+
+/* 紧急告警闪烁效果 */
+@keyframes urgentBlink {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 0 8px rgba(220, 38, 38, 0);
+    }
+}
+
+.popup-alert-item.critical.urgent {
+    animation: urgentBlink 1.5s ease-in-out infinite, slideInRight 0.3s ease;
+}
+
+/* 告警类型图标样式 */
+.alert-type-icon {
+    margin-left: auto;
+    font-size: 14px;
+    opacity: 0.5;
+}
+
+/* 批量操作浮动按钮 */
+.alert-bulk-actions {
+    position: sticky;
+    bottom: 0;
+    padding: 8px 12px;
+    background: linear-gradient(180deg, transparent 0%, white 20%, white 100%);
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+.alert-bulk-actions button {
+    flex: 1;
+    padding: 6px 12px;
+    font-size: 12px;
+    border-radius: 6px;
+}
+
+/* 告警详情展开 */
+.popup-alert-item.expanded {
+    background: var(--bg-tertiary);
+}
+
+.popup-alert-detail {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-color);
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+.popup-alert-item.expanded .popup-alert-detail {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.popup-alert-detail-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    font-size: 12px;
+}
+
+.popup-alert-detail-label {
+    color: var(--text-secondary);
+}
+
+.popup-alert-detail-value {
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+/* 音效指示器 */
+.sound-indicator {
+    position: fixed;
+    top: 50%;
+    right: 450px;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    background: var(--danger-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 18px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.sound-indicator.active {
+    opacity: 1;
+    animation: soundWave 0.6s ease;
+}
+
+@keyframes soundWave {
+    0% {
+        transform: translateY(-50%) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-50%) scale(1.5);
+        opacity: 0;
+    }
+}
+
+
+

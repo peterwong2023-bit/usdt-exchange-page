@@ -1,0 +1,2886 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>活动中心 - 管理后台</title>
+    <link rel="stylesheet" href="css/style.css?v=1.0.4">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* 极致兼容：确保点击按钮能看到反应 */
+        .btn-edit-platform:active {
+            transform: scale(0.9) !important;
+            background-color: #ddd !important;
+        }
+        
+        /* 极致兼容：确保弹窗显示 */
+        #newEditPlatformModal.active {
+            display: flex !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            z-index: 10005 !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部通知栏 -->
+    <div class="notification-bar" id="notificationBar">
+        <div class="notification-content">
+            <span class="notification-dot"></span>
+            <span>全新的活动主题上线，全新的活动Banner，供您查看</span>
+        </div>
+        <button class="notification-close" onclick="closeNotification()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <div class="app-container">
+        <!-- 侧边栏 -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <rect x="3" y="3" width="7" height="7" rx="2" fill="#fff"/>
+                            <rect x="14" y="3" width="7" height="7" rx="2" fill="#fff" opacity="0.7"/>
+                            <rect x="3" y="14" width="7" height="7" rx="2" fill="#fff" opacity="0.7"/>
+                            <rect x="14" y="14" width="7" height="7" rx="2" fill="#fff" opacity="0.5"/>
+                        </svg>
+                    </div>
+                    <div class="logo-text">
+                        <span class="logo-title">活动中心</span>
+                        <span class="logo-subtitle">CAMPAIGN CENTER</span>
+                    </div>
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <a href="dashboard.html" class="nav-item">
+                        <i class="fas fa-chart-pie"></i>
+                        <span>仪表板</span>
+                    </a>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">业务</div>
+                    <a href="index.html" class="nav-item active">
+                        <i class="fas fa-layer-group"></i>
+                        <span>平台列表</span>
+                    </a>
+                    <a href="merchant-list.html" class="nav-item">
+                        <i class="fas fa-store"></i>
+                        <span>商户列表</span>
+                    </a>
+                    <a href="activity-list.html" class="nav-item">
+                        <i class="fas fa-list-alt"></i>
+                        <span>活动列表</span>
+                    </a>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">日志</div>
+                    <a href="mining-flow.html" class="nav-item">
+                        <i class="fas fa-coins"></i>
+                        <span>挖矿流水</span>
+                    </a>
+                    <a href="item-receipt.html" class="nav-item">
+                        <i class="fas fa-gift"></i>
+                        <span>物品领取</span>
+                    </a>
+                    <a href="platform-log.html" class="nav-item">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>平台日志</span>
+                    </a>
+                    <a href="audit-log.html" class="nav-item">
+                        <i class="fas fa-clipboard-check"></i>
+                        <span>审核日志</span>
+                    </a>
+                    <a href="operation-log.html" class="nav-item">
+                        <i class="fas fa-history"></i>
+                        <span>操作日志</span>
+                    </a>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">平台数据</div>
+                    <a href="claim-data.html" class="nav-item">
+                        <i class="fas fa-download"></i>
+                        <span>领取数据</span>
+                    </a>
+                    <a href="user-behavior.html" class="nav-item">
+                        <i class="fas fa-chart-line"></i>
+                        <span>用户行为</span>
+                    </a>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">用户列表</div>
+                    <a href="user-data.html" class="nav-item">
+                        <i class="fas fa-id-card"></i>
+                        <span>用户数据</span>
+                    </a>
+                    <a href="user-detail.html" class="nav-item">
+                        <i class="fas fa-user-circle"></i>
+                        <span>用户详情</span>
+                    </a>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">系统</div>
+                    <a href="account-management.html" class="nav-item">
+                        <i class="fas fa-users"></i>
+                        <span>账号管理</span>
+                    </a>
+                    <a href="global-config.html" class="nav-item">
+                        <i class="fas fa-globe"></i>
+                        <span>全局配置</span>
+                    </a>
+                </div>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <button class="sidebar-toggle" onclick="toggleSidebar()">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+        </aside>
+
+        <!-- 主内容区 -->
+        <main class="main-content" style="padding: 0;">
+            <!-- 顶部工作区标签页 -->
+            <div class="admin-tabs">
+                <div class="admin-tab active" onclick="location.href='index.html'">平台列表 <i class="fas fa-times" onclick="closeTab(this); event.stopPropagation();"></i></div>
+                <div class="admin-tab" onclick="location.href='merchant-list.html'">商户列表(Live) <i class="fas fa-times" onclick="closeTab(this); event.stopPropagation();"></i></div>
+                <div class="admin-tab" onclick="location.href='dashboard.html'">仪表板 <i class="fas fa-times" onclick="closeTab(this); event.stopPropagation();"></i></div>
+                <div class="admin-tab" onclick="location.href='user-data.html'">用户数据 <i class="fas fa-times" onclick="closeTab(this); event.stopPropagation();"></i></div>
+                <div class="admin-tab" onclick="location.href='global-config.html'">全局配置 <i class="fas fa-times" onclick="closeTab(this); event.stopPropagation();"></i></div>
+                <div class="admin-tab" onclick="location.href='audit-log.html'">审核日志 <i class="fas fa-times" onclick="closeTab(this); event.stopPropagation();"></i></div>
+                <div class="admin-tab" onclick="location.href='operation-log.html'">操作日志 <i class="fas fa-times" onclick="closeTab(this); event.stopPropagation();"></i></div>
+                <div class="admin-tab" onclick="location.href='user-detail.html'">用户详情 <i class="fas fa-times" onclick="closeTab(this); event.stopPropagation();"></i></div>
+                <div class="admin-tab" onclick="location.href='account-management.html'">账号管理 <i class="fas fa-times" onclick="closeTab(this); event.stopPropagation();"></i></div>
+                <div class="admin-tabs-close-all" onclick="closeAllTabs()">
+                    <span>全部</span>
+                    <i class="fas fa-times"></i>
+                </div>
+            </div>
+
+            <!-- 顶部导航 -->
+            <header class="top-header">
+                <div class="header-left">
+                    <button class="menu-toggle" onclick="toggleSidebar()">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="breadcrumb">
+                        <span>平台</span>
+                        <i class="fas fa-chevron-right"></i>
+                        <span class="current">平台列表</span>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <div class="header-actions">
+                        <!-- 主题切换按钮 -->
+                        <button class="action-btn theme-toggle" onclick="toggleTheme()" title="切换主题">
+                            <i class="fas fa-sun" id="themeIcon"></i>
+                        </button>
+                        <button class="action-btn" title="刷新">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                        <button class="action-btn" title="通知">
+                            <i class="fas fa-bell"></i>
+                            <span class="badge">3</span>
+                        </button>
+                        <div class="lang-switcher">
+                            <button class="action-btn" onclick="toggleLangMenu()" title="切换语言">
+                                <i class="fas fa-globe"></i>
+                                <span class="lang-code">中文</span>
+                            </button>
+                            <div class="lang-dropdown" id="langDropdown">
+                                <a href="#" class="lang-option active" onclick="switchLang('zh')">中文</a>
+                                <a href="#" class="lang-option" onclick="switchLang('en')">English</a>
+                                <a href="#" class="lang-option" onclick="switchLang('vi')">Tiếng Việt</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="user-menu">
+                        <div class="user-avatar">
+                            <img src="https://ui-avatars.com/api/?name=Peter&background=6366f1&color=fff" alt="头像">
+                        </div>
+                        <div class="user-info">
+                            <span class="user-name">peter@bt.app</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- 页面内容 -->
+            <div class="page-content">
+                <!-- 页面标题 -->
+                <div class="page-header">
+                    <div class="page-title">
+                        <h1>平台列表</h1>
+                        <p class="page-description">管理所有活动平台</p>
+                    </div>
+                    <div class="page-actions">
+                        <button class="btn btn-primary" onclick="openModal('createPlatformModal')">
+                            <i class="fas fa-plus"></i>
+                            <span>创建</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 统计卡片 -->
+                <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr);">
+                    <div class="stat-card">
+                        <div class="stat-icon blue">
+                            <i class="fas fa-layer-group"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value">12</span>
+                            <span class="stat-label">总平台数</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon green">
+                            <i class="fas fa-store"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value">186</span>
+                            <span class="stat-label">总商户数</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon purple">
+                            <i class="fas fa-list-alt"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value">1,234</span>
+                            <span class="stat-label">总活动数</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 搜索栏 -->
+                <div class="filter-bar">
+                    <div class="filter-left">
+                        <div class="search-box-platform">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="searchInput" placeholder="搜索平台名称...">
+                            <button class="btn-search-main">
+                                <i class="fas fa-search"></i>
+                                <span>搜索</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 数据表格 -->
+                <div class="data-table-container">
+                    <table class="data-table platform-table">
+                        <colgroup>
+                            <col style="width: 30%;">
+                            <col style="width: 25%;">
+                            <col style="width: 25%;">
+                            <col style="width: 120px;">
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>名称</th>
+                                <th>平台名称/ID</th>
+                                <th>创建时间</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <div class="platform-name">
+                                        <div class="platform-icon">L</div>
+                                        <span>Live (Deprecated)</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="platform-id">
+                                        <span>live</span>
+                                        <button class="copy-btn" onclick="copyToClipboard('live')">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                                <td>11/04/2022</td>
+                                <td class="col-action">
+                                    <div class="action-buttons">
+                                        <button class="btn-icon-sm" title="查看" onclick="location.href='merchant-list.html'">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <div class="dropdown">
+                                            <button class="btn-icon-sm" title="设置" onclick="toggleDropdown(this)">
+                                                <i class="fas fa-cog"></i>
+                                            </button>
+                                            <div class="dropdown-menu" onclick="event.stopPropagation()">
+                                                <div class="dropdown-item" style="cursor: pointer;" 
+                                                   onclick="handleEditPlatform('Live (Deprecated)', 'live', 'd112a14e-7e7a-4ea3-9d9e-f4a7e38c29be')">
+                                                    <i class="fas fa-cog"></i> 设置
+                                                </div>
+                                                <a href="platform-log.html" class="dropdown-item">
+                                                    <i class="fas fa-history"></i> 日志
+                                                </a>
+                                                <a href="audit-log.html" class="dropdown-item">
+                                                    <i class="fas fa-clipboard-list"></i> 审核日志
+                                                </a>
+                                                <a href="user-detail.html" class="dropdown-item">
+                                                    <i class="fas fa-user-edit"></i> 用户详情
+                                                </a>
+                                                <a href="javascript:void(0)" class="dropdown-item" onclick="showToast('书签已添加', 'success')">
+                                                    <i class="far fa-bookmark"></i> 添加书签
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="platform-name">
+                                        <div class="platform-icon">L</div>
+                                        <span>Live</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="platform-id">
+                                        <span>live-old</span>
+                                        <button class="copy-btn" onclick="copyToClipboard('live-old')">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                                <td>28/03/2022</td>
+                                <td class="col-action">
+                                    <div class="action-buttons">
+                                        <button class="btn-icon-sm" title="查看" onclick="location.href='merchant-list.html'">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <div class="dropdown">
+                                            <button class="btn-icon-sm" title="设置" onclick="toggleDropdown(this)">
+                                                <i class="fas fa-cog"></i>
+                                            </button>
+                                            <div class="dropdown-menu">
+                                                <a href="javascript:void(0)" class="dropdown-item" 
+                                                   onclick="handleEditPlatform('Live', 'live-old', 'e223b25f-8f8b-5fb4-0e0f-g5b8f49d30cf')">
+                                                    <i class="fas fa-cog"></i> 设置
+                                                </a>
+                                                <a href="platform-log.html" class="dropdown-item" onclick="event.stopPropagation();">
+                                                    <i class="fas fa-history"></i> 日志
+                                                </a>
+                                                <a href="audit-log.html" class="dropdown-item" onclick="event.stopPropagation();">
+                                                    <i class="fas fa-clipboard-list"></i> 审核日志
+                                                </a>
+                                                <a href="user-detail.html" class="dropdown-item" onclick="event.stopPropagation();">
+                                                    <i class="fas fa-user-edit"></i> 用户详情
+                                                </a>
+                                                <a href="javascript:void(0)" class="dropdown-item" onclick="showToast('书签已添加', 'success')">
+                                                    <i class="far fa-bookmark"></i> 添加书签
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="platform-name">
+                                        <div class="platform-icon">G</div>
+                                        <span>Game Platform</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="platform-id">
+                                        <span>game-platform</span>
+                                        <button class="copy-btn" onclick="copyToClipboard('game-platform')">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                                <td>15/02/2023</td>
+                                <td class="col-action">
+                                    <div class="action-buttons">
+                                        <button class="btn-icon-sm" title="查看" onclick="location.href='merchant-list.html'">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <div class="dropdown">
+                                            <button class="btn-icon-sm" title="设置" onclick="toggleDropdown(this)">
+                                                <i class="fas fa-cog"></i>
+                                            </button>
+                                            <div class="dropdown-menu">
+                                                <a href="javascript:void(0)" class="dropdown-item" 
+                                                   onclick="handleEditPlatform('Game Platform', 'game-platform', 'f334c36g-9g9c-6gc5-1f1g-h6c9g50e41dg')">
+                                                    <i class="fas fa-cog"></i> 设置
+                                                </a>
+                                                <a href="platform-log.html" class="dropdown-item" onclick="event.stopPropagation();">
+                                                    <i class="fas fa-history"></i> 日志
+                                                </a>
+                                                <a href="audit-log.html" class="dropdown-item" onclick="event.stopPropagation();">
+                                                    <i class="fas fa-clipboard-list"></i> 审核日志
+                                                </a>
+                                                <a href="user-detail.html" class="dropdown-item" onclick="event.stopPropagation();">
+                                                    <i class="fas fa-user-edit"></i> 用户详情
+                                                </a>
+                                                <a href="javascript:void(0)" class="dropdown-item" onclick="showToast('书签已添加', 'success')">
+                                                    <i class="far fa-bookmark"></i> 添加书签
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="platform-name">
+                                        <div class="platform-icon">M</div>
+                                        <span>Marketing Hub</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="platform-id">
+                                        <span>marketing-hub</span>
+                                        <button class="copy-btn" onclick="copyToClipboard('marketing-hub')">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                                <td>20/06/2023</td>
+                                <td class="col-action">
+                                    <div class="action-buttons">
+                                        <button class="btn-icon-sm" title="查看" onclick="location.href='merchant-list.html'">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <div class="dropdown">
+                                            <button class="btn-icon-sm" title="设置" onclick="toggleDropdown(this)">
+                                                <i class="fas fa-cog"></i>
+                                            </button>
+                                            <div class="dropdown-menu">
+                                                <a href="javascript:void(0)" class="dropdown-item" 
+                                                   onclick="handleEditPlatform('Marketing Hub', 'marketing-hub', 'g445d47h-0h0d-7hd6-2g2h-i7dah61f52eh')">
+                                                    <i class="fas fa-cog"></i> 设置
+                                                </a>
+                                                <a href="platform-log.html" class="dropdown-item" onclick="event.stopPropagation();">
+                                                    <i class="fas fa-history"></i> 日志
+                                                </a>
+                                                <a href="audit-log.html" class="dropdown-item" onclick="event.stopPropagation();">
+                                                    <i class="fas fa-clipboard-list"></i> 审核日志
+                                                </a>
+                                                <a href="user-detail.html" class="dropdown-item" onclick="event.stopPropagation();">
+                                                    <i class="fas fa-user-edit"></i> 用户详情
+                                                </a>
+                                                <a href="javascript:void(0)" class="dropdown-item" onclick="showToast('书签已添加', 'success')">
+                                                    <i class="far fa-bookmark"></i> 添加书签
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="platform-name">
+                                        <div class="platform-icon">E</div>
+                                        <span>E-commerce</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="platform-id">
+                                        <span>ecommerce</span>
+                                        <button class="copy-btn" onclick="copyToClipboard('ecommerce')">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                                <td>05/09/2023</td>
+                                <td class="col-action">
+                                    <div class="action-buttons">
+                                        <button class="btn-icon-sm" title="查看" onclick="location.href='merchant-list.html'">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <div class="dropdown">
+                                            <button class="btn-icon-sm" title="设置" onclick="toggleDropdown(this)">
+                                                <i class="fas fa-cog"></i>
+                                            </button>
+                                            <div class="dropdown-menu">
+                                                <a href="javascript:void(0)" class="dropdown-item" 
+                                                   onclick="handleEditPlatform('E-commerce', 'ecommerce', 'h556e58i-1i1e-8ie7-3h3i-j8ebi72g63fi')">
+                                                    <i class="fas fa-cog"></i> 设置
+                                                </a>
+                                                <a href="platform-log.html" class="dropdown-item" onclick="event.stopPropagation();">
+                                                    <i class="fas fa-history"></i> 日志
+                                                </a>
+                                                <a href="audit-log.html" class="dropdown-item" onclick="event.stopPropagation();">
+                                                    <i class="fas fa-clipboard-list"></i> 审核日志
+                                                </a>
+                                                <a href="user-detail.html" class="dropdown-item" onclick="event.stopPropagation();">
+                                                    <i class="fas fa-user-edit"></i> 用户详情
+                                                </a>
+                                                <a href="javascript:void(0)" class="dropdown-item" onclick="showToast('书签已添加', 'success')">
+                                                    <i class="far fa-bookmark"></i> 添加书签
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="platform-name">
+                                        <div class="platform-icon">S</div>
+                                        <span>Social Media</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="platform-id">
+                                        <span>social-media</span>
+                                        <button class="copy-btn" onclick="copyToClipboard('social-media')">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                                <td>12/11/2023</td>
+                                <td class="col-action">
+                                    <div class="action-buttons">
+                                        <button class="btn-icon-sm" title="查看" onclick="location.href='merchant-list.html'">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <div class="dropdown">
+                                            <button class="btn-icon-sm" title="设置" onclick="toggleDropdown(this)">
+                                                <i class="fas fa-cog"></i>
+                                            </button>
+                                            <div class="dropdown-menu">
+                                                <a href="javascript:void(0)" class="dropdown-item" 
+                                                   onclick="handleEditPlatform('Social Media', 'social-media', 'i667f69j-2j2f-9jf8-4i4j-k9fcj83h74gj')">
+                                                    <i class="fas fa-cog"></i> 设置
+                                                </a>
+                                                <a href="platform-log.html" class="dropdown-item" onclick="event.stopPropagation();">
+                                                    <i class="fas fa-history"></i> 日志
+                                                </a>
+                                                <a href="audit-log.html" class="dropdown-item" onclick="event.stopPropagation();">
+                                                    <i class="fas fa-clipboard-list"></i> 审核日志
+                                                </a>
+                                                <a href="user-detail.html" class="dropdown-item" onclick="event.stopPropagation();">
+                                                    <i class="fas fa-user-edit"></i> 用户详情
+                                                </a>
+                                                <a href="javascript:void(0)" class="dropdown-item" onclick="showToast('书签已添加', 'success')">
+                                                    <i class="far fa-bookmark"></i> 添加书签
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="platform-name">
+                                        <div class="platform-icon">C</div>
+                                        <span>Content Platform</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="platform-id">
+                                        <span>content</span>
+                                        <button class="copy-btn" onclick="copyToClipboard('content')">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                                <td>25/01/2024</td>
+                                <td class="col-action">
+                                    <div class="action-buttons">
+                                        <button class="btn-icon-sm" title="查看" onclick="location.href='merchant-list.html'">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <div class="dropdown">
+                                            <button class="btn-icon-sm" title="设置" onclick="toggleDropdown(this)">
+                                                <i class="fas fa-cog"></i>
+                                            </button>
+                                            <div class="dropdown-menu">
+                                                <a href="javascript:void(0)" class="dropdown-item" 
+                                                   onclick="handleEditPlatform('Content Platform', 'content', 'j778g70k-3k3g-0kg9-5j5k-l0gdk94i85hk')">
+                                                    <i class="fas fa-cog"></i> 设置
+                                                </a>
+                                                <a href="platform-log.html" class="dropdown-item" onclick="event.stopPropagation();">
+                                                    <i class="fas fa-history"></i> 日志
+                                                </a>
+                                                <a href="audit-log.html" class="dropdown-item" onclick="event.stopPropagation();">
+                                                    <i class="fas fa-clipboard-list"></i> 审核日志
+                                                </a>
+                                                <a href="user-detail.html" class="dropdown-item" onclick="event.stopPropagation();">
+                                                    <i class="fas fa-user-edit"></i> 用户详情
+                                                </a>
+                                                <a href="javascript:void(0)" class="dropdown-item" onclick="showToast('书签已添加', 'success')">
+                                                    <i class="far fa-bookmark"></i> 添加书签
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="platform-name">
+                                        <div class="platform-icon">A</div>
+                                        <span>Analytics</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="platform-id">
+                                        <span>analytics</span>
+                                        <button class="copy-btn" onclick="copyToClipboard('analytics')">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                                <td>08/03/2024</td>
+                                <td class="col-action">
+                                    <div class="action-buttons">
+                                        <button class="btn-icon-sm" title="查看" onclick="location.href='merchant-list.html'">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <div class="dropdown">
+                                            <button class="btn-icon-sm" title="设置" onclick="toggleDropdown(this)">
+                                                <i class="fas fa-cog"></i>
+                                            </button>
+                                            <div class="dropdown-menu">
+                                                <a href="javascript:void(0)" class="dropdown-item" 
+                                                   onclick="handleEditPlatform('Analytics', 'analytics', 'k889h81l-4l4h-1lh0-6k6l-m1hel05j96il')">
+                                                    <i class="fas fa-cog"></i> 设置
+                                                </a>
+                                                <a href="platform-log.html" class="dropdown-item" onclick="event.stopPropagation();">
+                                                    <i class="fas fa-history"></i> 日志
+                                                </a>
+                                                <a href="audit-log.html" class="dropdown-item" onclick="event.stopPropagation();">
+                                                    <i class="fas fa-clipboard-list"></i> 审核日志
+                                                </a>
+                                                <a href="user-detail.html" class="dropdown-item" onclick="event.stopPropagation();">
+                                                    <i class="fas fa-user-edit"></i> 用户详情
+                                                </a>
+                                                <a href="javascript:void(0)" class="dropdown-item" onclick="showToast('书签已添加', 'success')">
+                                                    <i class="far fa-bookmark"></i> 添加书签
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <!-- 表格底部 -->
+                    <div class="table-footer">
+                        <div class="table-info">
+                            <span>显示 1-8 共 12 条</span>
+                        </div>
+                        <div class="pagination-wrapper">
+                            <div class="page-size">
+                                <span>10 条/页</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                            <div class="pagination">
+                                <button class="page-btn" disabled>
+                                    <i class="fas fa-chevron-left"></i>
+                                </button>
+                                <button class="page-btn active">1</button>
+                                <button class="page-btn">2</button>
+                                <button class="page-btn">
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                            </div>
+                            <div class="page-jump">
+                                <span>跳转至</span>
+                                <input type="number" min="1" max="2" value="1">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast 容器 -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- 创建平台弹窗 -->
+    <div class="modal-overlay" id="createPlatformModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">创建平台</h3>
+                <button class="modal-close" onclick="closeModal('createPlatformModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="createPlatformForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">
+                                <span class="required">*</span> 名称
+                            </label>
+                            <input type="text" class="form-input" placeholder="请输入平台名称" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">
+                                <span class="required">*</span> 平台名称/ID
+                            </label>
+                            <input type="text" class="form-input" placeholder="请输入唯一标识符" required>
+                            <span class="form-hint">名称必须是全局唯一的，字母和数字，包括（-）</span>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">
+                                <span class="required">*</span> API网域
+                            </label>
+                            <input type="text" class="form-input" placeholder="请输入API网域">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">CDN</label>
+                            <input type="text" class="form-input" placeholder="请输入CDN地址">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('createPlatformModal')">取消</button>
+                <button class="btn btn-primary" onclick="submitCreatePlatform()">
+                    <i class="fas fa-save"></i> 保存
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 商户列表弹窗 -->
+    <div class="modal-overlay" id="merchantListModal">
+        <div class="modal modal-fullscreen">
+            <div class="modal-header">
+                <h3 class="modal-title">商户列表 (Live)</h3>
+                <button class="modal-close" onclick="closeModal('merchantListModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body modal-body-table">
+                <!-- 筛选区域 -->
+                <div class="modal-filter-bar">
+                    <div class="filter-group-inline">
+                        <div class="select-wrapper-sm">
+                            <select class="form-select-sm">
+                                <option>选择广告系列类型</option>
+                                <option>类型1</option>
+                                <option>类型2</option>
+                            </select>
+                        </div>
+                        <div class="search-box-sm">
+                            <input type="text" placeholder="按名称/ID或名称或标题搜索">
+                            <button class="search-btn-sm">
+                                <i class="fas fa-search"></i> 搜索
+                            </button>
+                        </div>
+                    </div>
+                    <div class="filter-actions">
+                        <button class="btn btn-primary btn-sm" onclick="openModal('createMerchantModal')">
+                            <i class="fas fa-plus"></i> 创建
+                        </button>
+                        <button class="btn btn-outline btn-sm">
+                            <i class="fas fa-sync"></i> 同步
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 商户表格 -->
+                <div class="merchant-table-wrapper">
+                    <table class="data-table merchant-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 70px;">封面图片</th>
+                                <th>名称</th>
+                                <th>标题</th>
+                                <th>商户名称/ID</th>
+                                <th>托管商户名称/ID</th>
+                                <th>创建时间</th>
+                                <th>总活动数量</th>
+                                <th>新活动数量</th>
+                                <th style="width: 80px;">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><div class="merchant-avatar"><img src="https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=100&h=100&fit=crop" alt="avatar"></div></td>
+                                <td>testJerry</td>
+                                <td>-----</td>
+                                <td><span class="id-text">33456</span> <button class="copy-btn-sm"><i class="fas fa-copy"></i></button></td>
+                                <td>-----</td>
+                                <td>05/09/2025</td>
+                                <td>10</td>
+                                <td>0</td>
+                                <td class="col-action">
+                                    <div class="action-buttons">
+                                        <button class="btn-icon-sm" title="查看活动" onclick="location.href='activity-list.html'"><i class="fas fa-eye"></i></button>
+                                        <button class="btn-icon-sm" onclick="openModal('merchantSettingModal')"><i class="fas fa-cog"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><div class="merchant-avatar"><img src="https://images.unsplash.com/photo-1554469384-e58fac16e23a?w=100&h=100&fit=crop" alt="avatar"></div></td>
+                                <td>asdfasdsdfgv123</td>
+                                <td>-----</td>
+                                <td><span class="id-text">asdfasdsdfgv123</span> <button class="copy-btn-sm"><i class="fas fa-copy"></i></button></td>
+                                <td>-----</td>
+                                <td>05/09/2025</td>
+                                <td>10</td>
+                                <td>0</td>
+                                <td class="col-action">
+                                    <div class="action-buttons">
+                                        <button class="btn-icon-sm" title="查看活动" onclick="location.href='activity-list.html'"><i class="fas fa-eye"></i></button>
+                                        <button class="btn-icon-sm" onclick="openModal('merchantSettingModal')"><i class="fas fa-cog"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><div class="merchant-avatar"><img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=100&h=100&fit=crop" alt="avatar"></div></td>
+                                <td>jason87</td>
+                                <td>-----</td>
+                                <td><span class="id-text">jason87</span> <button class="copy-btn-sm"><i class="fas fa-copy"></i></button></td>
+                                <td>-----</td>
+                                <td>05/09/2025</td>
+                                <td>10</td>
+                                <td>0</td>
+                                <td class="col-action">
+                                    <div class="action-buttons">
+                                        <button class="btn-icon-sm" title="查看活动" onclick="location.href='activity-list.html'"><i class="fas fa-eye"></i></button>
+                                        <button class="btn-icon-sm" onclick="openModal('merchantSettingModal')"><i class="fas fa-cog"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><div class="merchant-avatar"><img src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=100&h=100&fit=crop" alt="avatar"></div></td>
+                                <td>asdfasdsdfgv121</td>
+                                <td>-----</td>
+                                <td><span class="id-text">asdfasdsdfgv121</span> <button class="copy-btn-sm"><i class="fas fa-copy"></i></button></td>
+                                <td>-----</td>
+                                <td>05/09/2025</td>
+                                <td>10</td>
+                                <td>0</td>
+                                <td class="col-action">
+                                    <div class="action-buttons">
+                                        <button class="btn-icon-sm" title="查看活动" onclick="location.href='activity-list.html'"><i class="fas fa-eye"></i></button>
+                                        <button class="btn-icon-sm" onclick="openModal('merchantSettingModal')"><i class="fas fa-cog"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><div class="merchant-avatar"><img src="https://images.unsplash.com/photo-1556761175-b413da4baf72?w=100&h=100&fit=crop" alt="avatar"></div></td>
+                                <td>asdfasdsdfgv12</td>
+                                <td>-----</td>
+                                <td><span class="id-text">asdfasdsdfgv12</span> <button class="copy-btn-sm"><i class="fas fa-copy"></i></button></td>
+                                <td>-----</td>
+                                <td>05/09/2025</td>
+                                <td>10</td>
+                                <td>0</td>
+                                <td class="col-action">
+                                    <div class="action-buttons">
+                                        <button class="btn-icon-sm" title="查看活动" onclick="location.href='activity-list.html'"><i class="fas fa-eye"></i></button>
+                                        <button class="btn-icon-sm" onclick="openModal('merchantSettingModal')"><i class="fas fa-cog"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><div class="merchant-avatar"><img src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=100&h=100&fit=crop" alt="avatar"></div></td>
+                                <td>Enzo</td>
+                                <td>-----</td>
+                                <td><span class="id-text">Enzo</span> <button class="copy-btn-sm"><i class="fas fa-copy"></i></button></td>
+                                <td>-----</td>
+                                <td>05/09/2025</td>
+                                <td>10</td>
+                                <td>0</td>
+                                <td class="col-action">
+                                    <div class="action-buttons">
+                                        <button class="btn-icon-sm" title="查看活动" onclick="location.href='activity-list.html'"><i class="fas fa-eye"></i></button>
+                                        <button class="btn-icon-sm" onclick="openModal('merchantSettingModal')"><i class="fas fa-cog"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><div class="merchant-avatar"><img src="https://images.unsplash.com/photo-1497215728101-856f4ea42174?w=100&h=100&fit=crop" alt="avatar"></div></td>
+                                <td>cesecese</td>
+                                <td>-----</td>
+                                <td><span class="id-text">cesecese</span> <button class="copy-btn-sm"><i class="fas fa-copy"></i></button></td>
+                                <td>-----</td>
+                                <td>05/09/2025</td>
+                                <td>10</td>
+                                <td>0</td>
+                                <td class="col-action">
+                                    <div class="action-buttons">
+                                        <button class="btn-icon-sm" title="查看活动" onclick="location.href='activity-list.html'"><i class="fas fa-eye"></i></button>
+                                        <button class="btn-icon-sm" onclick="openModal('merchantSettingModal')"><i class="fas fa-cog"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><div class="merchant-avatar"><img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=100&h=100&fit=crop" alt="avatar"></div></td>
+                                <td>nichousha</td>
+                                <td>-----</td>
+                                <td><span class="id-text">nichousha</span> <button class="copy-btn-sm"><i class="fas fa-copy"></i></button></td>
+                                <td>-----</td>
+                                <td>05/09/2025</td>
+                                <td>10</td>
+                                <td>0</td>
+                                <td class="col-action">
+                                    <div class="action-buttons">
+                                        <button class="btn-icon-sm" title="查看活动" onclick="location.href='activity-list.html'"><i class="fas fa-eye"></i></button>
+                                        <button class="btn-icon-sm" onclick="openModal('merchantSettingModal')"><i class="fas fa-cog"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><div class="merchant-avatar"><img src="https://images.unsplash.com/photo-1571171745866-84bcc004c275?w=100&h=100&fit=crop" alt="avatar"></div></td>
+                                <td>abc1</td>
+                                <td>-----</td>
+                                <td><span class="id-text">abc1</span> <button class="copy-btn-sm"><i class="fas fa-copy"></i></button></td>
+                                <td>-----</td>
+                                <td>05/09/2025</td>
+                                <td>13</td>
+                                <td>0</td>
+                                <td class="col-action">
+                                    <div class="action-buttons">
+                                        <button class="btn-icon-sm" title="查看活动" onclick="location.href='activity-list.html'"><i class="fas fa-eye"></i></button>
+                                        <button class="btn-icon-sm" onclick="openModal('merchantSettingModal')"><i class="fas fa-cog"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><div class="merchant-avatar"><img src="https://images.unsplash.com/photo-1556761175-5973eb0732da?w=100&h=100&fit=crop" alt="avatar"></div></td>
+                                <td>cese2</td>
+                                <td>-----</td>
+                                <td><span class="id-text">cese2</span> <button class="copy-btn-sm"><i class="fas fa-copy"></i></button></td>
+                                <td>-----</td>
+                                <td>05/09/2025</td>
+                                <td>10</td>
+                                <td>0</td>
+                                <td class="col-action">
+                                    <div class="action-buttons">
+                                        <button class="btn-icon-sm" title="查看活动" onclick="location.href='activity-list.html'"><i class="fas fa-eye"></i></button>
+                                        <button class="btn-icon-sm" onclick="openModal('merchantSettingModal')"><i class="fas fa-cog"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- 分页 -->
+                <div class="modal-pagination">
+                    <div class="pagination-nav">
+                        <button class="page-btn-sm" disabled><i class="fas fa-chevron-left"></i></button>
+                        <button class="page-btn-sm active">1</button>
+                        <button class="page-btn-sm">2</button>
+                        <button class="page-btn-sm">3</button>
+                        <button class="page-btn-sm">4</button>
+                        <button class="page-btn-sm">5</button>
+                        <span class="page-ellipsis">...</span>
+                        <button class="page-btn-sm">18</button>
+                        <button class="page-btn-sm"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                    <div class="pagination-info">
+                        <div class="page-size-select">
+                            <select class="form-select-sm">
+                                <option>10 条/页</option>
+                                <option>20 条/页</option>
+                                <option>50 条/页</option>
+                            </select>
+                        </div>
+                        <div class="page-jump">
+                            <span>跳转至</span>
+                            <input type="number" min="1" max="18" value="1" class="page-jump-input">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 商户设置弹窗 -->
+    <div class="modal-overlay" id="merchantSettingModal">
+        <div class="modal modal-fullscreen">
+            <div class="modal-header">
+                <h3 class="modal-title">商户设置 (推1)</h3>
+                <button class="modal-close" onclick="closeModal('merchantSettingModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" style="padding: 0; overflow-y: auto;">
+                <div class="merchant-setting-content">
+                    <!-- 商户信息 -->
+                    <div class="setting-section">
+                        <h4 class="setting-section-title">商户信息</h4>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">商户ID</label>
+                                <input type="text" class="form-input form-input-readonly" value="62bdfd33-9c1d-463b-b2a3-e35bac174094" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label"><span class="required">*</span> 名称</label>
+                                <input type="text" class="form-input" value="推1">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">标题</label>
+                                <input type="text" class="form-input" value="sdfasd">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label"><span class="required">*</span> 商户名称/ID</label>
+                                <input type="text" class="form-input" value="tu1">
+                                <span class="form-hint">名称必须是全局唯一的，字母和数字，包括（-）</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 配置 -->
+                    <div class="setting-section setting-section-alt">
+                        <h4 class="setting-section-title">配置</h4>
+                        <div class="config-item">
+                            <label class="config-label">自定义密钥?</label>
+                            <label class="toggle-switch">
+                                <input type="checkbox">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div class="config-item">
+                            <label class="config-label">自定义webhook?</label>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div class="form-group" style="margin-top: 16px;">
+                            <label class="form-label"><span class="required">*</span> API网域</label>
+                            <input type="text" class="form-input" value="http://13.215.143.71:20010">
+                        </div>
+                    </div>
+
+                    <!-- 上传图片 -->
+                    <div class="setting-section">
+                        <h4 class="setting-section-title">上传图片</h4>
+                        <div class="upload-grid upload-grid-2">
+                            <div class="upload-item">
+                                <label class="upload-label">封面图片</label>
+                                <div class="upload-preview">
+                                    <div class="upload-placeholder"><i class="fas fa-image"></i></div>
+                                </div>
+                            </div>
+                            <div class="upload-item">
+                                <label class="upload-label">背景图像</label>
+                                <div class="upload-preview upload-preview-bg">
+                                    <div class="upload-placeholder-color"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 一键领取活动图标 -->
+                    <div class="setting-section setting-section-alt">
+                        <h4 class="setting-section-title">一键领取活动图标</h4>
+                        <div class="form-group" style="margin-bottom: 24px;">
+                            <label class="form-label">要求所有文字</label>
+                            <input type="text" class="form-input" value="一步到位，点击领取所有的彩金和奖励">
+                        </div>
+                        <div class="upload-grid">
+                            <!-- 第1排 -->
+                            <div class="upload-item">
+                                <label class="upload-label">升级模式</label>
+                                <div class="upload-preview"><div class="upload-icon upload-icon-gold"><i class="fas fa-crown"></i></div></div>
+                                <span class="upload-hint">推荐图片尺寸: 560x560</span>
+                                <button class="btn btn-primary btn-sm btn-full"><i class="fas fa-upload"></i> 上传图片</button>
+                            </div>
+                            <div class="upload-item">
+                                <label class="upload-label">每日有效下注</label>
+                                <div class="upload-preview"><div class="upload-icon upload-icon-red"><i class="fas fa-coins"></i></div></div>
+                                <span class="upload-hint">推荐图片尺寸: 560x560</span>
+                                <button class="btn btn-primary btn-sm btn-full"><i class="fas fa-upload"></i> 上传图片</button>
+                            </div>
+                            <div class="upload-item">
+                                <label class="upload-label">邀请充值签到</label>
+                                <div class="upload-preview"><div class="upload-icon upload-icon-blue"><i class="fas fa-calendar-check"></i></div></div>
+                                <span class="upload-hint">推荐图片尺寸: 560x560</span>
+                                <button class="btn btn-primary btn-sm btn-full"><i class="fas fa-upload"></i> 上传图片</button>
+                            </div>
+                            <div class="upload-item">
+                                <label class="upload-label">救援金</label>
+                                <div class="upload-preview"><div class="upload-icon upload-icon-orange"><i class="fas fa-hand-holding-medical"></i></div></div>
+                                <span class="upload-hint">推荐图片尺寸: 560x560</span>
+                                <button class="btn btn-primary btn-sm btn-full"><i class="fas fa-upload"></i> 上传图片</button>
+                            </div>
+                            <div class="upload-item">
+                                <label class="upload-label">每日存款</label>
+                                <div class="upload-preview"><div class="upload-icon upload-icon-purple"><i class="fas fa-piggy-bank"></i></div></div>
+                                <span class="upload-hint">推荐图片尺寸: 560x560</span>
+                                <button class="btn btn-primary btn-sm btn-full"><i class="fas fa-upload"></i> 上传图片</button>
+                            </div>
+                            <div class="upload-item">
+                                <label class="upload-label">每周充值</label>
+                                <div class="upload-preview"><div class="upload-icon upload-icon-cyan"><i class="fas fa-calendar-plus"></i></div></div>
+                                <span class="upload-hint">推荐图片尺寸: 560x560</span>
+                                <button class="btn btn-primary btn-sm btn-full"><i class="fas fa-upload"></i> 上传图片</button>
+                            </div>
+                            <div class="upload-item">
+                                <label class="upload-label">连续充值</label>
+                                <div class="upload-preview"><div class="upload-icon upload-icon-blue"><i class="fas fa-layer-group"></i></div></div>
+                                <span class="upload-hint">推荐图片尺寸: 560x560</span>
+                                <button class="btn btn-primary btn-sm btn-full"><i class="fas fa-upload"></i> 上传图片</button>
+                            </div>
+                            <div class="upload-item">
+                                <label class="upload-label">每日返水</label>
+                                <div class="upload-preview"><div class="upload-icon upload-icon-gold"><i class="fas fa-percentage"></i></div></div>
+                                <span class="upload-hint">推荐图片尺寸: 560x560</span>
+                                <button class="btn btn-primary btn-sm btn-full"><i class="fas fa-upload"></i> 上传图片</button>
+                            </div>
+
+                            <!-- 第2排 -->
+                            <div class="upload-item">
+                                <label class="upload-label">首次活动</label>
+                                <div class="upload-preview"><div class="upload-icon upload-icon-red"><i class="fas fa-star"></i></div></div>
+                                <span class="upload-hint">推荐图片尺寸: 560x560</span>
+                                <button class="btn btn-primary btn-sm btn-full"><i class="fas fa-upload"></i> 上传图片</button>
+                            </div>
+                            <div class="upload-item">
+                                <label class="upload-label">满月福利</label>
+                                <div class="upload-preview"><div class="upload-icon upload-icon-gold"><i class="fas fa-moon"></i></div></div>
+                                <span class="upload-hint">推荐图片尺寸: 560x560</span>
+                                <button class="btn btn-primary btn-sm btn-full"><i class="fas fa-upload"></i> 上传图片</button>
+                            </div>
+                            <div class="upload-item">
+                                <label class="upload-label">红包雨</label>
+                                <div class="upload-preview"><div class="upload-icon upload-icon-red"><i class="fas fa-envelope-open-text"></i></div></div>
+                                <span class="upload-hint">推荐图片尺寸: 560x560</span>
+                                <button class="btn btn-primary btn-sm btn-full"><i class="fas fa-upload"></i> 上传图片</button>
+                            </div>
+                            <div class="upload-item">
+                                <label class="upload-label">节日礼金</label>
+                                <div class="upload-preview"><div class="upload-icon upload-icon-orange"><i class="fas fa-gift"></i></div></div>
+                                <span class="upload-hint">推荐图片尺寸: 560x560</span>
+                                <button class="btn btn-primary btn-sm btn-full"><i class="fas fa-upload"></i> 上传图片</button>
+                            </div>
+                            <div class="upload-item">
+                                <label class="upload-label">每日抽奖</label>
+                                <div class="upload-preview"><div class="upload-icon upload-icon-blue"><i class="fas fa-ticket-alt"></i></div></div>
+                                <span class="upload-hint">推荐图片尺寸: 560x560</span>
+                                <button class="btn btn-primary btn-sm btn-full"><i class="fas fa-upload"></i> 上传图片</button>
+                            </div>
+                            <div class="upload-item">
+                                <label class="upload-label">活动抽奖</label>
+                                <div class="upload-preview"><div class="upload-icon upload-icon-purple"><i class="fas fa-redo"></i></div></div>
+                                <span class="upload-hint">推荐图片尺寸: 560x560</span>
+                                <button class="btn btn-primary btn-sm btn-full"><i class="fas fa-upload"></i> 上传图片</button>
+                            </div>
+                            <div class="upload-item">
+                                <label class="upload-label">彩票满天</label>
+                                <div class="upload-preview"><div class="upload-icon upload-icon-red"><i class="fas fa-bullseye"></i></div></div>
+                                <span class="upload-hint">推荐图片尺寸: 560x560</span>
+                                <button class="btn btn-primary btn-sm btn-full"><i class="fas fa-upload"></i> 上传图片</button>
+                            </div>
+                            <div class="upload-item">
+                                <label class="upload-label">尊贵VIP</label>
+                                <div class="upload-preview"><div class="upload-icon upload-icon-gold"><i class="fas fa-gem"></i></div></div>
+                                <span class="upload-hint">推荐图片尺寸: 560x560</span>
+                                <button class="btn btn-primary btn-sm btn-full"><i class="fas fa-upload"></i> 上传图片</button>
+                            </div>
+
+                            <!-- 第3排 -->
+                            <div class="upload-item">
+                                <label class="upload-label">谁与争锋</label>
+                                <div class="upload-preview"><div class="upload-icon upload-icon-orange"><i class="fas fa-trophy"></i></div></div>
+                                <span class="upload-hint">推荐图片尺寸: 560x560</span>
+                                <button class="btn btn-primary btn-sm btn-full"><i class="fas fa-upload"></i> 上传图片</button>
+                            </div>
+                            <div class="upload-item">
+                                <label class="upload-label">连环赠送</label>
+                                <div class="upload-preview"><div class="upload-icon upload-icon-blue"><i class="fas fa-box-open"></i></div></div>
+                                <span class="upload-hint">推荐图片尺寸: 560x560</span>
+                                <button class="btn btn-primary btn-sm btn-full"><i class="fas fa-upload"></i> 上传图片</button>
+                            </div>
+                            <div class="upload-item">
+                                <label class="upload-label">凌云返水</label>
+                                <div class="upload-preview"><div class="upload-icon upload-icon-cyan"><i class="fas fa-cloud-download-alt"></i></div></div>
+                                <span class="upload-hint">推荐图片尺寸: 560x560</span>
+                                <button class="btn btn-primary btn-sm btn-full"><i class="fas fa-upload"></i> 上传图片</button>
+                            </div>
+                            <div class="upload-item">
+                                <label class="upload-label">每日签到</label>
+                                <div class="upload-preview"><div class="upload-icon upload-icon-gold"><i class="fas fa-calendar-alt"></i></div></div>
+                                <span class="upload-hint">推荐图片尺寸: 560x560</span>
+                                <button class="btn btn-primary btn-sm btn-full"><i class="fas fa-upload"></i> 上传图片</button>
+                            </div>
+                            <div class="upload-item">
+                                <label class="upload-label">元旦大转盘</label>
+                                <div class="upload-preview"><div class="upload-icon upload-icon-red"><i class="fas fa-sync-alt"></i></div></div>
+                                <span class="upload-hint">推荐图片尺寸: 560x560</span>
+                                <button class="btn btn-primary btn-sm btn-full"><i class="fas fa-upload"></i> 上传图片</button>
+                            </div>
+                            <div class="upload-item">
+                                <label class="upload-label">农历新年抽红包</label>
+                                <div class="upload-preview"><div class="upload-icon upload-icon-red"><i class="fas fa-fire-alt"></i></div></div>
+                                <span class="upload-hint">推荐图片尺寸: 560x560</span>
+                                <button class="btn btn-primary btn-sm btn-full"><i class="fas fa-upload"></i> 上传图片</button>
+                            </div>
+                            <div class="upload-item">
+                                <label class="upload-label">中秋节日</label>
+                                <div class="upload-preview"><div class="upload-icon upload-icon-gold"><i class="fas fa-cloud-moon"></i></div></div>
+                                <span class="upload-hint">推荐图片尺寸: 560x560</span>
+                                <button class="btn btn-primary btn-sm btn-full"><i class="fas fa-upload"></i> 上传图片</button>
+                            </div>
+                            <div class="upload-item">
+                                <label class="upload-label">节日大礼盒</label>
+                                <div class="upload-preview"><div class="upload-icon upload-icon-red"><i class="fas fa-gifts"></i></div></div>
+                                <span class="upload-hint">推荐图片尺寸: 560x560</span>
+                                <button class="btn btn-primary btn-sm btn-full"><i class="fas fa-upload"></i> 上传图片</button>
+                            </div>
+
+                            <!-- 第4排 -->
+                            <div class="upload-item">
+                                <label class="upload-label">新累计充值大返利</label>
+                                <div class="upload-preview">
+                                    <div class="upload-placeholder"><i class="fas fa-image"></i></div>
+                                </div>
+                                <span class="upload-hint">推荐图片尺寸: 560x560</span>
+                                <button class="btn btn-primary btn-sm btn-full"><i class="fas fa-upload"></i> 上传图片</button>
+                            </div>
+                            <div class="upload-item">
+                                <label class="upload-label">每日亏损补贴</label>
+                                <div class="upload-preview">
+                                    <div class="upload-placeholder"><i class="fas fa-image"></i></div>
+                                </div>
+                                <span class="upload-hint">推荐图片尺寸: 560x560</span>
+                                <button class="btn btn-primary btn-sm btn-full"><i class="fas fa-upload"></i> 上传图片</button>
+                            </div>
+                            <div class="upload-item">
+                                <label class="upload-label">天天签到 免费领红包</label>
+                                <div class="upload-preview">
+                                    <div class="upload-placeholder"><i class="fas fa-image"></i></div>
+                                </div>
+                                <span class="upload-hint">推荐图片尺寸: 560x560</span>
+                                <button class="btn btn-primary btn-sm btn-full"><i class="fas fa-upload"></i> 上传图片</button>
+                            </div>
+                            <div class="upload-item">
+                                <label class="upload-label">摇摆子彩金</label>
+                                <div class="upload-preview">
+                                    <div class="upload-placeholder"><i class="fas fa-image"></i></div>
+                                </div>
+                                <span class="upload-hint">推荐图片尺寸: 560x560</span>
+                                <button class="btn btn-primary btn-sm btn-full"><i class="fas fa-upload"></i> 上传图片</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 底部按钮 -->
+                <div class="merchant-setting-footer">
+                    <button class="btn btn-danger">
+                        <i class="fas fa-trash"></i> 删除商户
+                    </button>
+                    <button class="btn btn-outline">
+                        <i class="fas fa-clock"></i> 出售所有计划
+                    </button>
+                    <button class="btn btn-primary">
+                        <i class="fas fa-save"></i> 提交
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 活动列表弹窗 -->
+    <div class="modal-overlay" id="activityListModal">
+        <div class="modal modal-fullscreen">
+            <div class="modal-header">
+                <h3 class="modal-title">活动列表 (推1)</h3>
+                <button class="modal-close" onclick="closeModal('activityListModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body modal-body-table">
+                <!-- 筛选区域 -->
+                <div class="modal-filter-bar">
+                    <div class="filter-group-inline">
+                        <div class="filter-item">
+                            <label>名称</label>
+                            <input type="text" class="form-input-sm" placeholder="名称">
+                        </div>
+                        <div class="filter-item">
+                            <label>类型</label>
+                            <select class="form-select-sm">
+                                <option>选择类型</option>
+                                <option>广告</option>
+                                <option>连续充值</option>
+                                <option>每日返水</option>
+                                <option>每周充值</option>
+                                <option>救援金</option>
+                            </select>
+                        </div>
+                        <div class="filter-item">
+                            <label>类别</label>
+                            <select class="form-select-sm">
+                                <option>选择类别</option>
+                                <option>游戏活动</option>
+                            </select>
+                        </div>
+                        <div class="filter-item">
+                            <label>启用</label>
+                            <select class="form-select-sm">
+                                <option>选择启用</option>
+                                <option>是</option>
+                                <option>否</option>
+                            </select>
+                        </div>
+                        <div class="filter-item">
+                            <label>状态</label>
+                            <select class="form-select-sm">
+                                <option>选择有效</option>
+                            </select>
+                        </div>
+                        <div class="filter-item">
+                            <label>置顶</label>
+                            <select class="form-select-sm">
+                                <option>选择置顶</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="filter-actions">
+                        <button class="btn btn-primary btn-sm">
+                            <i class="fas fa-search"></i> 搜索
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 操作按钮栏 -->
+                <div class="activity-action-bar">
+                    <button class="btn btn-primary btn-sm">
+                        <i class="fas fa-plus"></i> 创建
+                    </button>
+                    <button class="btn btn-primary btn-sm">
+                        <i class="fas fa-eye"></i> 活动大厅预览
+                    </button>
+                    <button class="btn btn-primary btn-sm">
+                        <i class="fas fa-bullhorn"></i> 跑马灯设置
+                    </button>
+                </div>
+                
+                <!-- 活动表格 -->
+                <div class="merchant-table-wrapper">
+                    <table class="data-table activity-table">
+                        <colgroup>
+                            <col style="width: 240px;">
+                            <col style="width: 100px;">
+                            <col style="width: 100px;">
+                            <col style="width: 100px;">
+                            <col style="width: 80px;">
+                            <col style="width: 110px;">
+                            <col style="width: 110px;">
+                            <col style="width: 110px;">
+                            <col style="width: 80px;">
+                            <col style="width: 80px;">
+                            <col style="width: 80px;">
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>标题/名称/ID</th>
+                                <th>缩略图</th>
+                                <th>类型</th>
+                                <th>类别</th>
+                                <th>排序</th>
+                                <th>开始日期</th>
+                                <th>结束日期</th>
+                                <th>创建时间</th>
+                                <th>置顶</th>
+                                <th>启用</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <div class="activity-title">时间范围</div>
+                                    <div class="activity-id">ID: <a href="#" class="link-primary">sjfw</a> <button class="copy-btn-sm"><i class="fas fa-copy"></i></button></div>
+                                </td>
+                                <td><div class="activity-thumb"></div></td>
+                                <td>广告</td>
+                                <td>游戏活动</td>
+                                <td>-9000</td>
+                                <td>31/01/2026</td>
+                                <td>长期有效</td>
+                                <td>31/01/2026</td>
+                                <td>是</td>
+                                <td class="col-toggle"><label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label></td>
+                                <td class="col-action">
+                                    <button class="btn-icon-sm"><i class="fas fa-edit"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="activity-title">投注小技巧</div>
+                                    <div class="activity-id">ID: <a href="#" class="link-primary">tzxjq</a> <button class="copy-btn-sm"><i class="fas fa-copy"></i></button></div>
+                                </td>
+                                <td><div class="activity-thumb"></div></td>
+                                <td>广告</td>
+                                <td>游戏活动</td>
+                                <td>-999999</td>
+                                <td>31/01/2026</td>
+                                <td>长期有效</td>
+                                <td>31/01/2026</td>
+                                <td>是</td>
+                                <td class="col-toggle"><label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label></td>
+                                <td class="col-action">
+                                    <button class="btn-icon-sm"><i class="fas fa-edit"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="activity-title">连续存款</div>
+                                    <div class="activity-id">Path: <a href="#" class="link-primary">repeat_recharge</a> <button class="copy-btn-sm"><i class="fas fa-copy"></i></button></div>
+                                </td>
+                                <td><div class="activity-thumb"></div></td>
+                                <td>连续充值</td>
+                                <td>游戏活动</td>
+                                <td>0</td>
+                                <td>01/01/2026</td>
+                                <td>----</td>
+                                <td>30/01/2026</td>
+                                <td>否</td>
+                                <td><label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label></td>
+                                <td>
+                                    <button class="btn-icon-sm"><i class="fas fa-edit"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="activity-title">天天返水再返水</div>
+                                    <div class="activity-id">Path: <a href="#" class="link-primary">daily_rebate</a> <button class="copy-btn-sm"><i class="fas fa-copy"></i></button></div>
+                                </td>
+                                <td><div class="activity-thumb"></div></td>
+                                <td>每日返水</td>
+                                <td>游戏活动</td>
+                                <td>-9000000</td>
+                                <td>01/07/2025</td>
+                                <td>----</td>
+                                <td>29/01/2026</td>
+                                <td>否</td>
+                                <td><label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label></td>
+                                <td>
+                                    <button class="btn-icon-sm"><i class="fas fa-edit"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="activity-title">周周现金 大派送</div>
+                                    <div class="activity-id">Path: <a href="#" class="link-primary">weekly_recharge</a> <button class="copy-btn-sm"><i class="fas fa-copy"></i></button></div>
+                                </td>
+                                <td><div class="activity-thumb"></div></td>
+                                <td>每周充值</td>
+                                <td>游戏活动</td>
+                                <td>0</td>
+                                <td>04/08/2025</td>
+                                <td>----</td>
+                                <td>29/01/2026</td>
+                                <td>否</td>
+                                <td><label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label></td>
+                                <td>
+                                    <button class="btn-icon-sm"><i class="fas fa-edit"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="activity-title">彩票救援金 助你东山再起</div>
+                                    <div class="activity-id">Path: <a href="#" class="link-primary">relief</a> <button class="copy-btn-sm"><i class="fas fa-copy"></i></button></div>
+                                </td>
+                                <td><div class="activity-thumb"></div></td>
+                                <td>救援金</td>
+                                <td>游戏活动</td>
+                                <td>0</td>
+                                <td>01/11/2025</td>
+                                <td>----</td>
+                                <td>29/01/2026</td>
+                                <td>否</td>
+                                <td><label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label></td>
+                                <td>
+                                    <button class="btn-icon-sm"><i class="fas fa-edit"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="activity-title">fuwenben10</div>
+                                    <div class="activity-id">ID: <a href="#" class="link-primary">fuwenben10</a> <button class="copy-btn-sm"><i class="fas fa-copy"></i></button></div>
+                                </td>
+                                <td><div class="activity-thumb"></div></td>
+                                <td>广告</td>
+                                <td>游戏活动</td>
+                                <td>-1</td>
+                                <td>28/01/2026</td>
+                                <td>长期有效</td>
+                                <td>28/01/2026</td>
+                                <td>否</td>
+                                <td><label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label></td>
+                                <td>
+                                    <button class="btn-icon-sm"><i class="fas fa-edit"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="activity-title">fuwenben9</div>
+                                    <div class="activity-id">ID: <a href="#" class="link-primary">fuwenben9</a> <button class="copy-btn-sm"><i class="fas fa-copy"></i></button></div>
+                                </td>
+                                <td><div class="activity-thumb"></div></td>
+                                <td>广告</td>
+                                <td>游戏活动</td>
+                                <td>-2</td>
+                                <td>28/01/2026</td>
+                                <td>长期有效</td>
+                                <td>28/01/2026</td>
+                                <td>否</td>
+                                <td><label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label></td>
+                                <td>
+                                    <button class="btn-icon-sm"><i class="fas fa-edit"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="activity-title">fuwenben8</div>
+                                    <div class="activity-id">ID: <a href="#" class="link-primary">fuwenben8</a> <button class="copy-btn-sm"><i class="fas fa-copy"></i></button></div>
+                                </td>
+                                <td><div class="activity-thumb"></div></td>
+                                <td>广告</td>
+                                <td>游戏活动</td>
+                                <td>-3</td>
+                                <td>28/01/2026</td>
+                                <td>长期有效</td>
+                                <td>28/01/2026</td>
+                                <td>否</td>
+                                <td><label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label></td>
+                                <td>
+                                    <button class="btn-icon-sm"><i class="fas fa-edit"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="activity-title">fuwenben7</div>
+                                    <div class="activity-id">ID: <a href="#" class="link-primary">fuwenben7</a> <button class="copy-btn-sm"><i class="fas fa-copy"></i></button></div>
+                                </td>
+                                <td><div class="activity-thumb"></div></td>
+                                <td>广告</td>
+                                <td>游戏活动</td>
+                                <td>-4</td>
+                                <td>28/01/2026</td>
+                                <td>长期有效</td>
+                                <td>28/01/2026</td>
+                                <td>否</td>
+                                <td><label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label></td>
+                                <td>
+                                    <button class="btn-icon-sm"><i class="fas fa-edit"></i></button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- 分页 -->
+                <div class="modal-pagination">
+                    <div class="pagination-nav">
+                        <button class="page-btn-sm" disabled><i class="fas fa-chevron-left"></i></button>
+                        <button class="page-btn-sm active">1</button>
+                        <button class="page-btn-sm">2</button>
+                        <button class="page-btn-sm">3</button>
+                        <button class="page-btn-sm">4</button>
+                        <button class="page-btn-sm">5</button>
+                        <span class="page-ellipsis">...</span>
+                        <button class="page-btn-sm">19</button>
+                        <button class="page-btn-sm"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                    <div class="pagination-info">
+                        <select class="form-select-sm"><option>10 条/页</option></select>
+                        <div class="page-jump">
+                            <span>跳转至</span>
+                            <input type="number" value="1" class="page-jump-input">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 物品列表 (推1) -->
+    <div class="modal-overlay" id="activityListModal">
+
+    <!-- 审核日志弹窗 -->
+    <div class="modal-overlay" id="auditLogModal">
+        <div class="modal modal-fullscreen">
+            <div class="modal-header">
+                <h3 class="modal-title">审核日志</h3>
+                <button class="modal-close" onclick="closeModal('auditLogModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body modal-body-table">
+                <!-- 筛选区域 -->
+                <div class="modal-filter-bar">
+                    <div class="filter-group-inline">
+                        <div class="filter-item">
+                            <label>平台</label>
+                            <select class="form-select-sm"><option>全部</option></select>
+                        </div>
+                        <div class="filter-item">
+                            <label>商户</label>
+                            <select class="form-select-sm"><option>全部</option></select>
+                        </div>
+                        <div class="filter-item">
+                            <label>活动类别</label>
+                            <select class="form-select-sm"><option>全部</option></select>
+                        </div>
+                        <div class="filter-item">
+                            <label>关键词</label>
+                            <input type="text" class="form-input-sm" placeholder="关键词">
+                        </div>
+                        <div class="filter-item">
+                            <label>日期: 日/月/年</label>
+                            <div class="date-range-inline">
+                                <div class="date-input-wrapper">
+                                    <input type="text" class="form-input-sm" value="02-02-2026" style="width: 130px;">
+                                    <i class="far fa-calendar-alt date-icon"></i>
+                                </div>
+                                <span class="range-separator">-</span>
+                                <div class="date-input-wrapper">
+                                    <input type="text" class="form-input-sm" value="02-02-2026" style="width: 130px;">
+                                    <i class="far fa-calendar-alt date-icon"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="filter-actions">
+                        <button class="btn btn-primary btn-sm">
+                            <i class="fas fa-search"></i> 搜索
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 审核表格 -->
+                <div class="merchant-table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>创建时间</th>
+                                <th>操作人</th>
+                                <th>类型</th>
+                                <th>名称</th>
+                                <th>操作</th>
+                                <th>商户标题 / 商户名称/ID</th>
+                                <th>IP</th>
+                                <th>用户代理</th>
+                                <th style="width: 60px;">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>02-02 23:06:41</td>
+                                <td>roza@mail.com</td>
+                                <td>商户</td>
+                                <td>推1</td>
+                                <td>设置主题为(<strong>arcade</strong>)</td>
+                                <td>sdfasd // tu1</td>
+                                <td>108.137.134.6</td>
+                                <td class="text-small">Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)...</td>
+                                <td><button class="btn-icon-sm"><i class="fas fa-info-circle"></i></button></td>
+                            </tr>
+                            <tr>
+                                <td>02-02 23:03:34</td>
+                                <td>roza@mail.com</td>
+                                <td>商户</td>
+                                <td>推1</td>
+                                <td>设置主题为(<strong>theme_7</strong>)</td>
+                                <td>sdfasd // tu1</td>
+                                <td>108.137.134.6</td>
+                                <td class="text-small">Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)...</td>
+                                <td><button class="btn-icon-sm"><i class="fas fa-info-circle"></i></button></td>
+                            </tr>
+                            <tr>
+                                <td>02-02 14:45:23</td>
+                                <td>Deonly@mail.com</td>
+                                <td>用户详情</td>
+                                <td>--//--</td>
+                                <td>清除模拟</td>
+                                <td>-- // --</td>
+                                <td>103.9.188.78</td>
+                                <td class="text-small">Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)...</td>
+                                <td><button class="btn-icon-sm"><i class="fas fa-info-circle"></i></button></td>
+                            </tr>
+                            <tr>
+                                <td>02-02 14:45:23</td>
+                                <td>Deonly@mail.com</td>
+                                <td>用户详情</td>
+                                <td>--//--</td>
+                                <td>模拟（正常充值）</td>
+                                <td>-- // --</td>
+                                <td>103.9.188.78</td>
+                                <td class="text-small">Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)...</td>
+                                <td><button class="btn-icon-sm"><i class="fas fa-info-circle"></i></button></td>
+                            </tr>
+                            <tr>
+                                <td>02-02 13:52:06</td>
+                                <td>test@email.com</td>
+                                <td>用户</td>
+                                <td>--//--</td>
+                                <td>更新IP白名单</td>
+                                <td>-- // --</td>
+                                <td>103.9.188.78</td>
+                                <td class="text-small">Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)...</td>
+                                <td><button class="btn-icon-sm"><i class="fas fa-info-circle"></i></button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- 分页 -->
+                <div class="modal-pagination">
+                    <div class="pagination-nav">
+                        <button class="page-btn-sm" disabled><i class="fas fa-chevron-left"></i></button>
+                        <button class="page-btn-sm active">1</button>
+                        <button class="page-btn-sm">2</button>
+                        <button class="page-btn-sm"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                    <div class="pagination-info">
+                        <select class="form-select-sm"><option>10 条/页</option></select>
+                        <div class="page-jump">
+                            <span>跳转至</span>
+                            <input type="number" value="1" class="page-jump-input">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 用户详情弹窗 -->
+    <div class="modal-overlay" id="userDetailModal">
+        <div class="modal modal-fullscreen">
+            <div class="modal-header">
+                <h3 class="modal-title">用户详情</h3>
+                <button class="modal-close" onclick="closeModal('userDetailModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" style="padding: 0; overflow-y: auto;">
+                <!-- 顶部搜索栏 -->
+                <div class="user-search-bar">
+                    <div class="quick-search">
+                        <label>平台用户ID或令牌</label>
+                        <div class="quick-search-input">
+                            <input type="text" class="form-input-sm" value="1254202320" placeholder="输入平台用户ID或令牌">
+                            <button class="btn-clear"><i class="fas fa-times-circle"></i></button>
+                        </div>
+                        <button class="btn btn-primary btn-sm">
+                            <i class="fas fa-search"></i> 搜索
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 筛选区域 -->
+                <div class="user-filter-bar">
+                    <div class="filter-group-inline">
+                        <div class="filter-item">
+                            <label>平台</label>
+                            <select class="form-select-sm">
+                                <option>Live - live-old</option>
+                            </select>
+                        </div>
+                        <div class="filter-item">
+                            <label>商户</label>
+                            <select class="form-select-sm">
+                                <option>推1 - tu1</option>
+                            </select>
+                        </div>
+                        <div class="filter-item">
+                            <label>平台用户ID或令牌</label>
+                            <input type="text" class="form-input-sm" value="1254202320">
+                        </div>
+                    </div>
+                    <div class="filter-actions">
+                        <button class="btn btn-primary btn-sm">
+                            <i class="fas fa-search"></i> 搜索
+                        </button>
+                        <button class="btn btn-primary btn-sm">
+                            <i class="fas fa-sync"></i> 预览同步
+                        </button>
+                        <button class="btn btn-primary btn-sm">
+                            <i class="fas fa-exchange-alt"></i> 更改频道
+                        </button>
+                        <button class="btn btn-primary btn-sm">
+                            <i class="fas fa-wrench"></i> 老活动修复
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="user-detail-content">
+                    <h4 class="section-title">用户数据</h4>
+                    
+                    <!-- 基本信息 -->
+                    <div class="user-detail-section">
+                        <div class="section-header">
+                            <span class="section-label">基本信息</span>
+                            <button class="btn-icon-sm"><i class="fas fa-info-circle"></i></button>
+                        </div>
+                        <div class="detail-grid">
+                            <div class="detail-row">
+                                <span class="detail-label">头像</span>
+                                <span class="detail-value"><div class="user-avatar-lg"></div></span>
+                                <span class="detail-label">用户名</span>
+                                <span class="detail-value">勤力小侠_brjhtb</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">托管商户</span>
+                                <span class="detail-value"><a href="#" class="link-primary">tu1</a></span>
+                                <span class="detail-label">注册时间</span>
+                                <span class="detail-value">1768351327 (2026-01-14 08:42:07)</span>
+                            </div>
+                        <div class="detail-row">
+                            <span class="detail-label">令牌</span>
+                            <span class="detail-value">
+                                eyJhbGciOiJkaXIi... <button class="copy-btn-sm"><i class="fas fa-copy"></i></button>
+                                <br><a href="#" class="link-primary">活动中心(正常入口)</a> <a href="#" class="link-primary">活动中心(广告入口)</a>
+                            </span>
+                            <span class="detail-label">平台用户ID</span>
+                            <span class="detail-value">1254202320</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">总损失</span>
+                            <span class="detail-value">200000 <span class="text-danger">(模拟)</span></span>
+                            <span class="detail-label">黑名单状态</span>
+                            <span class="detail-value">----</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">商户</span>
+                            <span class="detail-value"><a href="#" class="link-primary">tu1</a></span>
+                            <span class="detail-label"></span>
+                            <span class="detail-value"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 升级模式 -->
+                <div class="user-detail-section">
+                    <div class="section-header">
+                        <span class="section-label">升级模式</span>
+                        <div class="section-links">
+                            <a href="#" class="link-primary">升级模式</a>
+                            <a href="#" class="link-primary">终身有效</a>
+                            <a href="#" class="link-primary">广告入口</a>
+                            <a href="#" class="link-primary">免维护入口</a>
+                        </div>
+                        <div class="section-actions">
+                            <button class="btn-icon-sm"><i class="fas fa-thumbtack"></i></button>
+                            <button class="btn-icon-sm"><i class="fas fa-info-circle"></i></button>
+                            <button class="btn-icon-sm"><i class="fas fa-sync"></i></button>
+                        </div>
+                    </div>
+                    <div class="detail-grid">
+                        <div class="detail-row">
+                            <span class="detail-label">人工等级加成</span>
+                            <span class="detail-value">0</span>
+                            <span class="detail-label">有效充值</span>
+                            <span class="detail-value">200000 <span class="text-danger">(模拟)</span></span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">用户级别</span>
+                            <span class="detail-value">V5 <span class="text-danger">(模拟)</span></span>
+                            <span class="detail-label">上层 (T0->T1)</span>
+                            <span class="detail-value">200000</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">终生的外表 (T1)</span>
+                            <span class="detail-value">200000</span>
+                            <span class="detail-label">终身外表（当前）</span>
+                            <span class="detail-value">200000</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 每日有效下注 -->
+                <div class="user-detail-section">
+                    <div class="section-header">
+                        <span class="section-label">每日有效下注</span>
+                        <div class="section-links">
+                            <a href="#" class="link-primary">每日投注</a>
+                            <a href="#" class="link-primary">闯关拿大奖</a>
+                            <a href="#" class="link-primary">广告入口</a>
+                            <a href="#" class="link-primary">免维护入口</a>
+                        </div>
+                        <div class="section-actions">
+                            <button class="btn-icon-sm"><i class="fas fa-thumbtack"></i></button>
+                            <button class="btn-icon-sm"><i class="fas fa-info-circle"></i></button>
+                            <button class="btn-icon-sm"><i class="fas fa-sync"></i></button>
+                        </div>
+                    </div>
+                    <div class="detail-grid">
+                        <div class="detail-row">
+                            <span class="detail-label">昨天打码量</span>
+                            <span class="detail-value">0 <span class="text-danger">(模拟)</span></span>
+                            <span class="detail-label">今天打码量</span>
+                            <span class="detail-value">0 <span class="text-danger">(模拟)</span></span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">昨天的损失金额</span>
+                            <span class="detail-value">0</span>
+                            <span class="detail-label">今天的损失金额</span>
+                            <span class="detail-value">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 操作区域 -->
+                <h4 class="section-title" style="margin-top: 32px;">操作</h4>
+                <div class="user-operations">
+                    <div class="operation-row">
+                        <span class="operation-label">更改上次领奖日期 (用户升级)</span>
+                        <div class="operation-actions">
+                            <button class="btn btn-outline btn-sm">设为02月01日</button>
+                            <button class="btn btn-outline btn-sm">设为01月31日</button>
+                        </div>
+                    </div>
+                    <div class="operation-row">
+                        <span class="operation-label">更改用户级别的上个周期数据</span>
+                        <div class="operation-actions">
+                            <button class="btn btn-outline btn-sm">模拟测试数据</button>
+                            <button class="btn btn-outline btn-sm">移除测试数据</button>
+                            <button class="btn btn-outline btn-sm">更新注册日期</button>
+                            <button class="btn btn-outline btn-sm">设置人工等级</button>
+                            <button class="btn btn-outline btn-sm">模拟下注</button>
+                            <button class="btn btn-outline btn-sm">重置模拟下注</button>
+                            <button class="btn btn-outline btn-sm">黑名单</button>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑平台弹窗 -->
+    <div class="modal-overlay" id="newEditPlatformModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-breadcrumb">
+                    <span>平台: <strong id="editPlatformName">Live (Deprecated)</strong></span>
+                    <span>/</span>
+                    <span class="active">编辑</span>
+                </div>
+                <button class="modal-close" onclick="closeModal('newEditPlatformModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="editPlatformForm">
+                    <!-- 基础信息 -->
+                    <div class="form-section">
+                        <div class="form-section-title">基础信息</div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">平台ID</label>
+                                <input type="text" id="editPlatformId" class="form-input readonly" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label"><span class="required">*</span> 名称</label>
+                                <input type="text" id="editPlatformDisplayName" class="form-input" placeholder="请输入平台名称">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label"><span class="required">*</span> 平台标识 (Slug)</label>
+                                <input type="text" id="editPlatformSlug" class="form-input" placeholder="请输入平台标识">
+                                <span class="form-hint">字母和数字，包括（-）</span>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label"><span class="required">*</span> API网域</label>
+                                <input type="text" value="http://google.com" class="form-input" placeholder="请输入API网域">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">CDN加速地址</label>
+                            <input type="text" value="http://google.com" class="form-input" placeholder="请输入CDN地址">
+                        </div>
+                    </div>
+                    
+                    <!-- 安全配置 -->
+                    <div class="form-section">
+                        <div class="form-section-title">安全配置</div>
+                        <div class="form-group">
+                            <label class="form-label">通信密钥 (API Key)</label>
+                            <div class="input-with-action">
+                                <input type="text" readonly value="4c55b8ce-bd19-429e-ba15-d6cff984b045" class="form-input readonly monospace">
+                                <button type="button" class="btn-icon" onclick="copyToClipboard('4c55b8ce-bd19-429e-ba15-d6cff984b045')">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-danger-light" onclick="confirmDeletePlatform()">
+                    <i class="fas fa-trash-alt"></i> 删除平台
+                </button>
+                <div class="footer-actions">
+                    <button class="btn btn-secondary" onclick="closeModal('newEditPlatformModal')">取消</button>
+                    <button class="btn btn-primary" onclick="saveEditPlatform()">
+                        <i class="fas fa-save"></i> 保存更改
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 创建商户弹窗 -->
+    <div class="modal-overlay" id="createMerchantModal">
+        <div class="modal modal-fullscreen">
+            <div class="modal-header">
+                <h3 class="modal-title">创建商户 (Live)</h3>
+                <button class="modal-close" onclick="closeModal('createMerchantModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" style="padding: 0; overflow-y: auto;">
+                <div class="merchant-setting-content">
+                    <!-- 商户信息 -->
+                    <div class="setting-section">
+                        <h4 class="setting-section-title">商户信息</h4>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label"><span class="required">*</span> 名称</label>
+                                <input type="text" class="form-input" placeholder="请输入商户名称">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">标题</label>
+                                <input type="text" class="form-input" placeholder="请输入商户标题">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label"><span class="required">*</span> 商户名称/ID</label>
+                                <input type="text" class="form-input" placeholder="请输入商户ID">
+                                <span class="form-hint">名称必须是全局唯一的，字母和数字，包括（-）</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 配置 -->
+                    <div class="setting-section setting-section-alt">
+                        <h4 class="setting-section-title">配置</h4>
+                        <div class="config-item">
+                            <label class="config-label">自定义密钥?</label>
+                            <label class="toggle-switch">
+                                <input type="checkbox">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div class="config-item">
+                            <label class="config-label">自定义webhook?</label>
+                            <label class="toggle-switch">
+                                <input type="checkbox">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div class="form-group" style="margin-top: 16px;">
+                            <label class="form-label"><span class="required">*</span> API网域</label>
+                            <input type="text" class="form-input" placeholder="请输入API网域地址">
+                        </div>
+                    </div>
+
+                    <!-- 上传图片 -->
+                    <div class="setting-section">
+                        <h4 class="setting-section-title">上传图片</h4>
+                        <div class="upload-grid upload-grid-2">
+                            <div class="upload-item">
+                                <label class="upload-label">封面图片</label>
+                                <div class="upload-preview">
+                                    <div class="upload-placeholder"><i class="fas fa-image"></i></div>
+                                </div>
+                            </div>
+                            <div class="upload-item">
+                                <label class="upload-label">背景图像</label>
+                                <div class="upload-preview">
+                                    <div class="upload-placeholder"><i class="fas fa-image"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 一键领取活动图标 -->
+                    <div class="setting-section setting-section-alt">
+                        <h4 class="setting-section-title">一键领取活动图标</h4>
+                        <div class="form-group" style="margin-bottom: 24px;">
+                            <label class="form-label">要求所有文字</label>
+                            <input type="text" class="form-input" value="一步到位，点击领取所有的彩金和奖励">
+                        </div>
+                        <div class="upload-grid">
+                            <!-- 第1排 -->
+                            <div class="upload-item">
+                                <label class="upload-label">升级模式</label>
+                                <div class="upload-preview"><div class="upload-icon upload-icon-gold"><i class="fas fa-crown"></i></div></div>
+                                <span class="upload-hint">推荐图片尺寸: 560x560</span>
+                                <button class="btn btn-primary btn-sm btn-full"><i class="fas fa-upload"></i> 上传图片</button>
+                            </div>
+                            <div class="upload-item">
+                                <label class="upload-label">每日有效下注</label>
+                                <div class="upload-preview"><div class="upload-icon upload-icon-red"><i class="fas fa-coins"></i></div></div>
+                                <span class="upload-hint">推荐图片尺寸: 560x560</span>
+                                <button class="btn btn-primary btn-sm btn-full"><i class="fas fa-upload"></i> 上传图片</button>
+                            </div>
+                            <div class="upload-item">
+                                <label class="upload-label">波币充值签到</label>
+                                <div class="upload-preview"><div class="upload-icon upload-icon-blue"><i class="fas fa-calendar-check"></i></div></div>
+                                <span class="upload-hint">推荐图片尺寸: 560x560</span>
+                                <button class="btn btn-primary btn-sm btn-full"><i class="fas fa-upload"></i> 上传图片</button>
+                            </div>
+                            <div class="upload-item">
+                                <label class="upload-label">救援金</label>
+                                <div class="upload-preview"><div class="upload-icon upload-icon-orange"><i class="fas fa-hand-holding-medical"></i></div></div>
+                                <span class="upload-hint">推荐图片尺寸: 560x560</span>
+                                <button class="btn btn-primary btn-sm btn-full"><i class="fas fa-upload"></i> 上传图片</button>
+                            </div>
+                            <div class="upload-item">
+                                <label class="upload-label">每日存款</label>
+                                <div class="upload-preview"><div class="upload-icon upload-icon-purple"><i class="fas fa-piggy-bank"></i></div></div>
+                                <span class="upload-hint">推荐图片尺寸: 560x560</span>
+                                <button class="btn btn-primary btn-sm btn-full"><i class="fas fa-upload"></i> 上传图片</button>
+                            </div>
+                            <div class="upload-item">
+                                <label class="upload-label">每周充值</label>
+                                <div class="upload-preview"><div class="upload-icon upload-icon-cyan"><i class="fas fa-calendar-plus"></i></div></div>
+                                <span class="upload-hint">推荐图片尺寸: 560x560</span>
+                                <button class="btn btn-primary btn-sm btn-full"><i class="fas fa-upload"></i> 上传图片</button>
+                            </div>
+                            <div class="upload-item">
+                                <label class="upload-label">连续充值</label>
+                                <div class="upload-preview"><div class="upload-icon upload-icon-blue"><i class="fas fa-layer-group"></i></div></div>
+                                <span class="upload-hint">推荐图片尺寸: 560x560</span>
+                                <button class="btn btn-primary btn-sm btn-full"><i class="fas fa-upload"></i> 上传图片</button>
+                            </div>
+                            <div class="upload-item">
+                                <label class="upload-label">每日返水</label>
+                                <div class="upload-preview"><div class="upload-icon upload-icon-gold"><i class="fas fa-percentage"></i></div></div>
+                                <span class="upload-hint">推荐图片尺寸: 560x560</span>
+                                <button class="btn btn-primary btn-sm btn-full"><i class="fas fa-upload"></i> 上传图片</button>
+                            </div>
+
+                            <!-- 第3排 -->
+                            <div class="upload-item">
+                                <label class="upload-label">谁与争锋</label>
+                                <div class="upload-preview"><div class="upload-icon upload-icon-orange"><i class="fas fa-trophy"></i></div></div>
+                                <span class="upload-hint">推荐图片尺寸: 560x560</span>
+                                <button class="btn btn-primary btn-sm btn-full"><i class="fas fa-upload"></i> 上传图片</button>
+                            </div>
+                            <div class="upload-item">
+                                <label class="upload-label">连环赠送</label>
+                                <div class="upload-preview"><div class="upload-icon upload-icon-blue"><i class="fas fa-box-open"></i></div></div>
+                                <span class="upload-hint">推荐图片尺寸: 560x560</span>
+                                <button class="btn btn-primary btn-sm btn-full"><i class="fas fa-upload"></i> 上传图片</button>
+                            </div>
+                            <div class="upload-item">
+                                <label class="upload-label">凌云返水</label>
+                                <div class="upload-preview"><div class="upload-icon upload-icon-cyan"><i class="fas fa-cloud-download-alt"></i></div></div>
+                                <span class="upload-hint">推荐图片尺寸: 560x560</span>
+                                <button class="btn btn-primary btn-sm btn-full"><i class="fas fa-upload"></i> 上传图片</button>
+                            </div>
+                            <div class="upload-item">
+                                <label class="upload-label">每日签到</label>
+                                <div class="upload-preview"><div class="upload-icon upload-icon-gold"><i class="fas fa-calendar-alt"></i></div></div>
+                                <span class="upload-hint">推荐图片尺寸: 560x560</span>
+                                <button class="btn btn-primary btn-sm btn-full"><i class="fas fa-upload"></i> 上传图片</button>
+                            </div>
+                            <div class="upload-item">
+                                <label class="upload-label">元旦大转盘</label>
+                                <div class="upload-preview"><div class="upload-icon upload-icon-red"><i class="fas fa-sync-alt"></i></div></div>
+                                <span class="upload-hint">推荐图片尺寸: 560x560</span>
+                                <button class="btn btn-primary btn-sm btn-full"><i class="fas fa-upload"></i> 上传图片</button>
+                            </div>
+                            <div class="upload-item">
+                                <label class="upload-label">农历新年抽红包</label>
+                                <div class="upload-preview"><div class="upload-icon upload-icon-red"><i class="fas fa-fire-alt"></i></div></div>
+                                <span class="upload-hint">推荐图片尺寸: 560x560</span>
+                                <button class="btn btn-primary btn-sm btn-full"><i class="fas fa-upload"></i> 上传图片</button>
+                            </div>
+                            <div class="upload-item">
+                                <label class="upload-label">中秋节日</label>
+                                <div class="upload-preview"><div class="upload-icon upload-icon-gold"><i class="fas fa-cloud-moon"></i></div></div>
+                                <span class="upload-hint">推荐图片尺寸: 560x560</span>
+                                <button class="btn btn-primary btn-sm btn-full"><i class="fas fa-upload"></i> 上传图片</button>
+                            </div>
+                            <div class="upload-item">
+                                <label class="upload-label">节日大礼盒</label>
+                                <div class="upload-preview"><div class="upload-icon upload-icon-red"><i class="fas fa-gifts"></i></div></div>
+                                <span class="upload-hint">推荐图片尺寸: 560x560</span>
+                                <button class="btn btn-primary btn-sm btn-full"><i class="fas fa-upload"></i> 上传图片</button>
+                            </div>
+
+                            <!-- 第4排 -->
+                            <div class="upload-item">
+                                <label class="upload-label">新累计充值大返利</label>
+                                <div class="upload-preview">
+                                    <div class="upload-placeholder"><i class="fas fa-image"></i></div>
+                                </div>
+                                <span class="upload-hint">推荐图片尺寸: 560x560</span>
+                                <button class="btn btn-primary btn-sm btn-full"><i class="fas fa-upload"></i> 上传图片</button>
+                            </div>
+                            <div class="upload-item">
+                                <label class="upload-label">每日亏损补贴</label>
+                                <div class="upload-preview">
+                                    <div class="upload-placeholder"><i class="fas fa-image"></i></div>
+                                </div>
+                                <span class="upload-hint">推荐图片尺寸: 560x560</span>
+                                <button class="btn btn-primary btn-sm btn-full"><i class="fas fa-upload"></i> 上传图片</button>
+                            </div>
+                            <div class="upload-item">
+                                <label class="upload-label">天天签到 免费领红包</label>
+                                <div class="upload-preview">
+                                    <div class="upload-placeholder"><i class="fas fa-image"></i></div>
+                                </div>
+                                <span class="upload-hint">推荐图片尺寸: 560x560</span>
+                                <button class="btn btn-primary btn-sm btn-full"><i class="fas fa-upload"></i> 上传图片</button>
+                            </div>
+                            <div class="upload-item">
+                                <label class="upload-label">摇摆子彩金</label>
+                                <div class="upload-preview">
+                                    <div class="upload-placeholder"><i class="fas fa-image"></i></div>
+                                </div>
+                                <span class="upload-hint">推荐图片尺寸: 560x560</span>
+                                <button class="btn btn-primary btn-sm btn-full"><i class="fas fa-upload"></i> 上传图片</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer merchant-setting-footer">
+                <button class="btn btn-secondary" onclick="closeModal('createMerchantModal')">取消</button>
+                <button class="btn btn-primary" onclick="showToast('商户创建成功', 'success')"><i class="fas fa-check"></i> 提交</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 挖矿流水弹窗 -->
+    <div class="modal-overlay" id="miningFlowModal">
+        <div class="modal modal-fullscreen">
+            <div class="modal-header">
+                <h3 class="modal-title">挖矿流水</h3>
+                <button class="modal-close" onclick="closeModal('miningFlowModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body modal-body-table">
+                <!-- 筛选区域 -->
+                <div class="modal-filter-bar">
+                    <div class="filter-group-inline">
+                        <div class="filter-item">
+                            <label>日期: 日/月/年</label>
+                            <div class="date-range-inline">
+                                <div class="date-input-wrapper">
+                                    <input type="text" class="form-input-sm" value="03-02-2026" style="width: 130px;">
+                                    <i class="far fa-calendar-alt date-icon"></i>
+                                </div>
+                                <span class="range-separator">-</span>
+                                <div class="date-input-wrapper">
+                                    <input type="text" class="form-input-sm" value="04-02-2026" style="width: 130px;">
+                                    <i class="far fa-calendar-alt date-icon"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="filter-item">
+                            <label>平台</label>
+                            <select class="form-select-sm" style="min-width: 120px;">
+                                <option>全部</option>
+                            </select>
+                        </div>
+                        <div class="filter-item">
+                            <label>状态</label>
+                            <select class="form-select-sm" style="min-width: 120px;">
+                                <option>全部</option>
+                            </select>
+                        </div>
+                        <div class="filter-item">
+                            <label>用户ID</label>
+                            <input type="text" class="form-input-sm" placeholder="用户ID" style="width: 140px;">
+                        </div>
+                    </div>
+                    <div class="filter-actions">
+                        <button class="btn btn-primary btn-sm">
+                            <i class="fas fa-search"></i> 搜索
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 数据表格 -->
+                <div class="merchant-table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>交易 ID</th>
+                                <th>日期</th>
+                                <th>金额</th>
+                                <th>状态</th>
+                                <th>普通利率 (%)</th>
+                                <th>高通利率 (%)</th>
+                                <th>消息区间 (分钟)</th>
+                                <th>活动名称</th>
+                                <th>平台用户 ID</th>
+                                <th>商户名称/ID</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- 空状态 -->
+                            <tr>
+                                <td colspan="10" style="padding: 100px 0; text-align: center; background: transparent;">
+                                    <div class="empty-state">
+                                        <div class="empty-icon" style="font-size: 48px; color: var(--text-tertiary); margin-bottom: 16px;">
+                                            <i class="fas fa-box-open"></i>
+                                        </div>
+                                        <div class="empty-text" style="color: var(--text-tertiary); font-size: 14px;">没有数据</div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 物品领取弹窗 -->
+    <div class="modal-overlay" id="itemReceiptModal">
+        <div class="modal modal-fullscreen">
+            <div class="modal-header">
+                <h3 class="modal-title">物品领取</h3>
+                <button class="modal-close" onclick="closeModal('itemReceiptModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body modal-body-table">
+                <!-- 筛选区域 -->
+                <div class="modal-filter-bar">
+                    <div class="filter-group-inline">
+                        <div class="filter-item">
+                            <label>日期: 日/月/年</label>
+                            <div class="date-range-inline">
+                                <div class="date-input-wrapper">
+                                    <input type="text" class="form-input-sm" value="03-02-2026" style="width: 130px;">
+                                    <i class="far fa-calendar-alt date-icon"></i>
+                                </div>
+                                <span class="range-separator">-</span>
+                                <div class="date-input-wrapper">
+                                    <input type="text" class="form-input-sm" value="03-02-2026" style="width: 130px;">
+                                    <i class="far fa-calendar-alt date-icon"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="filter-item">
+                            <label>平台</label>
+                            <select class="form-select-sm" style="min-width: 100px;">
+                                <option>全部</option>
+                            </select>
+                        </div>
+                        <div class="filter-item">
+                            <label>商户</label>
+                            <select class="form-select-sm" style="min-width: 100px;">
+                                <option>全部</option>
+                            </select>
+                        </div>
+                        <div class="filter-item">
+                            <label>领取状态</label>
+                            <select class="form-select-sm" style="min-width: 100px;">
+                                <option>是</option>
+                                <option>否</option>
+                            </select>
+                        </div>
+                        <div class="filter-item">
+                            <label>子渠道</label>
+                            <input type="text" class="form-input-sm" placeholder="子渠道" style="width: 100px;">
+                        </div>
+                        <div class="filter-item">
+                            <label>类型</label>
+                            <select class="form-select-sm" style="min-width: 100px;">
+                                <option>全部</option>
+                            </select>
+                        </div>
+                        <div class="filter-item">
+                            <label>平台用户 ID</label>
+                            <input type="text" class="form-input-sm" placeholder="平台用户 ID" style="width: 140px;">
+                        </div>
+                    </div>
+                    <div class="filter-actions" style="margin-left: auto;">
+                        <button class="btn btn-primary btn-sm">
+                            <i class="fas fa-search"></i> 搜索
+                        </button>
+                        <button class="btn btn-outline btn-sm">
+                            <i class="fas fa-redo"></i> 重置
+                        </button>
+                        <button class="btn btn-primary btn-sm">
+                            <i class="fas fa-file-export"></i> 导出
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 数据表格 -->
+                <div class="merchant-table-wrapper">
+                    <table class="data-table">
+                        <colgroup>
+                            <col style="width: 120px;">
+                            <col style="width: 140px;">
+                            <col style="width: 120px;">
+                            <col style="width: 120px;">
+                            <col style="width: 150px;">
+                            <col style="width: 150px;">
+                            <col style="width: 80px;">
+                            <col style="width: 150px;">
+                            <col style="width: 120px;">
+                            <col style="width: 80px;">
+                            <col style="width: 60px;">
+                            <col style="width: 80px;">
+                            <col style="width: 80px;">
+                            <col style="width: 80px;">
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>日期</th>
+                                <th>平台用户 ID</th>
+                                <th>平台名称/ID</th>
+                                <th>托管商户名称/ID</th>
+                                <th>商户名称/ID</th>
+                                <th>子渠道</th>
+                                <th>活动名称</th>
+                                <th>类型</th>
+                                <th>奖品</th>
+                                <th>图片</th>
+                                <th>领取彩金</th>
+                                <th>单个钻石</th>
+                                <th>钻石总数</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><a href="#" class="link-primary text-small">97daa4b8...</a></td>
+                                <td>03-02 23:59:59</td>
+                                <td><span class="link-primary">idkfjfjt432d</span> <i class="fas fa-search text-tertiary"></i></td>
+                                <td><span class="text-small">HENGLONG / long</span></td>
+                                <td><span class="text-small">Longheng Channel...</span></td>
+                                <td><span class="text-small">Longheng Channel...</span></td>
+                                <td>default</td>
+                                <td><span class="link-primary">天天签到 免费领取红...</span></td>
+                                <td>天天签到 免费领取红包 V1</td>
+                                <td>筹码</td>
+                                <td><img src="https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=32&h=32&fit=crop" style="width: 24px; height: 24px; border-radius: 4px;"></td>
+                                <td class="text-success">0.3</td>
+                                <td>1</td>
+                                <td>0.3</td>
+                            </tr>
+                            <tr>
+                                <td><a href="#" class="link-primary text-small">6fe6f315...</a></td>
+                                <td>03-02 23:26:00</td>
+                                <td><span class="link-primary">362193035</span> <i class="fas fa-search text-tertiary"></i></td>
+                                <td><span class="text-small">Live / live-old</span></td>
+                                <td><span class="link-primary text-small">推1 / tu1</span></td>
+                                <td><span class="link-primary text-small">tu2 / tu2</span></td>
+                                <td>default</td>
+                                <td><span class="link-primary">彩票大派送 余关诸豪...</span></td>
+                                <td>彩票闯关 第3关</td>
+                                <td>筹码</td>
+                                <td><i class="fas fa-cog text-danger"></i></td>
+                                <td class="text-success">88</td>
+                                <td>0</td>
+                                <td>0</td>
+                            </tr>
+                            <tr>
+                                <td><a href="#" class="link-primary text-small">483db77c...</a></td>
+                                <td>03-02 00:32:26</td>
+                                <td><span class="link-primary">1254202320</span> <i class="fas fa-search text-tertiary"></i></td>
+                                <td><span class="text-small">Live / live-old</span></td>
+                                <td><span class="link-primary text-small">推1 / tu1</span></td>
+                                <td><span class="link-primary text-small">推1 / tu1</span></td>
+                                <td>default</td>
+                                <td><span class="link-primary">升级模式 终身有效</span></td>
+                                <td>升级模式 V1 (默认)</td>
+                                <td>筹码</td>
+                                <td><i class="fas fa-cog text-danger"></i></td>
+                                <td class="text-success">10</td>
+                                <td>0</td>
+                                <td>0</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- 统计条 -->
+                <div class="table-summary-bar">
+                    <span>当前页面上的钻石总数: <strong>0.30</strong></span>
+                    <span>钻石总数: <i class="fas fa-eye"></i></span>
+                    <span>当前页面上的彩金总数: <strong>98.30</strong></span>
+                    <span>彩金总数: <i class="fas fa-eye"></i></span>
+                    <span>总是总数: <i class="fas fa-eye"></i></span>
+                    <span>金额: <i class="fas fa-eye"></i></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 领取数据弹窗 -->
+    <div class="modal-overlay" id="claimDataModal">
+        <div class="modal modal-fullscreen">
+            <div class="modal-header">
+                <h3 class="modal-title">领取数据</h3>
+                <button class="modal-close" onclick="closeModal('claimDataModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" style="padding: 0; overflow-y: auto; background: var(--bg-tertiary);">
+                <!-- 顶部筛选栏 -->
+                <div class="modal-filter-bar">
+                    <div class="filter-group-inline">
+                        <div class="filter-item">
+                            <label>平台</label>
+                            <select class="form-select-sm" style="min-width: 120px;"><option>Live</option></select>
+                        </div>
+                        <div class="filter-item">
+                            <label>商户</label>
+                            <select class="form-select-sm" style="min-width: 100px;"><option>全部</option></select>
+                        </div>
+                        <div class="filter-item">
+                            <label>子渠道</label>
+                            <select class="form-select-sm" style="min-width: 100px;"><option>子渠道</option></select>
+                        </div>
+                        <div class="filter-item">
+                            <label>活动类别</label>
+                            <select class="form-select-sm" style="min-width: 100px;"><option>全部</option></select>
+                        </div>
+                        <div class="filter-item">
+                            <label>日期: 日/月/年</label>
+                            <div class="date-range-inline">
+                                <div class="date-input-wrapper">
+                                    <input type="text" class="form-input-sm" value="27-01-2026" style="width: 130px;">
+                                    <i class="far fa-calendar-alt date-icon"></i>
+                                </div>
+                                <span class="range-separator">-</span>
+                                <div class="date-input-wrapper">
+                                    <input type="text" class="form-input-sm" value="03-02-2026" style="width: 130px;">
+                                    <i class="far fa-calendar-alt date-icon"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="filter-actions">
+                        <button class="btn btn-primary btn-sm">
+                            <i class="fas fa-search"></i> 搜索
+                        </button>
+                    </div>
+                </div>
+
+                <div style="padding: 24px;">
+                    <!-- Section 1: 每个平台的领取金额 -->
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h4 class="chart-title">每个平台的领取金额</h4>
+                            <span class="chart-subtitle">总领取: 20w</span>
+                        </div>
+                        <div class="chart-wrapper">
+                            <div class="chart-y-axis">
+                                <span>80000</span><span>60000</span><span>40000</span><span>20000</span><span>0</span>
+                            </div>
+                            <div class="chart-bar-group">
+                                <div class="chart-bar" style="height: 5%;"></div>
+                                <div class="chart-bar" style="height: 50%;"></div>
+                                <div class="chart-bar" style="height: 15%;"></div>
+                                <div class="chart-bar" style="height: 90%;"></div>
+                                <div class="chart-bar" style="height: 70%;"></div>
+                                <div class="chart-bar" style="height: 20%;"></div>
+                                <div class="chart-bar" style="height: 5%;"></div>
+                                <div class="chart-bar" style="height: 2%;"></div>
+                            </div>
+                            <svg class="chart-line-svg" preserveAspectRatio="none" viewBox="0 0 100 100">
+                                <path d="M0,95 Q12,90 25,50 T50,10 T75,80 T100,98" fill="none" stroke="#10b981" stroke-width="2" />
+                            </svg>
+                        </div>
+                        <div class="chart-x-axis">
+                            <span>27/01</span><span>28/01</span><span>29/01</span><span>30/01</span><span>31/01</span><span>01/02</span><span>02/02</span><span>03/02</span>
+                        </div>
+                    </div>
+
+                    <div class="data-table-container claim-data-table">
+                        <div class="table-filter-header">
+                            <label class="display-list-check">
+                                <input type="checkbox" class="checkbox" checked> 显示列表
+                            </label>
+                            <div class="search-box-sm">
+                                <input type="text" placeholder="搜索名称" style="width: 180px;">
+                                <i class="fas fa-search" style="margin-right: 10px; color: var(--text-tertiary);"></i>
+                            </div>
+                        </div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50px;"><input type="checkbox" class="checkbox" checked></th>
+                                    <th>名称</th>
+                                    <th style="text-align: right;">全部 :</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><input type="checkbox" class="checkbox" checked></td>
+                                    <td>Live</td>
+                                    <td style="text-align: right;">204851.81</td>
+                                </tr>
+                                <tr class="total-row">
+                                    <td colspan="2">全部:</td>
+                                    <td style="text-align: right;">204851.81</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Section 2: 每个商户的领取金额 -->
+                    <div class="chart-container" style="margin-top: 40px;">
+                        <div class="chart-header">
+                            <h4 class="chart-title">每个商户的领取金额</h4>
+                            <span class="chart-subtitle">总领取: 20w</span>
+                        </div>
+                        <div class="chart-wrapper">
+                            <div class="chart-y-axis">
+                                <span>80000</span><span>60000</span><span>40000</span><span>20000</span><span>0</span>
+                            </div>
+                            <div class="chart-bar-group">
+                                <div class="chart-bar" style="height: 8%;"></div>
+                                <div class="chart-bar" style="height: 45%;"></div>
+                                <div class="chart-bar" style="height: 10%;"></div>
+                                <div class="chart-bar" style="height: 95%;"></div>
+                                <div class="chart-bar" style="height: 65%;"></div>
+                                <div class="chart-bar" style="height: 25%;"></div>
+                                <div class="chart-bar" style="height: 8%;"></div>
+                                <div class="chart-bar" style="height: 3%;"></div>
+                            </div>
+                            <svg class="chart-line-svg" preserveAspectRatio="none" viewBox="0 0 100 100">
+                                <path d="M0,92 Q12,85 25,45 T50,5 T75,75 T100,97" fill="none" stroke="#10b981" stroke-width="2" />
+                                <path d="M0,95 Q12,90 25,50 T50,70 T75,70 T100,98" fill="none" stroke="#f59e0b" stroke-width="2" />
+                            </svg>
+                        </div>
+                        <div class="chart-x-axis">
+                            <span>27/01</span><span>28/01</span><span>29/01</span><span>30/01</span><span>31/01</span><span>01/02</span><span>02/02</span><span>03/02</span>
+                        </div>
+                    </div>
+
+                    <div class="data-table-container claim-data-table">
+                        <div class="table-filter-header">
+                            <label class="display-list-check">
+                                <input type="checkbox" class="checkbox" checked> 显示列表
+                            </label>
+                            <div class="search-box-sm">
+                                <input type="text" placeholder="搜索名称" style="width: 180px;">
+                                <i class="fas fa-search" style="margin-right: 10px; color: var(--text-tertiary);"></i>
+                            </div>
+                        </div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50px;"><input type="checkbox" class="checkbox" checked></th>
+                                    <th>名称</th>
+                                    <th style="text-align: right;">全部 :</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><input type="checkbox" class="checkbox" checked></td>
+                                    <td>推1</td>
+                                    <td style="text-align: right;">114051.55</td>
+                                </tr>
+                                <tr>
+                                    <td><input type="checkbox" class="checkbox" checked></td>
+                                    <td>tu2</td>
+                                    <td style="text-align: right;">90800.26</td>
+                                </tr>
+                                <tr class="total-row">
+                                    <td colspan="2">全部:</td>
+                                    <td style="text-align: right;">204851.81</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Section 3: 每种活动类型的领取金额 -->
+                    <div class="chart-container" style="margin-top: 40px;">
+                        <div class="chart-header">
+                            <h4 class="chart-title">每种活动类型的领取金额</h4>
+                            <span class="chart-subtitle">总领取: 20w</span>
+                        </div>
+                        <div class="chart-wrapper">
+                            <div class="chart-y-axis">
+                                <span>80000</span><span>60000</span><span>40000</span><span>20000</span><span>0</span>
+                            </div>
+                            <div class="chart-bar-group">
+                                <div class="chart-bar" style="height: 10%;"></div>
+                                <div class="chart-bar" style="height: 40%;"></div>
+                                <div class="chart-bar" style="height: 5%;"></div>
+                                <div class="chart-bar" style="height: 98%;"></div>
+                                <div class="chart-bar" style="height: 60%;"></div>
+                                <div class="chart-bar" style="height: 15%;"></div>
+                                <div class="chart-bar" style="height: 5%;"></div>
+                                <div class="chart-bar" style="height: 2%;"></div>
+                            </div>
+                            <svg class="chart-line-svg" preserveAspectRatio="none" viewBox="0 0 100 100">
+                                <path d="M0,90 Q12,80 25,40 T50,5 T75,85 T100,98" fill="none" stroke="#f59e0b" stroke-width="2" />
+                                <path d="M0,95 Q12,92 25,85 T50,75 T75,80 T100,98" fill="none" stroke="#ef4444" stroke-width="2" />
+                                <path d="M0,98 Q12,95 25,90 T50,92 T75,85 T100,98" fill="none" stroke="#10b981" stroke-width="2" />
+                                <path d="M0,99 Q12,98 25,99 T50,90 T75,95 T100,99" fill="none" stroke="#6366f1" stroke-width="2" />
+                            </svg>
+                        </div>
+                        <div class="chart-x-axis">
+                            <span>27/01</span><span>28/01</span><span>29/01</span><span>30/01</span><span>31/01</span><span>01/02</span><span>02/02</span><span>03/02</span>
+                        </div>
+                    </div>
+
+                    <div class="data-table-container claim-data-table">
+                        <div class="table-filter-header">
+                            <label class="display-list-check">
+                                <input type="checkbox" class="checkbox" checked> 显示列表
+                            </label>
+                            <div class="search-box-sm">
+                                <input type="text" placeholder="搜索名称" style="width: 180px;">
+                                <i class="fas fa-search" style="margin-right: 10px; color: var(--text-tertiary);"></i>
+                            </div>
+                        </div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50px;"><input type="checkbox" class="checkbox"></th>
+                                    <th>名称</th>
+                                    <th style="text-align: right;">全部 :</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td><input type="checkbox" class="checkbox"></td><td>每日浪币</td><td style="text-align: right;">1324</td></tr>
+                                <tr><td><input type="checkbox" class="checkbox"></td><td>满月福利</td><td style="text-align: right;">1306</td></tr>
+                                <tr><td><input type="checkbox" class="checkbox"></td><td>每日返水</td><td style="text-align: right;">960</td></tr>
+                                <tr><td><input type="checkbox" class="checkbox"></td><td>节日礼金</td><td style="text-align: right;">954</td></tr>
+                                <tr><td><input type="checkbox" class="checkbox"></td><td>救援金</td><td style="text-align: right;">588</td></tr>
+                                <tr><td><input type="checkbox" class="checkbox"></td><td>红包雨</td><td style="text-align: right;">572.2</td></tr>
+                                <tr><td><input type="checkbox" class="checkbox"></td><td>彩票闯关</td><td style="text-align: right;">404</td></tr>
+                                <tr class="total-row">
+                                    <td colspan="2">全部:</td>
+                                    <td style="text-align: right;">203545.81</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 用户行为弹窗 -->
+    <div class="modal-overlay" id="userBehaviorModal">
+        <div class="modal modal-fullscreen">
+            <div class="modal-header">
+                <h3 class="modal-title">用户行为</h3>
+                <button class="modal-close" onclick="closeModal('userBehaviorModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" style="padding: 0; overflow-y: auto;">
+                <!-- 顶部筛选栏 -->
+                <div class="modal-filter-bar">
+                    <div class="filter-group-inline">
+                        <div class="filter-item">
+                            <label>平台</label>
+                            <select class="form-select-sm" style="min-width: 120px;"><option>Live</option></select>
+                        </div>
+                        <div class="filter-item">
+                            <label>商户</label>
+                            <select class="form-select-sm" style="min-width: 100px;"><option>全部</option></select>
+                        </div>
+                        <div class="filter-item">
+                            <label>活动</label>
+                            <select class="form-select-sm" style="min-width: 150px;"><option>全部</option></select>
+                        </div>
+                        <div class="filter-item">
+                            <label>日期: 日/月/年</label>
+                            <div class="date-range-inline">
+                                <div class="date-input-wrapper">
+                                    <input type="text" class="form-input-sm" value="03-02-2026" style="width: 130px;">
+                                    <i class="far fa-calendar-alt date-icon"></i>
+                                </div>
+                                <span class="range-separator">-</span>
+                                <div class="date-input-wrapper">
+                                    <input type="text" class="form-input-sm" value="03-02-2026" style="width: 130px;">
+                                    <i class="far fa-calendar-alt date-icon"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="filter-actions">
+                        <button class="btn btn-primary btn-sm">
+                            <i class="fas fa-search"></i> 搜索
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 行为数据卡片 -->
+                <div class="behavior-grid">
+                    <!-- 卡片 1 -->
+                    <div class="behavior-card">
+                        <div class="behavior-card-header">
+                            <div class="behavior-icon-box behavior-icon-cyan">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <span class="behavior-percentage">-87.31%</span>
+                        </div>
+                        <div class="behavior-value">17</div>
+                        <div class="behavior-label">进入活动中心次数</div>
+                    </div>
+
+                    <!-- 卡片 2 -->
+                    <div class="behavior-card">
+                        <div class="behavior-card-header">
+                            <div class="behavior-icon-box behavior-icon-yellow">
+                                <i class="fas fa-bolt"></i>
+                            </div>
+                            <span class="behavior-percentage">-87.09%</span>
+                        </div>
+                        <div class="behavior-value">44</div>
+                        <div class="behavior-label">激活活动次数</div>
+                    </div>
+
+                    <!-- 卡片 3 -->
+                    <div class="behavior-card">
+                        <div class="behavior-card-header">
+                            <div class="behavior-icon-box behavior-icon-blue">
+                                <i class="fas fa-cube"></i>
+                            </div>
+                            <span class="behavior-percentage">-85.91%</span>
+                        </div>
+                        <div class="behavior-value">71</div>
+                        <div class="behavior-label">点击任意活动次数</div>
+                    </div>
+
+                    <!-- 卡片 4 -->
+                    <div class="behavior-card">
+                        <div class="behavior-card-header">
+                            <div class="behavior-icon-box behavior-icon-red">
+                                <i class="fas fa-bullseye"></i>
+                            </div>
+                            <span class="behavior-percentage">-100%</span>
+                        </div>
+                        <div class="behavior-value">0</div>
+                        <div class="behavior-label">点击充值次数</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app.js?v=1.2.6"></script>
+</body>
+</html>

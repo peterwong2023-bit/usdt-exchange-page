@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>Safe Check-in · 每日报平安</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+      min-height: 100vh;
+      color: #e2e8f0;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .card {
+      background: rgba(30, 41, 59, 0.9);
+      border-radius: 16px;
+      padding: 28px;
+      max-width: 360px;
+      width: 100%;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+    }
+    h1 {
+      font-size: 1.35rem;
+      margin: 0 0 8px 0;
+      color: #f8fafc;
+    }
+    .subtitle {
+      color: #94a3b8;
+      font-size: 0.9rem;
+      margin-bottom: 24px;
+    }
+    label {
+      display: block;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      margin-bottom: 6px;
+    }
+    input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      background: #1e293b;
+      color: #f8fafc;
+      font-size: 1rem;
+      margin-bottom: 16px;
+    }
+    input::placeholder { color: #64748b; }
+    button {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.05s, opacity 0.2s;
+    }
+    button:active { transform: scale(0.98); opacity: 0.9; }
+    .btn-primary {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: white;
+      margin-top: 8px;
+    }
+    .btn-checkin {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: white;
+      font-size: 1.1rem;
+      padding: 18px;
+      margin: 20px 0 12px 0;
+    }
+    .btn-checkin:disabled {
+      background: #475569;
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+    .last-checkin {
+      color: #94a3b8;
+      font-size: 0.9rem;
+      margin-top: 16px;
+      text-align: center;
+    }
+    .last-checkin strong { color: #22c55e; }
+    .screen { display: none; }
+    .screen.active { display: block; width: 100%; }
+    .edit-link {
+      display: block;
+      text-align: center;
+      margin-top: 20px;
+      font-size: 0.85rem;
+      color: #64748b;
+      text-decoration: none;
+    }
+    .edit-link:hover { color: #3b82f6; }
+    .success-msg {
+      background: rgba(34, 197, 94, 0.2);
+      border: 1px solid #22c55e;
+      color: #86efac;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      margin-top: 12px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <!-- 注册/登录页：首次使用填昵称 + 紧急联系人邮箱 -->
+  <div id="screen-setup" class="screen card active">
+    <h1>Safe Check-in</h1>
+    <p class="subtitle">每日签到，让关心你的人知道你平安。连续 2 天未签到将通知紧急联系人。</p>
+    <form id="form-setup">
+      <label for="nickname">你的昵称</label>
+      <input type="text" id="nickname" placeholder="例如：小明" required />
+      <label for="emergency-email">紧急联系人邮箱</label>
+      <input type="email" id="emergency-email" placeholder="someone@example.com" required />
+      <button type="submit" class="btn-primary">开始使用</button>
+    </form>
+  </div>
+
+  <!-- 主页：每日签到 -->
+  <div id="screen-home" class="screen card">
+    <h1>今日报平安</h1>
+    <p class="subtitle">Hi，<span id="display-name"></span>。记得每天签到哦。</p>
+    <button type="button" id="btn-checkin" class="btn-checkin">今日已签到</button>
+    <div id="checkin-success" class="success-msg" style="display:none;">✓ 签到成功，明天再来～</div>
+    <p class="last-checkin">上次签到：<strong id="last-checkin-date">—</strong></p>
+    <a href="#" id="edit-profile" class="edit-link">修改昵称或紧急联系人</a>
+  </div>
+
+  <script>
+    (function () {
+      var STORAGE_KEY = 'safe_checkin_kh';
+      function load() {
+        try {
+          var raw = localStorage.getItem(STORAGE_KEY);
+          return raw ? JSON.parse(raw) : null;
+        } catch (e) { return null; }
+      }
+      function save(data) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      }
+
+      function show(screenId) {
+        document.querySelectorAll('.screen').forEach(function (el) { el.classList.remove('active'); });
+        var el = document.getElementById(screenId);
+        if (el) el.classList.add('active');
+      }
+
+      var form = document.getElementById('form-setup');
+      if (form) {
+        form.addEventListener('submit', function (e) {
+          e.preventDefault();
+          var nickname = document.getElementById('nickname').value.trim();
+          var email = document.getElementById('emergency-email').value.trim();
+          if (!nickname || !email) return;
+          save({
+            nickname: nickname,
+            emergencyEmail: email,
+            lastCheckin: null
+          });
+          show('screen-home');
+          renderHome();
+        });
+      }
+
+      function renderHome() {
+        var data = load();
+        if (!data) { show('screen-setup'); return; }
+        document.getElementById('display-name').textContent = data.nickname || '—';
+        var last = data.lastCheckin;
+        document.getElementById('last-checkin-date').textContent = last ? formatDate(last) : '—';
+        var today = todayStr();
+        var btn = document.getElementById('btn-checkin');
+        var successEl = document.getElementById('checkin-success');
+        if (btn) {
+          btn.disabled = last === today;
+          btn.style.display = last === today ? 'none' : 'block';
+        }
+        if (successEl) successEl.style.display = last === today ? 'block' : 'none';
+      }
+
+      function todayStr() {
+        var d = new Date();
+        return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+      }
+      function pad(n) { return n < 10 ? '0' + n : n; }
+      function formatDate(s) {
+        if (!s) return '—';
+        var parts = s.split('-');
+        if (parts.length === 3) return parts[0] + '年' + parts[1] + '月' + parts[2] + '日';
+        return s;
+      }
+
+      var btnCheckin = document.getElementById('btn-checkin');
+      if (btnCheckin) {
+        btnCheckin.addEventListener('click', function () {
+          var data = load();
+          if (!data) return;
+          data.lastCheckin = todayStr();
+          save(data);
+          renderHome();
+        });
+      }
+
+      document.getElementById('edit-profile').addEventListener('click', function (e) {
+        e.preventDefault();
+        var data = load();
+        if (data) {
+          document.getElementById('nickname').value = data.nickname || '';
+          document.getElementById('emergency-email').value = data.emergencyEmail || '';
+        }
+        show('screen-setup');
+      });
+
+      // 进入页面时：已设置过则显示主页
+      var data = load();
+      if (data && (data.nickname || data.emergencyEmail)) {
+        show('screen-home');
+        renderHome();
+      } else {
+        show('screen-setup');
+      }
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>方案1：渐进式表单</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --bg-main: #f8fafc;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-tertiary: #94a3b8;
+            --border: #e2e8f0;
+            --success: #10b981;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
+            background: var(--bg-main);
+            color: var(--text-primary);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* 状态栏 */
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            color: white;
+            font-size: 14px;
+        }
+
+        /* 顶部导航 */
+        .header {
+            background: white;
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .back-btn {
+            position: absolute;
+            left: 16px;
+            background: none;
+            border: none;
+            font-size: 28px;
+            color: var(--text-primary);
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .header h1 {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .header .badge {
+            position: absolute;
+            right: 16px;
+            padding: 4px 10px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        /* 内容区 */
+        .content {
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* 渐进式步骤 */
+        .progressive-step {
+            background: white;
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            border: 2px solid transparent;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .progressive-step.active {
+            opacity: 1;
+            pointer-events: auto;
+            border-color: var(--primary);
+            box-shadow: 0 4px 16px rgba(59, 130, 246, 0.2);
+            animation: slideIn 0.4s ease;
+        }
+
+        .progressive-step.completed {
+            opacity: 1;
+            pointer-events: auto;
+            background: linear-gradient(135deg, #f0f9ff 0%, white 100%);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .step-number {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .progressive-step.completed .step-number {
+            background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+        }
+
+        .progressive-step.completed .step-number::before {
+            content: '✓';
+        }
+
+        .progressive-step.completed .step-number span {
+            display: none;
+        }
+
+        .step-title {
+            flex: 1;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .step-status {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            font-weight: 600;
+        }
+
+        .progressive-step.active .step-status {
+            color: var(--primary);
+        }
+
+        .progressive-step.completed .step-status {
+            color: var(--success);
+        }
+
+        /* 选择器 */
+        .selector {
+            padding: 18px 20px;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 14px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .selector:active {
+            transform: scale(0.98);
+            border-color: var(--primary);
+        }
+
+        .selector-icon {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .selector-text {
+            flex: 1;
+        }
+
+        .selector-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 2px;
+        }
+
+        .selector-value {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .selector-placeholder {
+            font-size: 15px;
+            color: var(--text-tertiary);
+        }
+
+        /* 输入框 */
+        .input-group {
+            margin-bottom: 14px;
+        }
+
+        .input-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .input-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 16px 18px;
+            background: #f8fafc;
+            border: 2px solid transparent;
+            border-radius: 14px;
+            font-size: 15px;
+            color: var(--text-primary);
+            outline: none;
+            transition: all 0.3s;
+            font-family: inherit;
+            font-weight: 500;
+        }
+
+        input:focus, textarea:focus {
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .paste-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            padding: 8px 16px;
+            background: white;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            font-size: 13px;
+            color: var(--primary);
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        /* 继续按钮 */
+        .continue-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 16px;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .continue-btn:active {
+            transform: translateY(2px);
+        }
+
+        .continue-btn:disabled {
+            background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%);
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* 提交按钮 */
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-size: 17px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            background: rgba(15, 23, 42, 0.92);
+            color: white;
+            padding: 18px 32px;
+            border-radius: 16px;
+            font-size: 15px;
+            font-weight: 600;
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 2000;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+    </style>
+</head>
+<body>
+    <!-- 状态栏 -->
+    <div class="status-bar">
+        <span>2:01</span>
+        <div>⚫⚫⚫⚫ 4G 🔋</div>
+    </div>
+
+    <!-- 顶部 -->
+    <div class="header">
+        <button class="back-btn" onclick="history.back()">‹</button>
+        <h1>出款</h1>
+        <span class="badge">渐进式</span>
+    </div>
+
+    <!-- 内容 -->
+    <div class="content">
+        <!-- 步骤1：选择区块链 -->
+        <div class="progressive-step active" id="step1">
+            <div class="step-header">
+                <div class="step-number"><span>1</span></div>
+                <div class="step-title">选择区块链 & 代币</div>
+                <div class="step-status">进行中</div>
+            </div>
+            <div class="selector" onclick="selectBlockchain()">
+                <div class="selector-icon">₮</div>
+                <div class="selector-text">
+                    <div class="selector-label">波场</div>
+                    <div class="selector-value">USDT (TRC20)</div>
+                </div>
+                <span style="color: var(--primary); font-size: 20px;">›</span>
+            </div>
+            <button class="continue-btn" onclick="nextStep(1)">继续</button>
+        </div>
+
+        <!-- 步骤2：选择商户 -->
+        <div class="progressive-step" id="step2">
+            <div class="step-header">
+                <div class="step-number"><span>2</span></div>
+                <div class="step-title">选择商户</div>
+                <div class="step-status">等待中</div>
+            </div>
+            <div class="selector" id="merchantSelector" onclick="if(document.getElementById('step2').classList.contains('active')) selectMerchant()">
+                <div class="selector-text">
+                    <span class="selector-placeholder">点击选择商户</span>
+                </div>
+                <span style="color: var(--text-tertiary); font-size: 20px;">›</span>
+            </div>
+            <button class="continue-btn" id="step2Btn" disabled onclick="nextStep(2)">继续</button>
+        </div>
+
+        <!-- 步骤3：填写详情 -->
+        <div class="progressive-step" id="step3">
+            <div class="step-header">
+                <div class="step-number"><span>3</span></div>
+                <div class="step-title">填写交易详情</div>
+                <div class="step-status">等待中</div>
+            </div>
+            <div class="input-group">
+                <label class="input-label">收款地址</label>
+                <div class="input-wrapper">
+                    <input type="text" placeholder="请输入收款地址" id="address" oninput="validateStep3()">
+                    <button class="paste-btn" onclick="pasteAddress()">粘贴</button>
+                </div>
+            </div>
+            <div class="input-group">
+                <label class="input-label">金额</label>
+                <input type="number" placeholder="请输入金额" id="amount" oninput="validateStep3()">
+            </div>
+            <div class="input-group">
+                <label class="input-label">备注（可选）</label>
+                <textarea placeholder="请输入备注信息" id="note"></textarea>
+            </div>
+            <button class="continue-btn" id="step3Btn" disabled onclick="nextStep(3)">继续</button>
+        </div>
+
+        <!-- 步骤4：确认提交 -->
+        <div class="progressive-step" id="step4">
+            <div class="step-header">
+                <div class="step-number"><span>4</span></div>
+                <div class="step-title">确认并提交</div>
+                <div class="step-status">等待中</div>
+            </div>
+            <div style="padding: 16px; background: #f8fafc; border-radius: 14px; margin-bottom: 16px;">
+                <div style="margin-bottom: 12px;">
+                    <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">区块链</div>
+                    <div style="font-weight: 700;">USDT (TRC20)</div>
+                </div>
+                <div style="margin-bottom: 12px;">
+                    <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">商户</div>
+                    <div style="font-weight: 700;" id="confirmMerchant">-</div>
+                </div>
+                <div style="margin-bottom: 12px;">
+                    <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">地址</div>
+                    <div style="font-weight: 700; word-break: break-all; font-size: 13px;" id="confirmAddress">-</div>
+                </div>
+                <div>
+                    <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">金额</div>
+                    <div style="font-weight: 700; color: var(--primary); font-size: 20px;" id="confirmAmount">-</div>
+                </div>
+            </div>
+            <button class="submit-btn" onclick="submit()">✓ 确认提交出款请求</button>
+        </div>
+
+        <div style="height: 80px;"></div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        let currentStep = 1;
+        let selectedMerchantData = null;
+
+        function nextStep(step) {
+            const currentStepEl = document.getElementById(`step${step}`);
+            const nextStepEl = document.getElementById(`step${step + 1}`);
+            
+            currentStepEl.classList.remove('active');
+            currentStepEl.classList.add('completed');
+            currentStepEl.querySelector('.step-status').textContent = '已完成';
+            
+            if (nextStepEl) {
+                nextStepEl.classList.add('active');
+                nextStepEl.querySelector('.step-status').textContent = '进行中';
+                currentStep = step + 1;
+                
+                // 滚动到下一步
+                setTimeout(() => {
+                    nextStepEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 100);
+            }
+        }
+
+        function selectBlockchain() {
+            if (!document.getElementById('step1').classList.contains('active')) return;
+            showToast('已选择 USDT (TRC20)');
+        }
+
+        function selectMerchant() {
+            // 模拟选择商户
+            const merchants = [
+                { name: '新宿归集', balance: 170.1 },
+                { name: 'live归集', balance: 28.7 },
+                { name: '测试商户F归集', balance: 6.5 }
+            ];
+            const selected = merchants[Math.floor(Math.random() * merchants.length)];
+            selectedMerchantData = selected;
+            
+            document.getElementById('merchantSelector').innerHTML = `
+                <div class="selector-icon">📦</div>
+                <div class="selector-text">
+                    <div class="selector-label">归集商户</div>
+                    <div class="selector-value">${selected.name}</div>
+                    <div style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">余额：${selected.balance} USDT</div>
+                </div>
+                <span style="color: var(--primary); font-size: 20px;">✓</span>
+            `;
+            
+            document.getElementById('step2Btn').disabled = false;
+            showToast(`已选择：${selected.name}`);
+        }
+
+        function validateStep3() {
+            const address = document.getElementById('address').value.trim();
+            const amount = document.getElementById('amount').value.trim();
+            document.getElementById('step3Btn').disabled = !(address && amount && parseFloat(amount) > 0);
+        }
+
+        async function pasteAddress() {
+            try {
+                const text = await navigator.clipboard.readText();
+                document.getElementById('address').value = text;
+                validateStep3();
+                showToast('✓ 已粘贴');
+            } catch (err) {
+                showToast('粘贴失败');
+            }
+        }
+
+        function submit() {
+            document.getElementById('confirmMerchant').textContent = selectedMerchantData.name;
+            document.getElementById('confirmAddress').textContent = document.getElementById('address').value;
+            document.getElementById('confirmAmount').textContent = document.getElementById('amount').value + ' USDT';
+            
+            showToast('✓ 出款请求已提交');
+            
+            setTimeout(() => {
+                location.reload();
+            }, 2000);
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+    </script>
+</body>
+</html>
+
+
+

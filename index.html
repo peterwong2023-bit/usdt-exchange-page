@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>USDT购买法币</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 顶部导航 -->
+        <div class="header">
+            <button class="back-btn">←</button>
+            <h1>USDT购买法币</h1>
+            <div class="header-icons">
+                <span class="icon">⏱</span>
+                <span class="icon">⚙</span>
+            </div>
+        </div>
+
+        <!-- 交易中状态卡片 -->
+        <div class="status-card trading-status" id="tradingStatus" style="display: none;">
+            <div class="status-left">
+                <div class="status-icon-circle trading">
+                    <span class="status-emoji">💱</span>
+                </div>
+                <div class="status-info">
+                    <div class="status-title">交易中</div>
+                    <div class="status-details">
+                        <div class="status-amount">买入数量 <strong>300</strong></div>
+                        <div class="status-time">等待卖家同意交易 <span class="countdown">00:09:53</span></div>
+                    </div>
+                </div>
+            </div>
+            <div class="status-arrow">›</div>
+        </div>
+
+        <!-- 退款中状态卡片 -->
+        <div class="status-card refund-status" id="refundStatus" onclick="window.location.href='refund-processing.html'">
+            <div class="status-left">
+                <div class="status-icon-circle refunding">
+                    <span class="status-emoji">⏳</span>
+                </div>
+                <div class="status-info">
+                    <div class="status-title">退款中</div>
+                    <div class="status-details">
+                        <div class="status-amount">退款金额 <strong>50.00 USDT</strong></div>
+                        <div class="status-time">预计几分钟内完成 <span class="processing-dot">●</span></div>
+                    </div>
+                </div>
+            </div>
+            <div class="status-arrow">›</div>
+        </div>
+
+        <!-- 主卡片 -->
+        <div class="main-card">
+            <div class="card-title">USDT-TRC20</div>
+
+            <!-- 输入区域 -->
+            <div class="input-section">
+                <div class="input-row">
+                    <div class="coin-icon usdt-icon">₮</div>
+                    <span class="coin-label">USDT</span>
+                    <input type="number" id="usdtInput" class="amount-input" placeholder="请输入要兑换的USDT数量">
+                </div>
+
+                <div class="input-row">
+                    <div class="coin-icon cny-icon">¥</div>
+                    <span class="coin-label">CNY</span>
+                    <input type="number" id="cnyInput" class="amount-input" placeholder="请输入要兑换的CNY数量" readonly>
+                </div>
+            </div>
+
+            <!-- 汇率信息 -->
+            <div class="rate-info">
+                <div class="rate-row">
+                    <span class="rate-label">当前汇率</span>
+                    <span class="rate-value">1 USDT ≈ <span id="rateValue">7.20</span> CNY</span>
+                </div>
+                <div class="rate-row">
+                    <span class="rate-label">兑换金额</span>
+                    <span class="rate-value"><span id="exchangeAmount">0.00</span> USDT</span>
+                </div>
+                <div class="rate-row">
+                    <span class="rate-label">手续费</span>
+                    <span class="rate-value"><span id="feeAmount">0.00</span> USDT</span>
+                </div>
+                <div class="rate-row highlight">
+                    <span class="rate-label">实际付款</span>
+                    <span class="rate-value primary"><span id="totalAmount">0.00</span> USDT</span>
+                </div>
+            </div>
+
+            <!-- 提示信息 -->
+            <div class="notice-box">
+                <span class="notice-icon">⚠</span>
+                注：到账金额需不低于 <strong>10 USDT</strong>，否则无法处理。
+            </div>
+
+            <!-- 购买按钮 -->
+            <button class="buy-btn" id="buyBtn">立即购买</button>
+        </div>
+
+        <!-- 说明卡片 -->
+        <div class="info-card">
+            <div class="info-header">
+                <h3>快速兑换指南</h3>
+                <button class="verify-btn">成为认证商家</button>
+            </div>
+            <p class="info-text">
+                使用USDT兑换法币，汇率优惠，到账快速。您可以购买我们的代币，并以溢价1%卖出，从而赚取额外的利润。
+            </p>
+            <div class="promo-banner">
+                <div class="promo-content">
+                    <h4>快速兑换</h4>
+                    <p>为你的财富增值创造无限可能！</p>
+                    <button class="promo-btn">立即前往 »</button>
+                </div>
+                <div class="promo-image">💰</div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 支付订单页面 -->
+    <div class="payment-page" id="paymentPage">
+        <div class="payment-header">
+            <button class="back-btn" id="backBtn">←</button>
+            <h1>支付订单</h1>
+            <div style="width: 40px;"></div>
+        </div>
+
+        <div class="payment-container">
+            <div class="payment-card-main">
+                <div class="payment-title">USDT-TRC20</div>
+                
+                <div class="exchange-display">
+                    <div class="exchange-from">
+                        <div class="exchange-amount" id="paymentUsdt">0.00</div>
+                        <div class="exchange-coin">
+                            <span class="coin-icon-small usdt">₮</span>
+                            <span>USDT</span>
+                        </div>
+                    </div>
+                    
+                    <div class="exchange-arrow">→</div>
+                    
+                    <div class="exchange-to">
+                        <div class="exchange-amount" id="paymentCny">0.00</div>
+                        <div class="exchange-coin">
+                            <span class="coin-icon-small cny">¥</span>
+                            <span>CNY</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="transfer-hint">
+                    请转入 <strong id="transferAmount">0.00</strong> USDT
+                </div>
+
+                <div class="qr-container">
+                    <canvas id="paymentQrcode"></canvas>
+                </div>
+
+                <div class="wallet-address-section">
+                    <div class="address-label">收款地址</div>
+                    <div class="address-box" id="addressBox">
+                        <span id="walletAddressText">TE6ndtiEzKFb2CMFPcC5C4D7SK9Tkcyyhp</span>
+                        <button class="copy-icon" id="copyAddressBtn">📋</button>
+                    </div>
+                </div>
+
+                <!-- 测试按钮 -->
+                <div style="text-align: center; margin-top: 20px;">
+                    <button class="test-refund-btn" id="testRefundBtn">🧪 测试退款通知</button>
+                </div>
+
+                <div class="payment-notices">
+                    <div class="notice-item">
+                        <span class="notice-icon-blue">ℹ️</span>
+                        该地址仅支持 <strong>USDT-TRC20</strong>，如使用其他币种可能导致资产无法找回。
+                    </div>
+                    <div class="notice-item">
+                        请确保到账金额不低于 <strong>1 USDT</strong>，否则无法进行处理，并且无法退款。
+                    </div>
+                    <div class="notice-item">
+                        一旦您的转账得到确认，系统将按照当前的汇率将其兑换为 CNY 并充值至您的账户。
+                    </div>
+                    <div class="notice-item">
+                        请注意，每次付款都应获取最新的 <strong>USDT-TRC20</strong> 地址进行操作。
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast提示 -->
+    <div class="toast" id="toast"></div>
+
+    <!-- 退款通知弹窗 -->
+    <div class="refund-modal" id="refundModal">
+        <div class="refund-overlay"></div>
+        <div class="refund-content">
+            <div class="refund-icon">⚠️</div>
+            <h3>充值异常</h3>
+            <p class="refund-message">
+                检测到您的充值存在以下问题：
+            </p>
+            <div class="refund-reason" id="refundReason">
+                <!-- 问题原因会动态插入 -->
+            </div>
+            <div class="refund-info">
+                <h4>申请退款</h4>
+                <p>如需申请退款，请联系客服并提供以下信息：</p>
+                <ul>
+                    <li>订单号：<strong id="orderNumber">--</strong></li>
+                    <li>充值金额：<strong id="refundAmount">--</strong></li>
+                    <li>交易哈希：<strong id="txHash">--</strong></li>
+                </ul>
+            </div>
+            <div class="refund-actions">
+                <button class="refund-apply-btn" id="applyRefundBtn">申请退款</button>
+                <button class="contact-btn" id="contactBtn">联系客服</button>
+            </div>
+            <button class="close-refund-btn-bottom" id="closeRefundBtn">我知道了</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

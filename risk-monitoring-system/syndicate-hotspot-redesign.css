@@ -1,0 +1,226 @@
+/* ==================== 团伙热点榜 - 重新设计版本 ==================== */
+
+/* 容器样式 */
+.syndicate-hotspot-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+}
+
+/* 单个团伙项目 - 卡片式设计 */
+.syndicate-item-card {
+    background: #ffffff;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 20px;
+    align-items: start;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    min-height: 120px; /* 确保最小高度 */
+}
+
+.syndicate-item-card:hover {
+    border-color: #3b82f6;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+    transform: translateY(-2px);
+    background: linear-gradient(to right, #ffffff 0%, #eff6ff 100%);
+}
+
+/* 左侧：排名徽章 */
+.syndicate-rank-badge {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 20px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+    color: #6b7280;
+    border: 2px solid #d1d5db;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    flex-shrink: 0;
+}
+
+.syndicate-rank-badge.top-rank {
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+    color: white;
+    border-color: #c2410c;
+    box-shadow: 0 4px 8px rgba(249, 115, 22, 0.35);
+}
+
+/* 中间：信息区域 */
+.syndicate-info-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 0; /* 防止flex溢出 */
+    flex: 1;
+}
+
+/* 第一行：ID + 状态 + 原因 */
+.syndicate-header-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.syndicate-group-id {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 18px;
+    font-weight: 800;
+    color: #111827;
+    letter-spacing: -0.5px;
+}
+
+.syndicate-status-badge {
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: 2px solid;
+    white-space: nowrap;
+}
+
+.syndicate-status-badge.active {
+    background: #fee2e2;
+    color: #991b1b;
+    border-color: #fca5a5;
+}
+
+.syndicate-status-badge.monitoring {
+    background: #fef3c7;
+    color: #92400e;
+    border-color: #fcd34d;
+}
+
+.syndicate-reason-tag {
+    padding: 5px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #9a3412;
+    background: linear-gradient(135deg, #fff7ed 0%, #fed7aa 100%);
+    border: 2px solid #fdba74;
+    box-shadow: 0 2px 4px rgba(251, 146, 60, 0.15);
+    white-space: nowrap;
+}
+
+/* 第二行：统计数据 */
+.syndicate-stats-row {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+.syndicate-stat-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+    white-space: nowrap;
+}
+
+.syndicate-stat-item i {
+    font-size: 14px;
+    color: #9ca3af;
+}
+
+/* 第三行：资源标签 */
+.syndicate-resources-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.syndicate-resource-chip {
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #475569;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border: 2px solid #cbd5e1;
+    font-family: 'JetBrains Mono', monospace;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.syndicate-resource-chip:hover {
+    background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+    border-color: #94a3b8;
+    transform: translateY(-1px);
+}
+
+.syndicate-resource-chip i {
+    font-size: 10px;
+    color: #64748b;
+}
+
+/* 右侧：风险分数 */
+.syndicate-score-badge {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 22px;
+    font-weight: 800;
+    color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    flex-shrink: 0;
+}
+
+.syndicate-score-badge.score-critical {
+    background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+    box-shadow: 0 6px 16px rgba(220, 38, 38, 0.4);
+}
+
+.syndicate-score-badge.score-high {
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+    box-shadow: 0 6px 16px rgba(249, 115, 22, 0.4);
+}
+
+.syndicate-score-badge.score-medium {
+    background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%);
+    box-shadow: 0 6px 16px rgba(234, 179, 8, 0.4);
+}
+
+/* 响应式调整 */
+@media (max-width: 1024px) {
+    .syndicate-item-card {
+        grid-template-columns: auto 1fr;
+        gap: 16px;
+    }
+    
+    .syndicate-score-badge {
+        grid-column: 2;
+        justify-self: end;
+    }
+}
+
+
+
+
+

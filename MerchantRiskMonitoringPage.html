@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商户熔断风险监控 - 极智风控系统</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React & ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Day.js -->
+    <script src="https://unpkg.com/dayjs/dayjs.min.js"></script>
+    <!-- Ant Design -->
+    <script src="https://unpkg.com/antd@5.12.2/dist/antd.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/antd@5.12.2/dist/reset.css">
+    <!-- Icons -->
+    <script src="https://unpkg.com/@ant-design/icons/dist/index.umd.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+
+        /* Modern Glassmorphism & Soft UI */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.04), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+            border-radius: 16px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .glass-card:hover {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            transform: translateY(-2px);
+        }
+
+        .stat-card-blue { border-bottom: 4px solid #3b82f6; }
+        .stat-card-red { border-bottom: 4px solid #ef4444; }
+        .stat-card-orange { border-bottom: 4px solid #f97316; }
+        .stat-card-green { border-bottom: 4px solid #22c55e; }
+
+        /* Custom Table Styling */
+        .ant-table {
+            background: transparent !important;
+        }
+        .ant-table-thead > tr > th {
+            background: #f1f5f9 !important;
+            color: #64748b !important;
+            font-weight: 600 !important;
+            font-size: 13px !important;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+            border-bottom: 1px solid #e2e8f0 !important;
+        }
+        .ant-table-tbody > tr > td {
+            border-bottom: 1px solid #f1f5f9 !important;
+            padding: 16px 24px !important;
+        }
+        .ant-table-row:hover > td {
+            background: #f8fafc !important;
+        }
+
+        /* Status Pills */
+        .pill {
+            padding: 6px 12px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .pill-fuse { background-color: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+        .pill-warn { background-color: #ffedd5; color: #9a3412; border: 1px solid #fed7aa; }
+        .pill-normal { background-color: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+
+        /* Score Gauge Effect */
+        .score-display {
+            font-size: 24px;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        /* Background Pattern */
+        .bg-mesh {
+            background-color: #f8fafc;
+            background-image: 
+                radial-gradient(at 0% 0%, hsla(210,100%,98%,1) 0, transparent 50%), 
+                radial-gradient(at 50% 0%, hsla(210,100%,96%,1) 0, transparent 50%), 
+                radial-gradient(at 100% 0%, hsla(210,100%,98%,1) 0, transparent 50%);
+        }
+
+        .rule-item {
+            border-left: 3px solid transparent;
+            transition: all 0.2s;
+        }
+        .rule-item-active {
+            border-left-color: #f97316;
+            background: #fffaf5;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        .ant-btn-primary {
+            background: #2563eb !important;
+            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2), 0 2px 4px -1px rgba(37, 99, 235, 0.1) !important;
+        }
+    </style>
+</head>
+<body class="bg-mesh min-h-screen">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useMemo } = React;
+        const { 
+            Table, Tag, Badge, Button, Input, Select, Space, Card, Row, Col, 
+            Switch, Dropdown, Drawer, Modal, Form, Checkbox, Radio, Tooltip, 
+            message, Typography, Collapse, Statistic, Divider, Progress, Empty, Avatar
+        } = antd;
+        
+        const AntDIcons = window.icons || window.AntDesignIcons;
+        const { 
+            SearchOutlined, ReloadOutlined, InfoCircleOutlined, FilterOutlined, 
+            ThunderboltOutlined, UnlockOutlined, HistoryOutlined, AlertOutlined,
+            LineChartOutlined, SettingOutlined, CheckCircleOutlined, WarningOutlined,
+            MoreOutlined, ArrowUpOutlined, ArrowDownOutlined, GlobalOutlined,
+            SafetyCertificateOutlined, TransactionOutlined
+        } = AntDIcons;
+
+        // --- Mock Data ---
+        const RULE_CONFIGS = [
+            { id: 'R1', name: '单笔金额异常', weight: 1.0, icon: <TransactionOutlined /> },
+            { id: 'R2', name: '累计金额异常', weight: 0.9, icon: <LineChartOutlined /> },
+            { id: 'R3', name: '出款频率异常', weight: 0.8, icon: <ThunderboltOutlined /> },
+            { id: 'R4', name: '小额高频', weight: 0.8, icon: <MoreOutlined /> },
+            { id: 'R5', name: '机械节奏', weight: 0.6, icon: <HistoryOutlined /> },
+            { id: 'R6', name: '地址集中度', weight: 0.7, icon: <GlobalOutlined /> },
+        ];
+
+        const INITIAL_MERCHANTS = [
+            {
+                id: 'M8801',
+                name: '全球付支付 (GlobalPay)',
+                status: 'FUSE',
+                score: 112,
+                last_update: '2026-01-15 14:20:00',
+                withdraw_status: 'OFF',
+                snapshot: {
+                    p99_30d: 5000,
+                    p50_30d: 200,
+                    current_10m_amount: 25000,
+                    current_1h_amount: 45000,
+                    current_1m_count: 8,
+                    top1_ratio: '75%',
+                },
+                rules: [
+                    { rule_id: 'R1', name: '单笔金额异常', weight: 1.0, hit: true, raw_score: 60, contribution: 60, threshold_info: 'amount > P99(5000)', description: '触发单笔大额出款 8500 USDT' },
+                    { rule_id: 'R2', name: '累计金额异常', weight: 0.9, hit: true, raw_score: 40, contribution: 36, threshold_info: '10m sum ≥ 2000', description: '10分钟累计出款 25000' },
+                    { rule_id: 'R3', name: '出款频率异常', weight: 0.8, hit: true, raw_score: 20, contribution: 16, threshold_info: '1m ≥ 5', description: '1分钟内出款 8 笔' },
+                    { rule_id: 'R4', name: '小额高频', weight: 0.8, hit: false, raw_score: 0, contribution: 0, threshold_info: 'ratio ≥ 70%', description: '未达到连续性触发条件' },
+                    { rule_id: 'R5', name: '机械节奏', weight: 0.6, hit: false, raw_score: 0, contribution: 0, threshold_info: 'stddev ≤ 3s', description: '节奏尚属正常范围' },
+                    { rule_id: 'R6', name: '地址集中度', weight: 0.7, hit: false, raw_score: 0, contribution: 0, threshold_info: 'top1 ≥ 60%', description: '地址分布正常' },
+                ]
+            },
+            {
+                id: 'M8802',
+                name: '亚洲汇通 (AsiaExchange)',
+                status: 'WARN',
+                score: 65,
+                last_update: '2026-01-15 14:15:00',
+                withdraw_status: 'ON',
+                snapshot: {
+                    p99_30d: 3000,
+                    p50_30d: 150,
+                    current_10m_amount: 1200,
+                    current_1h_amount: 3500,
+                    current_1m_count: 2,
+                    top1_ratio: '68%',
+                },
+                rules: [
+                    { rule_id: 'R1', name: '单笔金额异常', weight: 1.0, hit: false, raw_score: 0, contribution: 0, threshold_info: 'amount > P99', description: '单笔金额正常' },
+                    { rule_id: 'R2', name: '累计金额异常', weight: 0.9, hit: false, raw_score: 0, contribution: 0, threshold_info: '10m sum ≥ 2000', description: '累计金额正常' },
+                    { rule_id: 'R3', name: '出款频率异常', weight: 0.8, hit: false, raw_score: 0, contribution: 0, threshold_info: '1m ≥ 5', description: '频率正常' },
+                    { rule_id: 'R4', name: '小额高频', weight: 0.8, hit: true, raw_score: 50, contribution: 40, threshold_info: 'ratio ≥ 70%', description: '小额占比 85%，且 7 天内有 4 天异常' },
+                    { rule_id: 'R5', name: '机械节奏', weight: 0.6, hit: false, raw_score: 0, contribution: 0, threshold_info: 'stddev ≤ 3s', description: '节奏正常' },
+                    { rule_id: 'R6', name: '地址集中度', weight: 0.7, hit: true, raw_score: 35, contribution: 24.5, threshold_info: 'top1 ≥ 60%', description: 'Top1 地址占比 68%' },
+                ]
+            },
+            {
+                id: 'M8803',
+                name: '鼎盛科技 (PeakTech)',
+                status: 'NORMAL',
+                score: 15,
+                last_update: '2026-01-15 14:10:00',
+                withdraw_status: 'ON',
+                snapshot: {
+                    p99_30d: 8000,
+                    p50_30d: 500,
+                    current_10m_amount: 500,
+                    current_1h_amount: 1500,
+                    current_1m_count: 1,
+                    top1_ratio: '12%',
+                },
+                rules: [
+                    { rule_id: 'R1', name: '单笔金额异常', weight: 1.0, hit: false, raw_score: 0, contribution: 0, threshold_info: '-', description: '正常' },
+                    { rule_id: 'R2', name: '累计金额异常', weight: 0.9, hit: false, raw_score: 0, contribution: 0, threshold_info: '-', description: '正常' },
+                    { rule_id: 'R3', name: '出款频率异常', weight: 0.8, hit: false, raw_score: 0, contribution: 0, threshold_info: '-', description: '正常' },
+                    { rule_id: 'R4', name: '小额高频', weight: 0.8, hit: false, raw_score: 0, contribution: 0, threshold_info: '-', description: '正常' },
+                    { rule_id: 'R5', name: '机械节奏', weight: 0.6, hit: false, raw_score: 0, contribution: 0, threshold_info: '-', description: '正常' },
+                    { rule_id: 'R6', name: '地址集中度', weight: 0.7, hit: false, raw_score: 0, contribution: 0, threshold_info: '-', description: '正常' },
+                ]
+            }
+        ];
+
+        // --- Components ---
+        
+        const StatusPill = ({ status }) => {
+            const config = {
+                'FUSE': { class: 'pill-fuse', icon: <ThunderboltOutlined />, text: '已熔断' },
+                'WARN': { class: 'pill-warn', icon: <WarningOutlined />, text: '预警中' },
+                'NORMAL': { class: 'pill-normal', icon: <CheckCircleOutlined />, text: '运行正常' }
+            };
+            const { class: className, icon, text } = config[status];
+            return (
+                <div className={`pill ${className}`}>
+                    {icon}
+                    <span>{text}</span>
+                </div>
+            );
+        };
+
+        const KpiCard = ({ title, value, subValue, icon, colorClass, trend }) => (
+            <div className={`glass-card p-6 flex items-start justify-between ${colorClass}`}>
+                <div>
+                    <div className="text-slate-500 text-sm font-medium mb-1">{title}</div>
+                    <div className="text-2xl font-bold text-slate-900">{value}</div>
+                    {trend && (
+                        <div className={`text-xs mt-2 flex items-center gap-1 ${trend > 0 ? 'text-red-500' : 'text-emerald-500'}`}>
+                            {trend > 0 ? <ArrowUpOutlined /> : <ArrowDownOutlined />}
+                            {Math.abs(trend)}% vs 昨日
+                        </div>
+                    )}
+                </div>
+                <div className="p-3 bg-slate-100 rounded-xl text-slate-600 text-xl">
+                    {icon}
+                </div>
+            </div>
+        );
+
+        // --- Main App ---
+        const App = () => {
+            const [merchants, setMerchants] = useState(INITIAL_MERCHANTS);
+            const [drawerVisible, setDrawerVisible] = useState(false);
+            const [selectedId, setSelectedId] = useState(null);
+            const [filterStatus, setFilterStatus] = useState('ALL');
+
+            const selectedMerchant = useMemo(() => merchants.find(m => m.id === selectedId), [merchants, selectedId]);
+
+            const stats = useMemo(() => ({
+                total: merchants.length,
+                fuse: merchants.filter(m => m.status === 'FUSE').length,
+                warn: merchants.filter(m => m.status === 'WARN').length,
+                normal: merchants.filter(m => m.status === 'NORMAL').length
+            }), [merchants]);
+
+            const handleReleaseA = (id) => {
+                Modal.confirm({
+                    title: '确认执行解封策略 A？',
+                    content: '该操作将立即恢复商户出款权限，并将风险分重置为 40 进入预警观察期。',
+                    okText: '确认解封',
+                    cancelText: '取消',
+                    okButtonProps: { danger: true },
+                    onOk: () => {
+                        setMerchants(prev => prev.map(m => m.id === id ? {
+                            ...m, status: 'WARN', score: 40, withdraw_status: 'ON', last_update: dayjs().format('YYYY-MM-DD HH:mm:ss')
+                        } : m));
+                        message.success('商户已成功执行解封策略 A');
+                    }
+                });
+            };
+
+            const columns = [
+                {
+                    title: '商户信息',
+                    key: 'merchant',
+                    render: (_, record) => (
+                        <div className="flex items-center gap-3">
+                            <Avatar shape="square" size={40} style={{ backgroundColor: '#e2e8f0', color: '#475569', fontWeight: 600 }}>
+                                {record.name.charAt(0)}
+                            </Avatar>
+                            <div>
+                                <div className="font-semibold text-slate-800">{record.name}</div>
+                                <div className="text-xs text-slate-400 font-mono uppercase">{record.id}</div>
+                            </div>
+                        </div>
+                    )
+                },
+                {
+                    title: '风险级别',
+                    dataIndex: 'status',
+                    key: 'status',
+                    render: (status) => <StatusPill status={status} />
+                },
+                {
+                    title: '风险评分',
+                    dataIndex: 'score',
+                    key: 'score',
+                    render: (score) => (
+                        <div className="w-32">
+                            <div className="flex justify-between mb-1 items-end">
+                                <span className={`score-display ${score >= 100 ? 'text-red-500' : score >= 40 ? 'text-orange-500' : 'text-blue-500'}`}>
+                                    {score}
+                                </span>
+                                <span className="text-[10px] text-slate-400 font-medium">MAX 200</span>
+                            </div>
+                            <Progress 
+                                percent={(score / 200) * 100} 
+                                showInfo={false} 
+                                size="small"
+                                strokeColor={score >= 100 ? '#ef4444' : score >= 40 ? '#f97316' : '#3b82f6'}
+                                trailColor="#f1f5f9"
+                            />
+                        </div>
+                    )
+                },
+                {
+                    title: '出款控制',
+                    dataIndex: 'withdraw_status',
+                    key: 'withdraw_status',
+                    render: (val) => (
+                        <div className={`flex items-center gap-1.5 font-bold text-xs ${val === 'ON' ? 'text-emerald-600' : 'text-red-600'}`}>
+                            <div className={`w-2 h-2 rounded-full ${val === 'ON' ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
+                            {val === 'ON' ? 'ALLOW' : 'BLOCKED'}
+                        </div>
+                    )
+                },
+                {
+                    title: '异常特征',
+                    key: 'rules',
+                    render: (_, record) => (
+                        <div className="flex flex-wrap gap-1.5 max-w-[200px]">
+                            {record.rules.filter(r => r.hit).map(r => (
+                                <Tooltip title={r.description} key={r.rule_id}>
+                                    <Tag className="m-0 border-none bg-slate-100 text-slate-600 font-medium text-[11px] px-2 py-0.5">
+                                        {r.name}
+                                    </Tag>
+                                </Tooltip>
+                            ))}
+                            {record.rules.filter(r => r.hit).length === 0 && <span className="text-slate-300 text-xs italic">暂无风险特征</span>}
+                        </div>
+                    )
+                },
+                {
+                    title: '操作',
+                    key: 'action',
+                    fixed: 'right',
+                    render: (_, record) => (
+                        <Space>
+                            <Button 
+                                type="text" 
+                                icon={<InfoCircleOutlined />} 
+                                className="text-slate-400 hover:text-blue-600"
+                                onClick={() => { setSelectedId(record.id); setDrawerVisible(true); }}
+                            >
+                                分析
+                            </Button>
+                            {record.status === 'FUSE' && (
+                                <Button 
+                                    size="small" 
+                                    danger 
+                                    className="rounded-lg text-[11px] font-bold"
+                                    onClick={() => handleReleaseA(record.id)}
+                                >
+                                    解封 A
+                                </Button>
+                            )}
+                        </Space>
+                    )
+                }
+            ];
+
+            return (
+                <div className="p-8 max-w-[1440px] mx-auto">
+                    {/* Top Navigation / Header */}
+                    <div className="flex justify-between items-center mb-10">
+                        <div>
+                            <div className="flex items-center gap-3 mb-1">
+                                <div className="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-200">
+                                    <SafetyCertificateOutlined className="text-white text-xl" />
+                                </div>
+                                <h1 className="text-2xl font-bold tracking-tight text-slate-900">商户风险雷达</h1>
+                            </div>
+                            <p className="text-slate-500 text-sm">USDT 出款实时风控打分与熔断系统 · V2.0</p>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <div className="bg-white p-1 rounded-xl shadow-sm border border-slate-100 flex gap-1">
+                                <Button type="text" icon={<ReloadOutlined />} onClick={() => message.info('正在同步实时数据...')}>刷新数据</Button>
+                                <Divider type="vertical" className="h-8 my-auto" />
+                                <Button type="primary" icon={<SettingOutlined />} className="rounded-lg">系统配置</Button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* KPI Stats Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+                        <KpiCard title="监控商户总数" value={stats.total} icon={<GlobalOutlined />} colorClass="stat-card-blue" />
+                        <KpiCard title="熔断管控 (FUSE)" value={stats.fuse} icon={<ThunderboltOutlined />} colorClass="stat-card-red" trend={12} />
+                        <KpiCard title="高风险预警 (WARN)" value={stats.warn} icon={<WarningOutlined />} colorClass="stat-card-orange" trend={-5} />
+                        <KpiCard title="系统运行健康度" value="99.9%" icon={<CheckCircleOutlined />} colorClass="stat-card-green" />
+                    </div>
+
+                    {/* Main Content Area */}
+                    <div className="glass-card overflow-hidden">
+                        <div className="p-6 border-b border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4 bg-white/50">
+                            <div className="flex items-center gap-4">
+                                <Radio.Group 
+                                    value={filterStatus} 
+                                    onChange={e => setFilterStatus(e.target.value)} 
+                                    buttonStyle="solid"
+                                    className="modern-radio"
+                                >
+                                    <Radio.Button value="ALL" className="rounded-l-xl">全部</Radio.Button>
+                                    <Radio.Button value="FUSE">熔断</Radio.Button>
+                                    <Radio.Button value="WARN">预警</Radio.Button>
+                                    <Radio.Button value="NORMAL" className="rounded-r-xl">正常</Radio.Button>
+                                </Radio.Group>
+                                <Input 
+                                    placeholder="搜索商户 ID 或名称..." 
+                                    prefix={<SearchOutlined className="text-slate-400" />} 
+                                    className="w-72 h-10 rounded-xl border-slate-200 bg-slate-50/50 hover:bg-white focus:bg-white transition-all"
+                                />
+                            </div>
+                            <div className="flex items-center gap-2 text-slate-400 text-xs font-medium">
+                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                系统最后同步: {dayjs().format('HH:mm:ss')}
+                            </div>
+                        </div>
+
+                        <Table 
+                            columns={columns} 
+                            dataSource={merchants.filter(m => filterStatus === 'ALL' || m.status === filterStatus)} 
+                            rowKey="id" 
+                            pagination={false}
+                        />
+                    </div>
+
+                    {/* Analysis Drawer */}
+                    <Drawer
+                        title={
+                            <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center text-slate-600">
+                                    <LineChartOutlined />
+                                </div>
+                                <div>
+                                    <div className="text-base font-bold text-slate-900">{selectedMerchant?.name}</div>
+                                    <div className="text-[10px] text-slate-400 font-mono">{selectedMerchant?.id}</div>
+                                </div>
+                            </div>
+                        }
+                        placement="right"
+                        width={640}
+                        onClose={() => setDrawerVisible(false)}
+                        open={drawerVisible}
+                        className="modern-drawer"
+                        extra={
+                            <Space>
+                                <Button icon={<HistoryOutlined />}>风控历史</Button>
+                                {selectedMerchant?.status === 'FUSE' && (
+                                    <Button type="primary" danger ghost onClick={() => handleReleaseA(selectedMerchant.id)}>
+                                        执行策略 A
+                                    </Button>
+                                )}
+                            </Space>
+                        }
+                    >
+                        {selectedMerchant && (
+                            <div className="space-y-8">
+                                {/* Score Overview Section */}
+                                <section>
+                                    <div className="bg-slate-900 rounded-2xl p-8 text-white relative overflow-hidden shadow-2xl">
+                                        <div className="absolute top-0 right-0 p-8 opacity-10 text-8xl">
+                                            <AlertOutlined />
+                                        </div>
+                                        <div className="relative z-10 flex items-center justify-between">
+                                            <div>
+                                                <div className="text-slate-400 text-sm font-medium mb-1">当前风险分 (Real-time Score)</div>
+                                                <div className="flex items-baseline gap-2">
+                                                    <span className="text-6xl font-black">{selectedMerchant.score}</span>
+                                                    <span className="text-slate-500 font-bold">/ 200</span>
+                                                </div>
+                                            </div>
+                                            <div className="text-right">
+                                                <div className="mb-2"><StatusPill status={selectedMerchant.status} /></div>
+                                                <div className="text-slate-500 text-xs">自动衰减: {selectedMerchant.status === 'FUSE' ? '-10/30min' : '-20/30min'}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                {/* Rules Breakdown Section */}
+                                <section>
+                                    <div className="flex items-center justify-between mb-4">
+                                        <h3 className="text-base font-bold text-slate-800 flex items-center gap-2">
+                                            <div className="w-1.5 h-4 bg-blue-600 rounded-full" />
+                                            特征打分细节
+                                        </h3>
+                                        <span className="text-xs text-slate-400">权重按配置比例计算</span>
+                                    </div>
+                                    <div className="space-y-3">
+                                        {selectedMerchant.rules.map(rule => (
+                                            <div key={rule.rule_id} className={`rule-item p-4 rounded-xl border border-slate-100 ${rule.hit ? 'rule-item-active' : 'bg-white'}`}>
+                                                <div className="flex justify-between items-start">
+                                                    <div className="flex gap-3">
+                                                        <div className={`p-2 rounded-lg text-lg ${rule.hit ? 'bg-orange-100 text-orange-600' : 'bg-slate-100 text-slate-400'}`}>
+                                                            {RULE_CONFIGS.find(c => c.id === rule.rule_id)?.icon}
+                                                        </div>
+                                                        <div>
+                                                            <div className="font-bold text-sm text-slate-800">{rule.name}</div>
+                                                            <div className="text-xs text-slate-500 mt-1">{rule.description}</div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <div className={`font-mono font-bold ${rule.hit ? 'text-orange-600' : 'text-slate-300'}`}>
+                                                            {rule.hit ? `+${rule.contribution}` : '0'}
+                                                        </div>
+                                                        <div className="text-[10px] text-slate-400 mt-1">Weight: {rule.weight}</div>
+                                                    </div>
+                                                </div>
+                                                {rule.hit && (
+                                                    <div className="mt-4 pt-3 border-t border-orange-100/50 flex items-center justify-between text-[11px]">
+                                                        <span className="text-orange-600 font-medium">触发阈值: {rule.threshold_info}</span>
+                                                        <Button type="link" size="small" className="h-auto p-0 text-[11px]">核实证据</Button>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </section>
+
+                                {/* Quick Indicators Section */}
+                                <section>
+                                    <div className="flex items-center justify-between mb-4">
+                                        <h3 className="text-base font-bold text-slate-800 flex items-center gap-2">
+                                            <div className="w-1.5 h-4 bg-emerald-600 rounded-full" />
+                                            关键性能快照
+                                        </h3>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                                            <div className="text-slate-400 text-[10px] uppercase font-bold mb-1">P99 分位数 (30d)</div>
+                                            <div className="text-xl font-bold text-slate-700">{selectedMerchant.snapshot.p99_30d} USDT</div>
+                                        </div>
+                                        <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                                            <div className="text-slate-400 text-[10px] uppercase font-bold mb-1">10m 累计金额</div>
+                                            <div className="text-xl font-bold text-red-500">{selectedMerchant.snapshot.current_10m_amount} USDT</div>
+                                        </div>
+                                        <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                                            <div className="text-slate-400 text-[10px] uppercase font-bold mb-1">当前出款频率</div>
+                                            <div className="text-xl font-bold text-red-500">{selectedMerchant.snapshot.current_1m_count} tx/min</div>
+                                        </div>
+                                        <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                                            <div className="text-slate-400 text-[10px] uppercase font-bold mb-1">Top1 地址占比</div>
+                                            <div className="text-xl font-bold text-slate-700">{selectedMerchant.snapshot.top1_ratio}</div>
+                                        </div>
+                                    </div>
+                                </section>
+                                
+                                <div className="pt-6 border-t flex gap-3">
+                                    <Button block size="large" className="rounded-xl font-bold border-slate-200">人工复核通过</Button>
+                                    <Button block size="large" type="primary" className="rounded-xl font-bold">永久熔断商户</Button>
+                                </div>
+                            </div>
+                        )}
+                    </Drawer>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

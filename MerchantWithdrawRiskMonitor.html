@@ -1,0 +1,3493 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商户风控监控 - VOSS Admin</title>
+    <!-- React & ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Day.js -->
+    <script src="https://unpkg.com/dayjs/dayjs.min.js"></script>
+    <!-- Ant Design -->
+    <script src="https://unpkg.com/antd@5.12.2/dist/antd.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/antd@5.12.2/dist/reset.css">
+    <!-- Icons -->
+    <script src="https://unpkg.com/@ant-design/icons/dist/index.umd.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        * { box-sizing: border-box; }
+        
+        body { 
+            margin: 0; 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; 
+            font-size: 14px;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f7fa;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        /* 全局字体优化 */
+        .ant-table { font-size: 15px; }
+        .ant-table-thead > tr > th { font-size: 14px; font-weight: 600; color: #666 !important; padding: 14px 16px !important; }
+        .ant-table-tbody > tr > td { font-size: 15px; padding: 18px 16px !important; }
+        .ant-btn { font-size: 14px; }
+        .ant-select { font-size: 14px; }
+        .ant-select-item { font-size: 14px; }
+        .ant-input { font-size: 14px; }
+        .ant-form-item-label > label { font-size: 14px; }
+        .ant-tag { font-size: 13px; padding: 3px 10px; }
+        .ant-tabs-tab { font-size: 15px; }
+        .ant-typography { font-size: 15px; }
+        .ant-pagination { font-size: 14px; }
+        
+        /* === 顶部概览卡片 === */
+        .overview-header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            padding: 24px 32px;
+            margin: -24px -24px 24px -24px;
+            border-radius: 0 0 24px 24px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+        }
+        .overview-title {
+            color: #fff;
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0 0 20px 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .overview-title::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 28px;
+            background: linear-gradient(180deg, #00d9ff 0%, #00ff88 100%);
+            border-radius: 2px;
+        }
+        .stat-cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+        .stat-card {
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-4px);
+            background: rgba(255,255,255,0.12);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+        }
+        .stat-card-icon {
+            position: absolute;
+            right: 16px;
+            top: 16px;
+            font-size: 48px;
+            opacity: 0.1;
+            color: #fff;
+        }
+        .stat-card-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+        .stat-card-label {
+            font-size: 13px;
+            color: rgba(255,255,255,0.7);
+            font-weight: 500;
+        }
+        .stat-card.fuse { border-left: 4px solid #ff4d4f; }
+        .stat-card.fuse .stat-card-value { color: #ff7875; }
+        .stat-card.limit { border-left: 4px solid #fa8c16; }
+        .stat-card.limit .stat-card-value { color: #ffc069; }
+        .stat-card.warn { border-left: 4px solid #fadb14; }
+        .stat-card.warn .stat-card-value { color: #fff566; }
+        .stat-card.normal { border-left: 4px solid #52c41a; }
+        .stat-card.normal .stat-card-value { color: #95de64; }
+        
+        /* 实时脉动指示器 */
+        .live-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(82,196,26,0.15);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            color: #52c41a;
+            font-weight: 600;
+        }
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background: #52c41a;
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+        }
+        
+        /* 行背景色 - 按风险等级 */
+        .row-fuse { background-color: #fff1f0 !important; }
+        .row-limit { background-color: #fff7e6 !important; }
+        .row-warn { background-color: #fffbe6 !important; }
+        .row-normal { background-color: #fff !important; }
+        
+        /* 禁用鼠标悬停效果 */
+        .ant-table-row:hover > td { 
+            background: inherit !important; 
+        }
+        
+        /* 风险等级徽章 */
+        .level-badge { 
+            padding: 3px 10px; 
+            border-radius: 12px; 
+            font-size: 12px; 
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+        }
+        .level-normal { background: linear-gradient(135deg, #e6f7ff 0%, #bae7ff 100%); color: #0958d9; border: 1px solid #91caff; }
+        .level-warn { background: linear-gradient(135deg, #fffbe6 0%, #fff1b8 100%); color: #d48806; border: 1px solid #ffe58f; }
+        .level-limit { background: linear-gradient(135deg, #fff7e6 0%, #ffd591 100%); color: #d46b08; border: 1px solid #ffbb96; }
+        .level-fuse { background: linear-gradient(135deg, #fff1f0 0%, #ffccc7 100%); color: #cf1322; border: 1px solid #ffa39e; }
+        
+        /* 分数样式 */
+        .score-normal { color: #1890ff; }
+        .score-warn { color: #d48806; }
+        .score-limit { color: #d46b08; }
+        .score-fuse { color: #cf1322; }
+        
+        /* 人话解释块 */
+        .explain-block { 
+            background: linear-gradient(135deg, #fff7e6 0%, #fffbe6 100%); 
+            border: 1px solid #ffe58f; 
+            border-radius: 12px; 
+            padding: 20px;
+            margin: 16px 0;
+            box-shadow: 0 4px 16px rgba(250,173,20,0.1);
+        }
+        .explain-block .ant-typography { margin: 0; line-height: 1.8; }
+        
+        /* 规则卡片 */
+        .rule-card { border-radius: 12px; margin-bottom: 8px; transition: all 0.2s ease; }
+        .rule-card-hit { border-left: 4px solid #ff4d4f; background: linear-gradient(90deg, #fff1f0 0%, #fff 100%); }
+        .rule-card-miss { border-left: 4px solid #d9d9d9; background: #fafafa; }
+        .rule-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        
+        /* 抽屉内状态卡 */
+        .status-card { 
+            background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%); 
+            border-radius: 16px; 
+            padding: 24px;
+            border: 1px solid #f0f0f0;
+        }
+        
+        /* 筛选栏 */
+        .filter-bar { 
+            background: #fff; 
+            padding: 20px 24px; 
+            margin-bottom: 16px; 
+            border-radius: 16px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+            border: 1px solid rgba(0,0,0,0.04);
+        }
+        
+        /* 解封策略选项 */
+        .strategy-option { padding: 12px; border: 1px solid #d9d9d9; border-radius: 12px; margin-bottom: 8px; cursor: pointer; transition: all 0.2s; }
+        .strategy-option:hover { border-color: #1890ff; background: #f0f5ff; }
+        .strategy-option.selected { border-color: #1890ff; background: #e6f7ff; }
+        
+        /* 风险分仪表盘 */
+        .score-gauge { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+        .score-gauge-inner { position: relative; }
+        .score-gauge-label { text-align: left; }
+        
+        /* 进度条圆形样式优化 */
+        .ant-progress-circle .ant-progress-text { font-weight: 700 !important; }
+        
+        /* 紧凑样本表格 */
+        .compact-sample-table .ant-table-thead > tr > th {
+            background: #fafafa !important;
+            font-size: 12px !important;
+            padding: 8px 12px !important;
+            color: #8c8c8c !important;
+            font-weight: 500 !important;
+        }
+        .compact-sample-table .ant-table-tbody > tr > td {
+            padding: 8px 12px !important;
+            font-size: 13px !important;
+        }
+        .compact-sample-table .ant-table-tbody > tr:hover > td {
+            background: #f5f5f5 !important;
+        }
+        
+        /* 指标快照单元格 */
+        .snapshot-cell { display: flex; flex-direction: column; gap: 5px; }
+        .snapshot-item { display: flex; align-items: baseline; font-size: 14px; }
+        .snapshot-label { color: #999; font-size: 13px; white-space: nowrap; margin-right: 5px; }
+        .snapshot-value { font-weight: 600; font-size: 15px; }
+        /* 严重程度颜色分层 */
+        .snapshot-value.critical { color: #a8071a; } /* ≥5x 深红 */
+        .snapshot-value.high { color: #cf1322; }     /* 3-5x 橙红 */
+        .snapshot-value.medium { color: #d46b08; }   /* 2-3x 橙色 */
+        .snapshot-value.low { color: #8c8c8c; }      /* <2x 灰色 */
+        .snapshot-empty { color: #bfbfbf; font-size: 12px; }
+        
+        /* 地址集中度单元格 */
+        .addr-cell { font-size: 15px; display: flex; align-items: center; gap: 8px; }
+        .addr-cell .addr-value { font-weight: 600; font-size: 16px; }
+        .addr-cell .addr-label { font-size: 13px; padding: 4px 10px; border-radius: 8px; font-weight: 500; }
+        .addr-cell.high .addr-value { color: #cf1322; }
+        .addr-cell.high .addr-label { background: linear-gradient(135deg, #fff1f0 0%, #ffccc7 100%); color: #cf1322; }
+        .addr-cell.medium .addr-value { color: #d46b08; }
+        .addr-cell.medium .addr-label { background: linear-gradient(135deg, #fff7e6 0%, #ffd591 100%); color: #d46b08; }
+        .addr-cell.low .addr-value { color: #8c8c8c; }
+        .addr-cell.low .addr-label { background: #f5f5f5; color: #8c8c8c; }
+
+        /* 看板 KPI 卡片美化 */
+        .kpi-card { 
+            border-radius: 16px; 
+            border: none; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06); 
+            overflow: hidden; 
+            transition: all 0.3s ease;
+            background: #fff;
+        }
+        .kpi-card:hover { transform: translateY(-6px); box-shadow: 0 12px 32px rgba(0,0,0,0.12); }
+        .kpi-card .ant-statistic-title { color: #8c8c8c; font-size: 13px; margin-bottom: 8px; }
+        .kpi-card .ant-statistic-content { display: flex; align-items: baseline; }
+        .kpi-card .kpi-icon { position: absolute; right: 16px; top: 16px; font-size: 28px; opacity: 0.12; }
+
+        /* 趋势图美化 */
+        .trend-chart-container { 
+            height: 240px; 
+            display: flex; 
+            align-items: flex-end; 
+            justify-content: space-between; 
+            padding: 24px 20px 40px; 
+            background: linear-gradient(180deg, #fff 0%, #fafafa 100%); 
+            border-radius: 12px; 
+            position: relative; 
+        }
+        .trend-bar { 
+            width: 28px; 
+            border-radius: 6px 6px 0 0; 
+            position: relative; 
+            transition: all 0.3s ease; 
+            cursor: pointer; 
+        }
+        .trend-bar:hover { filter: brightness(1.1); transform: scaleY(1.02); }
+        .trend-bar::after { content: attr(data-value); position: absolute; top: -25px; left: 50%; transform: translateX(-50%); font-size: 11px; font-weight: 600; color: #595959; opacity: 0; transition: opacity 0.3s; }
+        .trend-bar:hover::after { opacity: 1; }
+        
+        /* 审计日志详情块美化 */
+        .audit-detail-block { padding: 16px; background: #fafafa; border-radius: 12px; border: 1px solid #f0f0f0; }
+        .audit-detail-label { color: #8c8c8c; font-size: 11px; margin-right: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .audit-detail-value { color: #262626; font-size: 13px; }
+        
+        /* 审计表格行高优化 */
+        .audit-table-v2 .ant-table-cell { padding: 14px 16px !important; }
+        .audit-table-v2 .ant-table-row:hover { cursor: pointer; }
+        
+        /* 主内容区卡片 */
+        .main-card {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+            border: 1px solid rgba(0,0,0,0.04);
+            overflow: hidden;
+        }
+        
+        /* Tabs 美化 */
+        .custom-tabs .ant-tabs-nav { 
+            background: #fff;
+            padding: 0 16px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+        }
+        .custom-tabs .ant-tabs-tab { 
+            padding: 16px 20px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .custom-tabs .ant-tabs-tab:hover { color: #1890ff; }
+        .custom-tabs .ant-tabs-tab-active { font-weight: 600; }
+        .custom-tabs .ant-tabs-ink-bar { height: 3px; border-radius: 2px; }
+        
+        /* 表格美化 */
+        .ant-table { border-radius: 12px; overflow: hidden; }
+        .ant-table-thead > tr > th { 
+            background: linear-gradient(180deg, #fafafa 0%, #f5f5f5 100%) !important;
+            font-weight: 600 !important;
+            color: #595959 !important;
+            border-bottom: 2px solid #f0f0f0 !important;
+        }
+        .ant-table-tbody > tr > td { border-bottom: 1px solid #f5f5f5 !important; }
+        
+        /* 按钮美化 */
+        .ant-btn-primary {
+            background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+            border: none;
+            box-shadow: 0 4px 12px rgba(24,144,255,0.3);
+            transition: all 0.2s ease;
+        }
+        .ant-btn-primary:hover {
+            background: linear-gradient(135deg, #40a9ff 0%, #1890ff 100%);
+            box-shadow: 0 6px 16px rgba(24,144,255,0.4);
+        }
+        .ant-btn {
+            transition: all 0.2s ease;
+        }
+        
+        /* 抽屉美化 */
+        .ant-drawer-header { 
+            background: linear-gradient(90deg, #1a1a2e 0%, #16213e 100%);
+            border-bottom: none;
+        }
+        .ant-drawer-title { color: #fff !important; }
+        .ant-drawer-close { color: rgba(255,255,255,0.8) !important; }
+        .ant-drawer-close:hover { color: #fff !important; }
+        
+        /* 标签美化 */
+        .ant-tag {
+            border-radius: 6px;
+            font-weight: 500;
+        }
+        
+        /* 时间戳样式 */
+        .timestamp {
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+            font-size: 12px;
+            color: #8c8c8c;
+        }
+        
+        /* ========== 侧边栏布局 ========== */
+        .app-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            width: 220px;
+            background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            z-index: 100;
+            overflow-y: auto;
+        }
+        
+        .sidebar-logo {
+            padding: 20px 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        
+        .sidebar-logo h1 {
+            color: #fff;
+            font-size: 18px;
+            font-weight: 700;
+            margin: 0;
+            letter-spacing: -0.5px;
+        }
+        
+        .sidebar-logo span {
+            color: rgba(255,255,255,0.4);
+            font-size: 11px;
+            font-weight: 400;
+        }
+        
+        .sidebar-menu {
+            flex: 1;
+            padding: 12px 0;
+        }
+        
+        .menu-group {
+            margin-bottom: 8px;
+        }
+        
+        .menu-group-title {
+            padding: 12px 24px 8px;
+            font-size: 11px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.35);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 11px 24px;
+            color: rgba(255,255,255,0.65);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-left: 3px solid transparent;
+            font-size: 14px;
+            gap: 12px;
+        }
+        
+        .menu-item:hover {
+            background: rgba(255,255,255,0.05);
+            color: rgba(255,255,255,0.9);
+        }
+        
+        .menu-item.active {
+            background: linear-gradient(90deg, rgba(24,144,255,0.2) 0%, transparent 100%);
+            color: #fff;
+            border-left-color: #1890ff;
+        }
+        
+        .menu-item .menu-icon {
+            font-size: 16px;
+            width: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .menu-item-sub {
+            padding-left: 56px;
+            font-size: 13px;
+        }
+        
+        .sidebar-footer {
+            padding: 16px 24px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+        }
+        
+        .sidebar-user {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .sidebar-user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1890ff 0%, #36cfc9 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .sidebar-user-info h4 {
+            margin: 0;
+            color: #fff;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        
+        .sidebar-user-info span {
+            color: rgba(255,255,255,0.45);
+            font-size: 11px;
+        }
+        
+        .main-content {
+            flex: 1;
+            margin-left: 220px;
+            padding: 24px;
+            min-height: 100vh;
+            background: #f5f7fa;
+        }
+        
+        .main-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #e8e8e8;
+        }
+        
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #8c8c8c;
+        }
+        
+        .breadcrumb a {
+            color: #1890ff;
+            text-decoration: none;
+        }
+        
+        .breadcrumb span {
+            color: #262626;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useMemo } = React;
+        const { 
+            Table, Tag, Badge, Button, Input, InputNumber, Select, Space, Card, Row, Col, 
+            Switch, Drawer, Modal, Form, Checkbox, Radio, Tooltip, message, Dropdown,
+            Typography, Collapse, Statistic, Divider, Progress, Alert, Descriptions,
+            Tabs, DatePicker, Popconfirm
+        } = antd;
+        
+        const { RangePicker } = DatePicker;
+        
+        const icons = window.icons || window.AntDesignIcons || {};
+        const { 
+            SearchOutlined, ReloadOutlined, InfoCircleOutlined, CopyOutlined,
+            ThunderboltOutlined, UnlockOutlined, HistoryOutlined, AlertOutlined,
+            WarningOutlined, CheckCircleOutlined, StopOutlined, ExclamationCircleOutlined,
+            SafetyCertificateOutlined, ApiOutlined, ClockCircleOutlined, LinkOutlined, DollarOutlined,
+            FileSearchOutlined, PieChartOutlined, BarChartOutlined, LineChartOutlined,
+            ArrowUpOutlined, ArrowDownOutlined, DownloadOutlined, GlobalOutlined, DownOutlined, UpOutlined,
+            CloseCircleOutlined, SettingOutlined,
+            // 侧边栏图标
+            DashboardOutlined, AppstoreOutlined, ShopOutlined, TeamOutlined,
+            WalletOutlined, SwapOutlined, BankOutlined, TransactionOutlined,
+            MonitorOutlined, AuditOutlined, FileTextOutlined, DatabaseOutlined,
+            UserOutlined, LockOutlined, BellOutlined, ToolOutlined,
+            MenuFoldOutlined, MenuUnfoldOutlined, RightOutlined, MoreOutlined, EllipsisOutlined
+        } = icons;
+
+        const { Text, Title, Paragraph } = Typography;
+        const { Panel } = Collapse;
+        const { Option } = Select;
+
+// ========== 9.1 & 9.2 合并后的全审计日志数据 ==========
+const MOCK_AUDIT_LOGS = [
+    {
+        id: 'LOG-1001',
+        type: 'FUSE',
+        merchant_id: 'M001',
+        merchant_name: '波币商户',
+        trigger_time: '2026-01-15 10:20:05',
+        score: 125,
+        risk_level: 'Fuse',
+        top_reasons: [
+            { rule_key: 'sum_window', rule_name: '累计金额异常', add_score: 70, strength_text: '5.2x' },
+            { rule_key: 'single_amount', rule_name: '单笔金额异常', add_score: 80, strength_text: '2.5x' }
+        ],
+        snapshot: '窗口内笔数: 45, 总额: 15万, Top1占比: 85%',
+        operator: 'SYSTEM_AUTO'
+    },
+    {
+        id: 'LOG-1002',
+        type: 'UNFREEZE',
+        merchant_id: 'M001',
+        merchant_name: '波币商户',
+        trigger_time: '2026-01-15 14:30:00',
+        operator: 'Admin_Zhang',
+        why: '商户核实为促销活动，已提供白名单地址证明',
+        basis: 'Policy_A (强制灰度)',
+        evidence_chain: ['proof_01.png']
+    },
+    {
+        id: 'LOG-1003',
+        type: 'FUSE',
+        merchant_id: 'M002',
+        merchant_name: 'uutalk',
+        trigger_time: '2026-01-15 09:45:12',
+        score: 85,
+        risk_level: 'Limit',
+        top_reasons: [
+            { rule_key: 'sum_window', rule_name: '累计金额异常', add_score: 50, strength_text: '3.5x' },
+            { rule_key: 'single_amount', rule_name: '单笔金额异常', add_score: 60, strength_text: '1.8x' }
+        ],
+        snapshot: '窗口内笔数: 32, 总额: 8500, Top1占比: 70%',
+        operator: 'SYSTEM_AUTO'
+    }
+];
+
+        const MOCK_UNFREEZE_RECORDS = [
+            {
+                id: 'U5001',
+                merchant_id: 'M001',
+                merchant_name: '波币商户',
+                who: 'Admin_Zhang',
+                when: '2026-01-15 14:30:00',
+                why: '商户核实为促销活动，已提供白名单地址证明',
+                basis: 'Policy_A (强制灰度)',
+                evidence_chain: ['proof_image_01.png', 'chat_log_v2.pdf']
+            }
+        ];
+
+        const MOCK_DASHBOARD_STATS = {
+            trends: [
+                { date: '01-09', score: 45 }, { date: '01-10', score: 52 },
+                { date: '01-11', score: 48 }, { date: '01-12', score: 85 },
+                { date: '01-13', score: 60 }, { date: '01-14', score: 72 },
+                { date: '01-15', score: 125 }
+            ],
+            ranking: [
+                { name: '波币商户', count: 12, rate: '0.5%' },
+                { name: '河南归集', count: 8, rate: '1.2%' },
+                { name: '哥伦比亚支付', count: 3, rate: '0.1%' }
+            ],
+            summary: {
+                total_fuses: 156,
+                avg_score: 64,
+                false_positive_rate: '2.4%'
+            }
+        };
+
+        // ========== 配置常量（来自脑图） ==========
+        
+        // 风险等级阈值默认值（V1: 双规则 + 延迟观察）
+        const DEFAULT_THRESHOLDS = {
+            NORMAL: { max: 29, label: '正常', color: 'blue', bgClass: 'row-normal', desc: '出款正常', icon: CheckCircleOutlined },
+            WARN: { min: 30, max: 59, label: '已告警', color: 'gold', bgClass: 'row-warn', desc: '出款正常', icon: WarningOutlined },
+            LIMIT: { min: 60, max: 99, label: '延迟观察', color: 'orange', bgClass: 'row-limit', desc: '出款延迟中', icon: ExclamationCircleOutlined },
+            FUSE: { min: 100, label: '熔断', color: 'red', bgClass: 'row-fuse', desc: '暂停自动出款', icon: StopOutlined }
+        };
+
+        // ========== 风控监控中心专用常量（仅本模块使用） ==========
+        
+        // 风险状态映射（基于分数）- 纯中文展示（V1 阈值）
+        const RISK_STATUS_MAP = {
+            FUSE: { min: 100, label: '熔断', color: 'error', desc: '暂停自动出款（需人工解除）' },
+            LIMIT: { min: 60, max: 99, label: '延迟观察', color: 'warning', desc: '出款延迟中' },
+            WARN: { min: 30, max: 59, label: '已告警', color: 'processing', desc: '出款正常' },
+            NORMAL: { max: 29, label: '正常', color: 'success', desc: '出款正常' }
+        };
+        
+        // 根据分数获取风险状态（V1 阈值）
+        const getRiskStatus = (score) => {
+            if (score >= 100) return { key: 'FUSE', ...RISK_STATUS_MAP.FUSE };
+            if (score >= 60) return { key: 'LIMIT', ...RISK_STATUS_MAP.LIMIT };
+            if (score >= 30) return { key: 'WARN', ...RISK_STATUS_MAP.WARN };
+            return { key: 'NORMAL', ...RISK_STATUS_MAP.NORMAL };
+        };
+        
+        // 解除条件模板
+        const RELEASE_CONDITIONS = {
+            FUSE: '人工解除',
+            LIMIT: '观察期约30分钟，自动恢复',
+            WARN: '无',
+            NORMAL: '无'
+        };
+        
+        // 快照阈值常量（前端写死）
+        const SNAPSHOT_THRESHOLDS = {
+            sum_ratio: { threshold: 3, unit: 'x', label: '累计金额' },
+            count_ratio: { threshold: 5, unit: 'x', label: '出款频率' }
+        };
+        
+        // 规则触发条件参数（用于可复核三件套）- 仅2条规则
+        const RULE_TRIGGER_PARAMS = {
+            single_amount: {
+                name: '单笔金额异常',
+                trigger: '单笔出款金额 > P99_30d',
+                params: [
+                    { label: '定义', value: 'amount > P99_30d' },
+                    { label: '强度计算', value: 'ratio = amount / P99_30d' },
+                    { label: '冷启动', value: 'tx_count_30d < 50 时降权 0.5x' }
+                ],
+                getValues: (snapshot) => ({
+                    current: snapshot.single_max ? `${snapshot.single_max.toLocaleString()} USDT` : '-',
+                    baseline: snapshot.p99_30d ? `${snapshot.p99_30d.toLocaleString()} USDT` : '-'
+                })
+            },
+            sum_window: {
+                name: '累计金额异常',
+                trigger: '窗口内累计金额 ≥ 基线 × K',
+                params: [
+                    { label: '定义', value: 'sum_amount_W >= baseline_sum_W × K' },
+                    { label: '窗口', value: '10分钟 / 1小时' },
+                    { label: '10m参数', value: 'abs_min=2000, min_tx=3, K=3' },
+                    { label: '1h参数', value: 'abs_min=5000, min_tx=5, K=3' }
+                ],
+                getValues: (snapshot) => ({
+                    current: snapshot.sum_10m ? `${snapshot.sum_10m.toLocaleString()} USDT (10m)` : '-',
+                    baseline: snapshot.sum_10m_baseline ? `${snapshot.sum_10m_baseline.toLocaleString()} USDT (基线)` : '-'
+                })
+            },
+            sum_10m: {
+                name: '累计金额异常',
+                trigger: '10分钟窗口累计金额 ≥ 基线 × K',
+                params: [
+                    { label: '定义', value: 'sum_amount_10m >= baseline × K' },
+                    { label: '最低金额', value: 'abs_min_sum = 2000 USDT' },
+                    { label: '最低笔数', value: 'min_tx_count = 3' },
+                    { label: '倍数阈值', value: 'K = 3' }
+                ],
+                getValues: (snapshot) => ({
+                    current: snapshot.sum_10m ? `${snapshot.sum_10m.toLocaleString()} USDT` : '-',
+                    baseline: snapshot.sum_10m_baseline ? `${snapshot.sum_10m_baseline.toLocaleString()} USDT` : '-'
+                })
+            }
+        };
+
+        // 阈值配置上下文
+        const ThresholdContext = React.createContext({
+            thresholds: DEFAULT_THRESHOLDS,
+            setThresholds: () => {}
+        });
+
+        // 2条规则配置（根据脑图定义）
+        const DEFAULT_RULE_CONFIGS = {
+            single_amount: {
+                id: 'R1', name: '单笔金额异常', weight: 1.0, enabled: true,
+                desc: '单笔出款金额 > P99_30d（比商户历史"正常上边界"还大）',
+                humanTpl: '单笔出款 {value} USDT，超过历史P99({p99}) {ratio}倍',
+                scoreMap: { '1-2x': 60, '2-5x': 80, '>=5x': 100 },
+                scoreDesc: { '1-2x': '偏大但可能偶发', '2-5x': '高危', '>=5x': '几乎必出事' },
+                coldStart: {
+                    threshold: 50, // tx_count_30d < 50 时触发
+                    multiplier: 0.5, // 降权倍率，例如80分变40分
+                    note: '新商户数据太少，别用分位数"一刀切"'
+                }
+            },
+            sum_window: {
+                id: 'R2', name: '累计金额异常', weight: 1.0, enabled: true,
+                desc: '短时间内出掉的钱，比平时同窗口多很多倍',
+                humanTpl: '{window}累计出款 {sum} USDT，是历史均值({baseline})的 {ratio}倍',
+                scoreMap: { '2-3x': 30, '3-5x': 50, '>=5x': 70 },
+                windows: ['10m', '1h'],
+                protection: {
+                    note: '除非叠加其他规则，不单独熔断',
+                    params: {
+                        '10m': { abs_min_sum: 2000, min_tx_count: 3, K: 3 },
+                        '1h': { abs_min_sum: 5000, min_tx_count: 5, K: 3 }
+                    }
+                }
+            }
+        };
+        
+        // 保持向后兼容
+        const RULE_CONFIGS = DEFAULT_RULE_CONFIGS;
+
+        // ========== Mock 数据 ==========
+        
+        const MOCK_MERCHANTS = [
+            {
+                merchant_id: 'M001',
+                merchant_name: '波币商户',
+                risk_score: 125,
+                risk_level: 'Fuse',
+                top_reasons: [
+                    { rule_key: 'sum_window', rule_name: '累计金额异常', add_score: 65, strength_text: '5.2x', strength_value: 5.2 },
+                    { rule_key: 'single_amount', rule_name: '单笔金额异常', add_score: 60, strength_text: '2.5x', strength_value: 2.5 }
+                ],
+                snapshot: {
+                    sum_10m: 150000, sum_10m_baseline: 39473, sum_10m_ratio: '3.8x',
+                    count_10m: 45, count_10m_baseline: 7.5, count_10m_ratio: '6x',
+                    top1_ratio: '85%', top2_ratio: '92%',
+                    single_max: 85000, p99_30d: 34000,
+                    // 1小时数据（仅供参考，不参与V1决策）
+                    sum_1h: 520000, sum_1h_baseline: 180000, sum_1h_ratio: 2.9,
+                    // 多小时趋势数据（仅供参考，不参与V1决策）
+                    hourly_trend: [
+                        { hour: '-3h', ratio: 1.8 },
+                        { hour: '-2h', ratio: 2.1 },
+                        { hour: '-1h', ratio: 2.5 },
+                        { hour: '当前', ratio: 2.9 }
+                    ]
+                },
+                // 历史6个10分钟窗口的累计金额趋势 (ratio相对于baseline)
+                trend_history: [
+                    { time: '-50min', ratio: 1.2 },
+                    { time: '-40min', ratio: 1.5 },
+                    { time: '-30min', ratio: 2.1 },
+                    { time: '-20min', ratio: 2.8 },
+                    { time: '-10min', ratio: 3.2 },
+                    { time: '当前', ratio: 3.8 }
+                ],
+                actions: { stop_withdraw: true, freeze_key: false, limit_rate: null },
+                last_trigger_at: '2026-01-15 10:20:05',
+                permissions: { can_fuse: false, can_unfreeze: true, can_config: true }
+            },
+            {
+                merchant_id: 'M002',
+                merchant_name: 'uutalk',
+                risk_score: 82,
+                risk_level: 'Limit',
+                top_reasons: [
+                    { rule_key: 'sum_window', rule_name: '累计金额异常', add_score: 45, strength_text: '3.5x', strength_value: 3.5 },
+                    { rule_key: 'single_amount', rule_name: '单笔金额异常', add_score: 37, strength_text: '1.8x', strength_value: 1.8 }
+                ],
+                snapshot: {
+                    sum_10m: 8500, sum_10m_baseline: 7000, sum_10m_ratio: '1.2x',
+                    count_10m: 32, count_10m_baseline: 8, count_10m_ratio: '4x',
+                    top1_ratio: '70%', top2_ratio: '78%',
+                    single_max: 42000, p99_30d: 23000,
+                    // 1小时数据（仅供参考，不参与V1决策）
+                    sum_1h: 95000, sum_1h_baseline: 72000, sum_1h_ratio: 1.3,
+                    // 多小时趋势数据（部分小时低于阈值，不触发提示）
+                    hourly_trend: [
+                        { hour: '-3h', ratio: 1.1 },
+                        { hour: '-2h', ratio: 1.4 },
+                        { hour: '-1h', ratio: 1.2 },
+                        { hour: '当前', ratio: 1.3 }
+                    ]
+                },
+                trend_history: [
+                    { time: '-50min', ratio: 0.8 },
+                    { time: '-40min', ratio: 0.9 },
+                    { time: '-30min', ratio: 1.0 },
+                    { time: '-20min', ratio: 1.1 },
+                    { time: '-10min', ratio: 1.15 },
+                    { time: '当前', ratio: 1.2 }
+                ],
+                actions: { stop_withdraw: false, freeze_key: false, limit_rate: '10笔/分钟', limit_amount: '50万/单笔' },
+                last_trigger_at: '2026-01-15 09:45:12',
+                permissions: { can_fuse: true, can_unfreeze: true, can_config: true }
+            },
+            {
+                merchant_id: 'M003',
+                merchant_name: 'bitda',
+                risk_score: 55,
+                risk_level: 'Warn',
+                top_reasons: [
+                    { rule_key: 'single_amount', rule_name: '单笔金额异常', add_score: 55, strength_text: '1.8x', strength_value: 1.8 }
+                ],
+                snapshot: {
+                    sum_10m: 52000, sum_10m_baseline: 25000, sum_10m_ratio: '2.1x',
+                    count_10m: 12, count_10m_baseline: 8, count_10m_ratio: '1.5x',
+                    single_max: 50000, p99_30d: 28000,
+                    // 1小时数据（仅供参考，不参与V1决策）
+                    sum_1h: 210000, sum_1h_baseline: 120000, sum_1h_ratio: 1.75,
+                    // 多小时趋势数据（连续3小时高于1.5x，触发提示）
+                    hourly_trend: [
+                        { hour: '-3h', ratio: 1.6 },
+                        { hour: '-2h', ratio: 1.7 },
+                        { hour: '-1h', ratio: 1.5 },
+                        { hour: '当前', ratio: 1.75 }
+                    ]
+                },
+                trend_history: [
+                    { time: '-50min', ratio: 1.8 },
+                    { time: '-40min', ratio: 2.0 },
+                    { time: '-30min', ratio: 2.2 },
+                    { time: '-20min', ratio: 2.0 },
+                    { time: '-10min', ratio: 2.15 },
+                    { time: '当前', ratio: 2.1 }
+                ],
+                actions: { stop_withdraw: false, freeze_key: false, limit_rate: null },
+                last_trigger_at: '2026-01-15 08:12:30',
+                permissions: { can_fuse: true, can_unfreeze: false, can_config: true }
+            },
+            {
+                merchant_id: 'M004',
+                merchant_name: '波币用户',
+                risk_score: 0,
+                risk_level: 'Normal',
+                top_reasons: [],
+                snapshot: {
+                    sum_10m: 12000, sum_10m_baseline: 15000, sum_10m_ratio: '0.8x',
+                    count_10m: 5, count_10m_baseline: 6, count_10m_ratio: '0.8x',
+                    top1_ratio: '25%',
+                    single_max: 8000, p99_30d: 12000,
+                    // 1小时数据（仅供参考，不参与V1决策）
+                    sum_1h: 58000, sum_1h_baseline: 65000, sum_1h_ratio: 0.89,
+                    // 多小时趋势数据（正常，不触发提示）
+                    hourly_trend: [
+                        { hour: '-3h', ratio: 0.9 },
+                        { hour: '-2h', ratio: 0.85 },
+                        { hour: '-1h', ratio: 0.92 },
+                        { hour: '当前', ratio: 0.89 }
+                    ]
+                },
+                trend_history: [
+                    { time: '-50min', ratio: 0.7 },
+                    { time: '-40min', ratio: 0.75 },
+                    { time: '-30min', ratio: 0.8 },
+                    { time: '-20min', ratio: 0.85 },
+                    { time: '-10min', ratio: 0.82 },
+                    { time: '当前', ratio: 0.8 }
+                ],
+                actions: { stop_withdraw: false, freeze_key: false, limit_rate: null },
+                last_trigger_at: '2026-01-14 22:00:00',
+                permissions: { can_fuse: true, can_unfreeze: false, can_config: true }
+            }
+        ];
+
+        // 获取详情的 mock
+        const getMockDetail = (id) => {
+            const base = MOCK_MERCHANTS.find(m => m.merchant_id === id) || MOCK_MERCHANTS[0];
+            return {
+                ...base,
+                // 人话解释（关键！）
+                explain_text: generateExplainText(base),
+                // 2条规则明细
+                rules_breakdown: [
+                    { 
+                        rule_key: 'single_amount', rule_name: '单笔金额异常', 
+                        hit: base.snapshot.single_max > 0, 
+                        strength_value: base.snapshot.single_max ? (base.snapshot.single_max / (base.snapshot.p99_30d || 28000)).toFixed(1) : 0,
+                        raw_score: (() => {
+                            const ratio = base.snapshot.single_max / (base.snapshot.p99_30d || 28000);
+                            if (ratio >= 5) return 100;
+                            if (ratio >= 2) return 80;
+                            if (ratio >= 1) return 60;
+                            return 0;
+                        })(),
+                        weight: 1.0, 
+                        contribution: 0,
+                        details: base.snapshot.single_max 
+                            ? `单笔最大 ${base.snapshot.single_max.toLocaleString()} USDT，P99_30d=${(base.snapshot.p99_30d || 28000).toLocaleString()} USDT` 
+                            : '无异常'
+                    },
+                    { 
+                        rule_key: 'sum_window', rule_name: '累计金额异常', 
+                        hit: parseFloat(base.snapshot.sum_10m_ratio) >= 2,
+                        strength_value: parseFloat(base.snapshot.sum_10m_ratio) || 0,
+                        raw_score: (() => {
+                            const ratio = parseFloat(base.snapshot.sum_10m_ratio);
+                            if (ratio >= 5) return 70;
+                            if (ratio >= 3) return 50;
+                            if (ratio >= 2) return 30;
+                            return 0;
+                        })(),
+                        weight: 1.0,
+                        contribution: 0,
+                        details: `10m累计 ${base.snapshot.sum_10m?.toLocaleString() || '-'} USDT，基线 ${base.snapshot.sum_10m_baseline?.toLocaleString() || '-'} USDT（${base.snapshot.sum_10m_ratio}）`
+                    }
+                ].map(r => ({ ...r, contribution: Math.round(r.raw_score * r.weight) })),
+                // 最近10笔样本（参照后台出款记录格式）
+                samples_last10: Array.from({ length: 10 }).map((_, i) => ({
+                    id: 4470 - i,
+                    order_no: `718762${8 - i}`,
+                    withdraw_type: ['商户', '用户', '手机'][i % 3],
+                    platform: 'test',
+                    chain: '波场',
+                    token: 'USDT',
+                    amount: [3.3, 2.5, 1.5, 2.1, 2.6, 3.799, 2.55, 10, 15, 4.436][i],
+                    from_address: `T${['YuP', 'A1w', 'A1w', 'Edm', 'Fce', 'TKZ', 'TKZ', 'CLe', 'TVV', 'Uk1'][i]}...${['jcmt', 'nqt4', 'nqt4', 'TMpJ', 'egB1', 'Kq55', 'Kq55', 'kTgi', 'vuTt', 'cufD'][i]}`,
+                    to_address: `T${['FQj', 'Vvp', 'Q8H', 'FQj', 'Vvp', 'Mnk', 'Q8H', 'TVV', 'Q8H', 'FQj'][i]}...${['xcHW', 'cSyX', 'eA41', 'xcHW', 'cSyX', 'H9VT', 'eA41', 'vuTt', 'eA41', 'xcHW'][i]}`,
+                    status: '已确认',
+                    tx_count: i === 7 ? 3 : 1,
+                    created_at: `2026-01-15 0${2 - Math.floor(i/5)}:${57 - i * 3}:${10 + i * 5}`,
+                    source: i % 3 === 0 ? 'admin' : 'api'
+                })),
+                // 地址分析
+                address_analysis: parseFloat(base.snapshot.top1_ratio) >= 50 ? {
+                    top1_ratio: base.snapshot.top1_ratio,
+                    top2_ratio: base.snapshot.top2_ratio || '5%',
+                    top1_amount_ratio: '90%',
+                    top_addresses: [
+                        { address: 'TTne...sj9b', count: 35, amount: 120000, ratio: base.snapshot.top1_ratio, new_address: false },
+                        { address: 'TA7z...gufq', count: 5, amount: 15000, ratio: '10%', new_address: true },
+                        { address: '0xba...eb13', count: 2, amount: 5000, ratio: '5%', new_address: true }
+                    ]
+                } : null
+            };
+        };
+
+        // 生成人话解释
+        const generateExplainText = (merchant) => {
+            const { risk_score, risk_level, top_reasons } = merchant;
+            
+            // 简洁版：只列出命中的规则名称
+            const ruleNames = top_reasons.map(r => {
+                if (r.rule_key === 'sum_window') return '累计金额异常';
+                if (r.rule_key === 'count_spike') return '出款笔数异常';
+                if (r.rule_key === 'single_amount') return '单笔金额异常';
+                if (r.rule_key === 'small_high_freq') return '小额高频异常';
+                if (r.rule_key === 'addr_concentrate') return '地址集中异常';
+                return r.rule_key;
+            });
+            
+            if (ruleNames.length === 0) {
+                return '当前无规则命中，状态正常。';
+            }
+            
+            return `命中规则：**${ruleNames.join('、')}**，详见下方规则明细。`;
+        };
+
+        // ========== 组件 ==========
+
+        // 出款样本表格列配置
+        const getSampleColumns = (compact = false) => [
+            { title: 'ID', dataIndex: 'id', width: 60, fixed: compact ? false : 'left' },
+            { title: '订单号', dataIndex: 'order_no', width: 100, render: v => v === '--' ? <Text type="secondary">--</Text> : <Space size={2}>{v}<CopyOutlined style={{ fontSize: 12, color: '#999', cursor: 'pointer' }} onClick={() => { navigator.clipboard.writeText(v); message.success('已复制'); }} /></Space> },
+            { title: '类型', dataIndex: 'withdraw_type', width: 80, render: v => <Tag style={{ margin: 0 }}>{v}</Tag> },
+            { title: '链', dataIndex: 'chain', width: 50 },
+            { title: '金额', dataIndex: 'amount', width: 80, render: v => <Text strong>{v}</Text>, suffix: 'USDT' },
+            { title: '发送方地址', dataIndex: 'from_address', width: 130, render: v => <Space size={4}>{v}<CopyOutlined style={{ fontSize: 11, color: '#999', cursor: 'pointer' }} onClick={() => { navigator.clipboard.writeText(v); message.success('已复制'); }} /><LinkOutlined style={{ fontSize: 11, color: '#1890ff', cursor: 'pointer' }} /></Space> },
+            { title: '收款地址', dataIndex: 'to_address', width: 130, render: v => <Space size={4}>{v}<CopyOutlined style={{ fontSize: 11, color: '#999', cursor: 'pointer' }} onClick={() => { navigator.clipboard.writeText(v); message.success('已复制'); }} /><LinkOutlined style={{ fontSize: 11, color: '#1890ff', cursor: 'pointer' }} /></Space> },
+            { title: '状态', dataIndex: 'status', width: 70, render: v => <Tag color="success" style={{ margin: 0 }}>{v}</Tag> },
+            { title: '时间', dataIndex: 'created_at', width: 150 }
+        ];
+
+        // 出款样本预览组件（含查看全部功能）
+        const SampleTablePreview = ({ samples, totalCount, ruleKey, ruleName }) => {
+            const [modalVisible, setModalVisible] = useState(false);
+            const previewCount = 10;
+            
+            // 模拟生成更多数据（实际应从API获取）
+            const generateMoreSamples = (count) => {
+                return Array.from({ length: count }).map((_, i) => ({
+                    id: 4470 - i,
+                    order_no: `718${7600 + i}`,
+                    withdraw_type: ['商户', '用户', '手机'][i % 3],
+                    platform: 'test',
+                    chain: '波场',
+                    token: 'USDT',
+                    amount: (Math.random() * 10 + 0.5).toFixed(2),
+                    from_address: `T${['YuP', 'A1w', 'Edm', 'Fce', 'TKZ', 'CLe', 'TVV', 'Uk1'][i % 8]}...${['jcmt', 'nqt4', 'TMpJ', 'egB1', 'Kq55', 'kTgi', 'vuTt', 'cufD'][i % 8]}`,
+                    to_address: `T${['FQj', 'Vvp', 'Q8H', 'Mnk', 'TVV'][i % 5]}...${['xcHW', 'cSyX', 'eA41', 'H9VT', 'vuTt'][i % 5]}`,
+                    status: '已确认',
+                    tx_count: 1,
+                    created_at: `2026-01-15 0${2 - Math.floor(i/20)}:${String(59 - (i % 60)).padStart(2, '0')}:${String(10 + (i % 50)).padStart(2, '0')}`,
+                    source: i % 3 === 0 ? 'admin' : 'api'
+                }));
+            };
+            
+            const allSamples = totalCount > samples.length ? generateMoreSamples(totalCount) : samples;
+            
+            return (
+                <>
+                    <div style={{ marginBottom: 8 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                            <Text strong>参考样本（用于解释规则命中）</Text>
+                            <Text type="secondary" style={{ fontSize: 12 }}>
+                                窗口内共 <Text strong style={{ color: '#cf1322' }}>{totalCount}</Text> 笔
+                            </Text>
+                        </div>
+                        <Text type="secondary" style={{ fontSize: 12 }}>
+                            以下样本用于解释规则为何命中，不要求逐笔审核，也不代表订单存在问题。
+                        </Text>
+                    </div>
+                    <Table 
+                        size="small" 
+                        pagination={false}
+                        dataSource={samples.slice(0, previewCount)}
+                        rowKey="id"
+                        scroll={{ x: 800 }}
+                        columns={getSampleColumns(true)}
+                    />
+                    {totalCount > previewCount && (
+                        <div style={{ textAlign: 'center', marginTop: 12, padding: '8px 0', background: '#fafafa', borderRadius: 4 }}>
+                            <Button type="link" onClick={() => setModalVisible(true)}>
+                                查看全部 {totalCount} 笔出款记录 <span style={{ marginLeft: 4 }}>→</span>
+                            </Button>
+                        </div>
+                    )}
+                    
+                    {/* 全部样本弹窗 */}
+                    <Modal
+                        title={
+                            <Space>
+                                <HistoryOutlined />
+                                <span>{ruleName} - 窗口内出款记录</span>
+                                <Tag color="error">共 {totalCount} 笔</Tag>
+                            </Space>
+                        }
+                        open={modalVisible}
+                        onCancel={() => setModalVisible(false)}
+                        footer={null}
+                        width={1000}
+                        bodyStyle={{ padding: '16px 24px' }}
+                    >
+                        <Table 
+                            size="small"
+                            dataSource={allSamples}
+                            rowKey="id"
+                            scroll={{ x: 900, y: 400 }}
+                            pagination={{
+                                pageSize: 20,
+                                showSizeChanger: true,
+                                pageSizeOptions: ['10', '20', '50', '100'],
+                                showTotal: (total, range) => `第 ${range[0]}-${range[1]} 条，共 ${total} 条`,
+                                size: 'small'
+                            }}
+                            columns={getSampleColumns(false)}
+                        />
+                    </Modal>
+                </>
+            );
+        };
+
+        // ========== 可折叠样本表组件（V1 极简：默认展开10条） ==========
+        const CollapsibleSampleTable = ({ samples, totalCount, ruleKey, ruleName }) => {
+            const [expanded, setExpanded] = useState(true); // 默认展开
+            const [modalVisible, setModalVisible] = useState(false);
+            const previewCount = 10; // 预览显示10笔
+            
+            // 精简的预览列配置（更紧凑美观）
+            const compactColumns = [
+                { 
+                    title: '订单号', 
+                    dataIndex: 'order_no', 
+                    width: 100,
+                    render: v => <Text style={{ fontFamily: 'monospace', fontSize: 13 }}>{v}</Text>
+                },
+                { 
+                    title: '金额', 
+                    dataIndex: 'amount', 
+                    width: 90, 
+                    align: 'right',
+                    render: v => <Text strong style={{ color: '#cf1322' }}>{v} <Text type="secondary" style={{ fontWeight: 'normal', fontSize: 11 }}>USDT</Text></Text>
+                },
+                { 
+                    title: '收款地址', 
+                    dataIndex: 'to_address', 
+                    width: 140,
+                    render: v => (
+                        <Text style={{ fontFamily: 'monospace', fontSize: 12, color: '#595959' }}>
+                            {v}
+                        </Text>
+                    )
+                },
+                { 
+                    title: '状态', 
+                    dataIndex: 'status', 
+                    width: 70, 
+                    align: 'center',
+                    render: v => <Tag color="success" style={{ margin: 0, fontSize: 11 }}>{v}</Tag>
+                },
+                { 
+                    title: '时间', 
+                    dataIndex: 'created_at', 
+                    width: 140,
+                    render: v => <Text type="secondary" style={{ fontSize: 12 }}>{v}</Text>
+                }
+            ];
+            
+            // 模拟生成更多数据
+            const generateMoreSamples = (count) => {
+                return Array.from({ length: count }).map((_, i) => ({
+                    id: 4470 - i,
+                    order_no: `718${7600 + i}`,
+                    withdraw_type: ['商户', '用户', '手机'][i % 3],
+                    platform: 'test',
+                    chain: '波场',
+                    token: 'USDT',
+                    amount: (Math.random() * 10 + 0.5).toFixed(2),
+                    from_address: `T${['YuP', 'A1w', 'Edm', 'Fce', 'TKZ', 'CLe', 'TVV', 'Uk1'][i % 8]}...${['jcmt', 'nqt4', 'TMpJ', 'egB1', 'Kq55', 'kTgi', 'vuTt', 'cufD'][i % 8]}`,
+                    to_address: `T${['FQj', 'Vvp', 'Q8H', 'Mnk', 'TVV'][i % 5]}...${['xcHW', 'cSyX', 'eA41', 'H9VT', 'vuTt'][i % 5]}`,
+                    status: '已确认',
+                    tx_count: 1,
+                    created_at: `2026-01-15 0${2 - Math.floor(i/20)}:${String(59 - (i % 60)).padStart(2, '0')}:${String(10 + (i % 50)).padStart(2, '0')}`,
+                    source: i % 3 === 0 ? 'admin' : 'api'
+                }));
+            };
+            
+            const allSamples = totalCount > samples.length ? generateMoreSamples(totalCount) : samples;
+            
+            return (
+                <div style={{ borderTop: '1px solid #f0f0f0', paddingTop: 12, marginTop: 8 }}>
+                    {/* 标题栏 */}
+                    <div style={{ 
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        alignItems: 'center',
+                        marginBottom: 8,
+                        paddingBottom: 8,
+                        borderBottom: '1px dashed #e8e8e8'
+                    }}>
+                        <Space>
+                            <Text type="secondary" style={{ fontSize: 13 }}>
+                                参考样本
+                            </Text>
+                            <Tag style={{ margin: 0, fontSize: 11 }}>
+                                窗口内 {totalCount} 笔
+                            </Tag>
+                        </Space>
+                        <Button 
+                            type="text" 
+                            size="small" 
+                            icon={expanded ? <UpOutlined /> : <DownOutlined />}
+                            onClick={() => setExpanded(!expanded)}
+                            style={{ color: '#8c8c8c', fontSize: 12 }}
+                        >
+                            {expanded ? '收起' : '展开'}
+                        </Button>
+                    </div>
+                    
+                    {/* 说明文案 */}
+                    {expanded && (
+                        <Text type="secondary" style={{ fontSize: 11, display: 'block', marginBottom: 8, color: '#bfbfbf' }}>
+                            样本用于解释规则命中，不要求逐笔审核，也不代表订单存在问题。
+                        </Text>
+                    )}
+                    
+                    {/* 展开后显示预览表格 */}
+                    {expanded && (
+                        <>
+                            <Table 
+                                size="small" 
+                                pagination={false}
+                                dataSource={samples.slice(0, previewCount)}
+                                rowKey="id"
+                                columns={compactColumns}
+                                style={{ 
+                                    border: '1px solid #f0f0f0', 
+                                    borderRadius: 6,
+                                    overflow: 'hidden'
+                                }}
+                                className="compact-sample-table"
+                            />
+                            {totalCount > previewCount && (
+                                <div style={{ 
+                                    textAlign: 'center', 
+                                    marginTop: 12, 
+                                    padding: '8px 0', 
+                                    background: '#fafafa', 
+                                    borderRadius: 4,
+                                    border: '1px dashed #e8e8e8'
+                                }}>
+                                    <Button type="link" size="small" onClick={() => setModalVisible(true)}>
+                                        查看全部 {totalCount} 笔出款记录 →
+                                    </Button>
+                                </div>
+                            )}
+                        </>
+                    )}
+                    
+                    {/* 全部样本弹窗 */}
+                    <Modal
+                        title={<Space><HistoryOutlined /><span>{ruleName} - 窗口内出款记录</span><Tag color="orange">共 {totalCount} 笔</Tag></Space>}
+                        open={modalVisible}
+                        onCancel={() => setModalVisible(false)}
+                        footer={null}
+                        width={1000}
+                    >
+                        <Table 
+                            size="small"
+                            dataSource={allSamples}
+                            rowKey="id"
+                            scroll={{ x: 900, y: 400 }}
+                            pagination={{ pageSize: 20, showSizeChanger: true }}
+                            columns={getSampleColumns(false)}
+                        />
+                    </Modal>
+                </div>
+            );
+        };
+
+        // ========== 10分钟风险快照辅助函数 ==========
+        
+        // 严重程度颜色映射（根据倍数）
+        const getRatioSeverity = (ratioStr) => {
+            if (!ratioStr) return 'low';
+            const ratio = parseFloat(ratioStr);
+            if (isNaN(ratio)) return 'low';
+            if (ratio >= 5) return 'critical';  // ≥5x 深红（高危）
+            if (ratio >= 3) return 'high';      // 3-5x 橙红（异常）
+            if (ratio >= 2) return 'medium';    // 2-3x 橙色（偏高）
+            return 'low';                        // <2x 灰色
+        };
+        
+        // V1 方案A：仅展示命中规则（列表页是"结果解释页"，不是"指标监控页"）
+        // 被展示的规则 = 已命中规则，使用 top_reasons 中的 strength_value/strength_text
+        const getRelevantSnapshotItems = (topReasons, snapshot, riskLevel) => {
+            // NORMAL 行不显示指标
+            if (riskLevel?.toUpperCase() === 'NORMAL') {
+                return { items: [], isEmpty: true, emptyText: '近10分钟无异常' };
+            }
+            
+            if (!topReasons || topReasons.length === 0) {
+                return { items: [], isEmpty: true, emptyText: '近10分钟无风险触发' };
+            }
+            
+            const items = [];
+            
+            // V1 双规则：只展示命中的规则（top_reasons 即为命中规则）
+            // 使用 top_reasons 中记录的强度值，不再从 snapshot 中取
+            topReasons.forEach(reason => {
+                const ruleKey = reason.rule_key;
+                const ruleName = reason.rule_name || '未知规则';
+                // 优先使用 strength_value，否则使用 strength_text，去掉可能存在的 x 后缀
+                let ratioValue = reason.strength_value || parseFloat(String(reason.strength_text || reason.strength || '0').replace('x', ''));
+                
+                // 单笔金额异常
+                if (ruleKey === 'single_amount') {
+                    items.push({
+                        label: '单笔金额异常',
+                        value: `${ratioValue}x`,
+                        severity: getRatioSeverity(ratioValue)
+                    });
+                }
+                
+                // 累计金额异常
+                if (['sum_10m', 'sum_window', 'sum_amount'].includes(ruleKey)) {
+                    items.push({
+                        label: '累计金额异常',
+                        value: `${ratioValue}x`,
+                        severity: getRatioSeverity(ratioValue)
+                    });
+                }
+            });
+            
+            // 最多显示2行（与Top2对齐）
+            const finalItems = items.slice(0, 2);
+            
+            if (finalItems.length === 0) {
+                return { items: [], isEmpty: true, emptyText: '近10分钟无风险触发' };
+            }
+            
+            return { items: finalItems, isEmpty: false };
+        };
+        
+        // ========== 迷你趋势曲线组件 (Sparkline) ==========
+        const TrendSparkline = ({ data, threshold = 3, width = 80, height = 28 }) => {
+            if (!data || data.length === 0) return null;
+            
+            const values = data.map(d => d.ratio);
+            const maxVal = Math.max(...values, threshold);
+            const minVal = Math.min(...values, 0);
+            const range = maxVal - minVal || 1;
+            
+            const padding = 2;
+            const innerW = width - padding * 2;
+            const innerH = height - padding * 2;
+            
+            // 生成曲线路径
+            const points = values.map((v, i) => ({
+                x: padding + (i / (values.length - 1)) * innerW,
+                y: padding + innerH - ((v - minVal) / range) * innerH
+            }));
+            
+            // 生成平滑曲线 (使用二次贝塞尔)
+            let pathD = `M ${points[0].x} ${points[0].y}`;
+            for (let i = 1; i < points.length; i++) {
+                const prev = points[i - 1];
+                const curr = points[i];
+                const cpX = (prev.x + curr.x) / 2;
+                pathD += ` Q ${prev.x + (cpX - prev.x) * 0.5} ${prev.y}, ${cpX} ${(prev.y + curr.y) / 2}`;
+                pathD += ` Q ${cpX + (curr.x - cpX) * 0.5} ${curr.y}, ${curr.x} ${curr.y}`;
+            }
+            
+            // 阈值线 Y 坐标
+            const thresholdY = padding + innerH - ((threshold - minVal) / range) * innerH;
+            
+            // 判断趋势方向和颜色
+            const lastVal = values[values.length - 1];
+            const firstVal = values[0];
+            const isRising = lastVal > firstVal;
+            const isAboveThreshold = lastVal >= threshold;
+            const strokeColor = isAboveThreshold ? '#ff4d4f' : (isRising ? '#faad14' : '#52c41a');
+            
+            // 最后一个点
+            const lastPoint = points[points.length - 1];
+            
+            return (
+                <Tooltip 
+                    title={
+                        <div style={{ fontSize: 11 }}>
+                            <div style={{ fontWeight: 500, marginBottom: 4 }}>近1小时趋势（vs 基线）</div>
+                            {data.map((d, i) => (
+                                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+                                    <span>{d.time}</span>
+                                    <span style={{ fontWeight: i === data.length - 1 ? 600 : 400 }}>{d.ratio}x</span>
+                                </div>
+                            ))}
+                            <div style={{ marginTop: 4, borderTop: '1px solid rgba(255,255,255,0.2)', paddingTop: 4, color: '#ffc069' }}>
+                                阈值线: {threshold}x
+                            </div>
+                        </div>
+                    }
+                >
+                    <svg width={width} height={height} style={{ cursor: 'help' }}>
+                        {/* 阈值虚线 */}
+                        <line 
+                            x1={padding} 
+                            y1={thresholdY} 
+                            x2={width - padding} 
+                            y2={thresholdY} 
+                            stroke="#ff4d4f" 
+                            strokeWidth="1" 
+                            strokeDasharray="2,2" 
+                            opacity="0.5"
+                        />
+                        {/* 趋势曲线 */}
+                        <path 
+                            d={pathD} 
+                            fill="none" 
+                            stroke={strokeColor} 
+                            strokeWidth="1.5" 
+                            strokeLinecap="round"
+                        />
+                        {/* 当前点 */}
+                        <circle 
+                            cx={lastPoint.x} 
+                            cy={lastPoint.y} 
+                            r="3" 
+                            fill={strokeColor}
+                        />
+                    </svg>
+                </Tooltip>
+            );
+        };
+
+        // ========== 10分钟风险快照单元格组件 ==========
+        const RiskSnapshotCell = ({ record }) => {
+            const { items, isEmpty, emptyText } = getRelevantSnapshotItems(
+                record.top_reasons, 
+                record.snapshot, 
+                record.risk_level
+            );
+            
+            return (
+                <div className="snapshot-cell">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        {/* 迷你趋势图 - 始终显示 */}
+                        {record.trend_history && (
+                            <TrendSparkline data={record.trend_history} threshold={3} />
+                        )}
+                        {/* 数值指标或空状态 */}
+                        <div style={{ flex: 1 }}>
+                            {isEmpty ? (
+                                <span className="snapshot-empty" style={{ display: 'block' }}>{emptyText}</span>
+                            ) : (
+                                items.map((item, idx) => (
+                                    <div key={idx} className="snapshot-item">
+                                        <span className="snapshot-label">{item.label}</span>
+                                        <span className={`snapshot-value ${item.severity}`}>
+                                            {item.value}
+                                        </span>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // ========== 审计事件 Mock 数据（审计级重构） ==========
+        // 数据结构说明:
+        // - id: 记录唯一ID
+        // - case_id: 事件链ID，同一商户的一次风险处置串成一条事件链
+        // - action_type: SYSTEM_AUTO_FUSE / ADMIN_MANUAL_FUSE / ADMIN_UNFREEZE
+        // - actor_type: SYSTEM / ADMIN
+        // - snapshot: { score, top2_rules:[{name,strength}], stop_withdraw:boolean }
+        const AUDIT_CASES = [
+            {
+                id: 'AUD-001',
+                case_id: 'CASE-20260115-0001',
+                merchant_id: 'M001',
+                merchant_name: '波币商户',
+                action_type: 'SYSTEM_AUTO_FUSE',
+                actor_type: 'SYSTEM',
+                actor_name: 'SYSTEM',
+                actor_role: null,
+                result: 'SUCCESS',
+                trigger_time: '2026-01-15 10:20:05',
+                snapshot: { 
+                    score: 125, 
+                    top2_rules: [
+                        { name: '累计金额异常', strength: '3.8x' },
+                        { name: '出款频率异常', strength: '6x' }
+                    ],
+                    stop_withdraw: true 
+                },
+                evidence_count: 0,
+                remark: '',
+                notes: '系统自动触发，风险分超过熔断阈值100'
+            },
+            {
+                id: 'AUD-002',
+                case_id: 'CASE-20260115-0001',
+                merchant_id: 'M001',
+                merchant_name: '波币商户',
+                action_type: 'ADMIN_UNFREEZE',
+                actor_type: 'ADMIN',
+                actor_name: 'Admin_Li',
+                actor_role: '风控主管',
+                result: 'SUCCESS',
+                trigger_time: '2026-01-15 14:30:00',
+                snapshot: { 
+                    score_before: 125,
+                    score_after: 40,
+                    risk_level_after: 'WARN',
+                    top2_rules: [
+                        { name: '累计金额异常', strength: '3.8x' },
+                        { name: '出款频率异常', strength: '6x' }
+                    ],
+                    stop_withdraw: false 
+                },
+                evidence_count: 2,
+                remark: '已核实为促销活动',
+                attachments: ['proof_01.png', 'chat_log.pdf'],
+                notes: '商户确认为促销活动，材料核实无误，批准恢复'
+            },
+            {
+                id: 'AUD-003',
+                case_id: 'CASE-20260115-0002',
+                merchant_id: 'M002',
+                merchant_name: 'uutalk',
+                action_type: 'SYSTEM_AUTO_FUSE',
+                actor_type: 'SYSTEM',
+                actor_name: 'SYSTEM',
+                actor_role: null,
+                result: 'SUCCESS',
+                trigger_time: '2026-01-15 09:45:12',
+                snapshot: { 
+                    score: 85, 
+                    top2_rules: [
+                        { name: '小额高频', strength: '4x' }
+                    ],
+                    stop_withdraw: true 
+                },
+                evidence_count: 0,
+                remark: '',
+                notes: '系统自动触发限速'
+            },
+            {
+                id: 'AUD-004',
+                case_id: 'CASE-20260114-0001',
+                merchant_id: 'M003',
+                merchant_name: 'bitda',
+                action_type: 'ADMIN_MANUAL_FUSE',
+                actor_type: 'ADMIN',
+                actor_name: 'Admin_Wang',
+                actor_role: '风控专员',
+                result: 'SUCCESS',
+                trigger_time: '2026-01-14 16:20:00',
+                snapshot: { 
+                    score: 55, 
+                    top2_rules: [
+                        { name: '客户投诉', strength: '紧急' }
+                    ],
+                    stop_withdraw: true 
+                },
+                evidence_count: 3,
+                remark: '待核实',
+                attachments: ['complaint_01.jpg', 'complaint_02.jpg', 'ticket_123.pdf'],
+                notes: '客户投诉有异常出款，主动熔断排查'
+            },
+            {
+                id: 'AUD-005',
+                case_id: 'CASE-20260114-0001',
+                merchant_id: 'M003',
+                merchant_name: 'bitda',
+                action_type: 'ADMIN_UNFREEZE',
+                actor_type: 'ADMIN',
+                actor_name: 'Admin_Li',
+                actor_role: '风控主管',
+                result: 'SUCCESS',
+                trigger_time: '2026-01-14 18:30:00',
+                snapshot: { 
+                    score_before: 55,
+                    score_after: 40,
+                    risk_level_after: 'WARN',
+                    top2_rules: [
+                        { name: '客户投诉', strength: '已核实' }
+                    ],
+                    stop_withdraw: false 
+                },
+                evidence_count: 3,
+                remark: '误报已核实',
+                notes: '核实为误报，恢复出款'
+            },
+            {
+                id: 'AUD-006',
+                case_id: 'CASE-20260113-0001',
+                merchant_id: 'M004',
+                merchant_name: '波币用户',
+                action_type: 'SYSTEM_AUTO_FUSE',
+                actor_type: 'SYSTEM',
+                actor_name: 'SYSTEM',
+                actor_role: null,
+                result: 'SUCCESS',
+                trigger_time: '2026-01-13 22:15:30',
+                snapshot: { 
+                    score: 110, 
+                    top2_rules: [
+                        { name: '地址集中度', strength: '85%' },
+                        { name: '机械节奏', strength: '命中' }
+                    ],
+                    stop_withdraw: true 
+                },
+                evidence_count: 0,
+                remark: '',
+                notes: '系统自动熔断，等待排查'
+            }
+        ];
+
+        // 动作类型配置（审计级：仅3类）
+        const ACTION_TYPE_CONFIG = {
+            SYSTEM_AUTO_FUSE: { label: '系统熔断', color: 'error', icon: ThunderboltOutlined },
+            ADMIN_MANUAL_FUSE: { label: '人工熔断', color: 'volcano', icon: StopOutlined },
+            ADMIN_UNFREEZE: { label: '执行解封', color: 'success', icon: UnlockOutlined }
+        };
+
+        // ========== 风控审计中心模块（审计级重构） ==========
+        const AuditCenterModule = () => {
+            const [filters, setFilters] = useState({ 
+                merchant: '', 
+                dateRange: null, 
+                actionTypes: [], // 多选
+                actorType: 'ALL', // SYSTEM / ADMIN / ALL
+                hasRemark: 'ALL' // ALL / YES / NO
+            });
+            const [selectedRecord, setSelectedRecord] = useState(null);
+            const [drawerVisible, setDrawerVisible] = useState(false);
+            const [remarkModalVisible, setRemarkModalVisible] = useState(false);
+            const [remarkTarget, setRemarkTarget] = useState(null);
+            const [remarkInput, setRemarkInput] = useState('');
+
+            // 筛选逻辑
+            const filteredCases = useMemo(() => {
+                return AUDIT_CASES.filter(c => {
+                    if (filters.merchant && !c.merchant_name.includes(filters.merchant) && !c.merchant_id.includes(filters.merchant)) return false;
+                    if (filters.actionTypes.length > 0 && !filters.actionTypes.includes(c.action_type)) return false;
+                    if (filters.actorType === 'SYSTEM' && c.actor_type !== 'SYSTEM') return false;
+                    if (filters.actorType === 'ADMIN' && c.actor_type !== 'ADMIN') return false;
+                    if (filters.hasRemark === 'YES' && !c.remark) return false;
+                    if (filters.hasRemark === 'NO' && c.remark) return false;
+                    return true;
+                });
+            }, [filters]);
+
+            // 获取同一 case_id 的所有事件（时间线）
+            const getCaseTimeline = (caseId) => {
+                return AUDIT_CASES
+                    .filter(c => c.case_id === caseId)
+                    .sort((a, b) => new Date(a.trigger_time) - new Date(b.trigger_time));
+            };
+
+            // 获取 Case 最终状态（含风险等级）
+            const getCaseFinalStatus = (caseId) => {
+                const timeline = getCaseTimeline(caseId);
+                if (timeline.length === 0) return { status: '未知', stopWithdraw: null, riskLevel: null };
+                const last = timeline[timeline.length - 1];
+                const stopWithdraw = last.snapshot?.stop_withdraw;
+                let status = '未知';
+                let riskLevel = null;
+                if (last.action_type === 'ADMIN_UNFREEZE' && last.result === 'SUCCESS') {
+                    status = '已解封';
+                    riskLevel = last.snapshot?.risk_level_after || 'WARN';
+                } else if (last.action_type.includes('FUSE')) {
+                    status = '熔断中';
+                    riskLevel = 'FUSE';
+                }
+                return { status, stopWithdraw, riskLevel };
+            };
+            
+            // 风险等级标签配置
+            const RISK_LEVEL_LABEL = {
+                NORMAL: { text: '正常', color: 'success' },
+                WARN: { text: '警告', color: 'warning' },
+                LIMIT: { text: '限制', color: 'orange' },
+                FUSE: { text: '熔断', color: 'error' }
+            };
+
+            const showDetail = (record) => {
+                setSelectedRecord(record);
+                setDrawerVisible(true);
+            };
+
+            const handleRemark = (record) => {
+                setRemarkTarget(record);
+                setRemarkInput(record.remark || '');
+                setRemarkModalVisible(true);
+            };
+
+            const confirmRemark = () => {
+                if (remarkTarget) {
+                    message.success('备注已保存');
+                }
+                setRemarkModalVisible(false);
+                setRemarkTarget(null);
+                setRemarkInput('');
+            };
+
+            const resetFilters = () => {
+                setFilters({ merchant: '', dateRange: null, actionTypes: [], actorType: 'ALL', hasRemark: 'ALL' });
+            };
+
+            // 列定义（审计级）
+            const columns = [
+                { 
+                    title: '时间', 
+                    dataIndex: 'trigger_time', 
+                    width: 160,
+                    render: v => <Text style={{ fontSize: 13, fontFamily: 'monospace', whiteSpace: 'nowrap' }}>{v}</Text>
+                },
+                { 
+                    title: '商户', 
+                    key: 'merchant', 
+                    width: 140,
+                    render: (_, r) => (
+                        <div style={{ lineHeight: 1.4 }}>
+                            <Text strong style={{ fontSize: 14, display: 'block' }}>{r.merchant_name}</Text>
+                            <Text type="secondary" style={{ fontSize: 12 }}>{r.merchant_id}</Text>
+                        </div>
+                    )
+                },
+                { 
+                    title: '动作类型', 
+                    dataIndex: 'action_type', 
+                    width: 105,
+                    align: 'center',
+                    render: v => {
+                        const cfg = ACTION_TYPE_CONFIG[v] || {};
+                        const IconComp = cfg.icon;
+                        return <Tag icon={IconComp && <IconComp />} color={cfg.color} style={{ fontSize: 12, margin: 0 }}>{cfg.label || v}</Tag>;
+                    }
+                },
+                { 
+                    title: '执行主体', 
+                    key: 'actor', 
+                    width: 170,
+                    render: (_, r) => (
+                        <div style={{ lineHeight: 1.4 }}>
+                            <Space size={4}>
+                                <Badge status={r.actor_type === 'SYSTEM' ? 'default' : 'success'} />
+                                <Text style={{ fontSize: 14 }}>{r.actor_name}</Text>
+                            </Space>
+                            {r.actor_role && <div><Text type="secondary" style={{ fontSize: 12, marginLeft: 14 }}>{r.actor_role}</Text></div>}
+                        </div>
+                    )
+                },
+                { 
+                    title: '结果', 
+                    dataIndex: 'result', 
+                    width: 65,
+                    align: 'center',
+                    render: v => v === 'SUCCESS' 
+                        ? <Tag color="success" style={{ fontSize: 12, margin: 0 }}>成功</Tag> 
+                        : <Tag color="error" style={{ fontSize: 12, margin: 0 }}>失败</Tag>
+                },
+                { 
+                    title: '风险快照', 
+                    key: 'snapshot', 
+                    width: 280,
+                    render: (_, r) => {
+                        const snap = r.snapshot || {};
+                        const top2 = snap.top2_rules || [];
+                        const isUnfreeze = r.action_type === 'ADMIN_UNFREEZE';
+                        const score = isUnfreeze ? snap.score_after : snap.score;
+                        const scoreBefore = isUnfreeze ? snap.score_before : null;
+                        return (
+                            <div style={{ fontSize: 13, lineHeight: 1.5 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                    {isUnfreeze ? (
+                                        <span>
+                                            分数: <Text type="secondary" delete style={{ fontSize: 12 }}>{scoreBefore}</Text>
+                                            <span style={{ margin: '0 4px', color: '#999' }}>→</span>
+                                            <Text strong style={{ color: '#fa8c16' }}>{score}</Text>
+                                        </span>
+                                    ) : (
+                                        <span>分数: <Text strong type={score >= 100 ? 'danger' : undefined}>{score}</Text></span>
+                                    )}
+                                    <Tag color={snap.stop_withdraw ? 'error' : 'success'} style={{ fontSize: 11, margin: 0, padding: '0 6px' }}>{snap.stop_withdraw ? '🔴 暂停自动出款' : '🟢 出款正常'}</Tag>
+                                </div>
+                                {top2.length > 0 && (
+                                    <div style={{ color: '#8c8c8c', fontSize: 12, marginTop: 2 }}>
+                                        Top2: {top2.map(t => `${t.name} ${t.strength}`).join(' / ')}
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    }
+                },
+                { 
+                    title: '备注', 
+                    dataIndex: 'remark', 
+                    width: 120,
+                    ellipsis: true,
+                    render: v => v 
+                        ? <Tooltip title={v}><Text style={{ fontSize: 12, color: '#595959' }}>{v}</Text></Tooltip>
+                        : <Text type="secondary" style={{ fontSize: 12 }}>—</Text>
+                },
+                {
+                    title: '操作',
+                    key: 'op',
+                    width: 140,
+                    align: 'center',
+                    fixed: 'right',
+                    render: (_, r) => (
+                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                            <a style={{ fontSize: 13, color: '#1890ff', cursor: 'pointer' }} onClick={() => showDetail(r)}>详情</a>
+                            <Divider type="vertical" style={{ margin: '0 8px', borderColor: '#d9d9d9' }} />
+                            <a style={{ fontSize: 13, color: '#1890ff', cursor: 'pointer' }} onClick={() => handleRemark(r)}>
+                                备注
+                            </a>
+                        </div>
+                    )
+                }
+            ];
+
+            // 获取详情抽屉的时间线数据
+            const detailTimeline = selectedRecord ? getCaseTimeline(selectedRecord.case_id) : [];
+            const caseStatus = selectedRecord ? getCaseFinalStatus(selectedRecord.case_id) : {};
+
+            return (
+                <div style={{ background: '#fff', padding: '24px', borderRadius: '8px' }}>
+                    {/* 一、筛选区（审计增强） */}
+                    <div style={{ marginBottom: 20, padding: '16px 20px', background: '#fafafa', borderRadius: '8px' }}>
+                        <Row gutter={12} align="middle">
+                            <Col>
+                                <Input 
+                                    placeholder="商户ID/名称" 
+                                    style={{ width: 150 }}
+                                    prefix={<SearchOutlined style={{ color: '#bfbfbf' }} />}
+                                    value={filters.merchant}
+                                    onChange={e => setFilters(f => ({ ...f, merchant: e.target.value }))}
+                                    allowClear
+                                />
+                            </Col>
+                            <Col>
+                                <RangePicker 
+                                    style={{ width: 260 }}
+                                    placeholder={['开始时间', '结束时间']}
+                                    onChange={v => setFilters(f => ({ ...f, dateRange: v }))}
+                                />
+                            </Col>
+                            <Col>
+                                <Select 
+                                    mode="multiple"
+                                    value={filters.actionTypes} 
+                                    style={{ width: 200 }}
+                                    placeholder="动作类型"
+                                    maxTagCount={1}
+                                    onChange={v => setFilters(f => ({ ...f, actionTypes: v }))}
+                                >
+                                    <Option value="SYSTEM_AUTO_FUSE">系统熔断</Option>
+                                    <Option value="ADMIN_MANUAL_FUSE">人工熔断</Option>
+                                    <Option value="ADMIN_UNFREEZE">执行解封</Option>
+                                </Select>
+                            </Col>
+                            <Col>
+                                <Select 
+                                    value={filters.actorType} 
+                                    style={{ width: 110 }}
+                                    onChange={v => setFilters(f => ({ ...f, actorType: v }))}
+                                >
+                                    <Option value="ALL">全部主体</Option>
+                                    <Option value="SYSTEM">SYSTEM</Option>
+                                    <Option value="ADMIN">ADMIN</Option>
+                                </Select>
+                            </Col>
+                            <Col>
+                                <Select 
+                                    value={filters.hasRemark} 
+                                    style={{ width: 110 }}
+                                    onChange={v => setFilters(f => ({ ...f, hasRemark: v }))}
+                                >
+                                    <Option value="ALL">全部</Option>
+                                    <Option value="YES">有备注</Option>
+                                    <Option value="NO">无备注</Option>
+                                </Select>
+                            </Col>
+                            <Col>
+                                <Button type="primary" icon={<SearchOutlined />}>查询</Button>
+                            </Col>
+                            <Col>
+                                <Button icon={<ReloadOutlined />} onClick={resetFilters}>重置</Button>
+                            </Col>
+                            <Col flex="auto" />
+                            <Col>
+                                <Button icon={<DownloadOutlined />}>导出当前筛选范围</Button>
+                            </Col>
+                        </Row>
+                    </div>
+
+                    {/* 二、审计事件列表 */}
+                    <Table
+                        columns={columns}
+                        dataSource={filteredCases}
+                        rowKey="id"
+                        size="middle"
+                        pagination={{ pageSize: 15, showTotal: t => `共 ${t} 条审计记录` }}
+                        scroll={{ x: 1150 }}
+                    />
+
+                    {/* 三、事件详情抽屉（Timeline 形式） */}
+                    <Drawer
+                        title={<Space><FileSearchOutlined />审计事件详情</Space>}
+                        placement="right"
+                        width={560}
+                        onClose={() => setDrawerVisible(false)}
+                        open={drawerVisible}
+                    >
+                        {selectedRecord && (
+                            <Space direction="vertical" size={20} style={{ width: '100%' }}>
+                                {/* A) 事件摘要 */}
+                                <Card size="small" style={{ background: '#f6f8fa' }}>
+                                    <Row gutter={16}>
+                                        <Col span={12}>
+                                            <Text type="secondary" style={{ fontSize: 12 }}>Case ID</Text>
+                                            <div><Text strong copyable style={{ fontSize: 14 }}>{selectedRecord.case_id}</Text></div>
+                                        </Col>
+                                        <Col span={12}>
+                                            <Text type="secondary" style={{ fontSize: 12 }}>商户</Text>
+                                            <div>
+                                                <Text strong style={{ fontSize: 14 }}>{selectedRecord.merchant_name}</Text>
+                                                <Text type="secondary" style={{ fontSize: 12, marginLeft: 6 }}>({selectedRecord.merchant_id})</Text>
+                                            </div>
+                                        </Col>
+                                    </Row>
+                                    <Divider style={{ margin: '12px 0' }} />
+                                    <Row gutter={12}>
+                                        <Col span={6}>
+                                            <Text type="secondary" style={{ fontSize: 12 }}>当前状态</Text>
+                                            <div>
+                                                <Tag color={caseStatus.status === '已解封' ? 'success' : 'error'} style={{ fontSize: 13 }}>
+                                                    {caseStatus.status}
+                                                </Tag>
+                                            </div>
+                                        </Col>
+                                        <Col span={6}>
+                                            <Text type="secondary" style={{ fontSize: 12 }}>风险等级</Text>
+                                            <div>
+                                                <Tag color={RISK_LEVEL_LABEL[caseStatus.riskLevel]?.color || 'default'} style={{ fontSize: 13 }}>
+                                                    {RISK_LEVEL_LABEL[caseStatus.riskLevel]?.text || '—'}
+                                                    {caseStatus.riskLevel === 'WARN' && <span style={{ fontSize: 11 }}>（观察中）</span>}
+                                                </Tag>
+                                            </div>
+                                        </Col>
+                                        <Col span={6}>
+                                            <Text type="secondary" style={{ fontSize: 12 }}>出款状态</Text>
+                                            <div>
+                                                <Tag color={caseStatus.stopWithdraw ? 'error' : 'success'} style={{ fontSize: 12 }}>
+                                                    {caseStatus.stopWithdraw ? '🔴 暂停自动出款' : '🟢 出款正常'}
+                                                </Tag>
+                                            </div>
+                                        </Col>
+                                        <Col span={6}>
+                                            <Text type="secondary" style={{ fontSize: 12 }}>事件数量</Text>
+                                            <div><Text strong style={{ fontSize: 14 }}>{detailTimeline.length} 条</Text></div>
+                                        </Col>
+                                    </Row>
+                                </Card>
+
+                                {/* B) 事件时间线 */}
+                                <div>
+                                    <Text strong style={{ fontSize: 15, marginBottom: 12, display: 'block' }}>
+                                        <HistoryOutlined style={{ marginRight: 8 }} />事件时间线
+                                    </Text>
+                                    <div style={{ paddingLeft: 8 }}>
+                                        {detailTimeline.map((item, idx) => {
+                                            const cfg = ACTION_TYPE_CONFIG[item.action_type] || {};
+                                            const IconComp = cfg.icon;
+                                            const isLast = idx === detailTimeline.length - 1;
+                                            return (
+                                                <div key={item.id} style={{ display: 'flex', marginBottom: isLast ? 0 : 20, position: 'relative', paddingLeft: 28 }}>
+                                                    {/* 时间线节点 */}
+                                                    <div style={{ 
+                                                        position: 'absolute', left: 0, top: 4, 
+                                                        width: 14, height: 14, borderRadius: '50%', 
+                                                        background: cfg.color === 'error' ? '#ff4d4f' : cfg.color === 'success' ? '#52c41a' : '#faad14',
+                                                        display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                                    }}>
+                                                        {IconComp && <IconComp style={{ fontSize: 10, color: '#fff' }} />}
+                                                    </div>
+                                                    {/* 连接线 */}
+                                                    {!isLast && <div style={{ position: 'absolute', left: 6, top: 20, width: 2, height: 'calc(100% + 8px)', background: '#e8e8e8' }} />}
+                                                    {/* 内容 */}
+                                                    <div style={{ flex: 1, background: '#fafafa', padding: '10px 14px', borderRadius: 6 }}>
+                                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                                                            <Space size={8}>
+                                                                <Tag color={cfg.color} style={{ fontSize: 12, margin: 0 }}>{cfg.label}</Tag>
+                                                                <Text style={{ fontSize: 12, fontFamily: 'monospace', color: '#8c8c8c' }}>{item.trigger_time}</Text>
+                                                            </Space>
+                                                            <Tag color={item.result === 'SUCCESS' ? 'success' : 'error'} style={{ fontSize: 11, margin: 0 }}>
+                                                                {item.result === 'SUCCESS' ? '成功' : '失败'}
+                                                            </Tag>
+                                                        </div>
+                                                        <div style={{ marginBottom: 6 }}>
+                                                            <Text style={{ fontSize: 13 }}>
+                                                                执行主体: <Text strong>{item.actor_name}</Text>
+                                                                {item.actor_role && <Text type="secondary"> ({item.actor_role})</Text>}
+                                                            </Text>
+                                                        </div>
+                                                        {/* 解封事件特殊展示 */}
+                                                        {item.action_type === 'ADMIN_UNFREEZE' ? (
+                                                            <div style={{ fontSize: 12 }}>
+                                                                <div style={{ marginBottom: 4, color: '#666' }}>
+                                                                    <span>分数: </span>
+                                                                    <Text strong type="danger">{item.snapshot?.score_before}</Text>
+                                                                    <span style={{ margin: '0 6px', color: '#999' }}>→</span>
+                                                                    <Text strong style={{ color: '#fa8c16' }}>{item.snapshot?.score_after}</Text>
+                                                                    <Tag color="warning" style={{ fontSize: 11, margin: '0 0 0 8px', padding: '0 6px' }}>
+                                                                        {RISK_LEVEL_LABEL[item.snapshot?.risk_level_after]?.text || '警告'}
+                                                                    </Tag>
+                                                                </div>
+                                                                <div style={{ marginBottom: 4 }}>
+                                                                    <Tag color="success" style={{ fontSize: 11, margin: 0, padding: '0 6px' }}>🟢 出款正常（已告警）</Tag>
+                                                                </div>
+                                                                <div style={{ padding: '6px 10px', background: '#fffbe6', border: '1px solid #ffe58f', borderRadius: 4, marginTop: 6 }}>
+                                                                    <Text style={{ fontSize: 12, color: '#d48806' }}>
+                                                                        <AlertOutlined style={{ marginRight: 6 }} />
+                                                                        动作影响：恢复出款，进入警告观察期
+                                                                    </Text>
+                                                                </div>
+                                                            </div>
+                                                        ) : (
+                                                            <div style={{ fontSize: 12, color: '#666' }}>
+                                                                <span>分数: <Text strong type={item.snapshot?.score >= 100 ? 'danger' : undefined}>{item.snapshot?.score}</Text></span>
+                                                                <Divider type="vertical" />
+                                                                <Tag color={item.snapshot?.stop_withdraw ? 'error' : 'success'} style={{ fontSize: 11, margin: 0 }}>{item.snapshot?.stop_withdraw ? '🔴 暂停自动出款' : '🟢 出款正常'}</Tag>
+                                                            </div>
+                                                        )}
+                                                        {item.snapshot?.top2_rules?.length > 0 && (
+                                                            <div style={{ fontSize: 12, color: '#8c8c8c', marginTop: 4 }}>
+                                                                Top2: {item.snapshot.top2_rules.map(t => `${t.name} ${t.strength}`).join(' / ')}
+                                                            </div>
+                                                        )}
+                                                        {item.notes && (
+                                                            <div style={{ fontSize: 12, color: '#666', marginTop: 6, paddingTop: 6, borderTop: '1px dashed #e8e8e8' }}>
+                                                                备注: {item.notes}
+                                                            </div>
+                                                        )}
+                                                        {item.evidence_count > 0 && (
+                                                            <div style={{ fontSize: 12, marginTop: 4 }}>
+                                                                <LinkOutlined /> 证据: {item.evidence_count} 个
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+
+                                {/* C) 证据区 */}
+                                {selectedRecord.attachments && selectedRecord.attachments.length > 0 && (
+                                    <div>
+                                        <Text strong style={{ fontSize: 15 }}>
+                                            <LinkOutlined style={{ marginRight: 8 }} />证据附件 ({selectedRecord.attachments.length})
+                                        </Text>
+                                        <div style={{ marginTop: 10 }}>
+                                            {selectedRecord.attachments.map((f, i) => (
+                                                <Tag 
+                                                    key={i} 
+                                                    icon={<LinkOutlined />} 
+                                                    style={{ marginBottom: 6, marginRight: 6, cursor: 'pointer', fontSize: 12, padding: '4px 10px' }} 
+                                                    onClick={() => message.info(`打开附件: ${f}`)}
+                                                >
+                                                    {f}
+                                                </Tag>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </Space>
+                        )}
+                    </Drawer>
+
+                    {/* 备注弹窗 */}
+                    <Modal
+                        title="添加备注"
+                        open={remarkModalVisible}
+                        onOk={confirmRemark}
+                        onCancel={() => { setRemarkModalVisible(false); setRemarkTarget(null); setRemarkInput(''); }}
+                        okText="保存"
+                        cancelText="取消"
+                        width={450}
+                    >
+                        {remarkTarget && (
+                            <div>
+                                <div style={{ marginBottom: 12, padding: '8px 12px', background: '#fafafa', borderRadius: 6 }}>
+                                    <Text type="secondary" style={{ fontSize: 12 }}>
+                                        事件：{ACTION_TYPE_CONFIG[remarkTarget.action_type]?.label} - {remarkTarget.merchant_name}
+                                    </Text>
+                                </div>
+                                <Input.TextArea 
+                                    placeholder="请输入备注内容..." 
+                                    rows={3}
+                                    value={remarkInput}
+                                    onChange={e => setRemarkInput(e.target.value)}
+                                    maxLength={200}
+                                    showCount
+                                />
+                            </div>
+                        )}
+                    </Modal>
+                </div>
+            );
+        };
+
+        // ========== 原 AuditLogsModule 保留兼容 ==========
+        const AuditLogsModule = () => <AuditCenterModule />;
+
+        // ========== 9.3 风险看板模块 (深度美化版) ==========
+        const RiskDashboardModule = () => {
+            return (
+                <div style={{ padding: '8px 0' }}>
+                    <Row gutter={[24, 24]} style={{ marginBottom: 24 }}>
+                        <Col span={8}>
+                            <Card 
+                                className="kpi-card" 
+                                bodyStyle={{ padding: 24, position: 'relative', overflow: 'hidden' }}
+                                style={{ background: 'linear-gradient(135deg, #fff 0%, #fff5f5 100%)', borderLeft: '4px solid #ff4d4f' }}
+                            >
+                                <div className="kpi-icon">{StopOutlined && <StopOutlined style={{ color: '#ff4d4f' }} />}</div>
+                                <Statistic 
+                                    title={<Text style={{ color: '#8c8c8c', fontSize: 13 }}>近30天系统自动熔断</Text>}
+                                    value={MOCK_DASHBOARD_STATS.summary.total_fuses} 
+                                    suffix={<Text style={{ fontSize: 16, color: '#8c8c8c' }}>次</Text>}
+                                    valueStyle={{ color: '#cf1322', fontWeight: 700, fontSize: 36 }} 
+                                />
+                                <div style={{ marginTop: 12, fontSize: 12, color: '#52c41a', display: 'flex', alignItems: 'center', gap: 4 }}>
+                                    {ArrowUpOutlined && <ArrowUpOutlined />} 同比上月增长 12%
+                                </div>
+                            </Card>
+                        </Col>
+                        <Col span={8}>
+                            <Card className="kpi-card" bodyStyle={{ padding: 20 }}>
+                                <div className="kpi-icon">{BarChartOutlined && <BarChartOutlined style={{ color: '#1890ff' }} />}</div>
+                                <Statistic 
+                                    title={<Text style={{ color: '#8c8c8c', fontSize: 13 }}>全量商户风险均分</Text>} 
+                                    value={MOCK_DASHBOARD_STATS.summary.avg_score} 
+                                    precision={1}
+                                    valueStyle={{ color: '#262626', fontWeight: 700 }} 
+                                />
+                                <div style={{ marginTop: 8, fontSize: 12, color: '#bfbfbf' }}>
+                                    处于“安全”水位 (阈值 40)
+                                </div>
+                            </Card>
+                        </Col>
+                        <Col span={8}>
+                            <Card className="kpi-card" bodyStyle={{ padding: 20 }}>
+                                <div className="kpi-icon">{InfoCircleOutlined && <InfoCircleOutlined style={{ color: '#faad14' }} />}</div>
+                                <Statistic 
+                                    title={<Text style={{ color: '#8c8c8c', fontSize: 13 }}>规则误报率 (人工介入)</Text>} 
+                                    value={MOCK_DASHBOARD_STATS.summary.false_positive_rate} 
+                                    valueStyle={{ color: '#faad14', fontWeight: 700 }} 
+                                />
+                                <div style={{ marginTop: 8, fontSize: 12, color: '#8c8c8c' }}>
+                                    已根据反馈优化 3 条规则
+                                </div>
+                            </Card>
+                        </Col>
+                    </Row>
+
+                    <Row gutter={24}>
+                        <Col span={16}>
+                            <Card title={<Space>{LineChartOutlined && <LineChartOutlined />} 风险态势感知 (近7日)</Space>} bordered={false} style={{ borderRadius: 12, boxShadow: '0 4px 12px rgba(0,0,0,0.03)' }}>
+                                <div className="trend-chart-container">
+                                    {MOCK_DASHBOARD_STATS.trends.map((item, i) => (
+                                        <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, flex: 1 }}>
+                                            <Tooltip title={`分值: ${item.score}`}>
+                                                <div 
+                                                    className="trend-bar" 
+                                                    data-value={item.score}
+                                                    style={{ 
+                                                        height: (item.score / 150) * 160, 
+                                                        background: item.score >= 100 ? 'linear-gradient(180deg, #ff4d4f 0%, #ff7875 100%)' : 'linear-gradient(180deg, #1890ff 0%, #69c0ff 100%)'
+                                                    }} 
+                                                />
+                                            </Tooltip>
+                                            <Text type="secondary" style={{ fontSize: 11 }}>{item.date}</Text>
+                                        </div>
+                                    ))}
+                                    {/* 辅助线 */}
+                                    <div style={{ position: 'absolute', left: 0, right: 0, top: 160 - (100 / 150) * 160 + 24, borderTop: '1px dashed #ffccc7', zIndex: 0 }}>
+                                        <span style={{ position: 'absolute', right: 8, top: -18, fontSize: 10, color: '#ff4d4f', opacity: 0.6 }}>熔断阈值线</span>
+                                    </div>
+                                </div>
+                            </Card>
+                        </Col>
+                        <Col span={8}>
+                            <Card title={<Space>{BarChartOutlined && <BarChartOutlined />} 熔断频次排行</Space>} bordered={false} style={{ borderRadius: 12, boxShadow: '0 4px 12px rgba(0,0,0,0.03)' }}>
+                                <Table 
+                                    size="small"
+                                    pagination={false}
+                                    dataSource={MOCK_DASHBOARD_STATS.ranking}
+                                    columns={[
+                                        { title: '商户名', dataIndex: 'name', render: v => <Text strong>{v}</Text> },
+                                        { title: '频次', dataIndex: 'count', align: 'right', render: v => <Text type="danger">{v}次</Text> },
+                                        { title: '异常占比', dataIndex: 'rate', align: 'right', render: v => <Text type="secondary">{v}</Text> }
+                                    ]}
+                                />
+                                <div style={{ marginTop: 16, textAlign: 'center' }}>
+                                    <Button size="small" type="link">查看全量商户排行 →</Button>
+                                </div>
+                            </Card>
+                        </Col>
+                    </Row>
+                </div>
+            );
+        };
+
+        // 风险等级徽章（带图标）
+        const RiskLevelBadge = ({ level, showIcon = true }) => {
+            if (!level) return null;
+            const config = DEFAULT_THRESHOLDS[level.toUpperCase()] || DEFAULT_THRESHOLDS.NORMAL;
+            const IconComponent = config.icon;
+            return (
+                <span className={`level-badge level-${level.toLowerCase()}`}>
+                    {showIcon && IconComponent && <IconComponent style={{ marginRight: 4 }} />}
+                    {config.label}
+                </span>
+            );
+        };
+        
+        // 风险分数显示组件（带仪表盘效果）- 显示实际分数
+        const RiskScoreGauge = ({ score, level }) => {
+            if (!level) return <Text strong>{score}</Text>;
+            const config = DEFAULT_THRESHOLDS[level.toUpperCase()] || DEFAULT_THRESHOLDS.NORMAL;
+            const displayScore = score; // 直接显示实际分数
+            const percent = Math.min((score / 100) * 100, 100);
+            const strokeColor = score >= 80 ? '#cf1322' : score >= 60 ? '#d46b08' : score >= 40 ? '#d48806' : '#1890ff';
+            const riskStatus = getRiskStatus(score);
+            
+            return (
+                <Tooltip title={score >= 100 ? `分数 ≥100，熔断状态` : null}>
+                    <div className="score-gauge">
+                        <div className="score-gauge-inner">
+                            <Progress 
+                                type="circle" 
+                                percent={percent} 
+                                size={48}
+                                strokeWidth={6}
+                                strokeColor={strokeColor}
+                                trailColor="#f0f0f0"
+                                format={() => (
+                                    <span style={{ fontSize: score > 100 ? 12 : 14, fontWeight: 600, color: strokeColor }}>
+                                        {displayScore}
+                                    </span>
+                                )}
+                            />
+                        </div>
+                        <div className="score-gauge-label">
+                            <Tag color={riskStatus.color} style={{ margin: 0, fontSize: 11 }}>{riskStatus.label}</Tag>
+                        </div>
+                    </div>
+                </Tooltip>
+            );
+        };
+
+        // 规则原因标签
+        const RuleReasonTag = ({ reason }) => (
+            <Tooltip title={`强度: ${reason.strength_text}`}>
+                <Tag color="volcano" style={{ marginBottom: 4 }}>
+                    {reason.rule_name} <Text strong>+{reason.add_score}</Text>
+                </Tag>
+            </Tooltip>
+        );
+
+        // ========== 主页面 ==========
+
+        // === 顶部概览统计卡片组件 ===
+        const OverviewHeader = ({ data }) => {
+            const stats = useMemo(() => {
+                const counts = { fuse: 0, limit: 0, warn: 0, normal: 0 };
+                data.forEach(m => {
+                    const level = m.risk_level?.toLowerCase();
+                    if (counts[level] !== undefined) counts[level]++;
+                });
+                return counts;
+            }, [data]);
+            
+            const [currentTime, setCurrentTime] = useState(new Date().toLocaleString('zh-CN'));
+            
+            useEffect(() => {
+                const timer = setInterval(() => {
+                    setCurrentTime(new Date().toLocaleString('zh-CN'));
+                }, 1000);
+                return () => clearInterval(timer);
+            }, []);
+            
+            return (
+                <div className="overview-header">
+                    <Row align="middle" justify="space-between" style={{ marginBottom: 24 }}>
+                        <Col>
+                            <div className="overview-title">商户风控监控中心</div>
+                        </Col>
+                        <Col>
+                            <Space size={16}>
+                                <div className="live-indicator">
+                                    <span className="live-dot"></span>
+                                    实时监控中
+                                </div>
+                                <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 13 }}>
+                                    {currentTime}
+                                </Text>
+                            </Space>
+                        </Col>
+                    </Row>
+                    <div className="stat-cards">
+                        <div className="stat-card fuse">
+                            <div className="stat-card-icon">{StopOutlined && <StopOutlined />}</div>
+                            <div className="stat-card-value">{stats.fuse}</div>
+                            <div className="stat-card-label">熔断中</div>
+                        </div>
+                        <div className="stat-card limit">
+                            <div className="stat-card-icon">{ClockCircleOutlined && <ClockCircleOutlined />}</div>
+                            <div className="stat-card-value">{stats.limit}</div>
+                            <div className="stat-card-label">延迟观察中</div>
+                        </div>
+                        <div className="stat-card warn">
+                            <div className="stat-card-icon">{WarningOutlined && <WarningOutlined />}</div>
+                            <div className="stat-card-value">{stats.warn}</div>
+                            <div className="stat-card-label">已告警</div>
+                        </div>
+                        <div className="stat-card normal">
+                            <div className="stat-card-icon">{CheckCircleOutlined && <CheckCircleOutlined />}</div>
+                            <div className="stat-card-value">{stats.normal}</div>
+                            <div className="stat-card-label">正常</div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const App = () => {
+            const [loading, setLoading] = useState(false);
+            const [data, setData] = useState(MOCK_MERCHANTS);
+            const [filterOnlyAction, setFilterOnlyAction] = useState(false);
+            const [autoRefresh, setAutoRefresh] = useState('Off');
+            
+            // 阈值配置状态
+            const [riskThresholds, setRiskThresholds] = useState(DEFAULT_THRESHOLDS);
+            const [ruleConfigs, setRuleConfigs] = useState(DEFAULT_RULE_CONFIGS);
+            const [thresholdModalVisible, setThresholdModalVisible] = useState(false);
+            const [configActiveTab, setConfigActiveTab] = useState('threshold');
+            const [thresholdForm] = Form.useForm();
+            const [ruleForm] = Form.useForm();
+            
+            // 抽屉状态
+            const [drawerVisible, setDrawerVisible] = useState(false);
+            const [selectedMerchant, setSelectedMerchant] = useState(null);
+            
+            // 弹窗状态
+            const [fuseModalVisible, setFuseModalVisible] = useState(false);
+            const [unfreezeModalVisible, setUnfreezeModalVisible] = useState(false);
+            const [targetId, setTargetId] = useState(null);
+
+            const [form] = Form.useForm();
+            const [fuseForm] = Form.useForm();
+            const [unfreezeForm] = Form.useForm();
+            
+            // 打开阈值配置
+            const openThresholdConfig = () => {
+                thresholdForm.setFieldsValue({
+                    normalMax: riskThresholds.NORMAL.max,
+                    warnMin: riskThresholds.WARN.min,
+                    warnMax: riskThresholds.WARN.max,
+                    limitMin: riskThresholds.LIMIT.min,
+                    limitMax: riskThresholds.LIMIT.max,
+                    fuseMin: riskThresholds.FUSE.min
+                });
+                // 设置规则表单初始值
+                const ruleFormValues = {};
+                Object.keys(ruleConfigs).forEach(key => {
+                    const rule = ruleConfigs[key];
+                    ruleFormValues[`${key}_enabled`] = rule.enabled;
+                    ruleFormValues[`${key}_weight`] = rule.weight;
+                    if (rule.scoreMap) {
+                        Object.keys(rule.scoreMap).forEach(scoreKey => {
+                            ruleFormValues[`${key}_score_${scoreKey.replace(/[^a-zA-Z0-9]/g, '_')}`] = rule.scoreMap[scoreKey];
+                        });
+                    }
+                });
+                ruleForm.setFieldsValue(ruleFormValues);
+                setThresholdModalVisible(true);
+            };
+            
+            // 保存配置
+            const saveThresholdConfig = () => {
+                if (configActiveTab === 'threshold') {
+                    thresholdForm.validateFields().then(values => {
+                        setRiskThresholds({
+                            NORMAL: { ...riskThresholds.NORMAL, max: values.normalMax },
+                            WARN: { ...riskThresholds.WARN, min: values.warnMin, max: values.warnMax },
+                            LIMIT: { ...riskThresholds.LIMIT, min: values.limitMin, max: values.limitMax },
+                            FUSE: { ...riskThresholds.FUSE, min: values.fuseMin }
+                        });
+                        setThresholdModalVisible(false);
+                        message.success('阈值配置已更新');
+                    });
+                } else {
+                    ruleForm.validateFields().then(values => {
+                        const newRuleConfigs = { ...ruleConfigs };
+                        Object.keys(newRuleConfigs).forEach(key => {
+                            newRuleConfigs[key] = {
+                                ...newRuleConfigs[key],
+                                enabled: values[`${key}_enabled`],
+                                weight: values[`${key}_weight`]
+                            };
+                            // 更新分数
+                            if (newRuleConfigs[key].scoreMap) {
+                                const newScoreMap = {};
+                                Object.keys(newRuleConfigs[key].scoreMap).forEach(scoreKey => {
+                                    const formKey = `${key}_score_${scoreKey.replace(/[^a-zA-Z0-9]/g, '_')}`;
+                                    newScoreMap[scoreKey] = values[formKey] || newRuleConfigs[key].scoreMap[scoreKey];
+                                });
+                                newRuleConfigs[key].scoreMap = newScoreMap;
+                            }
+                        });
+                        setRuleConfigs(newRuleConfigs);
+                        setThresholdModalVisible(false);
+                        message.success('规则配置已更新');
+                    });
+                }
+            };
+
+            // 搜索
+            const handleSearch = () => {
+                setLoading(true);
+                setTimeout(() => {
+                    let filtered = [...MOCK_MERCHANTS];
+                    if (filterOnlyAction) {
+                        filtered = filtered.filter(m => ['Limit', 'Fuse'].includes(m.risk_level));
+                    }
+                    setData(filtered);
+                    setLoading(false);
+                }, 300);
+            };
+
+            // 显示详情
+            const showDetail = (id) => {
+                setSelectedMerchant(getMockDetail(id));
+                setDrawerVisible(true);
+            };
+
+            // 熔断操作
+            const handleFuseClick = (id) => {
+                setTargetId(id);
+                fuseForm.resetFields();
+                setFuseModalVisible(true);
+            };
+
+            const submitFuse = async () => {
+                try {
+                    const values = await fuseForm.validateFields();
+                    setLoading(true);
+                    // Mock: POST /api/risk/merchant/{id}/fuse
+                    setTimeout(() => {
+                        message.success(`商户 ${targetId} 已熔断，暂停自动出款`);
+                        setFuseModalVisible(false);
+                        setDrawerVisible(false);
+                        handleSearch();
+                        setLoading(false);
+                    }, 500);
+                } catch (e) {}
+            };
+
+            // 解封操作
+            const handleUnfreezeClick = (id) => {
+                setTargetId(id);
+                unfreezeForm.resetFields();
+                setUnfreezeModalVisible(true);
+            };
+
+            const submitUnfreeze = async () => {
+                try {
+                    const values = await unfreezeForm.validateFields();
+                    setLoading(true);
+                    // Mock: POST /api/risk/merchant/{id}/unfreeze
+                    setTimeout(() => {
+                        const strategyText = values.strategy === 'recovering' ? '延迟观察期' : '直接恢复正常';
+                        message.success(`已恢复出款，策略：${strategyText}`);
+                        setUnfreezeModalVisible(false);
+                        setDrawerVisible(false);
+                        handleSearch();
+                        setLoading(false);
+                    }, 500);
+                } catch (e) {}
+            };
+
+            // 排序：Fuse > Limit > Warn > Normal，同级按分数降序
+            const sortedData = useMemo(() => {
+                const levelOrder = { Fuse: 4, Limit: 3, Warn: 2, Normal: 1 };
+                return [...data].sort((a, b) => {
+                    const diff = levelOrder[b.risk_level] - levelOrder[a.risk_level];
+                    return diff !== 0 ? diff : b.risk_score - a.risk_score;
+                });
+            }, [data]);
+
+            // 表格列定义
+            const columns = [
+                {
+                    title: '商户',
+                    key: 'merchant',
+                    width: 160,
+                    render: (_, r) => (
+                        <Space direction="vertical" size={2}>
+                            <Text strong style={{ fontSize: 15 }}>{r.merchant_name}</Text>
+                            <Space size={4}>
+                                <Text type="secondary" style={{ fontSize: 13, fontFamily: 'monospace' }}>{r.merchant_id}</Text>
+                                <CopyOutlined 
+                                    style={{ fontSize: 10, color: '#bfbfbf', cursor: 'pointer' }} 
+                                    onClick={() => { navigator.clipboard.writeText(r.merchant_id); message.success('已复制'); }} 
+                                />
+                            </Space>
+                        </Space>
+                    )
+                },
+                {
+                    title: '风险分',
+                    key: 'score',
+                    width: 100,
+                    sorter: (a, b) => a.risk_score - b.risk_score,
+                    render: (_, r) => <RiskScoreGauge score={r.risk_score} level={r.risk_level} />
+                },
+                {
+                    title: '最后触发',
+                    dataIndex: 'last_trigger_at',
+                    key: 'time',
+                    width: 150,
+                    render: (v) => {
+                        const [date, time] = v.split(' ');
+                        return (
+                            <Space direction="vertical" size={0}>
+                                <Text className="timestamp" style={{ fontSize: 13, color: '#595959' }}>{date}</Text>
+                                <Text className="timestamp" style={{ fontSize: 12, color: '#bfbfbf' }}>{time}</Text>
+                            </Space>
+                        );
+                    }
+                },
+                {
+                    title: '处置动作',
+                    key: 'actions',
+                    width: 160,
+                    render: (_, r) => {
+                        const riskStatus = getRiskStatus(r.risk_score);
+                        const releaseCondition = RELEASE_CONDITIONS[riskStatus.key];
+                        
+                        // 根据风险态显示不同的处置动作
+                        if (riskStatus.key === 'FUSE') {
+                            // 熔断状态
+                            return (
+                                <Tooltip title={<div style={{ fontSize: 12 }}><div>解除条件：{releaseCondition}</div></div>}>
+                                    <Space direction="vertical" size={2} style={{ cursor: 'help' }}>
+                                        <Tag icon={<StopOutlined />} color="error" style={{ margin: 0, padding: '2px 10px', borderRadius: 12 }}>暂停自动出款</Tag>
+                                        <Text type="secondary" style={{ fontSize: 11 }}>需人工解除</Text>
+                                    </Space>
+                                </Tooltip>
+                            );
+                        }
+                        
+                        if (riskStatus.key === 'LIMIT') {
+                            // 延迟处理
+                            return (
+                                <Tooltip title={<div style={{ fontSize: 12 }}>进入观察期，出款将延迟处理（约30分钟）<br/>解除条件：{releaseCondition}</div>}>
+                                    <Tag icon={<ClockCircleOutlined />} color="orange" style={{ margin: 0, padding: '2px 10px', borderRadius: 12, cursor: 'help' }}>出款延迟中</Tag>
+                                </Tooltip>
+                            );
+                        }
+                        
+                        if (riskStatus.key === 'WARN') {
+                            // 已告警：出款正常 + 已告警 tag
+                            return (
+                                <Space size={4}>
+                                    <Tag icon={<CheckCircleOutlined />} color="success" style={{ margin: 0, padding: '2px 10px', borderRadius: 12 }}>出款正常</Tag>
+                                    <Tag color="gold" style={{ margin: 0, padding: '2px 6px', borderRadius: 12, fontSize: 11 }}>已告警</Tag>
+                                </Space>
+                            );
+                        }
+                        
+                        // 正常
+                        return (
+                            <Tag icon={<CheckCircleOutlined />} color="success" style={{ margin: 0, padding: '2px 10px', borderRadius: 12 }}>出款正常</Tag>
+                        );
+                    }
+                },
+                {
+                    title: '操作',
+                    key: 'op',
+                    width: 180,
+                    fixed: 'right',
+                    render: (_, r) => {
+                        // 二次确认弹窗
+                        const showConfirm = (title, okText, okDanger, onOk) => {
+                            Modal.confirm({
+                                title,
+                                icon: <ExclamationCircleOutlined />,
+                                content: (
+                                    <Form layout="vertical" style={{ marginTop: 16 }}>
+                                        <Form.Item label="操作原因" required>
+                                            <Select placeholder="请选择原因" style={{ width: '100%' }}>
+                                                <Option value="false_positive">误报</Option>
+                                                <Option value="confirmed_risk">确认风险</Option>
+                                                <Option value="manual_dispose">人工处置</Option>
+                                                <Option value="policy_adjust">策略调整</Option>
+                                                <Option value="other">其他</Option>
+                                            </Select>
+                                        </Form.Item>
+                                        <Form.Item label="备注（选填）">
+                                            <Input.TextArea rows={2} placeholder="补充说明" />
+                                        </Form.Item>
+                                    </Form>
+                                ),
+                                okText,
+                                okButtonProps: okDanger ? { danger: true } : {},
+                                cancelText: '取消',
+                                onOk
+                            });
+                        };
+                        
+                        return (
+                            <Space size={4}>
+                                <Button 
+                                    type="primary" 
+                                    size="small" 
+                                    icon={<FileSearchOutlined />}
+                                    onClick={() => showDetail(r.merchant_id)}
+                                >
+                                    详情
+                                </Button>
+                                {/* 暂停出款按钮 - 仅正常和已告警状态显示 */}
+                                {r.risk_level !== 'Fuse' && r.risk_level !== 'Limit' && r.permissions.can_fuse && (
+                                    <Button 
+                                        size="small" 
+                                        danger
+                                        icon={<StopOutlined />}
+                                        onClick={() => showConfirm('确认暂停自动出款', '确认暂停', true, () => handleFuseClick(r.merchant_id))}
+                                    >
+                                        暂停出款
+                                    </Button>
+                                )}
+                                {/* 解除延迟按钮 - 仅延迟观察状态显示 */}
+                                {r.risk_level === 'Limit' && r.permissions.can_unfreeze && (
+                                    <Button 
+                                        size="small"
+                                        icon={<ClockCircleOutlined />}
+                                        style={{ color: '#1890ff', borderColor: '#1890ff' }}
+                                        onClick={() => showConfirm('确认解除延迟观察', '确认解除', false, () => { message.success('已解除延迟观察'); })}
+                                    >
+                                        解除延迟
+                                    </Button>
+                                )}
+                                {/* 解封按钮 - 仅熔断状态显示 */}
+                                {r.risk_level === 'Fuse' && r.permissions.can_unfreeze && (
+                                    <Tooltip title="解封后将进入观察状态，出款将逐步恢复">
+                                        <Button 
+                                            size="small"
+                                            icon={<UnlockOutlined />}
+                                            style={{ color: '#52c41a', borderColor: '#52c41a' }}
+                                            onClick={() => handleUnfreezeClick(r.merchant_id)}
+                                        >
+                                            解封
+                                        </Button>
+                                    </Tooltip>
+                                )}
+                            </Space>
+                        );
+                    }
+                }
+            ];
+
+            const [activeTab, setActiveTab] = useState('monitor');
+
+            // 列表主视图组件
+            const MonitoringModule = () => (
+                <>
+                    <Card className="filter-bar" bodyStyle={{ padding: 0 }}>
+                        <Form form={form} layout="inline" style={{ flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
+                            <Form.Item name="merchant" label={<Text type="secondary" style={{ fontSize: 14 }}>商户</Text>}>
+                                <Select showSearch placeholder="ID/名称" style={{ width: 160 }} allowClear>
+                                    {MOCK_MERCHANTS.map(m => <Option key={m.merchant_id} value={m.merchant_id}>{m.merchant_name}</Option>)}
+                                </Select>
+                            </Form.Item>
+                            <Form.Item name="level" label={<Text type="secondary" style={{ fontSize: 14 }}>风险等级</Text>}>
+                                <Select placeholder="全部" style={{ width: 110 }} allowClear>
+                                    <Option value="Normal">正常</Option>
+                                    <Option value="Warn">已告警</Option>
+                                    <Option value="Limit">延迟观察</Option>
+                                    <Option value="Fuse">熔断</Option>
+                                </Select>
+                            </Form.Item>
+                            <Form.Item label={<Text type="secondary" style={{ fontSize: 14 }}>分数范围</Text>}>
+                                <Space>
+                                    <Form.Item name="min_score" noStyle><Input style={{ width: 56, textAlign: 'center' }} placeholder="0" /></Form.Item>
+                                    <Text type="secondary">~</Text>
+                                    <Form.Item name="max_score" noStyle><Input style={{ width: 56, textAlign: 'center' }} placeholder="100" /></Form.Item>
+                                </Space>
+                            </Form.Item>
+                            <Form.Item name="time" label={<Text type="secondary" style={{ fontSize: 14 }}>触发时间</Text>}>
+                                <Select defaultValue="24h" style={{ width: 85 }}>
+                                    <Option value="1h">近 1h</Option>
+                                    <Option value="24h">近 24h</Option>
+                                    <Option value="7d">近 7d</Option>
+                                </Select>
+                            </Form.Item>
+                            <Form.Item>
+                                <Space size={8}>
+                                    <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>查询</Button>
+                                    <Button icon={<ReloadOutlined />} onClick={() => { form.resetFields(); handleSearch(); }}>重置</Button>
+                                </Space>
+                            </Form.Item>
+                            <div style={{ flex: 1 }} />
+                            <Form.Item style={{ marginRight: 0 }}>
+                                <Space size={20}>
+                                    <Space size={8}>
+                                        <Text type="secondary" style={{ fontSize: 14 }}>只看需处理</Text>
+                                        <Switch 
+                                            size="small" 
+                                            checked={filterOnlyAction} 
+                                            onChange={v => { setFilterOnlyAction(v); }}
+                                            style={{ background: filterOnlyAction ? '#1890ff' : undefined }}
+                                        />
+                                    </Space>
+                                    <Divider type="vertical" style={{ height: 24, margin: 0 }} />
+                                    <Space size={8}>
+                                        <Text type="secondary" style={{ fontSize: 14 }}>自动刷新</Text>
+                                        <Select size="small" value={autoRefresh} onChange={setAutoRefresh} style={{ width: 75 }}>
+                                            <Option value="Off">关闭</Option>
+                                            <Option value="5s">5秒</Option>
+                                            <Option value="10s">10秒</Option>
+                                            <Option value="30s">30秒</Option>
+                                        </Select>
+                                    </Space>
+                                    <Divider type="vertical" style={{ height: 24, margin: 0 }} />
+                                    <Button 
+                                        icon={<SettingOutlined />} 
+                                        onClick={openThresholdConfig}
+                                        style={{ fontSize: 14 }}
+                                    >
+                                        配置
+                                    </Button>
+                                </Space>
+                            </Form.Item>
+                        </Form>
+                    </Card>
+
+                    <Card className="main-card" bodyStyle={{ padding: 0 }}>
+                        <Table
+                            columns={columns}
+                            dataSource={sortedData}
+                            rowKey="merchant_id"
+                            loading={loading}
+                            pagination={{ 
+                                pageSize: 10, 
+                                showSizeChanger: true, 
+                                showTotal: t => <Text type="secondary">共 <Text strong>{t}</Text> 条记录</Text>,
+                                style: { padding: '12px 16px', margin: 0 }
+                            }}
+                            scroll={{ x: 1200 }}
+                            rowClassName={(r) => DEFAULT_THRESHOLDS[r.risk_level.toUpperCase()]?.bgClass || ''}
+                        />
+                    </Card>
+                </>
+            );
+
+            // 侧边栏组件
+            const Sidebar = () => (
+                <div className="sidebar">
+                    <div className="sidebar-logo">
+                        <h1>VVOSS Admin</h1>
+                        <span>7dd16a0</span>
+                    </div>
+                    
+                    <div className="sidebar-menu">
+                        {/* 业务管理 */}
+                        <div className="menu-group">
+                            <div className="menu-group-title">业务管理</div>
+                            <div className="menu-item">
+                                <span className="menu-icon">{AppstoreOutlined && <AppstoreOutlined />}</span>
+                                平台管理
+                            </div>
+                            <div className="menu-item">
+                                <span className="menu-icon">{ShopOutlined && <ShopOutlined />}</span>
+                                商户管理
+                            </div>
+                            <div className="menu-item">
+                                <span className="menu-icon">{TeamOutlined && <TeamOutlined />}</span>
+                                客户管理
+                            </div>
+                            <div className="menu-item">
+                                <span className="menu-icon">{ApiOutlined && <ApiOutlined />}</span>
+                                激活平台
+                            </div>
+                            <div className="menu-item">
+                                <span className="menu-icon">{ThunderboltOutlined && <ThunderboltOutlined />}</span>
+                                能量平台
+                            </div>
+                        </div>
+                        
+                        {/* 资金与交易 */}
+                        <div className="menu-group">
+                            <div className="menu-group-title">资金与交易</div>
+                            <div className="menu-item">
+                                <span className="menu-icon">{WalletOutlined && <WalletOutlined />}</span>
+                                钱包管理
+                            </div>
+                            <div className="menu-item">
+                                <span className="menu-icon">{SwapOutlined && <SwapOutlined />}</span>
+                                链上交易
+                            </div>
+                            <div className="menu-item">
+                                <span className="menu-icon">{BankOutlined && <BankOutlined />}</span>
+                                出款记录
+                            </div>
+                            <div className="menu-item">
+                                <span className="menu-icon">{TransactionOutlined && <TransactionOutlined />}</span>
+                                TRON委托
+                            </div>
+                            <div className="menu-item">
+                                <span className="menu-icon">{SafetyCertificateOutlined && <SafetyCertificateOutlined />}</span>
+                                TRON质押
+                            </div>
+                            <div className="menu-item">
+                                <span className="menu-icon">{CheckCircleOutlined && <CheckCircleOutlined />}</span>
+                                TRON投票
+                            </div>
+                            <div className="menu-item">
+                                <span className="menu-icon">{DashboardOutlined && <DashboardOutlined />}</span>
+                                转账费用
+                            </div>
+                            <div className="menu-item">
+                                <span className="menu-icon">{BarChartOutlined && <BarChartOutlined />}</span>
+                                统计报表
+                            </div>
+                            <div className="menu-item">
+                                <span className="menu-icon">{SearchOutlined && <SearchOutlined />}</span>
+                                链上余额查询
+                            </div>
+                        </div>
+                        
+                        {/* 任务与监控 */}
+                        <div className="menu-group">
+                            <div className="menu-group-title">任务与监控</div>
+                            <div className="menu-item">
+                                <span className="menu-icon">{DatabaseOutlined && <DatabaseOutlined />}</span>
+                                移动设备
+                            </div>
+                            <div className="menu-item">
+                                <span className="menu-icon">{ClockCircleOutlined && <ClockCircleOutlined />}</span>
+                                移动任务
+                            </div>
+                            <div className="menu-item">
+                                <span className="menu-icon">{GlobalOutlined && <GlobalOutlined />}</span>
+                                区块扫描
+                            </div>
+                            <div className="menu-item">
+                                <span className="menu-icon">{MonitorOutlined && <MonitorOutlined />}</span>
+                                链同步状态
+                            </div>
+                        </div>
+                        
+                        {/* 系统与权限 */}
+                        <div className="menu-group">
+                            <div className="menu-group-title">系统与权限</div>
+                            <div className="menu-item">
+                                <span className="menu-icon">{UserOutlined && <UserOutlined />}</span>
+                                账户管理
+                            </div>
+                            <div className="menu-item">
+                                <span className="menu-icon">{ShopOutlined && <ShopOutlined />}</span>
+                                商户账号
+                            </div>
+                            <div className="menu-item">
+                                <span className="menu-icon">{LockOutlined && <LockOutlined />}</span>
+                                角色管理
+                            </div>
+                            <div className="menu-item">
+                                <span className="menu-icon">{StopOutlined && <StopOutlined />}</span>
+                                黑名单管理
+                            </div>
+                            <div className="menu-item">
+                                <span className="menu-icon">{AlertOutlined && <AlertOutlined />}</span>
+                                风险检测记录
+                            </div>
+                            <div className="menu-item active">
+                                <span className="menu-icon">{MonitorOutlined && <MonitorOutlined />}</span>
+                                风控监控中心
+                            </div>
+                            <div className="menu-item">
+                                <span className="menu-icon">{FileTextOutlined && <FileTextOutlined />}</span>
+                                操作日志
+                            </div>
+                            <div className="menu-item">
+                                <span className="menu-icon">{BellOutlined && <BellOutlined />}</span>
+                                推送配置管理
+                            </div>
+                            <div className="menu-item">
+                                <span className="menu-icon">{GlobalOutlined && <GlobalOutlined />}</span>
+                                区块链配置
+                            </div>
+                            <div className="menu-item">
+                                <span className="menu-icon">{SettingOutlined && <SettingOutlined />}</span>
+                                系统配置
+                            </div>
+                        </div>
+                        
+                        {/* 开发工具 */}
+                        <div className="menu-group">
+                            <div className="menu-group-title">开发工具</div>
+                            <div className="menu-item">
+                                <span className="menu-icon">{ApiOutlined && <ApiOutlined />}</span>
+                                API 测试器
+                            </div>
+                            <div className="menu-item">
+                                <span className="menu-icon">{FileSearchOutlined && <FileSearchOutlined />}</span>
+                                回调日志
+                            </div>
+                            <div className="menu-item">
+                                <span className="menu-icon">{FileTextOutlined && <FileTextOutlined />}</span>
+                                OpenAPI 日志
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div className="sidebar-footer">
+                        <div className="sidebar-user">
+                            <div className="sidebar-user-avatar">L</div>
+                            <div className="sidebar-user-info">
+                                <h4>laoluan</h4>
+                                <span>管理员</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            return (
+                <div className="app-layout">
+                    <Sidebar />
+                    <div className="main-content">
+                        {/* 面包屑 */}
+                        <div className="main-header">
+                            <div className="breadcrumb">
+                                <a href="#">系统与权限</a>
+                                <RightOutlined style={{ fontSize: 10 }} />
+                                <span>风控监控中心</span>
+                            </div>
+{/* 右上角图标已移除 */}
+                        </div>
+                        
+                        {/* 页面标题 */}
+                        <div style={{ marginBottom: 16 }}>
+                            <Title level={4} style={{ margin: 0 }}>风控监控中心</Title>
+                        </div>
+                        
+                        {/* Tab 导航 */}
+                        <Tabs 
+                            className="custom-tabs"
+                            activeKey={activeTab} 
+                            onChange={setActiveTab}
+                            items={[
+                                { key: 'monitor', label: <Space><ThunderboltOutlined />实时风险监控</Space> },
+                                { key: 'audit', label: <Space><HistoryOutlined />风控审计中心</Space> }
+                            ]}
+                        />
+
+                        <div style={{ marginTop: 8 }}>
+                            {activeTab === 'monitor' && <MonitoringModule />}
+                            {activeTab === 'audit' && <Card className="main-card" bodyStyle={{ padding: 0 }}><AuditLogsModule /></Card>}
+                        </div>
+
+                    {/* === C. 详情抽屉 === */}
+                    <Drawer
+                        title={<Space><SafetyCertificateOutlined />风险分析详情</Space>}
+                        placement="right"
+                        width="48%"
+                        onClose={() => setDrawerVisible(false)}
+                        open={drawerVisible}
+                        extra={
+                            selectedMerchant && (
+                                <Space>
+                                    {/* 延迟观察状态：不显示恢复按钮，仅提示自动恢复 */}
+                                    {selectedMerchant.risk_level === 'Limit' && (
+                                        <Tag color="orange" style={{ margin: 0 }}>观察中（约30分钟自动恢复）</Tag>
+                                    )}
+                                    {/* 熔断状态：显示解封按钮 */}
+                                    {selectedMerchant.risk_level === 'Fuse' && (
+                                        <Tooltip title="解封后将进入观察状态，出款将逐步恢复">
+                                            <Button icon={<UnlockOutlined />} 
+                                                disabled={!selectedMerchant.permissions.can_unfreeze}
+                                                onClick={() => handleUnfreezeClick(selectedMerchant.merchant_id)}>
+                                                解封
+                                            </Button>
+                                        </Tooltip>
+                                    )}
+                                    {/* 非暂停状态：显示暂停出款按钮 */}
+                                    {selectedMerchant.risk_level !== 'Fuse' && (
+                                        <Button type="primary" danger icon={<StopOutlined />} 
+                                            disabled={!selectedMerchant.permissions.can_fuse}
+                                            onClick={() => handleFuseClick(selectedMerchant.merchant_id)}>
+                                            暂停出款
+                                        </Button>
+                                    )}
+                                </Space>
+                            )
+                        }
+                    >
+                        {selectedMerchant && (
+                            <Space direction="vertical" size="large" style={{ width: '100%' }}>
+                                {/* C1. 状态卡 */}
+                                <div className="status-card">
+                                    {/* 上半部分：商户 | 风险分 | 风险等级 */}
+                                    <Row gutter={24} style={{ marginBottom: 16 }}>
+                                        <Col span={8}>
+                                            <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 6 }}>商户</Text>
+                                            <Text strong style={{ fontSize: 16 }}>{selectedMerchant.merchant_name}</Text>
+                                            <Text type="secondary" style={{ fontSize: 12, marginLeft: 6 }}>({selectedMerchant.merchant_id})</Text>
+                                        </Col>
+                                        <Col span={8} style={{ textAlign: 'center' }}>
+                                            <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 6 }}>当前风险分</Text>
+                                            <Text style={{ 
+                                                fontSize: 32, 
+                                                fontWeight: 700, 
+                                                color: selectedMerchant.risk_score >= 100 ? '#cf1322' : selectedMerchant.risk_score >= 70 ? '#d46b08' : '#d48806'
+                                            }}>
+                                                {selectedMerchant.risk_score}
+                                            </Text>
+                                        </Col>
+                                        <Col span={8} style={{ textAlign: 'right' }}>
+                                            <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 6 }}>风险等级</Text>
+                                            <RiskLevelBadge level={selectedMerchant.risk_level} />
+                                        </Col>
+                                    </Row>
+                                    {/* 下半部分：状态标签 */}
+                                    <Row gutter={24} style={{ borderTop: '1px solid #f0f0f0', paddingTop: 12 }}>
+                                        <Col span={12}>
+                                            <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>出款状态</Text>
+                                            <Tag color={selectedMerchant.actions.stop_withdraw ? 'error' : 'success'} style={{ margin: 0 }}>
+                                                {selectedMerchant.actions.stop_withdraw ? '已停止' : '正常'}
+                                            </Tag>
+                                        </Col>
+                                        <Col span={12} style={{ textAlign: 'right' }}>
+                                            <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>最后触发</Text>
+                                            <Text>{selectedMerchant.last_trigger_at}</Text>
+                                        </Col>
+                                    </Row>
+                                </div>
+
+{/* 风险分析内容（风险解释 + 规则命中 + 4小时趋势） */}
+                                <div>
+                                    {/* C3. 人话解释（关键！） */}
+                                    <div className="explain-block" style={{ marginBottom: 20 }}>
+                                        <Paragraph style={{ fontSize: 14, lineHeight: 2 }}>
+                                            {selectedMerchant.explain_text.split('**').map((part, i) => 
+                                                i % 2 === 1 ? <Text strong key={i} type="danger">{part}</Text> : part
+                                            )}
+                                        </Paragraph>
+                                    </div>
+
+                                    {/* 规则命中明细 */}
+                                    <Title level={5} style={{ marginBottom: 12 }}>
+                                        <HistoryOutlined style={{ marginRight: 8 }} />
+                                        规则命中明细（2条规则）
+                                    </Title>
+                                    <Collapse accordion ghost defaultActiveKey={selectedMerchant.rules_breakdown[0]?.rule_key}>
+                                        {selectedMerchant.rules_breakdown.map(rule => (
+                                            <Panel
+                                                key={rule.rule_key}
+                                                className={`rule-card ${rule.hit ? 'rule-card-hit' : 'rule-card-miss'}`}
+                                                header={
+                                                    <Row align="middle" style={{ width: '100%' }}>
+                                                        <Col span={12}>
+                                                            <Badge status={rule.hit ? 'error' : 'default'} />
+                                                            <Text strong={rule.hit}>{rule.rule_name}</Text>
+                                                        </Col>
+                                                        <Col span={12}>
+                                                            <Text type="secondary">命中强度: </Text>
+                                                            <Text strong={rule.hit}>{rule.strength_value > 0 ? `${rule.strength_value}x` : '-'}</Text>
+                                                        </Col>
+                                                    </Row>
+                                                }
+                                            >
+                                                <div style={{ padding: '12px 24px' }}>
+                                                    {/* V1 极简解释：一句话 + 关键数值 + 处置结果 */}
+                                                    {(() => {
+                                                        const triggerParam = RULE_TRIGGER_PARAMS[rule.rule_key] || {};
+                                                        const snapshot = selectedMerchant.snapshot || {};
+                                                        const values = triggerParam.getValues ? triggerParam.getValues(snapshot) : { current: '-', baseline: '-' };
+                                                        const riskStatus = getRiskStatus(selectedMerchant.risk_score);
+                                                        
+                                                        // 生成人话解释
+                                                        const getHumanExplanation = () => {
+                                                            if (rule.rule_key === 'single_amount') {
+                                                                return `该商户单笔出款金额（${values.current}）超过历史P99基线（${values.baseline}），触发单笔金额异常规则。`;
+                                                            }
+                                                            if (['sum_10m', 'sum_window', 'sum_amount'].includes(rule.rule_key)) {
+                                                                return `该商户近10分钟累计出款金额（${values.current}）超过历史同窗口基线（${values.baseline}），触发累计金额异常规则。`;
+                                                            }
+                                                            return rule.details || '规则已命中';
+                                                        };
+                                                        
+                                                        return (
+                                                            <div style={{ marginBottom: 16 }}>
+                                                                {/* 一句话解释 */}
+                                                                <Paragraph style={{ fontSize: 13, marginBottom: 12, color: '#333' }}>
+                                                                    {getHumanExplanation()}
+                                                                </Paragraph>
+                                                                
+                                                                {/* 关键数值摘要条 */}
+                                                                <div style={{ 
+                                                                    display: 'flex', 
+                                                                    gap: 24, 
+                                                                    padding: '10px 16px', 
+                                                                    background: '#fafafa', 
+                                                                    borderRadius: 6,
+                                                                    alignItems: 'center',
+                                                                    flexWrap: 'wrap'
+                                                                }}>
+                                                                    <div>
+                                                                        <Text type="secondary" style={{ fontSize: 12 }}>当前值：</Text>
+                                                                        <Text strong style={{ color: '#cf1322' }}>{values.current}</Text>
+                                                                    </div>
+                                                                    <div>
+                                                                        <Text type="secondary" style={{ fontSize: 12 }}>基线(P99)：</Text>
+                                                                        <Text>{values.baseline}</Text>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })()}
+                                                    
+                                                    {/* 参考样本 - 单笔异常只显示触发的那一笔，累计异常显示样本表 */}
+                                                    {rule.hit && rule.rule_key === 'single_amount' && (
+                                                        <div style={{ 
+                                                            marginTop: 12,
+                                                            padding: 16, 
+                                                            background: '#fff', 
+                                                            border: '1px solid #f0f0f0',
+                                                            borderRadius: 8
+                                                        }}>
+                                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                                                                <Text strong style={{ fontSize: 13 }}>触发订单</Text>
+                                                                <Tag color="orange">触发单笔异常</Tag>
+                                                            </div>
+                                                            <div style={{ 
+                                                                display: 'grid', 
+                                                                gridTemplateColumns: 'repeat(2, 1fr)', 
+                                                                gap: '12px 24px',
+                                                                padding: 12,
+                                                                background: '#fafafa',
+                                                                borderRadius: 6
+                                                            }}>
+                                                                <div>
+                                                                    <Text type="secondary" style={{ fontSize: 11, display: 'block', marginBottom: 4 }}>订单号</Text>
+                                                                    <Space size={4}>
+                                                                        <Text strong style={{ fontFamily: 'monospace', fontSize: 13 }}>7187628</Text>
+                                                                        <CopyOutlined 
+                                                                            style={{ fontSize: 12, color: '#1890ff', cursor: 'pointer' }} 
+                                                                            onClick={() => { navigator.clipboard.writeText('7187628'); message.success('已复制订单号'); }}
+                                                                        />
+                                                                    </Space>
+                                                                </div>
+                                                                <div>
+                                                                    <Text type="secondary" style={{ fontSize: 11, display: 'block', marginBottom: 4 }}>金额</Text>
+                                                                    <Text strong style={{ color: '#cf1322', fontSize: 13 }}>{selectedMerchant.snapshot?.single_max ? selectedMerchant.snapshot.single_max.toLocaleString() : '—'} USDT</Text>
+                                                                </div>
+                                                                <div>
+                                                                    <Text type="secondary" style={{ fontSize: 11, display: 'block', marginBottom: 4 }}>发送地址</Text>
+                                                                    <Space size={4}>
+                                                                        <Text style={{ fontFamily: 'monospace', fontSize: 12 }}>TMnk...H9VT</Text>
+                                                                        <CopyOutlined 
+                                                                            style={{ fontSize: 12, color: '#1890ff', cursor: 'pointer' }} 
+                                                                            onClick={() => { navigator.clipboard.writeText('TMnkxyzH9VT'); message.success('已复制发送地址'); }}
+                                                                        />
+                                                                    </Space>
+                                                                </div>
+                                                                <div>
+                                                                    <Text type="secondary" style={{ fontSize: 11, display: 'block', marginBottom: 4 }}>收款地址</Text>
+                                                                    <Space size={4}>
+                                                                        <Text style={{ fontFamily: 'monospace', fontSize: 12 }}>TFQj...xCHW</Text>
+                                                                        <CopyOutlined 
+                                                                            style={{ fontSize: 12, color: '#1890ff', cursor: 'pointer' }} 
+                                                                            onClick={() => { navigator.clipboard.writeText('TFQjxyzxCHW'); message.success('已复制收款地址'); }}
+                                                                        />
+                                                                    </Space>
+                                                                </div>
+                                                                <div>
+                                                                    <Text type="secondary" style={{ fontSize: 11, display: 'block', marginBottom: 4 }}>时间</Text>
+                                                                    <Text style={{ fontSize: 12 }}>2026-01-15 02:57:10</Text>
+                                                                </div>
+                                                                <div>
+                                                                    <Text type="secondary" style={{ fontSize: 11, display: 'block', marginBottom: 4 }}>状态</Text>
+                                                                    <Tag color="green" style={{ margin: 0 }}>已确认</Tag>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                    {rule.hit && rule.rule_key !== 'single_amount' && (
+                                                        <CollapsibleSampleTable 
+                                                            samples={selectedMerchant.samples_last10} 
+                                                            totalCount={selectedMerchant.snapshot.count_10m || 45}
+                                                            ruleKey={rule.rule_key}
+                                                            ruleName={rule.rule_name}
+                                                        />
+                                                    )}
+                                                </div>
+                                            </Panel>
+                                        ))}
+                                    </Collapse>
+                                </div>
+
+
+                            </Space>
+                        )}
+                    </Drawer>
+
+                    {/* === 暂停出款确认弹窗 === */}
+                    <Modal
+                        title={<Space><ExclamationCircleOutlined style={{ color: '#ff4d4f' }} />确认暂停该商户自动出款？</Space>}
+                        open={fuseModalVisible}
+                        onOk={submitFuse}
+                        onCancel={() => setFuseModalVisible(false)}
+                        okText="确认暂停"
+                        cancelText="取消"
+                        okButtonProps={{ danger: true }}
+                        confirmLoading={loading}
+                    >
+                        <Alert 
+                            type="warning" 
+                            showIcon 
+                            message="暂停后该商户所有出款将需人工审核，请确认已核实风险。" 
+                            style={{ marginBottom: 16 }}
+                        />
+                        <Descriptions column={1} size="small" style={{ marginBottom: 16 }}>
+                            <Descriptions.Item label="商户">{MOCK_MERCHANTS.find(m => m.merchant_id === targetId)?.merchant_name} ({targetId})</Descriptions.Item>
+                            <Descriptions.Item label="当前风险分">{MOCK_MERCHANTS.find(m => m.merchant_id === targetId)?.risk_score}</Descriptions.Item>
+                        </Descriptions>
+                        <Form form={fuseForm} layout="vertical">
+                            <Form.Item name="remark" label="暂停原因（必填）" rules={[{ required: true, message: '请填写暂停原因' }]}>
+                                <Input.TextArea rows={3} placeholder="例如：核实到异常出款行为..." />
+                            </Form.Item>
+                        </Form>
+                    </Modal>
+
+                    {/* === 解封操作弹窗 === */}
+                    <Modal
+                        title={<Space><UnlockOutlined />执行解封</Space>}
+                        open={unfreezeModalVisible}
+                        onOk={submitUnfreeze}
+                        onCancel={() => setUnfreezeModalVisible(false)}
+                        okText="确认解封"
+                        cancelText="取消"
+                        confirmLoading={loading}
+                        width={500}
+                    >
+                        <Alert 
+                            type="info" 
+                            showIcon 
+                            message="解封后将进入观察状态，出款将逐步恢复。建议选择「延迟观察期」策略，观察无异常后自动恢复正常。" 
+                            style={{ marginBottom: 20 }}
+                        />
+                        <Form form={unfreezeForm} layout="vertical" initialValues={{ strategy: 'immediate' }}>
+                            <Form.Item 
+                                name="remark" 
+                                label={<Text strong>解封原因 / 核实结果</Text>}
+                                rules={[{ required: true, message: '请填写解封原因' }]}
+                                style={{ marginBottom: 20 }}
+                            >
+                                <Input.TextArea rows={3} placeholder="例如：已与商户确认无异常，属于正常业务高峰..." />
+                            </Form.Item>
+                            
+                            <Form.Item 
+                                name="strategy" 
+                                label={<Text strong>解封策略</Text>}
+                                rules={[{ required: true }]}
+                                style={{ marginBottom: 20 }}
+                            >
+                                <Radio.Group style={{ width: '100%' }}>
+                                    <div style={{ 
+                                        display: 'flex', 
+                                        flexDirection: 'column', 
+                                        gap: 12,
+                                        background: '#fafafa',
+                                        padding: '12px 16px',
+                                        borderRadius: 6
+                                    }}>
+                                        <Radio value="recovering" style={{ margin: 0 }}>
+                                            <div style={{ display: 'inline-block' }}>
+                                                <Text strong style={{ color: '#1890ff' }}>延迟观察期（推荐）</Text>
+                                                <br />
+                                                <Text type="secondary" style={{ fontSize: 12 }}>出款延迟约30分钟，观察无异常后自动恢复正常</Text>
+                                            </div>
+                                        </Radio>
+                                        <Radio value="normal" style={{ margin: 0 }}>
+                                            <div style={{ display: 'inline-block' }}>
+                                                <Text>直接恢复正常</Text>
+                                                <br />
+                                                <Text type="secondary" style={{ fontSize: 12 }}>立即解除所有限制</Text>
+                                            </div>
+                                        </Radio>
+                                    </div>
+                                </Radio.Group>
+                            </Form.Item>
+                            
+                            <Form.Item 
+                                name="google_code" 
+                                label={<Text strong>Google 验证码</Text>}
+                                rules={[{ required: true, message: '请输入验证码' }, { len: 6, message: '验证码为6位数字' }]}
+                                style={{ marginBottom: 0 }}
+                            >
+                                <Input 
+                                    placeholder="请输入6位验证码" 
+                                    maxLength={6} 
+                                    style={{ width: 180, fontFamily: 'monospace', fontSize: 16, letterSpacing: 4 }}
+                                    prefix={<SafetyCertificateOutlined style={{ color: '#1890ff' }} />}
+                                />
+                            </Form.Item>
+                        </Form>
+                    </Modal>
+
+                    {/* === 风控配置弹窗 === */}
+                    <Modal
+                        title="风控配置"
+                        open={thresholdModalVisible}
+                        onOk={saveThresholdConfig}
+                        onCancel={() => setThresholdModalVisible(false)}
+                        okText="保存配置"
+                        cancelText="取消"
+                        width={640}
+                    >
+                        <Tabs 
+                            activeKey={configActiveTab} 
+                            onChange={setConfigActiveTab}
+                            items={[
+                                {
+                                    key: 'threshold',
+                                    label: '等级阈值',
+                                    children: (
+                                        <div style={{ paddingTop: 8 }}>
+                                            <div style={{ padding: '10px 12px', background: '#f5f5f5', borderRadius: 6, marginBottom: 16 }}>
+                                                <Text type="secondary" style={{ fontSize: 12 }}>
+                                                    延迟观察：出款延迟约30分钟后自动恢复；熔断：暂停出款需人工解除
+                                                </Text>
+                                            </div>
+                                            <Form form={thresholdForm} layout="vertical">
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                                    {/* 正常 */}
+                                                    <div style={{ display: 'flex', alignItems: 'center', padding: '12px 16px', background: '#f6ffed', borderRadius: 6, border: '1px solid #d9f7be' }}>
+                                                        <CheckCircleOutlined style={{ color: '#52c41a', fontSize: 16, marginRight: 10 }} />
+                                                        <div style={{ flex: 1 }}>
+                                                            <Text strong>正常</Text>
+                                                            <Text type="secondary" style={{ fontSize: 12, marginLeft: 8 }}>业务正常</Text>
+                                                        </div>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                                            <Text>0 ~</Text>
+                                                            <Form.Item name="normalMax" style={{ marginBottom: 0 }}>
+                                                                <InputNumber min={0} max={200} style={{ width: 70 }} />
+                                                            </Form.Item>
+                                                            <Text type="secondary">分</Text>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* 已告警 */}
+                                                    <div style={{ display: 'flex', alignItems: 'center', padding: '12px 16px', background: '#fffbe6', borderRadius: 6, border: '1px solid #ffe58f' }}>
+                                                        <WarningOutlined style={{ color: '#faad14', fontSize: 16, marginRight: 10 }} />
+                                                        <div style={{ flex: 1 }}>
+                                                            <Text strong>已告警</Text>
+                                                            <Text type="secondary" style={{ fontSize: 12, marginLeft: 8 }}>需关注</Text>
+                                                        </div>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                                            <Form.Item name="warnMin" style={{ marginBottom: 0 }}>
+                                                                <InputNumber min={0} max={200} style={{ width: 70 }} />
+                                                            </Form.Item>
+                                                            <Text>~</Text>
+                                                            <Form.Item name="warnMax" style={{ marginBottom: 0 }}>
+                                                                <InputNumber min={0} max={200} style={{ width: 70 }} />
+                                                            </Form.Item>
+                                                            <Text type="secondary">分</Text>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* 延迟观察 */}
+                                                    <div style={{ display: 'flex', alignItems: 'center', padding: '12px 16px', background: '#fff7e6', borderRadius: 6, border: '1px solid #ffd591' }}>
+                                                        <ExclamationCircleOutlined style={{ color: '#fa8c16', fontSize: 16, marginRight: 10 }} />
+                                                        <div style={{ flex: 1 }}>
+                                                            <Text strong>延迟观察</Text>
+                                                            <Text type="secondary" style={{ fontSize: 12, marginLeft: 8 }}>出款延迟</Text>
+                                                        </div>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                                            <Form.Item name="limitMin" style={{ marginBottom: 0 }}>
+                                                                <InputNumber min={0} max={200} style={{ width: 70 }} />
+                                                            </Form.Item>
+                                                            <Text>~</Text>
+                                                            <Form.Item name="limitMax" style={{ marginBottom: 0 }}>
+                                                                <InputNumber min={0} max={200} style={{ width: 70 }} />
+                                                            </Form.Item>
+                                                            <Text type="secondary">分</Text>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* 熔断 */}
+                                                    <div style={{ display: 'flex', alignItems: 'center', padding: '12px 16px', background: '#fff1f0', borderRadius: 6, border: '1px solid #ffccc7' }}>
+                                                        <StopOutlined style={{ color: '#ff4d4f', fontSize: 16, marginRight: 10 }} />
+                                                        <div style={{ flex: 1 }}>
+                                                            <Text strong>熔断</Text>
+                                                            <Text type="secondary" style={{ fontSize: 12, marginLeft: 8 }}>暂停出款</Text>
+                                                        </div>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                                            <Form.Item name="fuseMin" style={{ marginBottom: 0 }}>
+                                                                <InputNumber min={0} max={200} style={{ width: 70 }} />
+                                                            </Form.Item>
+                                                            <Text type="secondary">分及以上</Text>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </Form>
+                                        </div>
+                                    )
+                                },
+                                {
+                                    key: 'rules',
+                                    label: '规则说明',
+                                    children: (
+                                        <div style={{ paddingTop: 8 }}>
+                                            <div style={{ padding: '10px 12px', background: '#f5f5f5', borderRadius: 6, marginBottom: 16 }}>
+                                                <Text type="secondary" style={{ fontSize: 12 }}>
+                                                    V1 规则参数已锁定，仅供查看
+                                                </Text>
+                                            </div>
+                                            
+                                            {/* 规则1: 单笔金额异常 */}
+                                            <div style={{ padding: 16, background: '#fafafa', borderRadius: 6, marginBottom: 12 }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', marginBottom: 12 }}>
+                                                    <Text strong>1. 单笔金额异常</Text>
+                                                    <Tag color="green" style={{ marginLeft: 8 }}>已启用</Tag>
+                                                </div>
+                                                <div style={{ display: 'grid', gridTemplateColumns: '80px 1fr', gap: '8px 12px', fontSize: 13 }}>
+                                                    <Text type="secondary">触发条件</Text>
+                                                    <Text>单笔出款超过该商户历史正常上限</Text>
+                                                    <Text type="secondary">风险分数</Text>
+                                                    <Text>1.5~2倍→30分，2~3倍→50分，3倍以上→70分</Text>
+                                                    <Text type="secondary">备注</Text>
+                                                    <Text>新商户（不足50笔）分数减半</Text>
+                                                </div>
+                                            </div>
+                                            
+                                            {/* 规则2: 累计金额异常 */}
+                                            <div style={{ padding: 16, background: '#fafafa', borderRadius: 6 }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', marginBottom: 12 }}>
+                                                    <Text strong>2. 累计金额异常</Text>
+                                                    <Tag color="green" style={{ marginLeft: 8 }}>已启用</Tag>
+                                                </div>
+                                                <div style={{ display: 'grid', gridTemplateColumns: '80px 1fr', gap: '8px 12px', fontSize: 13 }}>
+                                                    <Text type="secondary">触发条件</Text>
+                                                    <Text>10分钟累计出款超过历史同时段的2倍</Text>
+                                                    <Text type="secondary">风险分数</Text>
+                                                    <Text>2~3倍→30分，3~5倍→50分，5倍以上→70分</Text>
+                                                    <Text type="secondary">最低要求</Text>
+                                                    <Text>金额≥5000 USDT，笔数≥3笔</Text>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )
+                                }                            ]}
+                        />
+                    </Modal>
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

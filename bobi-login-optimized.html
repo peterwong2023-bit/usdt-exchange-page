@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>波币后台 | 节点认证</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=Zilla+Slab:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config({
+            theme: {
+                extend: {
+                    colors: {
+                        'crypto-blue': '#00f2ff',
+                        'crypto-deep': '#050a14',
+                        'crypto-card': '#0a1221',
+                    },
+                    fontFamily: {
+                        mono: ['Space Grotesk', 'monospace'],
+                        display: ['Zilla Slab', 'serif'],
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-15px)' },
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+    <style>
+        body {
+            background-color: #050a14;
+            color: #e2e8f0;
+            font-family: 'Space Grotesk', sans-serif;
+            overflow: hidden;
+        }
+
+        /* 动态矩阵背景 */
+        #canvas-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.4;
+        }
+
+        /* 玻璃拟化卡片 */
+        .glass-panel {
+            background: rgba(10, 18, 33, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(0, 242, 255, 0.15);
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.6), inset 0 0 20px rgba(0, 242, 255, 0.05);
+        }
+
+        /* 输入框科技感样式 */
+        .input-field {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .input-field:focus {
+            border-color: #00f2ff;
+            background: rgba(0, 242, 255, 0.05);
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.2);
+            outline: none;
+        }
+
+        /* 扫描线效果 */
+        .scanline {
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(to right, transparent, #00f2ff, transparent);
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0.3;
+            animation: scan 4s linear infinite;
+        }
+
+        @keyframes scan {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+
+        .text-glow {
+            text-shadow: 0 0 10px rgba(0, 242, 255, 0.5);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <canvas id="canvas-bg"></canvas>
+    
+    <!-- 装饰性元素 -->
+    <div class="fixed top-10 left-10 opacity-20 hidden md:block">
+        <div class="text-[10px] tracking-[0.5em] uppercase">节点状态：已激活</div>
+        <div class="text-[10px] tracking-[0.5em] uppercase mt-1">网络：主网 v4.2</div>
+    </div>
+
+    <main class="w-full max-w-md relative group">
+        <!-- 扫描线装饰 -->
+        <div class="absolute -inset-1 bg-crypto-blue/10 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+        
+        <div class="glass-panel rounded-2xl p-8 md:p-10 relative overflow-hidden">
+            <div class="scanline"></div>
+            
+            <!-- 头部 -->
+            <header class="text-center mb-10">
+                <div class="inline-block mb-4 relative">
+                    <div class="w-16 h-16 border-2 border-crypto-blue/30 rounded-full flex items-center justify-center animate-pulse-slow">
+                        <svg class="w-8 h-8 text-crypto-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A10.003 10.003 0 0012 3c1.268 0 2.39.63 3.068 1.593m-3.44 2.04l.054-.09A10.003 10.003 0 0012 3c1.268 0 2.39.63 3.068 1.593m-3.44 2.04l.054-.09A10.003 10.003 0 0012 3c1.268 0 2.39.63 3.068 1.593M12 11c0-3.517 1.009-6.799 2.753-9.571m-3.44 2.04l.054.09A10.003 10.003 0 0112 21c-1.268 0-2.39-.63-3.068-1.593" />
+                        </svg>
+                    </div>
+                </div>
+                <h1 class="font-display text-3xl font-bold tracking-tight text-white mb-2">波币后台 <span class="text-crypto-blue text-glow">中心内核</span></h1>
+                <p class="text-[10px] uppercase tracking-[0.3em] text-white/30">C2C 区块链管理系统</p>
+            </header>
+
+            <!-- 表单 -->
+            <form class="space-y-6">
+                <div class="space-y-1">
+                    <label class="text-[10px] uppercase tracking-widest text-crypto-blue/60 ml-1">访问账号</label>
+                    <div class="relative">
+                        <input type="text" class="input-field w-full py-3.5 px-10 rounded-lg text-sm" placeholder="请输入账号">
+                        <svg class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-white/20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                    </div>
+                </div>
+
+                <div class="space-y-1">
+                    <label class="text-[10px] uppercase tracking-widest text-crypto-blue/60 ml-1">安全密钥</label>
+                    <div class="relative">
+                        <input type="password" class="input-field w-full py-3.5 px-10 rounded-lg text-sm" placeholder="请输入密码">
+                        <svg class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-white/20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                    </div>
+                </div>
+
+                <div class="space-y-1">
+                    <label class="text-[10px] uppercase tracking-widest text-crypto-blue/60 ml-1">动态验证</label>
+                    <div class="relative">
+                        <input type="text" class="input-field w-full py-3.5 px-10 rounded-lg text-sm" placeholder="请输入谷歌验证码">
+                        <svg class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-white/20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-crypto-blue hover:bg-cyan-400 text-crypto-deep font-bold py-4 rounded-lg text-xs uppercase tracking-[0.3em] transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-[0_0_20px_rgba(0,242,255,0.3)]">
+                    进入节点认证
+                </button>
+            </form>
+
+            <!-- 底部信息 -->
+            <footer class="mt-10 pt-6 border-t border-white/5 flex flex-col items-center gap-3">
+                <div class="flex items-center gap-4 text-[10px] text-white/20 tracking-widest uppercase">
+                    <span>IP: 10.5.22.67</span>
+                    <span class="w-1 h-1 bg-white/10 rounded-full"></span>
+                    <span>版本: 1.1.6.7</span>
+                </div>
+                <div class="flex gap-6">
+                    <a href="#" class="text-[9px] text-crypto-blue/40 hover:text-crypto-blue transition-colors uppercase tracking-tighter">安全协议</a>
+                    <a href="#" class="text-[9px] text-crypto-blue/40 hover:text-crypto-blue transition-colors uppercase tracking-tighter">节点支持</a>
+                </div>
+            </footer>
+        </div>
+    </main>
+
+    <script>
+        // 动态矩阵背景逻辑
+        const canvas = document.getElementById('canvas-bg');
+        const ctx = canvas.getContext('2d');
+
+        let width, height, columns;
+        const fontSize = 16;
+        const chars = '01';
+        let drops = [];
+
+        function init() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            columns = Math.floor(width / fontSize);
+            drops = new Array(columns).fill(1);
+        }
+
+        function draw() {
+            ctx.fillStyle = 'rgba(5, 10, 20, 0.1)';
+            ctx.fillRect(0, 0, width, height);
+
+            ctx.fillStyle = '#00f2ff';
+            ctx.font = fontSize + 'px monospace';
+
+            for (let i = 0; i < drops.length; i++) {
+                const text = chars.charAt(Math.floor(Math.random() * chars.length));
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                if (drops[i] * fontSize > height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+
+        window.addEventListener('resize', init);
+        init();
+        setInterval(draw, 50);
+    </script>
+</body>
+</html>

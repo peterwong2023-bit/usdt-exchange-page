@@ -1,0 +1,2377 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Sticky - 智能桌面便签原型</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --primary: #2563eb;
+            --primary-light: #3b82f6;
+            --secondary: #059669;
+            --accent: #dc2626;
+            --warning: #d97706;
+            --success: #16a34a;
+            --purple: #7c3aed;
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --gray-400: #94a3b8;
+            --gray-500: #64748b;
+            --gray-600: #475569;
+            --gray-700: #334155;
+            --gray-800: #1e293b;
+            --gray-900: #0f172a;
+            
+            --glass-bg: rgba(15, 23, 42, 0.85);
+            --glass-border: rgba(148, 163, 184, 0.15);
+            --glass-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            --card-bg: rgba(30, 41, 59, 0.6);
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+        }
+
+        body {
+            font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(37, 99, 235, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(124, 58, 237, 0.08) 0%, transparent 50%),
+                linear-gradient(135deg, #0f172a 0%, #1e293b 25%, #334155 75%, #0f172a 100%);
+            height: 100vh;
+            overflow: hidden;
+            color: var(--text-primary);
+            -webkit-font-smoothing: antialiased;
+            position: relative;
+        }
+
+        /* 菜单栏 */
+        .menubar {
+            height: 32px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px) saturate(180%);
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            border-bottom: 1px solid var(--glass-border);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .menu-item {
+            padding: 6px 14px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            color: var(--text-secondary);
+        }
+
+        .menu-item:hover {
+            background: rgba(255,255,255,0.08);
+            color: var(--text-primary);
+        }
+
+        .menu-item.active {
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+        }
+
+        .menu-dropdown {
+            position: absolute;
+            top: 32px;
+            left: 16px;
+            width: 340px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(30px) saturate(180%);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: var(--glass-shadow);
+            border: 1px solid var(--glass-border);
+            display: none;
+            z-index: 1001;
+        }
+
+        .menu-dropdown.show { display: block; }
+
+        .dropdown-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .dropdown-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: white;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .dropdown-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .dropdown-status {
+            margin-left: auto;
+            font-size: 12px;
+            color: var(--success);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 500;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+            box-shadow: 0 0 10px rgba(22, 163, 74, 0.4);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.1); }
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .dropdown-item:hover {
+            background: rgba(255,255,255,0.06);
+            color: var(--text-primary);
+        }
+
+        .dropdown-item i {
+            width: 20px;
+            text-align: center;
+            color: var(--primary-light);
+        }
+
+        .dropdown-badge {
+            margin-left: auto;
+            background: var(--accent);
+            color: white;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 12px;
+            min-width: 18px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: rgba(255,255,255,0.08);
+            margin: 12px 0;
+        }
+
+        /* 桌面工作区 */
+        .desktop {
+            position: absolute;
+            top: 32px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 25% 25%, rgba(255,255,255,0.02) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(255,255,255,0.01) 0%, transparent 50%);
+        }
+
+        /* 便签窗口通用样式 */
+        .sticky-window {
+            position: absolute;
+            background: var(--glass-bg);
+            backdrop-filter: blur(24px) saturate(180%);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            box-shadow: var(--glass-shadow);
+            overflow: hidden;
+            min-width: 240px;
+            min-height: 160px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: default;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sticky-window:hover {
+            box-shadow: 0 32px 64px -12px rgba(0, 0, 0, 0.35);
+            transform: translateY(-1px);
+        }
+
+        .sticky-window.alert {
+            border-color: var(--accent);
+            box-shadow: 0 25px 50px -12px rgba(220, 38, 38, 0.4);
+        }
+
+        .sticky-window.focused {
+            z-index: 100;
+        }
+
+        .sticky-window.dragging {
+            opacity: 0.9;
+            z-index: 999;
+            transform: rotate(1deg) scale(1.02);
+        }
+
+        .sticky-window.locked .resize-handle {
+            display: none;
+        }
+
+        /* 便签头部 */
+        .sticky-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 18px;
+            background: rgba(51, 65, 85, 0.3);
+            border-bottom: 1px solid var(--glass-border);
+            cursor: grab;
+            user-select: none;
+            backdrop-filter: blur(8px);
+            height: 48px;
+            flex-shrink: 0;
+        }
+
+        .sticky-header:active {
+            cursor: grabbing;
+        }
+
+        .traffic-lights {
+            display: flex;
+            gap: 8px;
+        }
+
+        .traffic-light {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .traffic-light:hover {
+            transform: scale(1.1);
+        }
+
+        .traffic-light.close { background: #ff5f57; }
+        .traffic-light.minimize { background: #ffbd2e; }
+        .traffic-light.maximize { background: #28ca42; }
+
+        .sticky-title-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+            justify-content: center;
+        }
+
+        .sticky-type-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .sticky-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .sticky-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .sticky-action-btn {
+            width: 28px;
+            height: 28px;
+            border: none;
+            background: rgba(255,255,255,0.08);
+            color: rgba(255,255,255,0.7);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .sticky-action-btn:hover {
+            background: rgba(255,255,255,0.15);
+            color: #fff;
+            transform: scale(1.05);
+        }
+
+        /* 便签内容区 */
+        .sticky-body {
+            padding: 20px;
+            flex: 1;
+            overflow-y: auto;
+            min-height: 100px;
+        }
+
+        /* 便签底部 */
+        .sticky-footer {
+            padding: 10px 18px;
+            background: rgba(0,0,0,0.15);
+            border-top: 1px solid rgba(255,255,255,0.08);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 12px;
+            color: rgba(255,255,255,0.7);
+            height: 36px;
+            flex-shrink: 0;
+        }
+
+        .footer-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .health-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            box-shadow: 0 0 8px rgba(22, 163, 74, 0.4);
+        }
+
+        .health-indicator.error { 
+            background: var(--accent); 
+            box-shadow: 0 0 8px rgba(220, 38, 38, 0.4);
+        }
+        .health-indicator.warning { 
+            background: var(--warning); 
+            box-shadow: 0 0 8px rgba(217, 119, 6, 0.4);
+        }
+
+        .footer-action-btn {
+            background: none;
+            border: none;
+            color: var(--primary-light);
+            font-size: 11px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+
+        .footer-action-btn:hover {
+            background: rgba(59, 130, 246, 0.2);
+            color: var(--primary);
+        }
+
+        /* 币价便签样式 */
+        .crypto-price {
+            font-size: 32px;
+            font-weight: 800;
+            color: #fff;
+            line-height: 1;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .crypto-change {
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .crypto-change.up { color: var(--success); }
+        .crypto-change.down { color: var(--accent); }
+
+        .crypto-pairs {
+            margin-top: 20px;
+        }
+
+        .crypto-pair {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .crypto-pair:last-child {
+            border-bottom: none;
+        }
+
+        .pair-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.9);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .pair-price {
+            font-size: 14px;
+            font-weight: 700;
+            color: #fff;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .pair-change {
+            font-size: 12px;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 6px;
+            min-width: 55px;
+            text-align: center;
+        }
+
+        .pair-change.up {
+            background: rgba(22, 163, 74, 0.2);
+            color: var(--success);
+        }
+
+        .pair-change.down {
+            background: rgba(220, 38, 38, 0.2);
+            color: var(--accent);
+        }
+
+        /* 股票便签样式 */
+        .stock-main {
+            display: flex;
+            align-items: baseline;
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .stock-symbol {
+            font-size: 18px;
+            font-weight: 700;
+            color: rgba(255,255,255,0.9);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .stock-price {
+            font-size: 28px;
+            font-weight: 800;
+            color: #fff;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .stock-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .stock-item {
+            background: rgba(255,255,255,0.04);
+            border-radius: 10px;
+            padding: 12px;
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .stock-item-label {
+            font-size: 11px;
+            color: rgba(255,255,255,0.6);
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .stock-item-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* 交通便签样式 */
+        .traffic-route {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .route-icon {
+            width: 36px;
+            height: 36px;
+            background: var(--success);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: white;
+            box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
+        }
+
+        .route-info {
+            flex: 1;
+        }
+
+        .route-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .route-detail {
+            font-size: 12px;
+            color: rgba(255,255,255,0.7);
+            margin-top: 3px;
+        }
+
+        .traffic-eta {
+            font-size: 28px;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 10px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .traffic-status {
+            height: 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+
+        .traffic-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--success) 0%, var(--warning) 60%, var(--accent) 100%);
+            width: 75%;
+            border-radius: 4px;
+        }
+
+        /* 天气便签样式 */
+        .weather-main {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            margin-bottom: 20px;
+        }
+
+        .weather-icon {
+            font-size: 40px;
+            color: var(--warning);
+        }
+
+        .weather-temp {
+            font-size: 36px;
+            font-weight: 800;
+            color: #fff;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .weather-desc {
+            font-size: 13px;
+            color: rgba(255,255,255,0.8);
+            margin-top: 6px;
+        }
+
+        .weather-details {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .weather-detail {
+            text-align: center;
+            background: rgba(255,255,255,0.04);
+            border-radius: 10px;
+            padding: 10px 6px;
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .weather-detail i {
+            font-size: 14px;
+            color: var(--primary-light);
+            margin-bottom: 6px;
+        }
+
+        .weather-detail-value {
+            font-size: 13px;
+            font-weight: 600;
+            color: #fff;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .weather-detail-label {
+            font-size: 10px;
+            color: rgba(255,255,255,0.6);
+            margin-top: 3px;
+        }
+
+        /* 记事便签样式 */
+        .memo-textarea {
+            width: 100%;
+            height: 140px;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #fff;
+            font-size: 14px;
+            line-height: 1.6;
+            resize: none;
+            font-family: inherit;
+        }
+
+        .memo-textarea::placeholder {
+            color: rgba(255,255,255,0.5);
+        }
+
+        .memo-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .memo-btn {
+            padding: 8px 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .memo-btn.primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .memo-btn.primary:hover {
+            background: var(--primary-light);
+            transform: translateY(-1px);
+        }
+
+        .memo-btn.secondary {
+            background: rgba(255,255,255,0.08);
+            color: rgba(255,255,255,0.8);
+        }
+
+        .memo-btn.secondary:hover {
+            background: rgba(255,255,255,0.15);
+        }
+
+        /* 便签设置 Popover */
+        .settings-popover {
+            position: absolute;
+            width: 360px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(30px) saturate(180%);
+            border-radius: 14px;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            z-index: 200;
+            display: none;
+        }
+
+        .popover-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 22px 14px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .popover-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .popover-close {
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.7);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 0;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .popover-close:hover {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+        }
+
+        .popover-body {
+            padding: 18px 22px 22px;
+        }
+
+        .settings-tabs {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 20px;
+            background: rgba(255,255,255,0.04);
+            border-radius: 10px;
+            padding: 6px;
+        }
+
+        .settings-tab {
+            flex: 1;
+            padding: 10px 14px;
+            font-size: 13px;
+            font-weight: 600;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: rgba(255,255,255,0.7);
+        }
+
+        .settings-tab.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .settings-tab:hover:not(.active) {
+            background: rgba(255,255,255,0.08);
+            color: rgba(255,255,255,0.9);
+        }
+
+        .settings-content {
+            display: none;
+        }
+
+        .settings-content.active {
+            display: block;
+        }
+
+        .settings-item {
+            margin-bottom: 18px;
+        }
+
+        .settings-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .settings-select {
+            width: 100%;
+            padding: 10px 14px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 14px;
+        }
+
+        .settings-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 0;
+        }
+
+        .toggle-switch {
+            width: 48px;
+            height: 28px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 14px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .toggle-switch.active {
+            background: var(--primary);
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .toggle-switch.active::after {
+            left: 22px;
+        }
+
+        .settings-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .settings-btn:hover {
+            background: var(--primary-light);
+            transform: translateY(-1px);
+        }
+
+        .settings-btn.secondary {
+            background: rgba(255,255,255,0.08);
+            color: rgba(255,255,255,0.8);
+        }
+
+        .settings-btn.secondary:hover {
+            background: rgba(255,255,255,0.15);
+        }
+
+        /* 更多菜单 */
+        .more-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            width: 200px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(30px) saturate(180%);
+            border-radius: 10px;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            padding: 10px;
+            z-index: 150;
+            display: none;
+        }
+
+        .more-menu.show {
+            display: block;
+        }
+
+        .more-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 14px;
+            color: rgba(255,255,255,0.9);
+        }
+
+        .more-menu-item:hover {
+            background: rgba(255,255,255,0.08);
+        }
+
+        .more-menu-item i {
+            width: 18px;
+            text-align: center;
+            color: var(--primary-light);
+        }
+
+        .more-menu-item .checkmark {
+            margin-left: auto;
+            color: var(--success);
+            font-size: 14px;
+        }
+
+        /* 模态框样式 */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--glass-bg);
+            backdrop-filter: blur(30px) saturate(180%);
+            border-radius: 18px;
+            border: 1px solid var(--glass-border);
+            width: 540px;
+            max-width: 90vw;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+            overflow: hidden;
+        }
+
+        .modal-header {
+            padding: 22px 26px 18px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #fff;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .modal-body {
+            padding: 22px 26px;
+        }
+
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .template-card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 14px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .template-card:hover {
+            background: rgba(255,255,255,0.08);
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .template-card.selected {
+            background: rgba(37, 99, 235, 0.2);
+            border-color: var(--primary);
+        }
+
+        .template-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin: 0 auto 12px;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .template-icon.crypto { background: var(--warning); }
+        .template-icon.stock { background: var(--primary); }
+        .template-icon.traffic { background: var(--success); }
+        .template-icon.weather { background: var(--purple); }
+        .template-icon.memo { background: var(--secondary); }
+
+        .template-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 6px;
+        }
+
+        .template-desc {
+            font-size: 12px;
+            color: rgba(255,255,255,0.6);
+        }
+
+        .modal-footer {
+            padding: 18px 26px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            display: flex;
+            justify-content: flex-end;
+            gap: 14px;
+        }
+
+        .btn {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn.primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn.primary:hover {
+            background: var(--primary-light);
+            transform: translateY(-1px);
+        }
+
+        .btn.secondary {
+            background: rgba(255,255,255,0.08);
+            color: rgba(255,255,255,0.8);
+        }
+
+        .btn.secondary:hover {
+            background: rgba(255,255,255,0.15);
+        }
+
+        /* 告警角标 */
+        .alert-badge {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: var(--accent);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 10px;
+            animation: alertPulse 1.5s infinite;
+            box-shadow: 0 2px 8px rgba(220, 38, 38, 0.4);
+        }
+
+        @keyframes alertPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* 拖拽状态 */
+        .dragging {
+            opacity: 0.85;
+            z-index: 999;
+            transform: rotate(1deg) scale(1.02);
+        }
+
+        /* 全局搜索 */
+        .search-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: flex-start;
+            justify-content: center;
+            padding-top: 120px;
+            z-index: 3000;
+        }
+
+        .search-overlay.show {
+            display: flex;
+        }
+
+        .search-box {
+            background: var(--glass-bg);
+            backdrop-filter: blur(30px) saturate(180%);
+            border-radius: 14px;
+            border: 1px solid var(--glass-border);
+            width: 540px;
+            max-width: 90vw;
+            box-shadow: var(--glass-shadow);
+            overflow: hidden;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 18px 22px;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #fff;
+            font-size: 18px;
+            font-family: inherit;
+        }
+
+        .search-input::placeholder {
+            color: rgba(255,255,255,0.5);
+        }
+
+        .search-results {
+            max-height: 320px;
+            overflow-y: auto;
+        }
+
+        .search-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 22px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .search-item:hover {
+            background: rgba(255,255,255,0.05);
+        }
+
+        .search-item-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: #fff;
+        }
+
+        .search-item-info {
+            flex: 1;
+        }
+
+        .search-item-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .search-item-desc {
+            font-size: 13px;
+            color: rgba(255,255,255,0.6);
+            margin-top: 3px;
+        }
+
+        .search-item-status {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--success);
+        }
+
+        /* 缩放手柄 */
+        .resize-handle {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 18px;
+            height: 18px;
+            cursor: nw-resize;
+            background: linear-gradient(-45deg, transparent 0%, transparent 30%, rgba(255,255,255,0.2) 30%, rgba(255,255,255,0.2) 35%, transparent 35%, transparent 65%, rgba(255,255,255,0.2) 65%, rgba(255,255,255,0.2) 70%, transparent 70%);
+            opacity: 0.6;
+            transition: opacity 0.2s ease;
+        }
+
+        .resize-handle:hover {
+            opacity: 1;
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .template-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .modal {
+                width: 90vw;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 菜单栏 -->
+    <div class="menubar">
+        <div class="menu-item active" onclick="toggleDropdown()">AI Sticky</div>
+        <div class="menu-item">文件</div>
+        <div class="menu-item">编辑</div>
+        <div class="menu-item">视图</div>
+        <div class="menu-item">窗口</div>
+        <div class="menu-item">帮助</div>
+    </div>
+
+    <!-- 菜单下拉 -->
+    <div class="menu-dropdown" id="menuDropdown">
+        <div class="dropdown-header">
+            <div class="dropdown-icon">
+                <i class="fas fa-note-sticky"></i>
+            </div>
+            <div>
+                <div class="dropdown-title">AI Sticky</div>
+            </div>
+            <div class="dropdown-status">
+                <div class="status-dot"></div>
+                运行中
+            </div>
+        </div>
+        
+        <div class="dropdown-item" onclick="openNewModal()">
+            <i class="fas fa-plus"></i>
+            新建便签...
+        </div>
+        
+        <div class="dropdown-item" onclick="openSearch()">
+            <i class="fas fa-search"></i>
+            搜索/切换便签...
+            <span style="margin-left: auto; font-size: 12px; color: rgba(255,255,255,0.5);">⌘K</span>
+        </div>
+        
+        <div class="dropdown-item" onclick="openAlertCenter()">
+            <i class="fas fa-bell"></i>
+            告警中心
+            <div class="dropdown-badge">3</div>
+        </div>
+        
+        <div class="dropdown-divider"></div>
+        
+        <div class="dropdown-item" onclick="toggleRefresh()">
+            <i class="fas fa-pause" id="refreshIcon"></i>
+            <span id="refreshText">暂停全部刷新</span>
+        </div>
+        
+        <div class="dropdown-item" onclick="openKeyManager()">
+            <i class="fas fa-key"></i>
+            Key 管理
+        </div>
+        
+        <div class="dropdown-divider"></div>
+        
+        <div class="dropdown-item">
+            <i class="fas fa-cog"></i>
+            设置...
+        </div>
+        
+        <div class="dropdown-item">
+            <i class="fas fa-sign-out-alt"></i>
+            退出
+        </div>
+    </div>
+
+    <!-- 桌面工作区 -->
+    <div class="desktop" id="desktop">
+        <!-- 币价便签 -->
+        <div class="sticky-window alert" id="crypto-sticky" style="left: 60px; top: 80px; width: 340px;" onclick="focusSticky(this)">
+            <div class="alert-badge">!</div>
+            <div class="sticky-header" onmousedown="startDrag(event, 'crypto-sticky')">
+                <div class="traffic-lights">
+                    <div class="traffic-light close" onclick="closeSticky('crypto-sticky')"></div>
+                    <div class="traffic-light minimize"></div>
+                    <div class="traffic-light maximize"></div>
+                </div>
+                <div class="sticky-title-area">
+                    <div class="sticky-type-icon" style="background: var(--warning);">
+                        <i class="fab fa-bitcoin"></i>
+                    </div>
+                    <div class="sticky-title">BTC/USDT</div>
+                </div>
+                <div class="sticky-actions">
+                    <button class="sticky-action-btn" onclick="refreshSticky('crypto-sticky')">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <button class="sticky-action-btn" onclick="openSettings('crypto-sticky')">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                    <div style="position: relative;">
+                        <button class="sticky-action-btn" onclick="toggleMoreMenu(this)">
+                            <i class="fas fa-ellipsis"></i>
+                        </button>
+                        <div class="more-menu" id="crypto-more-menu">
+                            <div class="more-menu-item" onclick="togglePin('crypto-sticky')">
+                                <i class="fas fa-thumbtack"></i>
+                                置顶
+                                <span class="checkmark" id="crypto-pin-check" style="display: none;">✓</span>
+                            </div>
+                            <div class="more-menu-item" onclick="toggleLock('crypto-sticky')">
+                                <i class="fas fa-lock"></i>
+                                锁定大小
+                                <span class="checkmark" id="crypto-lock-check" style="display: none;">✓</span>
+                            </div>
+                            <div class="more-menu-item" onclick="copySticky('crypto-sticky')">
+                                <i class="fas fa-copy"></i>
+                                复制
+                            </div>
+                            <div class="more-menu-item" onclick="adjustOpacity('crypto-sticky')">
+                                <i class="fas fa-adjust"></i>
+                                透明度
+                            </div>
+                            <div class="more-menu-item" onclick="closeSticky('crypto-sticky')">
+                                <i class="fas fa-times"></i>
+                                关闭
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="sticky-body">
+                <div style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 6px;">
+                    <div class="crypto-price">$67,842</div>
+                    <div class="crypto-change up">
+                        <i class="fas fa-caret-up"></i>
+                        +2.34%
+                    </div>
+                </div>
+                <div style="font-size: 12px; color: rgba(255,255,255,0.6); margin-bottom: 20px;">BTC/USDT · 24h</div>
+                
+                <div class="crypto-pairs">
+                    <div class="crypto-pair">
+                        <div class="pair-name">ETH/USDT</div>
+                        <div class="pair-price">$3,456</div>
+                        <div class="pair-change down">-5.12%</div>
+                    </div>
+                    <div class="crypto-pair">
+                        <div class="pair-name">SOL/USDT</div>
+                        <div class="pair-price">$179</div>
+                        <div class="pair-change up">+8.67%</div>
+                    </div>
+                    <div class="crypto-pair">
+                        <div class="pair-name">DOGE/USDT</div>
+                        <div class="pair-price">$0.152</div>
+                        <div class="pair-change up">+1.23%</div>
+                    </div>
+                </div>
+            </div>
+            <div class="sticky-footer">
+                <span>更新于 12 秒前</span>
+                <div class="footer-status">
+                    <div class="health-indicator error"></div>
+                    <span>Key 失效</span>
+                    <button class="footer-action-btn" onclick="fixKey('crypto-sticky')">修复</button>
+                </div>
+            </div>
+            <div class="resize-handle" onmousedown="startResize(event, this.parentElement)"></div>
+        </div>
+
+        <!-- 股票便签 -->
+        <div class="sticky-window" id="stock-sticky" style="left: 440px; top: 80px; width: 320px;" onclick="focusSticky(this)">
+            <div class="sticky-header" onmousedown="startDrag(event, 'stock-sticky')">
+                <div class="traffic-lights">
+                    <div class="traffic-light close" onclick="closeSticky('stock-sticky')"></div>
+                    <div class="traffic-light minimize"></div>
+                    <div class="traffic-light maximize"></div>
+                </div>
+                <div class="sticky-title-area">
+                    <div class="sticky-type-icon" style="background: var(--primary);">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="sticky-title">TSLA</div>
+                </div>
+                <div class="sticky-actions">
+                    <button class="sticky-action-btn" onclick="refreshSticky('stock-sticky')">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <button class="sticky-action-btn" onclick="openSettings('stock-sticky')">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                    <div style="position: relative;">
+                        <button class="sticky-action-btn" onclick="toggleMoreMenu(this)">
+                            <i class="fas fa-ellipsis"></i>
+                        </button>
+                        <div class="more-menu" id="stock-more-menu">
+                            <div class="more-menu-item" onclick="togglePin('stock-sticky')">
+                                <i class="fas fa-thumbtack"></i>
+                                置顶
+                                <span class="checkmark" id="stock-pin-check" style="display: none;">✓</span>
+                            </div>
+                            <div class="more-menu-item" onclick="toggleLock('stock-sticky')">
+                                <i class="fas fa-lock"></i>
+                                锁定大小
+                                <span class="checkmark" id="stock-lock-check" style="display: none;">✓</span>
+                            </div>
+                            <div class="more-menu-item" onclick="copySticky('stock-sticky')">
+                                <i class="fas fa-copy"></i>
+                                复制
+                            </div>
+                            <div class="more-menu-item" onclick="adjustOpacity('stock-sticky')">
+                                <i class="fas fa-adjust"></i>
+                                透明度
+                            </div>
+                            <div class="more-menu-item" onclick="closeSticky('stock-sticky')">
+                                <i class="fas fa-times"></i>
+                                关闭
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="sticky-body">
+                <div class="stock-main">
+                    <div class="stock-symbol">TSLA</div>
+                    <div class="stock-price">$168.42</div>
+                    <div class="crypto-change down">
+                        <i class="fas fa-caret-down"></i>
+                        -6.78%
+                    </div>
+                </div>
+                
+                <div class="stock-grid">
+                    <div class="stock-item">
+                        <div class="stock-item-label">今开</div>
+                        <div class="stock-item-value">$179.20</div>
+                    </div>
+                    <div class="stock-item">
+                        <div class="stock-item-label">昨收</div>
+                        <div class="stock-item-value">$180.65</div>
+                    </div>
+                    <div class="stock-item">
+                        <div class="stock-item-label">最高</div>
+                        <div class="stock-item-value">$181.30</div>
+                    </div>
+                    <div class="stock-item">
+                        <div class="stock-item-label">最低</div>
+                        <div class="stock-item-value">$166.88</div>
+                    </div>
+                </div>
+            </div>
+            <div class="sticky-footer">
+                <span>更新于 3 分钟前</span>
+                <div class="footer-status">
+                    <div class="health-indicator warning"></div>
+                    <span>限流中</span>
+                    <button class="footer-action-btn" onclick="switchProvider('stock-sticky')">切换源</button>
+                </div>
+            </div>
+            <div class="resize-handle" onmousedown="startResize(event, this.parentElement)"></div>
+        </div>
+
+        <!-- 交通便签 -->
+        <div class="sticky-window" id="traffic-sticky" style="left: 800px; top: 80px; width: 300px;" onclick="focusSticky(this)">
+            <div class="sticky-header" onmousedown="startDrag(event, 'traffic-sticky')">
+                <div class="traffic-lights">
+                    <div class="traffic-light close" onclick="closeSticky('traffic-sticky')"></div>
+                    <div class="traffic-light minimize"></div>
+                    <div class="traffic-light maximize"></div>
+                </div>
+                <div class="sticky-title-area">
+                    <div class="sticky-type-icon" style="background: var(--success);">
+                        <i class="fas fa-route"></i>
+                    </div>
+                    <div class="sticky-title">通勤路况</div>
+                </div>
+                <div class="sticky-actions">
+                    <button class="sticky-action-btn" onclick="refreshSticky('traffic-sticky')">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <button class="sticky-action-btn" onclick="openSettings('traffic-sticky')">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                    <div style="position: relative;">
+                        <button class="sticky-action-btn" onclick="toggleMoreMenu(this)">
+                            <i class="fas fa-ellipsis"></i>
+                        </button>
+                        <div class="more-menu" id="traffic-more-menu">
+                            <div class="more-menu-item" onclick="togglePin('traffic-sticky')">
+                                <i class="fas fa-thumbtack"></i>
+                                置顶
+                                <span class="checkmark" id="traffic-pin-check" style="display: none;">✓</span>
+                            </div>
+                            <div class="more-menu-item" onclick="toggleLock('traffic-sticky')">
+                                <i class="fas fa-lock"></i>
+                                锁定大小
+                                <span class="checkmark" id="traffic-lock-check" style="display: none;">✓</span>
+                            </div>
+                            <div class="more-menu-item" onclick="copySticky('traffic-sticky')">
+                                <i class="fas fa-copy"></i>
+                                复制
+                            </div>
+                            <div class="more-menu-item" onclick="adjustOpacity('traffic-sticky')">
+                                <i class="fas fa-adjust"></i>
+                                透明度
+                            </div>
+                            <div class="more-menu-item" onclick="closeSticky('traffic-sticky')">
+                                <i class="fas fa-times"></i>
+                                关闭
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="sticky-body">
+                <div class="traffic-route">
+                    <div class="route-icon">
+                        <i class="fas fa-home"></i>
+                    </div>
+                    <div class="route-info">
+                        <div class="route-name">回家路线</div>
+                        <div class="route-detail">公司 → 家 · 12.3km</div>
+                    </div>
+                </div>
+                
+                <div class="traffic-eta">25 分钟</div>
+                
+                <div class="traffic-status">
+                    <div class="traffic-bar"></div>
+                </div>
+                
+                <div style="font-size: 12px; color: rgba(255,255,255,0.7);">
+                    <div style="margin-bottom: 6px;">
+                        <i class="fas fa-clock" style="margin-right: 8px;"></i>
+                        建议 18:30 出发
+                    </div>
+                    <div>
+                        <i class="fas fa-exclamation-triangle" style="margin-right: 8px; color: var(--warning);"></i>
+                        中度拥堵
+                    </div>
+                </div>
+            </div>
+            <div class="sticky-footer">
+                <span>更新于 1 分钟前</span>
+                <div class="footer-status">
+                    <div class="health-indicator"></div>
+                    <span>正常</span>
+                </div>
+            </div>
+            <div class="resize-handle" onmousedown="startResize(event, this.parentElement)"></div>
+        </div>
+
+        <!-- 天气便签 -->
+        <div class="sticky-window" id="weather-sticky" style="left: 60px; top: 380px; width: 320px;" onclick="focusSticky(this)">
+            <div class="sticky-header" onmousedown="startDrag(event, 'weather-sticky')">
+                <div class="traffic-lights">
+                    <div class="traffic-light close" onclick="closeSticky('weather-sticky')"></div>
+                    <div class="traffic-light minimize"></div>
+                    <div class="traffic-light maximize"></div>
+                </div>
+                <div class="sticky-title-area">
+                    <div class="sticky-type-icon" style="background: var(--purple);">
+                        <i class="fas fa-cloud-sun"></i>
+                    </div>
+                    <div class="sticky-title">北京天气</div>
+                </div>
+                <div class="sticky-actions">
+                    <button class="sticky-action-btn" onclick="refreshSticky('weather-sticky')">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <button class="sticky-action-btn" onclick="openSettings('weather-sticky')">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                    <div style="position: relative;">
+                        <button class="sticky-action-btn" onclick="toggleMoreMenu(this)">
+                            <i class="fas fa-ellipsis"></i>
+                        </button>
+                        <div class="more-menu" id="weather-more-menu">
+                            <div class="more-menu-item" onclick="togglePin('weather-sticky')">
+                                <i class="fas fa-thumbtack"></i>
+                                置顶
+                                <span class="checkmark" id="weather-pin-check" style="display: none;">✓</span>
+                            </div>
+                            <div class="more-menu-item" onclick="toggleLock('weather-sticky')">
+                                <i class="fas fa-lock"></i>
+                                锁定大小
+                                <span class="checkmark" id="weather-lock-check" style="display: none;">✓</span>
+                            </div>
+                            <div class="more-menu-item" onclick="copySticky('weather-sticky')">
+                                <i class="fas fa-copy"></i>
+                                复制
+                            </div>
+                            <div class="more-menu-item" onclick="adjustOpacity('weather-sticky')">
+                                <i class="fas fa-adjust"></i>
+                                透明度
+                            </div>
+                            <div class="more-menu-item" onclick="closeSticky('weather-sticky')">
+                                <i class="fas fa-times"></i>
+                                关闭
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="sticky-body">
+                <div class="weather-main">
+                    <div class="weather-icon">
+                        <i class="fas fa-sun"></i>
+                    </div>
+                    <div>
+                        <div class="weather-temp">22°C</div>
+                        <div class="weather-desc">晴朗</div>
+                    </div>
+                </div>
+                
+                <div class="weather-details">
+                    <div class="weather-detail">
+                        <i class="fas fa-eye"></i>
+                        <div class="weather-detail-value">10km</div>
+                        <div class="weather-detail-label">能见度</div>
+                    </div>
+                    <div class="weather-detail">
+                        <i class="fas fa-tint"></i>
+                        <div class="weather-detail-value">45%</div>
+                        <div class="weather-detail-label">湿度</div>
+                    </div>
+                    <div class="weather-detail">
+                        <i class="fas fa-wind"></i>
+                        <div class="weather-detail-value">12km/h</div>
+                        <div class="weather-detail-label">风速</div>
+                    </div>
+                </div>
+            </div>
+            <div class="sticky-footer">
+                <span>更新于 5 分钟前</span>
+                <div class="footer-status">
+                    <div class="health-indicator"></div>
+                    <span>正常</span>
+                </div>
+            </div>
+            <div class="resize-handle" onmousedown="startResize(event, this.parentElement)"></div>
+        </div>
+
+        <!-- 记事便签 -->
+        <div class="sticky-window" id="memo-sticky" style="left: 420px; top: 380px; width: 340px;" onclick="focusSticky(this)">
+            <div class="sticky-header" onmousedown="startDrag(event, 'memo-sticky')">
+                <div class="traffic-lights">
+                    <div class="traffic-light close" onclick="closeSticky('memo-sticky')"></div>
+                    <div class="traffic-light minimize"></div>
+                    <div class="traffic-light maximize"></div>
+                </div>
+                <div class="sticky-title-area">
+                    <div class="sticky-type-icon" style="background: var(--secondary);">
+                        <i class="fas fa-edit"></i>
+                    </div>
+                    <div class="sticky-title">会议记录</div>
+                </div>
+                <div class="sticky-actions">
+                    <button class="sticky-action-btn" onclick="refreshSticky('memo-sticky')">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <button class="sticky-action-btn" onclick="openSettings('memo-sticky')">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                    <div style="position: relative;">
+                        <button class="sticky-action-btn" onclick="toggleMoreMenu(this)">
+                            <i class="fas fa-ellipsis"></i>
+                        </button>
+                        <div class="more-menu" id="memo-more-menu">
+                            <div class="more-menu-item" onclick="togglePin('memo-sticky')">
+                                <i class="fas fa-thumbtack"></i>
+                                置顶
+                                <span class="checkmark" id="memo-pin-check" style="display: none;">✓</span>
+                            </div>
+                            <div class="more-menu-item" onclick="toggleLock('memo-sticky')">
+                                <i class="fas fa-lock"></i>
+                                锁定大小
+                                <span class="checkmark" id="memo-lock-check" style="display: none;">✓</span>
+                            </div>
+                            <div class="more-menu-item" onclick="copySticky('memo-sticky')">
+                                <i class="fas fa-copy"></i>
+                                复制
+                            </div>
+                            <div class="more-menu-item" onclick="adjustOpacity('memo-sticky')">
+                                <i class="fas fa-adjust"></i>
+                                透明度
+                            </div>
+                            <div class="more-menu-item" onclick="closeSticky('memo-sticky')">
+                                <i class="fas fa-times"></i>
+                                关闭
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="sticky-body">
+                <textarea class="memo-textarea" placeholder="输入你的记录...">产品评审会议
+- 确认 AI Sticky v1.0 功能范围
+- 讨论便签模板设计
+- 确定 API Key 管理策略
+- 下周开始开发</textarea>
+                
+                <div class="memo-actions">
+                    <button class="memo-btn primary" onclick="aiOrganize('memo-sticky')">
+                        <i class="fas fa-magic"></i>
+                        AI 整理
+                    </button>
+                    <button class="memo-btn secondary" onclick="saveNote('memo-sticky')">
+                        保存
+                    </button>
+                </div>
+            </div>
+            <div class="sticky-footer">
+                <span>自动保存于 1 分钟前</span>
+                <div class="footer-status">
+                    <div class="health-indicator"></div>
+                    <span>已同步</span>
+                </div>
+            </div>
+            <div class="resize-handle" onmousedown="startResize(event, this.parentElement)"></div>
+        </div>
+    </div>
+
+    <!-- 便签设置 Popover -->
+    <div class="settings-popover" id="stickySettingsPopover">
+        <div class="popover-header">
+            <span class="popover-title">便签设置</span>
+            <button class="popover-close" onclick="closeSettingsPopover()">&times;</button>
+        </div>
+        <div class="popover-body">
+            <div class="settings-tabs">
+                <div class="settings-tab active" onclick="switchSettingsTab(this, 'refresh')">刷新</div>
+                <div class="settings-tab" onclick="switchSettingsTab(this, 'rules')">规则</div>
+                <div class="settings-tab" onclick="switchSettingsTab(this, 'notify')">通知</div>
+                <div class="settings-tab" onclick="switchSettingsTab(this, 'source')">数据源</div>
+            </div>
+            
+            <!-- 刷新设置 -->
+            <div class="settings-content active" id="refresh-content">
+                <div class="settings-item">
+                    <label class="settings-label">刷新频率</label>
+                    <select class="settings-select">
+                        <option>1 分钟</option>
+                        <option selected>5 分钟</option>
+                        <option>15 分钟</option>
+                        <option>60 分钟</option>
+                    </select>
+                </div>
+                <div class="settings-item">
+                    <div class="settings-toggle">
+                        <span>可见优先</span>
+                        <div class="toggle-switch active" onclick="toggleSwitch(this)"></div>
+                    </div>
+                </div>
+                <div class="settings-item">
+                    <div class="settings-toggle">
+                        <span>后台降频</span>
+                        <div class="toggle-switch active" onclick="toggleSwitch(this)"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 规则设置 -->
+            <div class="settings-content" id="rules-content">
+                <div class="settings-item">
+                    <label class="settings-label">价格告警</label>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <select class="settings-select" style="flex: 1;">
+                            <option>价格低于</option>
+                            <option>价格高于</option>
+                            <option>涨跌幅超过</option>
+                        </select>
+                        <input type="number" placeholder="阈值" style="width: 80px; padding: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; color: #fff;">
+                    </div>
+                </div>
+                <div class="settings-item">
+                    <div class="settings-toggle">
+                        <span>启用告警</span>
+                        <div class="toggle-switch" onclick="toggleSwitch(this)"></div>
+                    </div>
+                </div>
+                <div class="settings-item">
+                    <label class="settings-label">去重窗口</label>
+                    <select class="settings-select">
+                        <option>5 分钟</option>
+                        <option selected>10 分钟</option>
+                        <option>30 分钟</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- 通知设置 -->
+            <div class="settings-content" id="notify-content">
+                <div class="settings-item">
+                    <div class="settings-toggle">
+                        <span>系统通知</span>
+                        <div class="toggle-switch" onclick="toggleSwitch(this)"></div>
+                    </div>
+                </div>
+                <div class="settings-item">
+                    <div class="settings-toggle">
+                        <span>声音提醒</span>
+                        <div class="toggle-switch" onclick="toggleSwitch(this)"></div>
+                    </div>
+                </div>
+                <div style="font-size: 12px; color: rgba(255,255,255,0.6); line-height: 1.4;">
+                    仅当开启时才会在告警触发且未被去重时发送通知
+                </div>
+            </div>
+            
+            <!-- 数据源设置 -->
+            <div class="settings-content" id="source-content">
+                <div class="settings-item">
+                    <label class="settings-label">Provider</label>
+                    <select class="settings-select">
+                        <option selected>Binance API</option>
+                        <option>CoinGecko API</option>
+                        <option>Alpha Vantage</option>
+                    </select>
+                </div>
+                <div class="settings-item">
+                    <label class="settings-label">Key 状态</label>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div class="health-indicator error"></div>
+                        <span style="color: var(--accent);">失效</span>
+                    </div>
+                </div>
+                <div class="settings-item">
+                    <button class="settings-btn" onclick="openKeyWizard()">修复 Key</button>
+                </div>
+                <div class="settings-item">
+                    <button class="settings-btn secondary" onclick="testConnection()">测试连接</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 新建便签模态框 -->
+    <div class="modal-overlay" id="newStickyModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">新建便签</h2>
+            </div>
+            <div class="modal-body">
+                <div class="template-grid">
+                    <div class="template-card" onclick="selectTemplate(this, 'crypto')">
+                        <div class="template-icon crypto">
+                            <i class="fab fa-bitcoin"></i>
+                        </div>
+                        <div class="template-name">币价监控</div>
+                        <div class="template-desc">实时加密货币行情</div>
+                    </div>
+                    <div class="template-card" onclick="selectTemplate(this, 'stock')">
+                        <div class="template-icon stock">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="template-name">股票监控</div>
+                        <div class="template-desc">美股港股实时数据</div>
+                    </div>
+                    <div class="template-card" onclick="selectTemplate(this, 'traffic')">
+                        <div class="template-icon traffic">
+                            <i class="fas fa-route"></i>
+                        </div>
+                        <div class="template-name">交通路况</div>
+                        <div class="template-desc">导航和ETA预测</div>
+                    </div>
+                    <div class="template-card" onclick="selectTemplate(this, 'weather')">
+                        <div class="template-icon weather">
+                            <i class="fas fa-cloud-sun"></i>
+                        </div>
+                        <div class="template-name">天气预报</div>
+                        <div class="template-desc">本地天气和预报</div>
+                    </div>
+                    <div class="template-card" onclick="selectTemplate(this, 'memo')">
+                        <div class="template-icon memo">
+                            <i class="fas fa-edit"></i>
+                        </div>
+                        <div class="template-name">智能记事</div>
+                        <div class="template-desc">AI 整理的文本便签</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn secondary" onclick="closeModal('newStickyModal')">取消</button>
+                <button class="btn primary" onclick="createSticky()" id="createBtn" disabled>创建</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 全局搜索 -->
+    <div class="search-overlay" id="searchOverlay">
+        <div class="search-box">
+            <input type="text" class="search-input" placeholder="搜索便签..." onkeyup="searchStickies(this.value)">
+            <div class="search-results" id="searchResults">
+                <div class="search-item" onclick="focusSearchResult('crypto-sticky')">
+                    <div class="search-item-icon" style="background: var(--warning);">
+                        <i class="fab fa-bitcoin"></i>
+                    </div>
+                    <div class="search-item-info">
+                        <div class="search-item-name">BTC/USDT</div>
+                        <div class="search-item-desc">币价监控 · $67,842</div>
+                    </div>
+                    <div class="search-item-status" style="background: var(--accent);"></div>
+                </div>
+                <div class="search-item" onclick="focusSearchResult('stock-sticky')">
+                    <div class="search-item-icon" style="background: var(--primary);">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="search-item-info">
+                        <div class="search-item-name">TSLA</div>
+                        <div class="search-item-desc">股票监控 · $168.42</div>
+                    </div>
+                    <div class="search-item-status" style="background: var(--warning);"></div>
+                </div>
+                <div class="search-item" onclick="focusSearchResult('traffic-sticky')">
+                    <div class="search-item-icon" style="background: var(--success);">
+                        <i class="fas fa-route"></i>
+                    </div>
+                    <div class="search-item-info">
+                        <div class="search-item-name">通勤路况</div>
+                        <div class="search-item-desc">交通监控 · 25 分钟</div>
+                    </div>
+                    <div class="search-item-status"></div>
+                </div>
+                <div class="search-item" onclick="focusSearchResult('weather-sticky')">
+                    <div class="search-item-icon" style="background: var(--purple);">
+                        <i class="fas fa-cloud-sun"></i>
+                    </div>
+                    <div class="search-item-info">
+                        <div class="search-item-name">北京天气</div>
+                        <div class="search-item-desc">天气监控 · 22°C 晴朗</div>
+                    </div>
+                    <div class="search-item-status"></div>
+                </div>
+                <div class="search-item" onclick="focusSearchResult('memo-sticky')">
+                    <div class="search-item-icon" style="background: var(--secondary);">
+                        <i class="fas fa-edit"></i>
+                    </div>
+                    <div class="search-item-info">
+                        <div class="search-item-name">会议记录</div>
+                        <div class="search-item-desc">智能记事 · 产品评审会议</div>
+                    </div>
+                    <div class="search-item-status"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Key 向导模态框 -->
+    <div class="modal-overlay" id="keyWizardModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">API Key 向导</h2>
+            </div>
+            <div class="modal-body">
+                <div style="text-align: center; margin-bottom: 24px;">
+                    <div style="font-size: 16px; color: #fff; margin-bottom: 8px;">配置 Binance API Key</div>
+                    <div style="font-size: 14px; color: rgba(255,255,255,0.6);">请前往 Binance 获取您的 API Key</div>
+                </div>
+                
+                <div class="settings-item">
+                    <label class="settings-label">API Key</label>
+                    <input type="text" placeholder="粘贴您的 API Key" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: #fff; font-family: 'JetBrains Mono', monospace;">
+                </div>
+                
+                <div class="settings-item">
+                    <label class="settings-label">Secret Key</label>
+                    <input type="password" placeholder="粘贴您的 Secret Key" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: #fff; font-family: 'JetBrains Mono', monospace;">
+                </div>
+                
+                <div style="background: rgba(37, 99, 235, 0.1); border: 1px solid rgba(37, 99, 235, 0.3); border-radius: 8px; padding: 12px; font-size: 13px; color: rgba(255,255,255,0.8);">
+                    <i class="fas fa-info-circle" style="margin-right: 8px; color: var(--primary);"></i>
+                    您的 API Key 仅存储在本地，不会上传到任何服务器
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn secondary" onclick="closeModal('keyWizardModal')">取消</button>
+                <button class="btn primary" onclick="testApiKey()">测试并保存</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 全局变量
+        let isDragging = false;
+        let isResizing = false;
+        let dragElement = null;
+        let resizeElement = null;
+        let dragOffset = { x: 0, y: 0 };
+        let selectedTemplate = null;
+        let currentSettingsSticky = null;
+        let globalRefreshPaused = false;
+
+        // 菜单栏功能
+        function toggleDropdown() {
+            const dropdown = document.getElementById('menuDropdown');
+            dropdown.classList.toggle('show');
+        }
+
+        function toggleRefresh() {
+            globalRefreshPaused = !globalRefreshPaused;
+            const icon = document.getElementById('refreshIcon');
+            const text = document.getElementById('refreshText');
+            
+            if (globalRefreshPaused) {
+                icon.className = 'fas fa-play';
+                text.textContent = '恢复全部刷新';
+                // 更新所有便签状态
+                document.querySelectorAll('.sticky-window').forEach(sticky => {
+                    const footer = sticky.querySelector('.sticky-footer .footer-status span:last-child');
+                    if (footer) footer.textContent = '已暂停';
+                });
+            } else {
+                icon.className = 'fas fa-pause';
+                text.textContent = '暂停全部刷新';
+                // 恢复所有便签状态
+                document.querySelectorAll('.sticky-window').forEach(sticky => {
+                    const footer = sticky.querySelector('.sticky-footer .footer-status span:last-child');
+                    if (footer) footer.textContent = '正常';
+                });
+            }
+        }
+
+        // 拖拽和缩放功能
+        function startDrag(e, id) {
+            if (e.target.closest('.sticky-actions') || e.target.closest('.traffic-lights') || e.target.closest('.resize-handle')) {
+                return;
+            }
+            
+            isDragging = true;
+            dragElement = document.getElementById(id);
+            
+            const rect = dragElement.getBoundingClientRect();
+            dragOffset.x = e.clientX - rect.left;
+            dragOffset.y = e.clientY - rect.top;
+            
+            dragElement.classList.add('dragging');
+            focusSticky(dragElement);
+            
+            e.preventDefault();
+        }
+
+        function startResize(e, element) {
+            if (element.classList.contains('locked')) {
+                return;
+            }
+            
+            isResizing = true;
+            resizeElement = element;
+            
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        // 全局事件监听
+        document.addEventListener('mousemove', function(e) {
+            if (isDragging && dragElement) {
+                const x = e.clientX - dragOffset.x;
+                const y = e.clientY - dragOffset.y;
+                
+                dragElement.style.left = Math.max(0, Math.min(x, window.innerWidth - dragElement.offsetWidth)) + 'px';
+                dragElement.style.top = Math.max(32, Math.min(y, window.innerHeight - dragElement.offsetHeight)) + 'px';
+            }
+            
+            if (isResizing && resizeElement) {
+                const rect = resizeElement.getBoundingClientRect();
+                const newWidth = Math.max(240, e.clientX - rect.left);
+                const newHeight = Math.max(160, e.clientY - rect.top);
+                
+                resizeElement.style.width = newWidth + 'px';
+                resizeElement.style.height = newHeight + 'px';
+            }
+        });
+
+        document.addEventListener('mouseup', function() {
+            if (isDragging && dragElement) {
+                dragElement.classList.remove('dragging');
+                isDragging = false;
+                dragElement = null;
+            }
+            
+            if (isResizing && resizeElement) {
+                isResizing = false;
+                resizeElement = null;
+            }
+        });
+
+        // 便签窗口功能
+        function focusSticky(element) {
+            document.querySelectorAll('.sticky-window').forEach(w => w.classList.remove('focused'));
+            element.classList.add('focused');
+        }
+
+        function closeSticky(id) {
+            const element = document.getElementById(id);
+            element.style.display = 'none';
+        }
+
+        function refreshSticky(id) {
+            const btn = document.querySelector(`#${id} .sticky-action-btn i.fa-sync-alt`);
+            btn.style.animation = 'spin 1s linear';
+            setTimeout(() => btn.style.animation = '', 1000);
+        }
+
+        // 更多菜单功能
+        function toggleMoreMenu(btn) {
+            const menu = btn.nextElementSibling;
+            document.querySelectorAll('.more-menu').forEach(m => {
+                if (m !== menu) m.classList.remove('show');
+            });
+            menu.classList.toggle('show');
+        }
+
+        function togglePin(id) {
+            const checkmark = document.getElementById(id.replace('-sticky', '-pin-check'));
+            const isVisible = checkmark.style.display !== 'none';
+            checkmark.style.display = isVisible ? 'none' : 'inline';
+            
+            // 关闭菜单
+            document.querySelectorAll('.more-menu').forEach(m => m.classList.remove('show'));
+        }
+
+        function toggleLock(id) {
+            const element = document.getElementById(id);
+            const checkmark = document.getElementById(id.replace('-sticky', '-lock-check'));
+            const isLocked = element.classList.contains('locked');
+            
+            if (isLocked) {
+                element.classList.remove('locked');
+                checkmark.style.display = 'none';
+            } else {
+                element.classList.add('locked');
+                checkmark.style.display = 'inline';
+            }
+            
+            // 关闭菜单
+            document.querySelectorAll('.more-menu').forEach(m => m.classList.remove('show'));
+        }
+
+        function copySticky(id) {
+            alert('便签已复制');
+            document.querySelectorAll('.more-menu').forEach(m => m.classList.remove('show'));
+        }
+
+        function adjustOpacity(id) {
+            const element = document.getElementById(id);
+            const currentOpacity = parseFloat(element.style.opacity) || 1;
+            const newOpacity = currentOpacity === 1 ? 0.7 : currentOpacity === 0.7 ? 0.4 : 1;
+            element.style.opacity = newOpacity;
+            
+            document.querySelectorAll('.more-menu').forEach(m => m.classList.remove('show'));
+        }
+
+        // 设置面板功能
+        function openSettings(id) {
+            currentSettingsSticky = id;
+            const popover = document.getElementById('stickySettingsPopover');
+            const sticky = document.getElementById(id);
+            const rect = sticky.getBoundingClientRect();
+            
+            popover.style.display = 'block';
+            popover.style.left = (rect.right + 10) + 'px';
+            popover.style.top = rect.top + 'px';
+            
+            // 确保不超出屏幕
+            if (rect.right + 370 > window.innerWidth) {
+                popover.style.left = (rect.left - 370) + 'px';
+            }
+        }
+
+        function closeSettingsPopover() {
+            document.getElementById('stickySettingsPopover').style.display = 'none';
+            currentSettingsSticky = null;
+        }
+
+        function switchSettingsTab(tab, contentId) {
+            // 切换标签
+            document.querySelectorAll('.settings-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            
+            // 切换内容
+            document.querySelectorAll('.settings-content').forEach(c => c.classList.remove('active'));
+            document.getElementById(contentId + '-content').classList.add('active');
+        }
+
+        function toggleSwitch(switchEl) {
+            switchEl.classList.toggle('active');
+        }
+
+        // Footer 修复功能
+        function fixKey(id) {
+            openKeyWizard();
+        }
+
+        function switchProvider(id) {
+            alert('切换数据源');
+        }
+
+        // 模态框功能
+        function openNewModal() {
+            document.getElementById('newStickyModal').classList.add('show');
+            document.getElementById('menuDropdown').classList.remove('show');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('show');
+            selectedTemplate = null;
+            document.querySelectorAll('.template-card').forEach(card => card.classList.remove('selected'));
+            document.getElementById('createBtn').disabled = true;
+        }
+
+        function selectTemplate(card, type) {
+            document.querySelectorAll('.template-card').forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+            selectedTemplate = type;
+            document.getElementById('createBtn').disabled = false;
+        }
+
+        function createSticky() {
+            if (!selectedTemplate) return;
+            
+            alert(`创建 ${selectedTemplate} 便签`);
+            closeModal('newStickyModal');
+        }
+
+        // 搜索功能
+        function openSearch() {
+            document.getElementById('searchOverlay').classList.add('show');
+            document.getElementById('menuDropdown').classList.remove('show');
+            document.querySelector('.search-input').focus();
+        }
+
+        function searchStickies(query) {
+            // 简单的搜索演示
+            const items = document.querySelectorAll('.search-item');
+            items.forEach(item => {
+                const name = item.querySelector('.search-item-name').textContent.toLowerCase();
+                const desc = item.querySelector('.search-item-desc').textContent.toLowerCase();
+                const match = name.includes(query.toLowerCase()) || desc.includes(query.toLowerCase());
+                item.style.display = match ? 'flex' : 'none';
+            });
+        }
+
+        function focusSearchResult(id) {
+            const element = document.getElementById(id);
+            if (element) {
+                focusSticky(element);
+                element.style.border = '2px solid var(--primary)';
+                setTimeout(() => element.style.border = '', 2000);
+            }
+            document.getElementById('searchOverlay').classList.remove('show');
+        }
+
+        // Key 向导
+        function openKeyWizard() {
+            document.getElementById('keyWizardModal').classList.add('show');
+            closeSettingsPopover();
+        }
+
+        function testApiKey() {
+            alert('API Key 测试成功！');
+            closeModal('keyWizardModal');
+            
+            // 更新便签状态
+            if (currentSettingsSticky) {
+                const footer = document.querySelector(`#${currentSettingsSticky} .footer-status`);
+                const indicator = footer.querySelector('.health-indicator');
+                const status = footer.querySelector('span:last-child');
+                const btn = footer.querySelector('.footer-action-btn');
+                
+                indicator.className = 'health-indicator';
+                status.textContent = '正常';
+                if (btn) btn.style.display = 'none';
+            }
+        }
+
+        function testConnection() {
+            alert('连接测试成功！');
+        }
+
+        // 其他功能
+        function openAlertCenter() {
+            alert('打开告警中心');
+            document.getElementById('menuDropdown').classList.remove('show');
+        }
+
+        function openKeyManager() {
+            alert('打开 Key 管理');
+            document.getElementById('menuDropdown').classList.remove('show');
+        }
+
+        function aiOrganize(id) {
+            const textarea = document.querySelector(`#${id} .memo-textarea`);
+            textarea.value = `# 产品评审会议纪要
+
+## 会议概要
+- **时间**: 2024年1月15日
+- **参与人员**: 产品团队
+- **主题**: AI Sticky v1.0 功能确认
+
+## 决策事项
+1. ✅ 确认 AI Sticky v1.0 功能范围
+2. ✅ 讨论便签模板设计
+3. ✅ 确定 API Key 管理策略
+
+## 下一步行动
+- [ ] 下周开始开发
+- [ ] 准备技术方案文档
+- [ ] 设计评审排期`;
+        }
+
+        function saveNote(id) {
+            alert('记录已保存');
+        }
+
+        // 键盘快捷键
+        document.addEventListener('keydown', function(e) {
+            if (e.metaKey && e.key === 'k') {
+                e.preventDefault();
+                openSearch();
+            }
+            
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal-overlay, .search-overlay').forEach(overlay => {
+                    overlay.classList.remove('show');
+                });
+                closeSettingsPopover();
+                document.querySelectorAll('.more-menu').forEach(m => m.classList.remove('show'));
+            }
+        });
+
+        // 点击外部关闭
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.menu-dropdown') && !e.target.closest('.menu-item')) {
+                document.getElementById('menuDropdown').classList.remove('show');
+            }
+            
+            if (!e.target.closest('.more-menu') && !e.target.closest('.sticky-action-btn')) {
+                document.querySelectorAll('.more-menu').forEach(m => m.classList.remove('show'));
+            }
+            
+            if (!e.target.closest('.settings-popover') && !e.target.closest('.sticky-action-btn')) {
+                closeSettingsPopover();
+            }
+        });
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('AI Sticky 原型已加载');
+            
+            // 添加旋转动画
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes spin {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(360deg); }
+                }
+            `;
+            document.head.appendChild(style);
+        });
+    </script>
+</body>
+</html>

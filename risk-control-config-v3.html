@@ -1,0 +1,1461 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>风控配置 - 方案3 - VOSS Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    </style>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+            padding-bottom: 40px;
+        }
+
+        /* 顶部状态栏 */
+        .status-bar {
+            background: white;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            font-weight: 600;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+            position: relative;
+            z-index: 10;
+        }
+
+        .time {
+            color: #1e293b;
+            letter-spacing: 0.5px;
+            font-weight: 500;
+        }
+
+        .status-icons {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            color: #64748b;
+        }
+
+        /* 头部 */
+        .header {
+            background: white;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .header-title {
+            font-size: 19px;
+            font-weight: 700;
+            color: #1e293b;
+            flex: 1;
+            text-align: center;
+            letter-spacing: 0.3px;
+        }
+
+        .back-btn {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            font-size: 18px;
+            cursor: pointer;
+            color: #64748b;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .back-btn:hover {
+            background: #1e293b;
+            color: white;
+            border-color: #1e293b;
+        }
+
+        .back-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* 主容器 */
+        .container {
+            padding: 24px 16px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* 卡片样式 */
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e5e7eb;
+            margin-bottom: 20px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .card.disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+
+        .card-title i {
+            color: #3b82f6;
+        }
+
+        /* Toggle开关 */
+        .toggle-switch {
+            position: relative;
+            width: 52px;
+            height: 28px;
+            background: #cbd5e1;
+            border-radius: 100px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .toggle-switch.active {
+            background: #3b82f6;
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            transition: all 0.3s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .toggle-switch.active::after {
+            left: 26px;
+        }
+
+        /* 分离配置开关 */
+        .separate-config-section {
+            background: #f8fafc;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+            transition: all 0.3s;
+        }
+
+        .separate-config-section.active {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+
+        .separate-config-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .separate-config-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .separate-config-label {
+            font-size: 15px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 4px;
+        }
+
+        .separate-config-desc {
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        /* 配置内容区域 */
+        .config-content {
+            margin-top: 20px;
+            display: none;
+        }
+
+        .config-content.active {
+            display: block;
+        }
+
+        /* 交易类型标签 */
+        .transaction-type-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #dbeafe;
+            color: #1e40af;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .transaction-type-badge.withdrawal {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .transaction-type-badge i {
+            font-size: 16px;
+        }
+
+        /* 提供商配置项 */
+        .provider-config-item {
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            transition: all 0.3s;
+        }
+
+        .provider-config-item:hover {
+            border-color: #cbd5e1;
+        }
+
+        .provider-config-item.active {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+
+        .provider-config-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .provider-config-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .provider-config-name {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 4px;
+        }
+
+        .provider-config-desc {
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        .provider-config-content {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .provider-flag {
+            font-size: 24px;
+        }
+
+        /* 表单样式 */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #475569;
+        }
+
+        .form-input {
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s;
+            background: white;
+            font-family: inherit;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+
+        .amount-range {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .amount-range input {
+            flex: 1;
+        }
+
+        .range-separator {
+            color: #94a3b8;
+            font-weight: 600;
+        }
+
+        /* 行为控制 */
+        .behavior-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        @media (max-width: 600px) {
+            .behavior-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .behavior-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            background: #f8fafc;
+            border-radius: 10px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .behavior-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        /* 信息提示框 */
+        .info-box {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 12px;
+        }
+
+        .info-box-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #92400e;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-box-text {
+            font-size: 13px;
+            color: #78350f;
+            line-height: 1.5;
+        }
+
+        /* 配置预览 */
+        .provider-preview {
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 20px;
+        }
+
+        .preview-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #0c4a6e;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .preview-text {
+            font-size: 13px;
+            color: #075985;
+            line-height: 1.6;
+        }
+
+        /* 水平时间轴样式 */
+        .range-timeline {
+            margin: 16px 0 0 0;
+        }
+
+        .timeline-bar-container {
+            position: relative;
+            height: 50px;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+        }
+
+        .timeline-segment {
+            position: relative;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            flex-direction: column;
+            gap: 2px;
+            padding: 8px 4px;
+        }
+
+        .timeline-segment.bitrace {
+            background: #10b981;
+        }
+
+        .timeline-segment.chainalysis {
+            background: #3b82f6;
+        }
+
+        .timeline-segment.overlap {
+            background: linear-gradient(90deg, #8b5cf6 0%, #a78bfa 100%);
+            position: relative;
+            border: 2px solid #7c3aed;
+        }
+
+        .timeline-segment.overlap::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                90deg,
+                rgba(16, 185, 129, 0.3) 0%,
+                rgba(16, 185, 129, 0.3) 50%,
+                rgba(59, 130, 246, 0.3) 50%,
+                rgba(59, 130, 246, 0.3) 100%
+            );
+            background-size: 40px 100%;
+            animation: slideOverlay 3s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes slideOverlay {
+            0% { background-position: 0 0; }
+            100% { background-position: 40px 0; }
+        }
+
+        .timeline-segment.undetected {
+            background: #f1f5f9;
+            border-left: 1px dashed #cbd5e1;
+            border-right: 1px dashed #cbd5e1;
+        }
+
+
+        .timeline-segment-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: white;
+            text-align: center;
+            line-height: 1.2;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            z-index: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+        }
+
+        .timeline-segment-range {
+            font-size: 10px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.9);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            z-index: 1;
+        }
+
+        .timeline-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            font-size: 11px;
+            color: #64748b;
+            font-weight: 600;
+        }
+
+        .timeline-legend {
+            display: flex;
+            gap: 16px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+            padding: 12px;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+
+        .timeline-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: #475569;
+            font-weight: 600;
+        }
+
+        .timeline-legend-icon {
+            width: 20px;
+            height: 12px;
+            border-radius: 3px;
+        }
+
+        .timeline-legend-icon.bitrace {
+            background: #10b981;
+        }
+
+        .timeline-legend-icon.chainalysis {
+            background: #3b82f6;
+        }
+
+        .timeline-legend-icon.overlap {
+            background: linear-gradient(90deg, #8b5cf6 0%, #a78bfa 100%);
+            border: 1.5px solid #7c3aed;
+        }
+
+        .timeline-legend-icon.undetected {
+            background: #f1f5f9;
+            border: 1px dashed #cbd5e1;
+        }
+
+        /* 隐藏类 */
+        .hidden {
+            display: none !important;
+        }
+
+        /* 保存按钮 */
+        .save-btn {
+            width: 100%;
+            padding: 18px;
+            border: none;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 32px;
+        }
+
+        .save-btn:hover {
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .save-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Toast提示 */
+        .toast {
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-150px);
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 16px 28px;
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: 600;
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 2000;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .toast.success {
+            background: rgba(16, 185, 129, 0.95);
+        }
+
+        .toast.error {
+            background: rgba(220, 38, 38, 0.95);
+        }
+
+        /* 分隔线 */
+        .divider {
+            height: 1px;
+            background: #e5e7eb;
+            margin: 24px 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部状态栏 -->
+    <div class="status-bar">
+        <span class="time" id="currentTime">11:56</span>
+        <div class="status-icons">
+            <span><i class="fas fa-signal"></i></span>
+            <span>5G</span>
+            <span><i class="fas fa-battery-three-quarters"></i></span>
+        </div>
+    </div>
+
+    <!-- 头部 -->
+    <div class="header">
+        <button class="back-btn" onclick="goBack()"><i class="fas fa-arrow-left"></i></button>
+        <h1 class="header-title">风控配置 - 方案3</h1>
+        <div style="width: 36px;"></div>
+    </div>
+
+    <!-- 主容器 -->
+    <div class="container">
+        <!-- 总开关 -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    <i class="fas fa-power-off"></i>
+                    <span>风控配置</span>
+                </div>
+                <div class="toggle-switch" id="master-toggle" onclick="toggleMaster()"></div>
+            </div>
+            <div class="info-box" style="background: #dbeafe; border-color: #3b82f6;">
+                <div class="info-box-title" style="color: #1e40af;">
+                    <i class="fas fa-info-circle"></i>
+                    <span>启用说明</span>
+                </div>
+                <div class="info-box-text" style="color: #1e3a8a;">
+                    开启后，系统将对所有交易进行风险检测和控制。关闭则停用所有风控功能。
+                </div>
+            </div>
+        </div>
+
+        <!-- 风控提供商配置 -->
+        <div class="card" id="routing-config">
+            <div class="card-title">
+                <i class="fas fa-shield-alt"></i>
+                <span>风控提供商配置</span>
+            </div>
+
+            <!-- 是否区分入款/出款配置 -->
+            <div class="separate-config-section" id="separate-section">
+                <div class="separate-config-header">
+                    <div class="separate-config-title">
+                        <i class="fas fa-sliders-h" style="color: #3b82f6; font-size: 20px;"></i>
+                        <div>
+                            <div class="separate-config-label">区分入款/出款配置</div>
+                            <div class="separate-config-desc">开启后可为入款和出款设置不同的检测策略</div>
+                        </div>
+                    </div>
+                    <div class="toggle-switch" id="separate-toggle" onclick="toggleSeparateConfig()"></div>
+                </div>
+            </div>
+
+            <div class="info-box" style="background: #dbeafe; border-color: #3b82f6; margin-bottom: 24px;">
+                <div class="info-box-title" style="color: #1e40af;">
+                    <i class="fas fa-lightbulb"></i>
+                    <span>配置说明</span>
+                </div>
+                <div class="info-box-text" style="color: #1e3a8a;">
+                    为每个风控提供商配置检测的金额范围。<strong>金额范围可以重叠，重叠部分将同时使用多家提供商检测。</strong>
+                </div>
+            </div>
+
+            <!-- 统一配置模式 -->
+            <div id="unified-config" class="config-content active">
+                <!-- Bitrace 配置 -->
+                <div class="provider-config-item">
+                    <div class="provider-config-header">
+                        <div class="provider-config-title">
+                            <span class="provider-flag">🇭🇰</span>
+                            <div>
+                                <div class="provider-config-name">Bitrace</div>
+                                <div class="provider-config-desc">成本低廉，响应迅速，适合中小额交易</div>
+                            </div>
+                        </div>
+                        <div class="toggle-switch" id="toggle-unified-bitrace" onclick="toggleProviderConfig('unified', 'bitrace')"></div>
+                    </div>
+                    <div class="provider-config-content hidden" id="content-unified-bitrace">
+                        <div class="form-group">
+                            <label class="form-label">检测金额范围 (USDT)</label>
+                            <div class="amount-range">
+                                <input type="number" class="form-input" id="unified-bitrace-min" placeholder="最小金额" value="100" onchange="updateProviderPreview('unified')">
+                                <span class="range-separator">-</span>
+                                <input type="number" class="form-input" id="unified-bitrace-max" placeholder="最大金额 (留空=无上限)" onchange="updateProviderPreview('unified')">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chainalysis 配置 -->
+                <div class="provider-config-item">
+                    <div class="provider-config-header">
+                        <div class="provider-config-title">
+                            <span class="provider-flag">🇺🇸</span>
+                            <div>
+                                <div class="provider-config-name">Chainalysis</div>
+                                <div class="provider-config-desc">成本较高，行业权威，适合大额及高风险交易</div>
+                            </div>
+                        </div>
+                        <div class="toggle-switch" id="toggle-unified-chainalysis" onclick="toggleProviderConfig('unified', 'chainalysis')"></div>
+                    </div>
+                    <div class="provider-config-content hidden" id="content-unified-chainalysis">
+                        <div class="form-group">
+                            <label class="form-label">检测金额范围 (USDT)</label>
+                            <div class="amount-range">
+                                <input type="number" class="form-input" id="unified-chainalysis-min" placeholder="最小金额" value="1000" onchange="updateProviderPreview('unified')">
+                                <span class="range-separator">-</span>
+                                <input type="number" class="form-input" id="unified-chainalysis-max" placeholder="最大金额 (留空=无上限)" onchange="updateProviderPreview('unified')">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 统一配置预览 -->
+                <div class="provider-preview">
+                    <div class="preview-title">
+                        <i class="fas fa-eye"></i>
+                        <span>检测范围预览（适用于入款和出款）</span>
+                    </div>
+                    <div class="preview-text" id="unified-preview-content">
+                        <div style="text-align: center; padding: 20px; color: #94a3b8; font-size: 11px;">
+                            请先启用至少一个风控提供商
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 分离配置模式 -->
+            <div id="separated-config" class="config-content">
+                <!-- 入款配置 -->
+                <div style="margin-bottom: 32px;">
+                    <div class="transaction-type-badge">
+                        <i class="fas fa-arrow-down"></i>
+                        <span>入款检测配置</span>
+                    </div>
+
+                    <!-- Bitrace 配置 -->
+                    <div class="provider-config-item">
+                        <div class="provider-config-header">
+                            <div class="provider-config-title">
+                                <span class="provider-flag">🇭🇰</span>
+                                <div>
+                                    <div class="provider-config-name">Bitrace</div>
+                                    <div class="provider-config-desc">成本低廉，响应迅速，适合中小额交易</div>
+                                </div>
+                            </div>
+                            <div class="toggle-switch" id="toggle-deposit-bitrace" onclick="toggleProviderConfig('deposit', 'bitrace')"></div>
+                        </div>
+                        <div class="provider-config-content hidden" id="content-deposit-bitrace">
+                            <div class="form-group">
+                                <label class="form-label">检测金额范围 (USDT)</label>
+                                <div class="amount-range">
+                                    <input type="number" class="form-input" id="deposit-bitrace-min" placeholder="最小金额" value="100" onchange="updateProviderPreview('deposit')">
+                                    <span class="range-separator">-</span>
+                                    <input type="number" class="form-input" id="deposit-bitrace-max" placeholder="最大金额 (留空=无上限)" onchange="updateProviderPreview('deposit')">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chainalysis 配置 -->
+                    <div class="provider-config-item">
+                        <div class="provider-config-header">
+                            <div class="provider-config-title">
+                                <span class="provider-flag">🇺🇸</span>
+                                <div>
+                                    <div class="provider-config-name">Chainalysis</div>
+                                    <div class="provider-config-desc">成本较高，行业权威，适合大额及高风险交易</div>
+                                </div>
+                            </div>
+                            <div class="toggle-switch" id="toggle-deposit-chainalysis" onclick="toggleProviderConfig('deposit', 'chainalysis')"></div>
+                        </div>
+                        <div class="provider-config-content hidden" id="content-deposit-chainalysis">
+                            <div class="form-group">
+                                <label class="form-label">检测金额范围 (USDT)</label>
+                                <div class="amount-range">
+                                    <input type="number" class="form-input" id="deposit-chainalysis-min" placeholder="最小金额" value="1000" onchange="updateProviderPreview('deposit')">
+                                    <span class="range-separator">-</span>
+                                    <input type="number" class="form-input" id="deposit-chainalysis-max" placeholder="最大金额 (留空=无上限)" onchange="updateProviderPreview('deposit')">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 入款配置预览 -->
+                    <div class="provider-preview">
+                        <div class="preview-title">
+                            <i class="fas fa-eye"></i>
+                            <span>入款检测范围预览</span>
+                        </div>
+                        <div class="preview-text" id="deposit-preview-content">
+                            <div style="text-align: center; padding: 20px; color: #94a3b8; font-size: 11px;">
+                                请先启用至少一个风控提供商
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="divider"></div>
+
+                <!-- 出款配置 -->
+                <div>
+                    <div class="transaction-type-badge withdrawal">
+                        <i class="fas fa-arrow-up"></i>
+                        <span>出款检测配置</span>
+                    </div>
+
+                    <!-- Bitrace 配置 -->
+                    <div class="provider-config-item">
+                        <div class="provider-config-header">
+                            <div class="provider-config-title">
+                                <span class="provider-flag">🇭🇰</span>
+                                <div>
+                                    <div class="provider-config-name">Bitrace</div>
+                                    <div class="provider-config-desc">成本低廉，响应迅速，适合中小额交易</div>
+                                </div>
+                            </div>
+                            <div class="toggle-switch" id="toggle-withdrawal-bitrace" onclick="toggleProviderConfig('withdrawal', 'bitrace')"></div>
+                        </div>
+                        <div class="provider-config-content hidden" id="content-withdrawal-bitrace">
+                            <div class="form-group">
+                                <label class="form-label">检测金额范围 (USDT)</label>
+                                <div class="amount-range">
+                                    <input type="number" class="form-input" id="withdrawal-bitrace-min" placeholder="最小金额" value="100" onchange="updateProviderPreview('withdrawal')">
+                                    <span class="range-separator">-</span>
+                                    <input type="number" class="form-input" id="withdrawal-bitrace-max" placeholder="最大金额 (留空=无上限)" onchange="updateProviderPreview('withdrawal')">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chainalysis 配置 -->
+                    <div class="provider-config-item">
+                        <div class="provider-config-header">
+                            <div class="provider-config-title">
+                                <span class="provider-flag">🇺🇸</span>
+                                <div>
+                                    <div class="provider-config-name">Chainalysis</div>
+                                    <div class="provider-config-desc">成本较高，行业权威，适合大额及高风险交易</div>
+                                </div>
+                            </div>
+                            <div class="toggle-switch" id="toggle-withdrawal-chainalysis" onclick="toggleProviderConfig('withdrawal', 'chainalysis')"></div>
+                        </div>
+                        <div class="provider-config-content hidden" id="content-withdrawal-chainalysis">
+                            <div class="form-group">
+                                <label class="form-label">检测金额范围 (USDT)</label>
+                                <div class="amount-range">
+                                    <input type="number" class="form-input" id="withdrawal-chainalysis-min" placeholder="最小金额" value="1000" onchange="updateProviderPreview('withdrawal')">
+                                    <span class="range-separator">-</span>
+                                    <input type="number" class="form-input" id="withdrawal-chainalysis-max" placeholder="最大金额 (留空=无上限)" onchange="updateProviderPreview('withdrawal')">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 出款配置预览 -->
+                    <div class="provider-preview">
+                        <div class="preview-title">
+                            <i class="fas fa-eye"></i>
+                            <span>出款检测范围预览</span>
+                        </div>
+                        <div class="preview-text" id="withdrawal-preview-content">
+                            <div style="text-align: center; padding: 20px; color: #94a3b8; font-size: 11px;">
+                                请先启用至少一个风控提供商
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 风险检查阈值设置 -->
+        <div class="card" id="threshold-config">
+            <div class="card-title">
+                <i class="fas fa-chart-line"></i>
+                <span>风险评分阈值</span>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">风险评分阈值 (0-100)</label>
+                <input type="number" class="form-input" placeholder="风险分数" value="20" min="0" max="100" style="max-width: 300px;">
+            </div>
+
+            <div class="info-box" style="background: #fef2f2; border-color: #dc2626;">
+                <div class="info-box-title" style="color: #991b1b;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>阈值说明</span>
+                </div>
+                <div class="info-box-text" style="color: #7f1d1d;">
+                    当风控提供商检测到的风险评分 ≥ 设定值时，将触发风险告警以及拦截行为。
+                </div>
+            </div>
+        </div>
+
+        <!-- 风险行为控制 -->
+        <div class="card" id="behavior-config">
+            <div class="card-title">
+                <i class="fas fa-shield-virus"></i>
+                <span>风险行为控制</span>
+            </div>
+            
+            <div class="behavior-grid">
+                <div class="behavior-item">
+                    <span class="behavior-label">隔离入款</span>
+                    <div class="toggle-switch" id="toggle-deposit" onclick="toggleBehavior('deposit')"></div>
+                </div>
+                <div class="behavior-item">
+                    <span class="behavior-label">拦截出款</span>
+                    <div class="toggle-switch" id="toggle-withdrawal" onclick="toggleBehavior('withdrawal')"></div>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <div class="info-box-title">
+                    <i class="fas fa-info-circle"></i>
+                    <span>控制说明</span>
+                </div>
+                <div class="info-box-text">
+                    <strong>隔离入款：</strong>检测到高风险的入款将被隔离。<br>
+                    <strong>拦截出款：</strong>高风险用户的出款申请将被自动拒绝。
+                </div>
+            </div>
+        </div>
+
+        <!-- 保存按钮 -->
+        <button class="save-btn" onclick="saveConfig()">
+            <i class="fas fa-save"></i>
+            <span>保存配置</span>
+        </button>
+    </div>
+
+    <!-- Toast提示 -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // 全局状态
+        let config = {
+            enabled: false,
+            separateConfig: false,  // 是否区分入款/出款
+            unified: {
+                providers: {
+                    bitrace: {
+                        enabled: false,
+                        minAmount: 100,
+                        maxAmount: null
+                    },
+                    chainalysis: {
+                        enabled: false,
+                        minAmount: 1000,
+                        maxAmount: null
+                    }
+                }
+            },
+            deposit: {
+                providers: {
+                    bitrace: {
+                        enabled: false,
+                        minAmount: 100,
+                        maxAmount: null
+                    },
+                    chainalysis: {
+                        enabled: false,
+                        minAmount: 1000,
+                        maxAmount: null
+                    }
+                }
+            },
+            withdrawal: {
+                providers: {
+                    bitrace: {
+                        enabled: false,
+                        minAmount: 100,
+                        maxAmount: null
+                    },
+                    chainalysis: {
+                        enabled: false,
+                        minAmount: 1000,
+                        maxAmount: null
+                    }
+                }
+            },
+            thresholds: {
+                riskScore: 20
+            },
+            behaviors: {
+                isolateDeposit: false,
+                blockWithdrawal: false
+            }
+        };
+
+        // 更新时间
+        function updateTime() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('currentTime').textContent = `${hours}:${minutes}`;
+        }
+        updateTime();
+        setInterval(updateTime, 60000);
+
+        // 显示Toast
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast show';
+            if (type) {
+                toast.classList.add(type);
+            }
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    toast.className = 'toast';
+                }, 400);
+            }, 3000);
+        }
+
+        // 返回
+        function goBack() {
+            window.history.back();
+        }
+
+        // 切换总开关
+        function toggleMaster() {
+            const toggle = document.getElementById('master-toggle');
+            const routingConfig = document.getElementById('routing-config');
+            const thresholdConfig = document.getElementById('threshold-config');
+            const behaviorConfig = document.getElementById('behavior-config');
+            
+            config.enabled = !config.enabled;
+            toggle.classList.toggle('active');
+            
+            if (config.enabled) {
+                routingConfig.classList.remove('disabled');
+                thresholdConfig.classList.remove('disabled');
+                behaviorConfig.classList.remove('disabled');
+                showToast('风控配置已启用', 'success');
+            } else {
+                routingConfig.classList.add('disabled');
+                thresholdConfig.classList.add('disabled');
+                behaviorConfig.classList.add('disabled');
+                showToast('风控配置已关闭', 'info');
+            }
+        }
+
+        // 切换区分配置开关
+        function toggleSeparateConfig() {
+            if (!config.enabled) {
+                showToast('请先启用风控配置', 'error');
+                return;
+            }
+
+            const toggle = document.getElementById('separate-toggle');
+            const section = document.getElementById('separate-section');
+            const unifiedConfig = document.getElementById('unified-config');
+            const separatedConfig = document.getElementById('separated-config');
+            
+            config.separateConfig = !config.separateConfig;
+            toggle.classList.toggle('active');
+            section.classList.toggle('active');
+            
+            if (config.separateConfig) {
+                unifiedConfig.classList.remove('active');
+                separatedConfig.classList.add('active');
+                showToast('已切换到分离配置模式', 'success');
+            } else {
+                unifiedConfig.classList.add('active');
+                separatedConfig.classList.remove('active');
+                showToast('已切换到统一配置模式', 'info');
+            }
+        }
+
+        // 切换提供商配置
+        function toggleProviderConfig(configType, provider) {
+            if (!config.enabled) {
+                showToast('请先启用风控配置', 'error');
+                return;
+            }
+            
+            const toggle = document.getElementById(`toggle-${configType}-${provider}`);
+            const content = document.getElementById(`content-${configType}-${provider}`);
+            const item = content.parentElement;
+            
+            config[configType].providers[provider].enabled = !config[configType].providers[provider].enabled;
+            toggle.classList.toggle('active');
+            content.classList.toggle('hidden');
+            item.classList.toggle('active');
+            
+            updateProviderPreview(configType);
+        }
+
+        // 更新提供商预览
+        function updateProviderPreview(configType) {
+            const previewContent = document.getElementById(`${configType}-preview-content`);
+            
+            // 收集所有已启用提供商的配置
+            const providers = [];
+            
+            if (config[configType].providers.bitrace.enabled) {
+                const min = parseInt(document.getElementById(`${configType}-bitrace-min`).value) || 0;
+                const max = document.getElementById(`${configType}-bitrace-max`).value ? parseInt(document.getElementById(`${configType}-bitrace-max`).value) : null;
+                providers.push({ provider: 'Bitrace', flag: '🇭🇰', min, max, class: 'bitrace' });
+            }
+            
+            if (config[configType].providers.chainalysis.enabled) {
+                const min = parseInt(document.getElementById(`${configType}-chainalysis-min`).value) || 0;
+                const max = document.getElementById(`${configType}-chainalysis-max`).value ? parseInt(document.getElementById(`${configType}-chainalysis-max`).value) : null;
+                providers.push({ provider: 'Chainalysis', flag: '🇺🇸', min, max, class: 'chainalysis' });
+            }
+            
+            if (providers.length === 0) {
+                previewContent.innerHTML = `
+                    <div style="text-align: center; padding: 20px; color: #94a3b8; font-size: 11px;">
+                        请先启用至少一个风控提供商
+                    </div>
+                `;
+                return;
+            }
+            
+            // 构建区间信息
+            const breakpoints = [0];
+            providers.forEach(p => {
+                breakpoints.push(p.min);
+                if (p.max) breakpoints.push(p.max);
+            });
+            const points = [...new Set(breakpoints)].sort((a, b) => a - b);
+            
+            const segments = [];
+            for (let i = 0; i < points.length - 1; i++) {
+                const start = points[i];
+                const end = points[i + 1];
+                
+                // 找出覆盖这个区间的提供商
+                const covering = providers.filter(p => {
+                    const pMax = p.max || Infinity;
+                    return p.min <= start && start < pMax;
+                });
+                
+                if (covering.length === 0) {
+                    // 未检测区域
+                    segments.push({ start, end, type: 'undetected', provider: null, providers: [] });
+                } else if (covering.length === 1) {
+                    const p = covering[0];
+                    segments.push({ start, end, type: p.class, provider: p, providers: covering });
+                } else if (covering.length === 2) {
+                    segments.push({ start, end, type: 'overlap', provider: null, providers: covering });
+                }
+            }
+            
+            // 处理无上限的情况
+            providers.forEach(p => {
+                if (p.max === null) {
+                    const lastPoint = Math.max(...points.filter(pt => pt >= p.min));
+                    const covering = providers.filter(prov => {
+                        const provMax = prov.max || Infinity;
+                        return prov.min <= lastPoint && lastPoint < provMax;
+                    });
+                    
+                    if (covering.length === 1) {
+                        segments.push({ start: lastPoint, end: Infinity, type: p.class, provider: p, providers: covering });
+                    } else if (covering.length === 2) {
+                        segments.push({ start: lastPoint, end: Infinity, type: 'overlap', provider: null, providers: covering });
+                    }
+                }
+            });
+            
+            // 合并相邻的同类型区间
+            const mergedSegments = [];
+            for (let seg of segments) {
+                if (mergedSegments.length === 0) {
+                    mergedSegments.push(seg);
+                } else {
+                    const last = mergedSegments[mergedSegments.length - 1];
+                    if (last.type === seg.type && last.end === seg.start) {
+                        last.end = seg.end;
+                    } else {
+                        mergedSegments.push(seg);
+                    }
+                }
+            }
+            
+            // 计算总范围
+            const maxValue = Math.max(...mergedSegments.map(s => s.end === Infinity ? s.start * 2 : s.end));
+            
+            // 生成水平时间轴
+            let html = '<div class="range-timeline">';
+            html += '<div class="timeline-bar-container">';
+            
+            mergedSegments.forEach(seg => {
+                const start = seg.start;
+                const end = seg.end === Infinity ? maxValue : seg.end;
+                const width = ((end - start) / maxValue) * 100;
+                
+                const rangeText = seg.end === Infinity ? `${seg.start}+` : `${seg.start}-${seg.end}`;
+                
+                if (seg.type === 'undetected') {
+                    html += `
+                        <div class="timeline-segment undetected" style="width: ${width}%;" title="未检测区域">
+                            ${width > 12 ? `<div class="timeline-segment-label" style="color: #94a3b8;">未检测</div>` : ''}
+                            ${width > 8 ? `<div class="timeline-segment-range" style="color: #94a3b8;">${rangeText}</div>` : ''}
+                        </div>
+                    `;
+                } else if (seg.type === 'overlap') {
+                    const flags = seg.providers.map(p => p.flag).join('');
+                    html += `
+                        <div class="timeline-segment overlap" style="width: ${width}%;" title="双重检测">
+                            ${width > 15 ? `<div class="timeline-segment-label">${flags} 双重检测</div>` : ''}
+                            ${width > 10 ? `<div class="timeline-segment-range">${rangeText}</div>` : ''}
+                        </div>
+                    `;
+                } else {
+                    const p = seg.provider;
+                    html += `
+                        <div class="timeline-segment ${seg.type}" style="width: ${width}%;" title="${p.provider}">
+                            ${width > 12 ? `<div class="timeline-segment-label">${p.flag} ${p.provider}</div>` : ''}
+                            ${width > 8 ? `<div class="timeline-segment-range">${rangeText}</div>` : ''}
+                        </div>
+                    `;
+                }
+            });
+            
+            html += '</div>';
+            
+            // 检查是否有无限范围
+            const hasInfinity = mergedSegments.some(s => s.end === Infinity);
+            html += `<div class="timeline-labels"><span>0 USDT</span><span>${hasInfinity ? '∞' : maxValue + ' USDT'}</span></div>`;
+            
+            // 添加图例
+            html += '<div class="timeline-legend">';
+            
+            const hasTypes = {
+                undetected: mergedSegments.some(s => s.type === 'undetected'),
+                bitrace: mergedSegments.some(s => s.type === 'bitrace'),
+                chainalysis: mergedSegments.some(s => s.type === 'chainalysis'),
+                overlap: mergedSegments.some(s => s.type === 'overlap')
+            };
+            
+            if (hasTypes.undetected) {
+                html += '<div class="timeline-legend-item"><div class="timeline-legend-icon undetected"></div><span>⚠️ 未检测区域</span></div>';
+            }
+            if (hasTypes.bitrace) {
+                html += '<div class="timeline-legend-item"><div class="timeline-legend-icon bitrace"></div><span>🇭🇰 Bitrace (独立检测)</span></div>';
+            }
+            if (hasTypes.chainalysis) {
+                html += '<div class="timeline-legend-item"><div class="timeline-legend-icon chainalysis"></div><span>🇺🇸 Chainalysis (独立检测)</span></div>';
+            }
+            if (hasTypes.overlap) {
+                html += '<div class="timeline-legend-item"><div class="timeline-legend-icon overlap"></div><span>🇭🇰🇺🇸 重叠区域 (双重检测)</span></div>';
+            }
+            
+            html += '</div></div>';
+            
+            previewContent.innerHTML = html;
+        }
+
+        // 切换行为控制
+        function toggleBehavior(type) {
+            if (!config.enabled) {
+                showToast('请先启用风控配置', 'error');
+                return;
+            }
+            
+            const toggle = document.getElementById(`toggle-${type}`);
+            toggle.classList.toggle('active');
+            
+            if (type === 'deposit') {
+                config.behaviors.isolateDeposit = !config.behaviors.isolateDeposit;
+            } else if (type === 'withdrawal') {
+                config.behaviors.blockWithdrawal = !config.behaviors.blockWithdrawal;
+            }
+        }
+
+        // 保存配置
+        function saveConfig() {
+            // 验证总开关
+            if (!config.enabled) {
+                showToast('请先启用风控配置', 'error');
+                return;
+            }
+            
+            // 收集阈值配置
+            const thresholdInput = document.querySelector('#threshold-config .form-input');
+            config.thresholds.riskScore = parseFloat(thresholdInput.value) || 0;
+            
+            if (config.separateConfig) {
+                // 分离配置模式验证
+                const depositEnabled = config.deposit.providers.bitrace.enabled || config.deposit.providers.chainalysis.enabled;
+                const withdrawalEnabled = config.withdrawal.providers.bitrace.enabled || config.withdrawal.providers.chainalysis.enabled;
+                
+                if (!depositEnabled && !withdrawalEnabled) {
+                    showToast('请至少为入款或出款启用一个风控提供商', 'error');
+                    return;
+                }
+                
+                // 验证入款配置
+                if (config.deposit.providers.bitrace.enabled) {
+                    const min = parseInt(document.getElementById('deposit-bitrace-min').value);
+                    const max = document.getElementById('deposit-bitrace-max').value ? parseInt(document.getElementById('deposit-bitrace-max').value) : null;
+                    
+                    if (max && min >= max) {
+                        showToast('入款-Bitrace: 最小金额不能大于或等于最大金额', 'error');
+                        return;
+                    }
+                    
+                    config.deposit.providers.bitrace.minAmount = min;
+                    config.deposit.providers.bitrace.maxAmount = max;
+                }
+                
+                if (config.deposit.providers.chainalysis.enabled) {
+                    const min = parseInt(document.getElementById('deposit-chainalysis-min').value);
+                    const max = document.getElementById('deposit-chainalysis-max').value ? parseInt(document.getElementById('deposit-chainalysis-max').value) : null;
+                    
+                    if (max && min >= max) {
+                        showToast('入款-Chainalysis: 最小金额不能大于或等于最大金额', 'error');
+                        return;
+                    }
+                    
+                    config.deposit.providers.chainalysis.minAmount = min;
+                    config.deposit.providers.chainalysis.maxAmount = max;
+                }
+                
+                // 验证出款配置
+                if (config.withdrawal.providers.bitrace.enabled) {
+                    const min = parseInt(document.getElementById('withdrawal-bitrace-min').value);
+                    const max = document.getElementById('withdrawal-bitrace-max').value ? parseInt(document.getElementById('withdrawal-bitrace-max').value) : null;
+                    
+                    if (max && min >= max) {
+                        showToast('出款-Bitrace: 最小金额不能大于或等于最大金额', 'error');
+                        return;
+                    }
+                    
+                    config.withdrawal.providers.bitrace.minAmount = min;
+                    config.withdrawal.providers.bitrace.maxAmount = max;
+                }
+                
+                if (config.withdrawal.providers.chainalysis.enabled) {
+                    const min = parseInt(document.getElementById('withdrawal-chainalysis-min').value);
+                    const max = document.getElementById('withdrawal-chainalysis-max').value ? parseInt(document.getElementById('withdrawal-chainalysis-max').value) : null;
+                    
+                    if (max && min >= max) {
+                        showToast('出款-Chainalysis: 最小金额不能大于或等于最大金额', 'error');
+                        return;
+                    }
+                    
+                    config.withdrawal.providers.chainalysis.minAmount = min;
+                    config.withdrawal.providers.chainalysis.maxAmount = max;
+                }
+            } else {
+                // 统一配置模式验证
+                if (!config.unified.providers.bitrace.enabled && !config.unified.providers.chainalysis.enabled) {
+                    showToast('请至少启用一个风控提供商', 'error');
+                    return;
+                }
+                
+                if (config.unified.providers.bitrace.enabled) {
+                    const min = parseInt(document.getElementById('unified-bitrace-min').value);
+                    const max = document.getElementById('unified-bitrace-max').value ? parseInt(document.getElementById('unified-bitrace-max').value) : null;
+                    
+                    if (max && min >= max) {
+                        showToast('Bitrace: 最小金额不能大于或等于最大金额', 'error');
+                        return;
+                    }
+                    
+                    config.unified.providers.bitrace.minAmount = min;
+                    config.unified.providers.bitrace.maxAmount = max;
+                }
+                
+                if (config.unified.providers.chainalysis.enabled) {
+                    const min = parseInt(document.getElementById('unified-chainalysis-min').value);
+                    const max = document.getElementById('unified-chainalysis-max').value ? parseInt(document.getElementById('unified-chainalysis-max').value) : null;
+                    
+                    if (max && min >= max) {
+                        showToast('Chainalysis: 最小金额不能大于或等于最大金额', 'error');
+                        return;
+                    }
+                    
+                    config.unified.providers.chainalysis.minAmount = min;
+                    config.unified.providers.chainalysis.maxAmount = max;
+                }
+            }
+            
+            // 保存配置（这里可以添加API调用）
+            console.log('保存配置:', config);
+            
+            showToast('配置保存成功！', 'success');
+            
+            // 可以在这里添加跳转或其他逻辑
+            setTimeout(() => {
+                // window.location.href = 'some-page.html';
+            }, 1500);
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化预览
+            updateProviderPreview('unified');
+            updateProviderPreview('deposit');
+            updateProviderPreview('withdrawal');
+            
+            // 初始状态：所有配置卡片禁用
+            document.getElementById('routing-config').classList.add('disabled');
+            document.getElementById('threshold-config').classList.add('disabled');
+            document.getElementById('behavior-config').classList.add('disabled');
+        });
+    </script>
+</body>
+</html>
+

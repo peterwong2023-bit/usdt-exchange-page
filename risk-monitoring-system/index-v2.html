@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>高可用AI风险监控系统 - 运营中心</title>
+    <link rel="stylesheet" href="styles-v2.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <h1 class="logo">
+                    <i class="fas fa-shield-halved"></i>
+                    高可用AI风险监控系统
+                </h1>
+                <span class="subtitle">运营管理中心 - Real-time Monitoring</span>
+            </div>
+            <div class="header-center">
+                <!-- 快速统计 -->
+                <div class="quick-stats">
+                    <div class="stat-card danger">
+                        <div class="stat-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                        <div class="stat-content">
+                            <div class="stat-value" id="criticalAlerts">8</div>
+                            <div class="stat-label">紧急告警</div>
+                        </div>
+                    </div>
+                    <div class="stat-card warning">
+                        <div class="stat-icon"><i class="fas fa-users-slash"></i></div>
+                        <div class="stat-content">
+                            <div class="stat-value" id="highRiskUsers">156</div>
+                            <div class="stat-label">高风险用户</div>
+                        </div>
+                    </div>
+                    <div class="stat-card info">
+                        <div class="stat-icon"><i class="fas fa-network-wired"></i></div>
+                        <div class="stat-content">
+                            <div class="stat-value" id="syndicateGroups">12</div>
+                            <div class="stat-label">疑似团伙</div>
+                        </div>
+                    </div>
+                    <div class="stat-card success">
+                        <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                        <div class="stat-content">
+                            <div class="stat-value" id="processedToday">47</div>
+                            <div class="stat-label">今日处理</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="header-actions">
+                    <button class="btn btn-icon" title="通知">
+                        <i class="fas fa-bell"></i>
+                        <span class="badge">3</span>
+                    </button>
+                    <button class="btn btn-icon" title="导出报表" id="exportReport">
+                        <i class="fas fa-file-export"></i>
+                    </button>
+                    <button class="btn btn-primary" id="refreshAll">
+                        <i class="fas fa-sync-alt"></i>
+                        刷新数据
+                    </button>
+                    <div class="user-profile">
+                        <i class="fas fa-user-circle"></i>
+                        <span>运营员</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 视图切换标签 -->
+    <nav class="view-tabs">
+        <div class="tabs-container">
+            <button class="tab-btn active" data-view="overview">
+                <i class="fas fa-chart-line"></i>
+                概览仪表板
+            </button>
+            <button class="tab-btn" data-view="users">
+                <i class="fas fa-users"></i>
+                用户风险列表
+            </button>
+            <button class="tab-btn" data-view="events">
+                <i class="fas fa-exclamation-circle"></i>
+                风险事件监控
+            </button>
+            <button class="tab-btn" data-view="relationships">
+                <i class="fas fa-project-diagram"></i>
+                关系图谱分析
+            </button>
+            <button class="tab-btn" data-view="operations">
+                <i class="fas fa-tasks"></i>
+                运营操作台
+            </button>
+        </div>
+    </nav>
+
+    <!-- 主内容区域 -->
+    <main class="main-content">
+        <!-- 概览仪表板视图 -->
+        <section class="view-section active" id="overviewView">
+            <div class="dashboard-grid">
+                <!-- 实时告警面板 -->
+                <div class="dashboard-card urgent-alerts">
+                    <div class="card-header">
+                        <h3>
+                            <i class="fas fa-siren"></i>
+                            实时告警中心
+                        </h3>
+                        <div class="card-actions">
+                            <button class="btn-sm btn-outline" id="markAllRead">全部已读</button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="alerts-list" id="urgentAlertsList">
+                            <!-- 告警项将通过JS动态加载 -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 风险趋势图表 -->
+                <div class="dashboard-card risk-trend">
+                    <div class="card-header">
+                        <h3>
+                            <i class="fas fa-chart-area"></i>
+                            风险趋势分析
+                        </h3>
+                        <div class="card-actions">
+                            <select class="select-sm" id="trendPeriod">
+                                <option value="24h">24小时</option>
+                                <option value="7d" selected>7天</option>
+                                <option value="30d">30天</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="riskTrendChart" style="height: 250px;"></div>
+                    </div>
+                </div>
+
+                <!-- Top风险用户 -->
+                <div class="dashboard-card top-risks">
+                    <div class="card-header">
+                        <h3>
+                            <i class="fas fa-ranking-star"></i>
+                            Top 10 高风险用户
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="top-risks-list" id="topRisksList">
+                            <!-- Top用户将通过JS动态加载 -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 风险分布 -->
+                <div class="dashboard-card risk-distribution">
+                    <div class="card-header">
+                        <h3>
+                            <i class="fas fa-chart-pie"></i>
+                            风险类型分布
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div id="riskDistributionChart" style="height: 250px;"></div>
+                    </div>
+                </div>
+
+                <!-- 处理统计 -->
+                <div class="dashboard-card processing-stats">
+                    <div class="card-header">
+                        <h3>
+                            <i class="fas fa-tasks-alt"></i>
+                            处理效率统计
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="stats-grid">
+                            <div class="stat-box">
+                                <div class="stat-number">92%</div>
+                                <div class="stat-text">及时处理率</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-number">15分钟</div>
+                                <div class="stat-text">平均响应时间</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-number">47</div>
+                                <div class="stat-text">今日处理数</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-number">8</div>
+                                <div class="stat-text">待处理</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 团伙监控 -->
+                <div class="dashboard-card syndicate-monitor">
+                    <div class="card-header">
+                        <h3>
+                            <i class="fas fa-users-cog"></i>
+                            团伙网络监控
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="syndicate-list" id="syndicateList">
+                            <!-- 团伙数据将通过JS动态加载 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 用户风险列表视图 -->
+        <section class="view-section" id="usersView">
+            <!-- 高级过滤面板 -->
+            <div class="filter-panel">
+                <div class="filter-group">
+                    <label>风险等级</label>
+                    <select class="filter-select" id="filterRiskLevel">
+                        <option value="">全部</option>
+                        <option value="critical">紧急风险</option>
+                        <option value="high">高风险</option>
+                        <option value="medium">中风险</option>
+                        <option value="low">低风险</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>风险类型</label>
+                    <select class="filter-select" id="filterRiskType">
+                        <option value="">全部</option>
+                        <option value="device">设备风险</option>
+                        <option value="ip">IP风险</option>
+                        <option value="payment">支付风险</option>
+                        <option value="trade">交易风险</option>
+                        <option value="syndicate">团伙风险</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>处理状态</label>
+                    <select class="filter-select" id="filterStatus">
+                        <option value="">全部</option>
+                        <option value="pending">待处理</option>
+                        <option value="processing">处理中</option>
+                        <option value="resolved">已处理</option>
+                        <option value="ignored">已忽略</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>用户搜索</label>
+                    <input type="text" class="filter-input" id="filterUserSearch" placeholder="用户ID/手机/设备ID">
+                </div>
+                <div class="filter-group">
+                    <label>日期范围</label>
+                    <input type="date" class="filter-input" id="filterDateStart">
+                </div>
+                <div class="filter-group">
+                    <label>至</label>
+                    <input type="date" class="filter-input" id="filterDateEnd">
+                </div>
+                <div class="filter-actions">
+                    <button class="btn btn-primary" id="applyUserFilters">
+                        <i class="fas fa-search"></i> 搜索
+                    </button>
+                    <button class="btn btn-outline" id="resetUserFilters">
+                        <i class="fas fa-redo"></i> 重置
+                    </button>
+                    <button class="btn btn-outline" id="exportUsers">
+                        <i class="fas fa-download"></i> 导出
+                    </button>
+                </div>
+            </div>
+
+            <!-- 批量操作栏 -->
+            <div class="batch-actions" id="batchActionsBar" style="display: none;">
+                <div class="batch-info">
+                    已选择 <span id="selectedCount">0</span> 个用户
+                </div>
+                <div class="batch-buttons">
+                    <button class="btn btn-warning" id="batchLimit">
+                        <i class="fas fa-ban"></i> 批量限制
+                    </button>
+                    <button class="btn btn-danger" id="batchBlock">
+                        <i class="fas fa-user-lock"></i> 批量封禁
+                    </button>
+                    <button class="btn btn-info" id="batchReview">
+                        <i class="fas fa-eye"></i> 批量审核
+                    </button>
+                    <button class="btn btn-outline" id="cancelSelection">
+                        <i class="fas fa-times"></i> 取消选择
+                    </button>
+                </div>
+            </div>
+
+            <!-- 用户列表表格 -->
+            <div class="table-card">
+                <table class="data-table" id="usersTable">
+                    <thead>
+                        <tr>
+                            <th width="40">
+                                <input type="checkbox" id="selectAll">
+                            </th>
+                            <th>用户ID</th>
+                            <th>风险评分</th>
+                            <th>风险等级</th>
+                            <th>主要风险</th>
+                            <th>触发时间</th>
+                            <th>关联账户</th>
+                            <th>处理状态</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody">
+                        <!-- 数据将通过JS动态加载 -->
+                    </tbody>
+                </table>
+                <div class="table-pagination">
+                    <div class="pagination-info">
+                        显示 <span id="userStartRecord">1</span> - <span id="userEndRecord">50</span> 条，共 <span id="userTotalRecords">0</span> 条
+                    </div>
+                    <div class="pagination-controls">
+                        <button class="btn-pagination" id="userPrevPage">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <span class="page-numbers" id="userPageNumbers"></span>
+                        <button class="btn-pagination" id="userNextPage">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 风险事件监控视图 -->
+        <section class="view-section" id="eventsView">
+            <div class="events-dashboard">
+                <!-- 事件统计卡片 -->
+                <div class="event-stats-row">
+                    <div class="event-stat-card critical">
+                        <div class="stat-icon"><i class="fas fa-fire"></i></div>
+                        <div class="stat-info">
+                            <div class="stat-value">8</div>
+                            <div class="stat-label">紧急事件</div>
+                        </div>
+                    </div>
+                    <div class="event-stat-card high">
+                        <div class="stat-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                        <div class="stat-info">
+                            <div class="stat-value">34</div>
+                            <div class="stat-label">高风险事件</div>
+                        </div>
+                    </div>
+                    <div class="event-stat-card medium">
+                        <div class="stat-icon"><i class="fas fa-exclamation-circle"></i></div>
+                        <div class="stat-info">
+                            <div class="stat-value">89</div>
+                            <div class="stat-label">中风险事件</div>
+                        </div>
+                    </div>
+                    <div class="event-stat-card low">
+                        <div class="stat-icon"><i class="fas fa-info-circle"></i></div>
+                        <div class="stat-info">
+                            <div class="stat-value">152</div>
+                            <div class="stat-label">低风险事件</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 事件时间线 -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h3>
+                            <i class="fas fa-stream"></i>
+                            风险事件时间线
+                        </h3>
+                        <div class="card-actions">
+                            <button class="btn-sm btn-primary" id="autoRefreshEvents">
+                                <i class="fas fa-play"></i> 自动刷新
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="timeline" id="eventsTimeline">
+                            <!-- 时间线将通过JS动态加载 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 关系图谱分析视图 -->
+        <section class="view-section" id="relationshipsView">
+            <div class="relationships-container">
+                <div class="graph-controls">
+                    <div class="control-group">
+                        <label>图谱类型</label>
+                        <select class="select-md" id="graphTypeSelect">
+                            <option value="device">设备关系图</option>
+                            <option value="ip">IP关系图</option>
+                            <option value="payment">支付关系图</option>
+                            <option value="syndicate">团伙关系图</option>
+                            <option value="full">全关系图谱</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label>中心节点</label>
+                        <input type="text" class="input-md" id="centerNodeInput" placeholder="输入用户ID">
+                    </div>
+                    <div class="control-group">
+                        <label>关系深度</label>
+                        <select class="select-md" id="depthSelect">
+                            <option value="1">1层</option>
+                            <option value="2" selected>2层</option>
+                            <option value="3">3层</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary" id="generateGraph">
+                        <i class="fas fa-project-diagram"></i> 生成图谱
+                    </button>
+                </div>
+
+                <div class="graph-main">
+                    <div class="graph-canvas" id="relationshipGraphCanvas">
+                        <!-- ECharts图表将渲染在这里 -->
+                    </div>
+                    <div class="graph-legend">
+                        <h4>图例说明</h4>
+                        <div class="legend-item">
+                            <span class="legend-icon user"></span>
+                            <span>用户节点</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-icon device"></span>
+                            <span>设备节点</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-icon ip"></span>
+                            <span>IP节点</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-icon payment"></span>
+                            <span>支付节点</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 运营操作台视图 -->
+        <section class="view-section" id="operationsView">
+            <div class="operations-grid">
+                <!-- 快速操作面板 -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h3>
+                            <i class="fas fa-bolt"></i>
+                            快速操作
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="quick-actions-grid">
+                            <button class="action-card" id="quickBan">
+                                <i class="fas fa-user-slash"></i>
+                                <span>封禁用户</span>
+                            </button>
+                            <button class="action-card" id="quickLimit">
+                                <i class="fas fa-hand-paper"></i>
+                                <span>限制交易</span>
+                            </button>
+                            <button class="action-card" id="quickUnlock">
+                                <i class="fas fa-unlock"></i>
+                                <span>解除限制</span>
+                            </button>
+                            <button class="action-card" id="quickReview">
+                                <i class="fas fa-clipboard-check"></i>
+                                <span>人工审核</span>
+                            </button>
+                            <button class="action-card" id="quickWhitelist">
+                                <i class="fas fa-check-circle"></i>
+                                <span>加入白名单</span>
+                            </button>
+                            <button class="action-card" id="quickBlacklist">
+                                <i class="fas fa-times-circle"></i>
+                                <span>加入黑名单</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 待处理任务 -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h3>
+                            <i class="fas fa-clipboard-list"></i>
+                            待处理任务 (8)
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="task-list" id="pendingTasksList">
+                            <!-- 任务将通过JS动态加载 -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 操作日志 -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h3>
+                            <i class="fas fa-history"></i>
+                            最近操作记录
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="operation-logs" id="recentOperations">
+                            <!-- 操作记录将通过JS动态加载 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 用户详情弹窗 -->
+    <div class="modal" id="userDetailModal">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3>用户风险详情</h3>
+                <button class="modal-close" id="closeUserDetail">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="userDetailContent">
+                <!-- 用户详情将通过JS动态加载 -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="closeModal">关闭</button>
+                <button class="btn btn-warning" id="limitUserAction">限制交易</button>
+                <button class="btn btn-danger" id="banUserAction">封禁用户</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 操作确认弹窗 -->
+    <div class="modal" id="confirmModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="confirmTitle">确认操作</h3>
+                <button class="modal-close" id="closeConfirm">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p id="confirmMessage">确定要执行此操作吗？</p>
+                <textarea class="textarea" id="confirmReason" placeholder="请输入操作原因（必填）"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancelConfirm">取消</button>
+                <button class="btn btn-primary" id="executeConfirm">确认执行</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 加载提示 -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>数据加载中...</p>
+        </div>
+    </div>
+
+    <!-- 通知提示 -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- 脚本文件 -->
+    <script src="data-v2.js"></script>
+    <script src="app-v2.js"></script>
+</body>
+</html>
+
+
+

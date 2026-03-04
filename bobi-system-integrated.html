@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>波币 | 数字化集成指挥中心</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Exo+2:wght@300;400;600&family=JetBrains+Mono:wght@400;700&family=Noto+Sans+SC:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #22D3EE;
+            --primary-glow: rgba(34, 211, 238, 0.4);
+            --accent-gold: #F59E0B;
+            --accent-purple: #8B5CF6;
+            --bg-base: #020617;
+            --glass-bg: rgba(15, 23, 42, 0.7);
+            --glass-border: rgba(34, 211, 238, 0.15);
+            --text-1: #F8FAFC;
+            --text-2: #94A3B8;
+            --text-3: #64748B;
+            --font-head: 'Orbitron', sans-serif;
+            --font-body: 'Exo 2', 'Noto Sans SC', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            --success: #10B981;
+            --danger: #F43F5E;
+            --warning: #FACC15;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: var(--font-body); background: var(--bg-base); color: var(--text-1); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+
+        /* ===== 背景系统 (HUD + Blockchain) ===== */
+        .bg-system { position: fixed; inset: 0; z-index: -1; background: radial-gradient(ellipse at 30% 20%, rgba(34, 211, 238, 0.06) 0%, transparent 50%), radial-gradient(ellipse at 70% 80%, rgba(139, 92, 246, 0.04) 0%, transparent 50%), radial-gradient(circle at 50% 50%, #0f172a 0%, #020617 100%); }
+        .bg-mesh { position: absolute; inset: 0; background-image: linear-gradient(to right, rgba(34, 211, 238, 0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(34, 211, 238, 0.04) 1px, transparent 1px); background-size: 48px 48px; mask-image: radial-gradient(ellipse at center, black 40%, transparent 80%); }
+        .matrix-effect { position: absolute; inset: 0; opacity: 0.05; pointer-events: none; }
+        /* CRT 扫描线 */
+        .bg-system::after { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.08) 2px, rgba(0,0,0,0.08) 4px); pointer-events: none; z-index: 1; }
+        .glass-panel { background: var(--glass-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--glass-border); }
+
+        /* ===== HEADER ===== */
+        .header { height: 64px; border-bottom: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: space-between; padding: 0 32px; background: rgba(2, 6, 23, 0.92); z-index: 1000; position: relative; }
+        .header::after { content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, var(--primary) 20%, var(--accent-gold) 50%, var(--primary) 80%, transparent); opacity: 0.5; }
+        .header-left { display: flex; align-items: center; height: 100%; }
+        .logo-text { font-family: var(--font-head); font-size: 20px; font-weight: 700; letter-spacing: 3px; color: var(--primary); text-shadow: 0 0 20px var(--primary-glow), 0 0 40px rgba(34, 211, 238, 0.15); margin-right: 40px; }
+        .top-nav { display: flex; gap: 0; height: 100%; }
+        .top-nav a { 
+            color: var(--text-2); text-decoration: none; font-size: 14px; font-weight: 500; 
+            padding: 0 20px; height: 100%; display: flex; align-items: center; 
+            transition: all 0.3s; position: relative; cursor: pointer; 
+        }
+        .top-nav a:hover { color: var(--primary); background: rgba(34, 211, 238, 0.05); }
+        .top-nav a.active { color: var(--primary); font-weight: 700; text-shadow: 0 0 10px var(--primary-glow); }
+        .top-nav a.active::after { 
+            content: ''; position: absolute; bottom: 0; left: 10%; width: 80%; height: 2px; 
+            background: var(--primary); box-shadow: 0 0 15px var(--primary), 0 0 30px rgba(34, 211, 238, 0.2); border-radius: 2px 2px 0 0;
+        }
+
+        /* ===== LAYOUT ===== */
+        .container { display: flex; flex: 1; overflow: hidden; }
+        .sidebar { width: 240px; border-right: 1px solid var(--glass-border); background: rgba(2, 6, 23, 0.4); display: flex; flex-direction: column; overflow-y: auto; scrollbar-width: none; }
+        .sidebar::-webkit-scrollbar { display: none; }
+        
+        .sidebar-section { font-size: 10px; text-transform: uppercase; color: var(--primary); padding: 24px 24px 12px; letter-spacing: 3px; opacity: 0.5; font-weight: 700; font-family: var(--font-mono); }
+        .side-link { 
+            padding: 12px 24px; font-size: 13px; color: var(--text-2); 
+            display: flex; align-items: center; gap: 12px; 
+            transition: all 0.2s ease; cursor: pointer; border-left: 3px solid transparent;
+        }
+        .side-link:hover { color: #FFF; background: rgba(255,255,255,0.04); }
+        .side-link.active { 
+            color: var(--primary); 
+            background: linear-gradient(90deg, rgba(34,211,238,0.1), transparent); 
+            border-left-color: var(--primary); font-weight: 600;
+        }
+
+        /* ===== 数据行样式 (关键修复) ===== */
+        .data-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .data-label { font-size: 14px; color: var(--text-2); font-weight: 500; }
+        .data-val { font-family: var(--font-mono); font-size: 20px; font-weight: 700; color: #FFF; }
+
+        .main-stage { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: rgba(0,0,0,0.15); }
+        .tab-bar { display: none; }
+
+        .view-port { flex: 1; overflow-y: auto; padding: 32px; display: none; scroll-behavior: smooth; }
+        .view-port.active { display: block; animation: fadeIn 0.5s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ===== 共享 UI 组件 ===== */
+        .btn-tech { 
+            background: linear-gradient(135deg, var(--primary), #0ea5e9); color: #000; 
+            border: none; padding: 10px 24px; border-radius: 8px; font-weight: 700; font-size: 13px; 
+            cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s ease; 
+            box-shadow: 0 2px 8px rgba(34, 211, 238, 0.2);
+        }
+        .btn-tech:hover { box-shadow: 0 4px 16px rgba(34, 211, 238, 0.35); filter: brightness(1.1); }
+        .btn-tech:active { transform: translateY(1px); box-shadow: 0 1px 4px rgba(34, 211, 238, 0.15); }
+
+        .btn-ghost { 
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); 
+            color: var(--text-2); padding: 9px 22px; border-radius: 8px; font-size: 13px; 
+            cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 10px; 
+        }
+        .btn-ghost:hover { border-color: var(--primary); color: #FFF; background: rgba(34, 211, 238, 0.05); }
+        .btn-ghost.active { border-color: var(--primary); color: var(--primary); background: rgba(34, 211, 238, 0.12); box-shadow: 0 0 15px rgba(34, 211, 238, 0.1); }
+        .mono { font-family: var(--font-mono); letter-spacing: 0.5px; }
+
+        /* ===== 卡片样式 (HUD Brackets) ===== */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(440px, 1fr)); gap: 32px; }
+        .card-pro { 
+            border-radius: 4px; padding: 32px; position: relative; overflow: hidden; 
+            transition: all 0.3s ease; 
+            background: var(--glass-bg); border: 1px solid var(--glass-border);
+        }
+        /* HUD 角标 */
+        .card-pro::before, .card-pro::after { content: ''; position: absolute; width: 20px; height: 20px; border-color: var(--primary); border-style: solid; opacity: 0.5; transition: all 0.3s; pointer-events: none; z-index: 2; }
+        .card-pro::before { top: 0; left: 0; border-width: 2px 0 0 2px; }
+        .card-pro::after { bottom: 0; right: 0; border-width: 0 2px 2px 0; }
+        .card-pro:hover { border-color: rgba(34, 211, 238, 0.4); box-shadow: 0 0 30px rgba(34, 211, 238, 0.08), inset 0 0 30px rgba(34, 211, 238, 0.02); }
+        .card-pro:hover::before, .card-pro:hover::after { width: 28px; height: 28px; opacity: 0.9; border-color: var(--primary); filter: drop-shadow(0 0 4px var(--primary)); }
+        .card-scan { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(to bottom, transparent, rgba(34, 211, 238, 0.05) 50%, transparent); animation: scan-v 6s linear infinite; }
+        @keyframes scan-v { 0% { transform: translateY(-100%); } 100% { transform: translateY(100%); } }
+        .icon-shield { 
+            width: 64px; height: 64px; background: rgba(0,0,0,0.5); 
+            border: 1px solid var(--glass-border); border-radius: 4px; 
+            display: flex; align-items: center; justify-content: center; 
+            position: relative; transition: 0.3s;
+        }
+        .icon-shield::before { content: ''; position: absolute; inset: -2px; border-radius: 4px; border: 1px solid transparent; background: linear-gradient(135deg, var(--primary), transparent, transparent, var(--accent-purple)) border-box; -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0); mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; opacity: 0.4; }
+        .card-pro:hover .icon-shield { border-color: var(--primary); box-shadow: 0 0 20px var(--primary-glow); }
+        .card-pro:hover .icon-shield::before { opacity: 0.8; }
+
+        /* ===== 表格样式 (Animated Border) ===== */
+        .table-container { border-radius: 4px; overflow: auto; border: 1px solid var(--glass-border); background: var(--glass-bg); box-shadow: 0 8px 32px rgba(0,0,0,0.25); max-height: calc(100vh - 180px); position: relative; }
+        .table-container::before { content: ''; position: absolute; inset: -1px; border-radius: 4px; padding: 1px; background: linear-gradient(135deg, var(--primary), transparent 40%, transparent 60%, var(--accent-purple)); -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; z-index: 1; opacity: 0.6; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: auto; }
+        th { background: rgba(0,0,0,0.6); padding: 14px 12px; text-align: left; font-size: 11px; color: var(--text-2); border-bottom: 1px solid var(--glass-border); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; white-space: nowrap; position: sticky; top: 0; z-index: 10; }
+        th::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 1px; background: var(--glass-border); }
+        td { padding: 11px 12px; border-bottom: 1px solid rgba(255,255,255,0.03); color: var(--text-1); transition: background 0.15s, color 0.15s; white-space: nowrap; }
+        tbody tr { transition: background 0.15s; }
+        tbody tr:nth-child(even) { background: rgba(255,255,255,0.015); }
+        tbody tr:hover { background: rgba(34, 211, 238, 0.06); }
+        tbody tr:hover td { color: #FFF; }
+        .status-up { color: var(--success); font-weight: 600; white-space: nowrap; font-size: 12px; }
+        .status-up::before { content: '● '; font-size: 7px; vertical-align: middle; }
+        .status-down { color: var(--text-3); font-weight: 500; white-space: nowrap; font-size: 12px; }
+        .status-down::before { content: '● '; font-size: 7px; vertical-align: middle; }
+        .mono-val { font-family: var(--font-mono); font-weight: 600; font-size: 13px; color: var(--text-1); }
+
+        /* 操作按钮 */
+        .ops { white-space: nowrap; }
+        .op-btn { 
+            padding: 5px 14px; border-radius: 4px; font-size: 12px; font-weight: 600; 
+            cursor: pointer; border: none; margin-right: 6px;
+            color: #FFF; background: #3B82F6; 
+            transition: all 0.3s;
+        }
+        .op-btn:hover { background: #2563EB; box-shadow: 0 0 12px rgba(59, 130, 246, 0.4); transform: translateY(-1px); }
+        .op-btn.success { background: #10B981; }
+        .op-btn.success:hover { background: #059669; box-shadow: 0 0 12px rgba(16, 185, 129, 0.4); }
+
+        /* 用户与时钟 */
+        .user-hub { display: flex; align-items: center; gap: 20px; }
+        .user-avatar { 
+            width: 42px; height: 42px; border-radius: 12px; border: 2px solid var(--primary); 
+            padding: 2px; background: rgba(0,0,0,0.6); box-shadow: 0 0 15px var(--primary-glow);
+            transition: 0.3s; cursor: pointer;
+        }
+        .user-avatar:hover { transform: scale(1.1); box-shadow: 0 0 25px var(--primary); }
+        .pulse { width: 8px; height: 8px; background: var(--success); border-radius: 50%; display: inline-block; margin-right: 10px; box-shadow: 0 0 8px var(--success); animation: blink 2.5s ease-in-out infinite; }
+        @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
+        @keyframes blink { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+
+        /* ===== Neon data values ===== */
+        .data-val { font-family: var(--font-mono); font-size: 20px; font-weight: 700; color: var(--primary); text-shadow: 0 0 12px var(--primary-glow); }
+
+        /* ===== 底部状态栏 ===== */
+        .status-bar { height: 28px; background: rgba(0,0,0,0.6); border-top: 1px solid var(--glass-border); display: flex; align-items: center; padding: 0 24px; gap: 32px; font-size: 11px; font-family: var(--font-mono); color: var(--text-3); flex-shrink: 0; }
+        .status-bar .live { color: var(--success); display: flex; align-items: center; gap: 6px; }
+        .status-bar .live::before { content: ''; width: 6px; height: 6px; background: var(--success); border-radius: 50%; box-shadow: 0 0 8px var(--success); animation: blink 2s infinite; }
+        .status-dot { display: inline-flex; align-items: center; gap: 6px; }
+        .status-dot::before { content: '■'; font-size: 6px; color: var(--primary); }
+
+        /* ===== HUD 装饰线条 ===== */
+        .hud-line { height: 1px; background: linear-gradient(90deg, transparent, var(--primary) 20%, var(--primary) 80%, transparent); opacity: 0.15; margin: 16px 0; }
+
+        /* ===== Custom scrollbar ===== */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.2); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.35); }
+        * { scrollbar-width: thin; scrollbar-color: rgba(148,163,184,0.2) transparent; }
+
+        /* ===== Focus states for keyboard navigation (WCAG) ===== */
+        button:focus-visible, a:focus-visible, select:focus-visible, input:focus-visible {
+            outline: 2px solid var(--accent-purple);
+            outline-offset: 2px;
+        }
+
+        /* ===== Reduced motion preference ===== */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+            .matrix-effect { display: none; }
+            .card-scan { display: none; }
+        }
+
+        /* ===== Table container scrollbar special ===== */
+        .table-container::-webkit-scrollbar-thumb { background: rgba(34, 211, 238, 0.15); }
+        .table-container::-webkit-scrollbar-thumb:hover { background: rgba(34, 211, 238, 0.3); }
+    </style>
+</head>
+<body>
+    <div class="bg-system">
+        <div class="bg-mesh"></div>
+        <canvas id="matrix" class="matrix-effect"></canvas>
+    </div>
+
+    <header class="header">
+        <div class="header-left">
+            <div class="logo-text">BOBI EXCHANGE</div>
+            <nav class="top-nav" id="topNav">
+                <a href="#" data-view="report" class="active">数据报表</a>
+                <a href="#" data-view="merchant">商户管理</a>
+                <a href="#" data-view="user">用户管理</a>
+                <a href="#" data-view="trade">交易管理</a>
+                <a href="#" data-view="log">日志</a>
+                <a href="#" data-view="system">系统管理</a>
+            </nav>
+        </div>
+        <div class="user-hub">
+            <div style="text-align: right;">
+                <div style="font-size: 13px; font-weight: 700; color: #FFF;">ADMINISTRATOR</div>
+                <div id="clock" style="font-family: var(--font-mono); color: var(--primary); font-size: 11px;">2026-02-12 10:10:38</div>
+            </div>
+            <div class="user-avatar">
+                <img src="https://api.dicebear.com/7.x/identicon/svg?seed=admin" style="width:100%; border-radius:8px">
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- 侧边栏：全量项回归 -->
+        <aside class="sidebar" id="sidebar">
+            <div id="side-report">
+                <div class="sidebar-section">Main Navigation</div>
+                <div class="side-link active">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
+                    数据总表
+                </div>
+                <div class="side-link">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                    平台金钱流水
+                </div>
+                <div class="side-link">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    用户金钱流水
+                </div>
+                <div class="side-link">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+                    实时挂单统计
+                </div>
+                <div class="side-link">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 12h2a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-2"/></svg>
+                    公司金钱流水
+                </div>
+                <div class="side-link">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    商户金钱流水
+                </div>
+                <div class="side-link">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    用户积分流水
+                </div>
+            </div>
+            <div id="side-merchant" style="display: none;">
+                <div class="side-link" style="opacity: 0.6; font-size: 12px; gap: 8px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                    导航
+                </div>
+                <div class="sidebar-section" style="display: flex; align-items: center; gap: 8px;">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M6 9l6 6 6-6"/></svg>
+                    商户管理
+                </div>
+                <div class="side-link active">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    公司列表
+                </div>
+                <div class="side-link">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                    商户列表
+                </div>
+                <div class="side-link">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
+                    USDT交易记录
+                </div>
+                <div class="side-link">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg>
+                    商户提现方式
+                </div>
+                <div class="side-link">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="m17 5-5-3-5 3"/><path d="m17 19-5 3-5-3"/></svg>
+                    商户提现列表
+                </div>
+                <div class="side-link">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg>
+                    货币列表
+                </div>
+            </div>
+            <div id="side-user" style="display: none;">
+                <div class="side-link" style="opacity: 0.6; font-size: 12px; gap: 8px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                    导航
+                </div>
+                <div class="sidebar-section" style="display: flex; align-items: center; gap: 8px;">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M6 9l6 6 6-6"/></svg>
+                    用户管理
+                </div>
+                <div class="side-link active">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+                    用户列表
+                </div>
+                <div class="side-link">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/></svg>
+                    商家认证
+                </div>
+                <div class="side-link">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                    支付方式列表
+                </div>
+                <div class="side-link">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    卡号/账号拉黑
+                </div>
+                <div class="side-link">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="5" y="5" rx="1"/><path d="M9 9h6v6H9z"/></svg>
+                    二维码拉黑
+                </div>
+                <div class="side-link">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                    活跃日志
+                </div>
+                <div class="side-link">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg>
+                    充值管理
+                </div>
+                <div class="side-link">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+                    手机号拉黑
+                </div>
+                <div class="sidebar-section" style="display: flex; align-items: center; gap: 8px;">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M6 9l6 6 6-6"/></svg>
+                    风险账号监控
+                </div>
+                <div class="side-link">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                    实时监控表
+                </div>
+                <div class="side-link">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+                    IP操控度表
+                </div>
+            </div>
+        </aside>
+
+        <main class="main-stage">
+            <!-- 视图 1: 数据报表 (深度还原) -->
+            <div id="view-report" class="view-port active">
+                <div style="margin-bottom: 28px; display: flex; align-items: center; justify-content: space-between;">
+                    <h1 style="font-family: var(--font-head); font-size: 22px; color: #FFF; display: flex; align-items: center; gap: 12px;">
+                        <span class="pulse"></span> 平台数据概览
+                    </h1>
+                    <div style="font-family: var(--font-mono); font-size: 10px; color: var(--text-3); display: flex; gap: 16px; letter-spacing: 1px;">
+                        <span>◆ ENCRYPTED</span>
+                        <span style="color: var(--success);">◆ VERIFIED</span>
+                    </div>
+                </div>
+
+                <div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end; margin-bottom: 32px; padding: 24px; border-radius: 16px;" class="glass-panel">
+                    <div style="display: flex; flex-direction: column; gap: 6px;">
+                        <label style="font-size: 11px; font-weight: 700; color: var(--text-3); text-transform: uppercase;">APP 标识</label>
+                        <select style="background: #000; border: 1px solid var(--glass-border); color: #FFF; padding: 10px 16px; border-radius: 8px; font-size: 13px; outline: none;"><option>全部节点</option></select>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 6px;">
+                        <label style="font-size: 11px; font-weight: 700; color: var(--text-3); text-transform: uppercase;">统计区间</label>
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <input type="text" value="2025-02-12" style="background: #000; border: 1px solid var(--glass-border); color: #FFF; padding: 10px 16px; border-radius: 8px; font-size: 13px; width: 120px; outline: none;" readonly>
+                            <span style="color: var(--text-3); font-family: var(--font-mono)">>>></span>
+                            <input type="text" value="2025-02-12" style="background: #000; border: 1px solid var(--glass-border); color: #FFF; padding: 10px 16px; border-radius: 8px; font-size: 13px; width: 120px; outline: none;" readonly>
+                        </div>
+                    </div>
+                    <button class="btn-tech">查询数据</button>
+                    <button class="btn-ghost active">当日</button>
+                    <button class="btn-ghost">上一日</button>
+                    <button class="btn-ghost" disabled style="opacity:0.3">下一日</button>
+                    <div style="margin-left: auto; display: flex; align-items: center; gap: 16px;">
+                        <span style="font-size: 12px; color: #FACC15; background: rgba(250, 204, 21, 0.1); padding: 6px 16px; border-radius: 6px; border: 1px solid rgba(250, 204, 21, 0.2);">数据每15分钟更新</span>
+                        <button class="btn-tech">获取波币经营报表</button>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="card-pro glass-panel">
+                        <div class="card-scan"></div>
+                        <div style="display: flex; align-items: center; gap: 24px; margin-bottom: 28px;">
+                            <div class="icon-shield"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"/><path d="m7 7-.01.01"/></svg></div>
+                            <div><div style="font-family: var(--font-head); font-size: 20px; font-weight: 700; color: #FFF;">提单中心</div><div style="font-size: 11px; color: var(--text-3);">ORDER DELIVERY</div></div>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 14px;">
+                            <div class="data-item"><span class="data-label">挂单总数</span><span class="data-val">1,429</span></div>
+                            <div class="data-item"><span class="data-label">上架单数</span><span class="data-val">856</span></div>
+                            <div class="data-item"><span class="data-label">上架中波币</span><span class="data-val">42,050.00</span></div>
+                            <div class="data-item"><span class="data-label">下架波币</span><span class="data-val">120</span></div>
+                            <div class="data-item" style="border:none"><span class="data-label" style="color:var(--danger)">暂停波币</span><span class="data-val" style="color:var(--danger)">12</span></div>
+                        </div>
+                    </div>
+
+                    <div class="card-pro glass-panel">
+                        <div class="card-scan"></div>
+                        <div style="display: flex; align-items: center; gap: 24px; margin-bottom: 28px;">
+                            <div class="icon-shield"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/></svg></div>
+                            <div><div style="font-family: var(--font-head); font-size: 20px; font-weight: 700; color: #FFF;">工单监控</div><div style="font-size: 11px; color: var(--text-3);">TICKET MONITOR</div></div>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 14px;">
+                            <div class="data-item"><span class="data-label">完成笔数</span><span class="data-val">3,102</span></div>
+                            <div class="data-item"><span class="data-label">完成波币</span><span class="data-val">158,200.00</span></div>
+                            <div class="data-item"><span class="data-label">失败笔数</span><span class="data-val">45</span></div>
+                            <div class="data-item" style="border:none"><span class="data-label">失败波币</span><span class="data-val">1,240.50</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 视图 2: 商户管理 (截图精准还原) -->
+            <div id="view-merchant" class="view-port">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <div style="display: flex; gap: 12px;">
+                        <button class="btn-tech" style="background: linear-gradient(135deg, #10B981, #059669); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.25);">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                            查询
+                        </button>
+                        <button class="btn-ghost">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                            添加公司
+                        </button>
+                    </div>
+                    <div style="display: flex; gap: 24px; font-size: 13px; color: var(--text-2);">
+                        <div>商户总数量: <span style="color: var(--primary); font-family: var(--font-mono); font-weight: 800;">163</span></div>
+                        <div>在用商户总数量: <span style="color: var(--primary); font-family: var(--font-mono); font-weight: 800;">147</span></div>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>公司ID</th><th>公司名称</th><th>公司余额</th><th>下属商户总余额</th><th>商户数量</th><th>在用商户数量</th><th>状态</th><th>USDT充值</th><th>USDT提取</th><th>软钱包状态</th><th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td class="mono-val">1</td><td>MI</td><td class="mono-val">58463458.96</td><td class="mono-val">7510383.317</td><td class="mono-val">18</td><td class="mono-val">15</td><td class="status-up">已开放</td><td class="status-up">已启用</td><td class="status-up">已启用</td><td class="status-up">已启用</td><td class="ops"><button class="op-btn">编辑</button><button class="op-btn success">上下分</button></td></tr>
+                            <tr><td class="mono-val">2</td><td>IPHONE</td><td class="mono-val">103886</td><td class="mono-val">84934.47</td><td class="mono-val">3</td><td class="mono-val">2</td><td class="status-up">已开放</td><td class="status-up">已启用</td><td class="status-up">已启用</td><td class="status-down">未启用</td><td class="ops"><button class="op-btn">编辑</button><button class="op-btn success">上下分</button></td></tr>
+                            <tr><td class="mono-val">3</td><td>HUAWEI</td><td class="mono-val">0</td><td class="mono-val">0</td><td class="mono-val">0</td><td class="mono-val">0</td><td class="status-up">已开放</td><td class="status-down">未启用</td><td class="status-down">未启用</td><td class="status-down">未启用</td><td class="ops"><button class="op-btn">编辑</button><button class="op-btn success">上下分</button></td></tr>
+                            <tr><td class="mono-val">5</td><td>OPPO</td><td class="mono-val">0</td><td class="mono-val">0</td><td class="mono-val">0</td><td class="mono-val">0</td><td class="status-up">已开放</td><td class="status-down">未启用</td><td class="status-down">未启用</td><td class="status-down">未启用</td><td class="ops"><button class="op-btn">编辑</button><button class="op-btn success">上下分</button></td></tr>
+                            <tr><td class="mono-val">6</td><td>微信老李对</td><td class="mono-val">0</td><td class="mono-val">0</td><td class="mono-val">0</td><td class="mono-val">0</td><td class="status-up">已开放</td><td class="status-down">未启用</td><td class="status-down">未启用</td><td class="status-down">未启用</td><td class="ops"><button class="op-btn">编辑</button><button class="op-btn success">上下分</button></td></tr>
+                            <tr><td class="mono-val">7</td><td style="color:var(--danger); font-weight:700;">123456</td><td class="mono-val">0</td><td class="mono-val">0</td><td class="mono-val">0</td><td class="mono-val">0</td><td class="status-down">已冻结</td><td class="status-down">未启用</td><td class="status-down">未启用</td><td class="status-down">未启用</td><td class="ops"><button class="op-btn">编辑</button><button class="op-btn success">上下分</button></td></tr>
+                            <tr><td class="mono-val">8</td><td>你好呀</td><td class="mono-val">0</td><td class="mono-val">0</td><td class="mono-val">0</td><td class="mono-val">0</td><td class="status-up">已开放</td><td class="status-down">未启用</td><td class="status-down">未启用</td><td class="status-down">未启用</td><td class="ops"><button class="op-btn">编辑</button><button class="op-btn success">上下分</button></td></tr>
+                            <tr><td class="mono-val">9</td><td>哈哈哈哈</td><td class="mono-val">32092</td><td class="mono-val">293867.75</td><td class="mono-val">4</td><td class="mono-val">3</td><td class="status-up">已开放</td><td class="status-down">未启用</td><td class="status-down">未启用</td><td class="status-down">未启用</td><td class="ops"><button class="op-btn">编辑</button><button class="op-btn success">上下分</button></td></tr>
+                            <tr><td class="mono-val">10</td><td>随便取</td><td class="mono-val">0</td><td class="mono-val">0</td><td class="mono-val">0</td><td class="mono-val">0</td><td class="status-up">已开放</td><td class="status-down">未启用</td><td class="status-down">未启用</td><td class="status-down">未启用</td><td class="ops"><button class="op-btn">编辑</button><button class="op-btn success">上下分</button></td></tr>
+                            <tr><td class="mono-val">11</td><td>精转</td><td class="mono-val">0</td><td class="mono-val">0</td><td class="mono-val">2</td><td class="mono-val">0</td><td class="status-up">已开放</td><td class="status-down">未启用</td><td class="status-down">未启用</td><td class="status-down">未启用</td><td class="ops"><button class="op-btn">编辑</button><button class="op-btn success">上下分</button></td></tr>
+                            <tr><td class="mono-val">12</td><td>Node Technology</td><td class="mono-val">0</td><td class="mono-val">0</td><td class="mono-val">1</td><td class="mono-val">0</td><td class="status-up">已开放</td><td class="status-down">未启用</td><td class="status-down">未启用</td><td class="status-down">未启用</td><td class="ops"><button class="op-btn">编辑</button><button class="op-btn success">上下分</button></td></tr>
+                            <tr><td class="mono-val">13</td><td>apics</td><td class="mono-val">1717942.98</td><td class="mono-val">36015664.212</td><td class="mono-val">87</td><td class="mono-val">85</td><td class="status-up">已开放</td><td class="status-up">已启用</td><td class="status-up">已启用</td><td class="status-up">已启用</td><td class="ops"><button class="op-btn">编辑</button><button class="op-btn success">上下分</button></td></tr>
+                            <tr><td class="mono-val">14</td><td>fp238</td><td class="mono-val">0</td><td class="mono-val">0</td><td class="mono-val">0</td><td class="mono-val">0</td><td class="status-up">已开放</td><td class="status-down">未启用</td><td class="status-down">未启用</td><td class="status-down">未启用</td><td class="ops"><button class="op-btn">编辑</button><button class="op-btn success">上下分</button></td></tr>
+                            <tr><td class="mono-val">15</td><td>fpcc33</td><td class="mono-val">0</td><td class="mono-val">0</td><td class="mono-val">0</td><td class="mono-val">0</td><td class="status-up">已开放</td><td class="status-down">未启用</td><td class="status-down">未启用</td><td class="status-down">未启用</td><td class="ops"><button class="op-btn">编辑</button><button class="op-btn success">上下分</button></td></tr>
+                            <tr><td class="mono-val">16</td><td>fp888</td><td class="mono-val">0</td><td class="mono-val">0</td><td class="mono-val">0</td><td class="mono-val">0</td><td class="status-up">已开放</td><td class="status-down">未启用</td><td class="status-down">未启用</td><td class="status-down">未启用</td><td class="ops"><button class="op-btn">编辑</button><button class="op-btn success">上下分</button></td></tr>
+                            <tr><td class="mono-val">17</td><td style="color:var(--danger); font-weight:700;">fp990</td><td class="mono-val">0</td><td class="mono-val">0</td><td class="mono-val">0</td><td class="mono-val">0</td><td class="status-down">已冻结</td><td class="status-down">未启用</td><td class="status-down">未启用</td><td class="status-down">未启用</td><td class="ops"><button class="op-btn">编辑</button><button class="op-btn success">上下分</button></td></tr>
+                            <tr><td class="mono-val">18</td><td>联盟</td><td class="mono-val">90000</td><td class="mono-val">18941.364</td><td class="mono-val">1</td><td class="mono-val">1</td><td class="status-up">已开放</td><td class="status-down">未启用</td><td class="status-down">未启用</td><td class="status-down">未启用</td><td class="ops"><button class="op-btn">编辑</button><button class="op-btn success">上下分</button></td></tr>
+                            <tr><td class="mono-val">19</td><td>变形金</td><td class="mono-val">0</td><td class="mono-val">0</td><td class="mono-val">1</td><td class="mono-val">0</td><td class="status-up">已开放</td><td class="status-down">未启用</td><td class="status-down">未启用</td><td class="status-down">未启用</td><td class="ops"><button class="op-btn">编辑</button><button class="op-btn success">上下分</button></td></tr>
+                            <tr><td class="mono-val">20</td><td>水电费西过</td><td class="mono-val">13888</td><td class="mono-val">0</td><td class="mono-val">0</td><td class="mono-val">0</td><td class="status-up">已开放</td><td class="status-up">已启用</td><td class="status-down">未启用</td><td class="status-down">未启用</td><td class="ops"><button class="op-btn">编辑</button><button class="op-btn success">上下分</button></td></tr>
+                            <tr><td class="mono-val">21</td><td>niu</td><td class="mono-val">9000000</td><td class="mono-val">992491</td><td class="mono-val">2</td><td class="mono-val">1</td><td class="status-up">已开放</td><td class="status-up">已启用</td><td class="status-up">已启用</td><td class="status-up">已启用</td><td class="ops"><button class="op-btn">编辑</button><button class="op-btn success">上下分</button></td></tr>
+                            <tr><td class="mono-val">22</td><td>嘿嘿</td><td class="mono-val">100000</td><td class="mono-val">994000</td><td class="mono-val">1</td><td class="mono-val">1</td><td class="status-up">已开放</td><td class="status-down">未启用</td><td class="status-down">未启用</td><td class="status-down">未启用</td><td class="ops"><button class="op-btn">编辑</button><button class="op-btn success">上下分</button></td></tr>
+                            <tr><td class="mono-val">23</td><td>ankpwd</td><td class="mono-val">0</td><td class="mono-val">0</td><td class="mono-val">1</td><td class="mono-val">0</td><td class="status-up">已开放</td><td class="status-down">未启用</td><td class="status-down">未启用</td><td class="status-down">未启用</td><td class="ops"><button class="op-btn">编辑</button><button class="op-btn success">上下分</button></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 视图 3: 用户管理 -->
+            <div id="view-user" class="view-port">
+                <!-- 筛选栏 第1行 -->
+                <div class="glass-panel" style="padding: 20px 24px; border-radius: 4px; margin-bottom: 16px; display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end;">
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                        <label style="font-size: 10px; color: var(--text-3); font-family: var(--font-mono);">APP</label>
+                        <select style="background: rgba(0,0,0,0.4); border: 1px solid var(--glass-border); color: #FFF; padding: 7px 12px; border-radius: 4px; font-size: 12px; outline: none; min-width: 80px;"><option>全部</option></select>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                        <label style="font-size: 10px; color: var(--text-3); font-family: var(--font-mono);">用户ID</label>
+                        <input type="text" placeholder="" style="background: rgba(0,0,0,0.4); border: 1px solid var(--glass-border); color: #FFF; padding: 7px 12px; border-radius: 4px; font-size: 12px; outline: none; width: 100px;">
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                        <label style="font-size: 10px; color: var(--text-3); font-family: var(--font-mono);">手机</label>
+                        <div style="display: flex; gap: 4px;">
+                            <select style="background: rgba(0,0,0,0.4); border: 1px solid var(--glass-border); color: #FFF; padding: 7px 8px; border-radius: 4px; font-size: 11px; outline: none; width: 100px;"><option>中国(+86)</option></select>
+                        </div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                        <label style="font-size: 10px; color: var(--text-3); font-family: var(--font-mono);">昵称</label>
+                        <input type="text" placeholder="" style="background: rgba(0,0,0,0.4); border: 1px solid var(--glass-border); color: #FFF; padding: 7px 12px; border-radius: 4px; font-size: 12px; outline: none; width: 90px;">
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                        <label style="font-size: 10px; color: var(--text-3); font-family: var(--font-mono);">货币地址</label>
+                        <input type="text" placeholder="" style="background: rgba(0,0,0,0.4); border: 1px solid var(--glass-border); color: #FFF; padding: 7px 12px; border-radius: 4px; font-size: 12px; outline: none; width: 110px;">
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                        <label style="font-size: 10px; color: var(--text-3); font-family: var(--font-mono);">用户来源</label>
+                        <select style="background: rgba(0,0,0,0.4); border: 1px solid var(--glass-border); color: #FFF; padding: 7px 12px; border-radius: 4px; font-size: 12px; outline: none;"><option></option></select>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                        <label style="font-size: 10px; color: var(--text-3); font-family: var(--font-mono);">用户状态</label>
+                        <select style="background: rgba(0,0,0,0.4); border: 1px solid var(--glass-border); color: #FFF; padding: 7px 12px; border-radius: 4px; font-size: 12px; outline: none;"><option>全部</option></select>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                        <label style="font-size: 10px; color: var(--text-3); font-family: var(--font-mono);">登在市场</label>
+                        <select style="background: rgba(0,0,0,0.4); border: 1px solid var(--glass-border); color: #FFF; padding: 7px 12px; border-radius: 4px; font-size: 12px; outline: none;"><option>全部</option></select>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                        <label style="font-size: 10px; color: var(--text-3); font-family: var(--font-mono);">系统类型</label>
+                        <select style="background: rgba(0,0,0,0.4); border: 1px solid var(--glass-border); color: #FFF; padding: 7px 12px; border-radius: 4px; font-size: 12px; outline: none;"><option>全部</option></select>
+                    </div>
+                </div>
+                <!-- 筛选栏 第2行 -->
+                <div class="glass-panel" style="padding: 16px 24px; border-radius: 4px; margin-bottom: 24px; display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end;">
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                        <label style="font-size: 10px; color: var(--text-3); font-family: var(--font-mono);">登录IP</label>
+                        <input type="text" placeholder="" style="background: rgba(0,0,0,0.4); border: 1px solid var(--glass-border); color: #FFF; padding: 7px 12px; border-radius: 4px; font-size: 12px; outline: none; width: 110px;">
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                        <label style="font-size: 10px; color: var(--text-3); font-family: var(--font-mono);">注册IP</label>
+                        <input type="text" placeholder="" style="background: rgba(0,0,0,0.4); border: 1px solid var(--glass-border); color: #FFF; padding: 7px 12px; border-radius: 4px; font-size: 12px; outline: none; width: 110px;">
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                        <label style="font-size: 10px; color: var(--text-3); font-family: var(--font-mono);">注册时间</label>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <input type="text" value="2026-02-13" style="background: rgba(0,0,0,0.4); border: 1px solid var(--glass-border); color: #FFF; padding: 7px 12px; border-radius: 4px; font-size: 12px; outline: none; width: 100px;" readonly>
+                            <span style="color: var(--text-3); font-size: 11px;">~</span>
+                            <input type="text" value="2026-02-13" style="background: rgba(0,0,0,0.4); border: 1px solid var(--glass-border); color: #FFF; padding: 7px 12px; border-radius: 4px; font-size: 12px; outline: none; width: 100px;" readonly>
+                        </div>
+                    </div>
+                    <button class="btn-tech" style="background: linear-gradient(135deg, #10B981, #059669); box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2); padding: 8px 20px;">查询</button>
+                    <button class="btn-ghost active" style="padding: 7px 16px;">当日</button>
+                    <button class="btn-ghost" style="padding: 7px 16px;">上一日</button>
+                    <button class="btn-ghost" disabled style="opacity:0.3; padding: 7px 16px;">下一日</button>
+                </div>
+
+                <!-- 用户管理表格 -->
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width:36px;"><input type="checkbox" style="accent-color: var(--primary);"></th>
+                                <th>ID</th><th>来源</th><th>昵称</th><th>头像</th><th>通币地址</th><th>通币余额</th><th>登在市场</th><th>实名状态</th><th>审核状态</th><th>信用额度</th><th>登录IP</th><th>设备固件状态</th><th>注册时间</th><th>最后上线时间</th><th>系统类型</th><th>登在连续</th><th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><input type="checkbox" style="accent-color: var(--primary);"></td>
+                                <td class="mono-val">143704930</td>
+                                <td style="font-size:11px;">fun_2076986_73a</td>
+                                <td style="max-width:100px; overflow:hidden; text-overflow:ellipsis;">陪我到终于..qst</td>
+                                <td><div style="width:28px; height:28px; border-radius:4px; background: rgba(34,211,238,0.1); border: 1px solid var(--glass-border); display:flex; align-items:center; justify-content:center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-3)" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div></td>
+                                <td style="font-size:10px; font-family: var(--font-mono); max-width:120px; overflow:hidden; text-overflow:ellipsis;">0P9b6e1c9044e2779...e1f6d5ed5889f5a84</td>
+                                <td class="mono-val">0</td>
+                                <td></td>
+                                <td style="color: var(--warning);">未实名</td>
+                                <td>初始化</td>
+                                <td style="font-size:11px;">认购用数控</td>
+                                <td style="font-size:11px; font-family: var(--font-mono);">103.9.868.761<br><span style="font-size:10px; color:var(--text-3);">基础</span></td>
+                                <td></td>
+                                <td style="font-size:11px; font-family: var(--font-mono);">2026-02-13 01:27:01</td>
+                                <td style="font-size:11px; font-family: var(--font-mono);">02-10 01:04:21</td>
+                                <td>♀</td>
+                                <td class="status-up">正常</td>
+                                <td class="ops"><button class="op-btn">操作 ▾</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 底部操作栏 -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+                    <button class="btn-ghost" style="border-color: var(--danger); color: var(--danger); padding: 7px 20px; font-size: 12px;">批量冻结</button>
+                    <div style="display: flex; align-items: center; gap: 12px; font-size: 12px; color: var(--text-2);">
+                        <span>每页显示:</span>
+                        <select style="background: rgba(0,0,0,0.4); border: 1px solid var(--glass-border); color: #FFF; padding: 5px 10px; border-radius: 4px; font-size: 12px; outline: none;"><option>32</option></select>
+                        <span style="font-family: var(--font-mono);">第1页</span>
+                        <button class="btn-ghost" style="padding: 4px 10px; font-size: 11px;">&gt;</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 底部状态栏 (交易所风格) -->
+    <div class="status-bar">
+        <span class="live">SYSTEM ONLINE</span>
+        <span class="status-dot">BLOCK: #19,284,731</span>
+        <span class="status-dot">GAS: 12 Gwei</span>
+        <span class="status-dot">TPS: 2,847</span>
+        <span class="status-dot">LATENCY: 23ms</span>
+        <span style="margin-left: auto; color: var(--text-3);">BOBI CHAIN v3.2.1 | MAINNET</span>
+    </div>
+
+    <script>
+        // --- 视图切换逻辑 ---
+        const topNav = document.getElementById('topNav');
+        const viewPorts = document.querySelectorAll('.view-port');
+        const sidebars = { report: document.getElementById('side-report'), merchant: document.getElementById('side-merchant'), user: document.getElementById('side-user') };
+
+        topNav.addEventListener('click', (e) => {
+            e.preventDefault();
+            const link = e.target.closest('a');
+            if (!link) return;
+            const viewId = link.dataset.view;
+            if (!sidebars[viewId]) return;
+            topNav.querySelectorAll('a').forEach(a => a.classList.remove('active'));
+            link.classList.add('active');
+            viewPorts.forEach(v => v.classList.remove('active'));
+            document.getElementById(`view-${viewId}`).classList.add('active');
+            Object.values(sidebars).forEach(s => s.style.display = 'none');
+            sidebars[viewId].style.display = 'block';
+        });
+
+        // --- 基础特效 ---
+        const canvas = document.getElementById('matrix');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+        const letters = "0123456789ABCDEF₿ΞΦ";
+        const fontSize = 14;
+        const columns = canvas.width / fontSize;
+        const drops = Array(Math.floor(columns)).fill(1);
+        function draw() {
+            ctx.fillStyle = 'rgba(2, 6, 23, 0.05)'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#22D3EE'; ctx.font = fontSize + 'px monospace';
+            drops.forEach((d, i) => {
+                ctx.fillText(letters[Math.floor(Math.random()*letters.length)], i*fontSize, d*fontSize);
+                if (d*fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+                drops[i]++;
+            });
+        }
+        setInterval(draw, 60);
+
+        function tick() {
+            const d = new Date(), p = n => String(n).padStart(2, '0');
+            document.getElementById('clock').textContent = `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+        }
+        setInterval(tick, 1000); tick();
+        window.onresize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
+
+        // 路由支持: #report, #merchant, #user
+        function routeFromHash() {
+            const h = location.hash.replace('#','');
+            if (h && sidebars[h]) {
+                const link = topNav.querySelector(`[data-view="${h}"]`);
+                if (link) link.click();
+            }
+        }
+        window.addEventListener('hashchange', routeFromHash);
+        routeFromHash();
+    </script>
+</body>
+</html>

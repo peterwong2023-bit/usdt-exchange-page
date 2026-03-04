@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>波币AI风险监控系统</title>
+    <link rel="stylesheet" href="styles-v4.css?v=202601091856">
+    <link rel="stylesheet" href="styles-v4-enhanced.css?v=202601091856">
+    <link rel="stylesheet" href="risk-monitor-panel.css?v=202601091856">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <h1 class="logo">
+                    <img src="../bob.png" alt="波币" class="logo-icon">
+                    <span class="logo-text">波币AI风险监控系统</span>
+                </h1>
+                <div class="subtitle-container">
+                    <span class="subtitle-cn">抓光所有骗子</span>
+                    <span class="subtitle-divider">·</span>
+                    <span class="subtitle-en">Anti Scammer</span>
+                </div>
+            </div>
+            
+            <!-- 快速搜索 -->
+            <div class="header-center">
+                <div class="quick-search">
+                    <i class="fas fa-search"></i>
+                    <input type="text" 
+                           placeholder="搜索: 用户ID / 设备指纹 / 支付QR / 银行账号 / IP地址" 
+                           id="quickSearch"
+                           class="search-input">
+                    <button class="search-btn" id="executeSearch">
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="header-right">
+                <div class="header-actions">
+                    <!-- 告警铃铛按钮 -->
+                    <button class="btn btn-icon alert-bell" id="alertBellBtn" title="告警通知">
+                        <i class="fas fa-bell"></i>
+                        <span class="badge pulse" id="alertBadge">8</span>
+                    </button>
+                    <button class="btn btn-icon" title="导出报表" id="exportReport">
+                        <i class="fas fa-file-export"></i>
+                    </button>
+                    <button class="btn btn-primary" id="refreshAll">
+                        <i class="fas fa-sync-alt"></i>
+                        刷新
+                    </button>
+                    <div class="user-profile">
+                        <i class="fas fa-user-circle"></i>
+                        <span>运营员</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 视图切换标签 -->
+    <nav class="view-tabs">
+        <div class="tabs-container">
+            <button class="tab-btn active" data-view="overview">
+                <i class="fas fa-chart-line"></i>
+                概览仪表板
+            </button>
+            <button class="tab-btn" data-view="users">
+                <i class="fas fa-users"></i>
+                风险处理队列
+            </button>
+            <button class="tab-btn" data-view="events">
+                <i class="fas fa-exclamation-circle"></i>
+                风险事件中心
+            </button>
+            <button class="tab-btn" data-view="relationships">
+                <i class="fas fa-project-diagram"></i>
+                关联关系分析
+            </button>
+            <button class="tab-btn" data-view="operations">
+                <i class="fas fa-tasks"></i>
+                风控管理台
+            </button>
+        </div>
+    </nav>
+
+    <!-- 主内容区域 -->
+    <main class="main-content">
+        <!-- 概览仪表板视图 - 增强版 -->
+        <section class="view-section active" id="overviewView">
+            <!-- KPI 概览卡片 -->
+            <div class="kpi-overview">
+                <div class="kpi-card danger">
+                    <div class="kpi-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="kpi-content">
+                        <div class="kpi-value" id="totalRiskUsers">1,247</div>
+                        <div class="kpi-label">风险用户总数</div>
+                        <div class="kpi-trend up">
+                            <i class="fas fa-arrow-up"></i> 5%
+                        </div>
+                    </div>
+                </div>
+
+                <div class="kpi-card critical">
+                    <div class="kpi-icon">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    <div class="kpi-content">
+                        <div class="kpi-value" id="highRiskUsers">89</div>
+                        <div class="kpi-label">高危用户</div>
+                        <div class="kpi-trend down">
+                            <i class="fas fa-arrow-down"></i> 3%
+                        </div>
+                    </div>
+                </div>
+
+                <div class="kpi-card warning">
+                    <div class="kpi-icon">
+                        <i class="fas fa-project-diagram"></i>
+                    </div>
+                    <div class="kpi-content">
+                        <div class="kpi-value" id="riskSyndicates">23</div>
+                        <div class="kpi-label">风险团伙</div>
+                        <div class="kpi-trend up">
+                            <i class="fas fa-arrow-up"></i> 2%
+                        </div>
+                    </div>
+                </div>
+
+                <div class="kpi-card info">
+                    <div class="kpi-icon">
+                        <i class="fas fa-user-clock"></i>
+                    </div>
+                    <div class="kpi-content">
+                        <div class="kpi-value" id="pendingReview">156</div>
+                        <div class="kpi-label">待审核用户</div>
+                        <div class="kpi-trend up">
+                            <i class="fas fa-arrow-up"></i> 8%
+                        </div>
+                    </div>
+                </div>
+
+                <div class="kpi-card success">
+                    <div class="kpi-icon">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    <div class="kpi-content">
+                        <div class="kpi-value" id="newRiskToday">47</div>
+                        <div class="kpi-label">今日新增风险</div>
+                        <div class="kpi-trend down">
+                            <i class="fas fa-arrow-down"></i> 12%
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-grid-enhanced">
+                <!-- AI模型健康监控 -->
+                <div class="dashboard-card ai-health">
+                    <div class="card-header">
+                        <h3>
+                            <i class="fas fa-brain"></i>
+                            AI模型质量监控
+                        </h3>
+                        <span class="status-indicator success">
+                            <i class="fas fa-circle"></i> 运行正常
+                        </span>
+                    </div>
+                    <div class="card-body">
+                        <div class="ai-model-grid">
+                            <!-- 左侧：命中率圆形显示 -->
+                            <div class="hit-rate-circle-container">
+                                <div class="section-label">模型表现</div>
+                                <div class="hit-rate-circle">
+                                    <div class="circle-progress">
+                                        <svg width="140" height="140">
+                                            <circle cx="70" cy="70" r="60" fill="none" stroke="#e2e8f0" stroke-width="12"/>
+                                            <circle cx="70" cy="70" r="60" fill="none" stroke="#10b981" stroke-width="12"
+                                                stroke-dasharray="377" stroke-dashoffset="30" stroke-linecap="round"
+                                                transform="rotate(-90 70 70)"/>
+                                        </svg>
+                                        <div class="circle-text">
+                                            <div class="circle-value">92</div>
+                                            <div class="circle-label">命中率</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 右侧：其他指标 -->
+                            <div class="ai-metrics-right">
+                                <div class="metric-row">
+                                    <div class="metric-box">
+                                        <div class="metric-box-label">误报率</div>
+                                        <div class="metric-box-value">3%</div>
+                                        <div class="progress-bar-thin">
+                                            <div class="progress-fill-thin success" style="width: 3%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="metric-box">
+                                        <div class="metric-box-label">覆盖率</div>
+                                        <div class="metric-box-value">47%</div>
+                                        <div class="progress-bar-thin">
+                                            <div class="progress-fill-thin warning" style="width: 47%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="metric-row">
+                                    <div class="metric-box">
+                                        <div class="metric-box-label">今日人工纠正</div>
+                                        <div class="metric-box-value highlight">47 <span class="unit">次</span></div>
+                                    </div>
+                                    <div class="metric-box">
+                                        <div class="metric-box-label">训练样本</div>
+                                        <div class="metric-box-value highlight">2.8M <span class="unit">条</span></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="model-version-box">
+                                    <span class="version-label">当前版本:</span>
+                                    <span class="version-badge">v2.4.1</span>
+                                    <span class="status-dot"></span>
+                                    <span class="status-text">运行正常</span>
+                                    <button class="btn-update">检查更新</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 地区风险热力图 -->
+                <div class="dashboard-card geo-heatmap">
+                    <div class="card-header">
+                        <h3>
+                            <i class="fas fa-map-marked-alt"></i>
+                            地区风险热力图
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="geo-list" id="geoHeatmapList">
+                            <!-- 地区风险数据 -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 风险类型趋势 -->
+                <div class="dashboard-card risk-type-trend">
+                    <div class="card-header">
+                        <h3>
+                            <i class="fas fa-chart-line"></i>
+                            风险类型趋势
+                        </h3>
+                        <div class="card-actions">
+                            <select class="select-sm" id="typeTrendPeriod">
+                                <option value="7d" selected>近7天</option>
+                                <option value="30d">近30天</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="riskTypeTrendChart" style="height: 280px;"></div>
+                    </div>
+                </div>
+
+                <!-- 风险类别分布 -->
+                <div class="dashboard-card risk-distribution">
+                    <div class="card-header">
+                        <h3>
+                            <i class="fas fa-chart-pie"></i>
+                            风险类别分布
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div id="riskDistributionChart" style="height: 280px;"></div>
+                    </div>
+                </div>
+
+                <!-- 风险监控面板（合并：待审核 + 团伙） -->
+                <div class="dashboard-card risk-monitor-panel">
+                    <div class="card-header">
+                        <h3>
+                            <i class="fas fa-shield-alt"></i>
+                            风险监控面板
+                            <span class="tab-count" id="totalCount">0</span>
+                        </h3>
+                        <div class="panel-tabs">
+                            <button class="panel-tab-btn active" data-tab="users" onclick="app.filterRiskPanel('users')">
+                                <i class="fas fa-user-shield"></i> 风险用户
+                                <span class="tab-count" id="usersCount">0</span>
+                            </button>
+                            <button class="panel-tab-btn" data-tab="syndicates" onclick="app.filterRiskPanel('syndicates')">
+                                <i class="fas fa-users-slash"></i> 风险团伙
+                                <span class="tab-count" id="syndicatesCount">0</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="risk-monitor-list" id="riskMonitorList">
+                            <!-- 统一的风险监控列表 -->
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- 风险处理队列视图 -->
+        <section class="view-section" id="usersView">
+            <!-- 统计摘要卡片 -->
+            <div class="queue-stats-bar">
+                <div class="queue-stat-card critical">
+                    <div class="stat-icon"><i class="fas fa-fire"></i></div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="criticalCount">3</div>
+                        <div class="stat-label">紧急处理</div>
+                    </div>
+                </div>
+                <div class="queue-stat-card high">
+                    <div class="stat-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="highCount">5</div>
+                        <div class="stat-label">高危用户</div>
+                    </div>
+                </div>
+                <div class="queue-stat-card pending">
+                    <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="pendingCount">2</div>
+                        <div class="stat-label">待审核</div>
+                    </div>
+                </div>
+                <div class="queue-stat-card total">
+                    <div class="stat-icon"><i class="fas fa-users"></i></div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="queueTotalCount">10</div>
+                        <div class="stat-label">队列总数</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 过滤器面板 - 单行紧凑版 -->
+            <div class="filter-panel-compact">
+                <select class="filter-select-compact" id="filterRiskLevel">
+                    <option value="">全部等级</option>
+                    <option value="critical">🔴 紧急</option>
+                    <option value="high">🟠 高危</option>
+                    <option value="medium">🟡 中等</option>
+                    <option value="low">🟢 低风险</option>
+                </select>
+                
+                <select class="filter-select-compact" id="filterRiskType">
+                    <option value="">全部类型</option>
+                    <option value="device">📱 设备</option>
+                    <option value="ip">🌐 IP</option>
+                    <option value="payment">💳 支付</option>
+                    <option value="trade">💱 交易</option>
+                    <option value="syndicate">👥 团伙</option>
+                </select>
+                
+                <input type="text" class="filter-input-compact" id="filterUserSearch" placeholder="搜索：用户ID / 手机号 / 设备指纹...">
+                
+                <button class="btn-filter-compact primary" id="applyUserFilters">
+                    <i class="fas fa-search"></i> 查询
+                </button>
+                
+                <button class="btn-filter-compact secondary" id="resetUserFilters">
+                    <i class="fas fa-redo"></i> 重置
+                </button>
+            </div>
+
+            <!-- 批量操作工具栏 -->
+            <div class="batch-action-bar" id="batchActionBar" style="display: none;">
+                <div class="batch-info">
+                    <i class="fas fa-check-square"></i>
+                    已选择 <strong id="selectedCount">0</strong> 个用户
+                </div>
+                <div class="batch-actions">
+                    <button class="btn-batch review"><i class="fas fa-clipboard-check"></i> 批量审核</button>
+                    <button class="btn-batch freeze"><i class="fas fa-lock"></i> 批量冻结</button>
+                    <button class="btn-batch mark"><i class="fas fa-flag"></i> 批量标记</button>
+                    <button class="btn-batch clear"><i class="fas fa-times"></i> 取消选择</button>
+                </div>
+            </div>
+
+            <!-- 用户卡片列表容器 -->
+            <div class="user-queue-container">
+                <div class="queue-list-header">
+                    <h3>
+                        <i class="fas fa-list"></i>
+                        风险处理队列
+                        <span class="count-badge-v2" id="userTotalCount">0</span>
+                    </h3>
+                    <div class="header-actions">
+                        <button class="btn-header-action" id="refreshUserList">
+                            <i class="fas fa-sync-alt"></i> 刷新
+                        </button>
+                    </div>
+                </div>
+                <div class="user-cards-list" id="userCardsList">
+                    <!-- 卡片将通过JS动态生成 -->
+                </div>
+                <div class="queue-pagination">
+                    <div class="pagination-info">
+                        显示 <span id="userStartRecord">1</span> - <span id="userEndRecord">10</span> 条，共 <span id="userTotalRecords">0</span> 条
+                    </div>
+                    <div class="pagination-controls">
+                        <button class="btn-pagination" id="userPrevPage">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="btn-pagination" id="userNextPage">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 风险事件中心视图 -->
+        <section class="view-section" id="eventsView">
+            <!-- 事件统计看板 -->
+            <div class="event-stats-dashboard">
+                <div class="event-stat-card today">
+                    <div class="stat-icon"><i class="fas fa-calendar-day"></i></div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="todayEventCount">47</div>
+                        <div class="stat-label">今日事件</div>
+                    </div>
+                </div>
+                <div class="event-stat-card critical-events">
+                    <div class="stat-icon"><i class="fas fa-fire"></i></div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="criticalEventCount">12</div>
+                        <div class="stat-label">高危事件</div>
+                    </div>
+                </div>
+                <div class="event-stat-card auto-handled">
+                    <div class="stat-icon"><i class="fas fa-robot"></i></div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="autoHandledCount">38</div>
+                        <div class="stat-label">AI自动处理</div>
+                    </div>
+                </div>
+                <div class="event-stat-card pending-review">
+                    <div class="stat-icon"><i class="fas fa-user-clock"></i></div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="pendingReviewEventCount">9</div>
+                        <div class="stat-label">待人工复核</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 事件筛选器 - 单行版 -->
+            <div class="event-filter-bar">
+                <select class="event-filter-select" id="filterEventType">
+                    <option value="">全部事件类型</option>
+                    <option value="device">📱 设备异常</option>
+                    <option value="ip">🌐 IP风险</option>
+                    <option value="trade">💱 交易异常</option>
+                    <option value="payment">💳 支付风险</option>
+                    <option value="syndicate">👥 团伙行为</option>
+                </select>
+                
+                <select class="event-filter-select" id="filterEventLevel">
+                    <option value="">全部严重程度</option>
+                    <option value="critical">🔴 严重</option>
+                    <option value="high">🟠 高危</option>
+                    <option value="medium">🟡 中等</option>
+                </select>
+                
+                <select class="event-filter-select" id="filterEventStatus">
+                    <option value="">全部处理状态</option>
+                    <option value="auto">🤖 AI已处理</option>
+                    <option value="manual">👤 人工已处理</option>
+                    <option value="pending">⏳ 待复核</option>
+                </select>
+                
+                <input type="text" class="event-filter-input" id="filterEventSearch" placeholder="搜索：用户ID / 事件描述 / IP地址...">
+                
+                <button class="btn-event-filter primary" id="applyEventFilters">
+                    <i class="fas fa-search"></i> 查询
+                </button>
+                
+                <button class="btn-event-filter secondary" id="resetEventFilters">
+                    <i class="fas fa-redo"></i> 重置
+                </button>
+            </div>
+
+            <!-- 事件时间轴列表 -->
+            <div class="events-timeline-container">
+                <div class="timeline-header">
+                    <h3><i class="fas fa-stream"></i> 实时事件流 <span class="event-count-badge" id="eventTotalCount">0</span></h3>
+                    <button class="btn-pause-feed" id="pauseEventFeed">
+                        <i class="fas fa-pause"></i> 暂停实时更新
+                    </button>
+                </div>
+                <div class="events-timeline" id="eventsTimeline">
+                    <!-- 事件卡片将通过JS动态生成 -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 右下角告警弹窗（继承V3） -->
+    <div class="alert-popup" id="alertPopup">
+        <div class="alert-popup-header">
+            <h3>
+                <i class="fas fa-bell"></i>
+                实时告警中心
+                <span class="alert-count" id="popupAlertCount">8</span>
+            </h3>
+            <div class="alert-popup-actions">
+                <button class="btn-icon-sm" id="markAllReadBtn" title="全部已读">
+                    <i class="fas fa-check-double"></i>
+                </button>
+                <button class="btn-icon-sm" id="closeAlertPopup" title="关闭">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        <div class="alert-popup-body" id="alertPopupBody">
+            <!-- 告警列表将通过JS动态加载 -->
+        </div>
+        <div class="alert-popup-footer">
+            <button class="btn-text" id="viewAllAlerts">查看全部告警</button>
+        </div>
+    </div>
+
+    <!-- 加载提示 -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>数据加载中...</p>
+        </div>
+    </div>
+
+    <!-- 通知提示容器 -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- 审核详情抽屉 (Persona Drawer) -->
+    <div class="audit-drawer-overlay" id="auditDrawerOverlay" onclick="app.closeAuditDrawer()"></div>
+    <div class="audit-drawer" id="auditDrawer">
+        <div class="drawer-header">
+            <div class="drawer-title">
+                <i class="fas fa-user-shield"></i>
+                风险用户审核详情
+            </div>
+            <button class="drawer-close" onclick="app.closeAuditDrawer()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="drawer-body">
+            <iframe id="auditIframe" src="" frameborder="0" style="width: 100%; height: 100%;"></iframe>
+        </div>
+    </div>
+
+    <!-- 脚本文件 -->
+    <script src="data-v2.js?v=202601091932"></script>
+    <script src="data-v4.js?v=202601091932"></script>
+    <script src="app-v3.js?v=202601091932"></script>
+    <script src="app-v4.js?v=202601091932"></script>
+</body>
+</html>

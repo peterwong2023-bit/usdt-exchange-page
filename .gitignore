@@ -1,0 +1,13 @@
+.vercel
+node_modules
+.DS_Store
+*.zip
+.cursor
+.claude
+.product-team
+ai-sticky-notes
+lottery-admin
+lottery-h5
+lottery-redesign
+worldmonitor
+*.pdf

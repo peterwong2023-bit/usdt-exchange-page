@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>方案4：浮动操作面板</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
+            background: #f8fafc;
+            padding-bottom: 180px;
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            color: white;
+            font-size: 14px;
+        }
+
+        .header {
+            background: white;
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+        }
+
+        .badge {
+            padding: 4px 10px;
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            margin-left: auto;
+        }
+
+        .content {
+            padding: 16px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .form-card {
+            background: white;
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+
+        .section-title {
+            font-size: 13px;
+            color: #64748b;
+            font-weight: 700;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .selector {
+            padding: 18px;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .selector:active {
+            transform: scale(0.98);
+        }
+
+        .selector.selected {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-color: #bae6fd;
+        }
+
+        .merchant-info {
+            flex: 1;
+        }
+
+        .merchant-name {
+            font-weight: 700;
+            font-size: 15px;
+            margin-bottom: 2px;
+        }
+
+        .merchant-subtitle {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        /* 余额信息行 */
+        .balance-info {
+            display: flex;
+            gap: 16px;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px dashed #cbd5e1;
+        }
+
+        .balance-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .balance-item-icon {
+            font-size: 14px;
+        }
+
+        .balance-item-text {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .balance-item-value {
+            font-weight: 700;
+            font-size: 14px;
+            margin-left: 2px;
+        }
+
+        .balance-item-value.available {
+            color: #3b82f6;
+        }
+
+        .balance-item-value.frozen {
+            color: #94a3b8;
+        }
+
+        .sel-icon {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 16px 18px;
+            background: #f8fafc;
+            border: 2px solid transparent;
+            border-radius: 14px;
+            font-size: 15px;
+            outline: none;
+            margin-bottom: 12px;
+            font-family: inherit;
+        }
+
+        input:focus, textarea:focus {
+            border-color: #3b82f6;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+
+        textarea { min-height: 100px; }
+
+        /* 浮动面板 */
+        .floating-panel {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            box-shadow: 0 -4px 24px rgba(0,0,0,0.15);
+            padding: 20px;
+            z-index: 100;
+            border-radius: 24px 24px 0 0;
+            transition: all 0.3s;
+        }
+
+
+        .panel-summary {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            padding: 16px 20px;
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            border-radius: 14px;
+        }
+
+        .summary-merchant {
+            flex: 1;
+        }
+
+        .summary-merchant-name {
+            font-size: 13px;
+            color: #64748b;
+            margin-bottom: 2px;
+        }
+
+        .summary-merchant-value {
+            font-weight: 700;
+            font-size: 15px;
+            color: #0f172a;
+        }
+
+        .summary-amount {
+            text-align: right;
+        }
+
+        .summary-amount-label {
+            font-size: 11px;
+            color: #64748b;
+            margin-bottom: 2px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .summary-amount-value {
+            font-weight: 800;
+            font-size: 22px;
+            color: #3b82f6;
+        }
+
+        .panel-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 17px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(59, 130, 246, 0.4);
+        }
+
+        .panel-btn:disabled {
+            background: #cbd5e1;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(15, 23, 42, 0.92);
+            color: white;
+            padding: 18px 32px;
+            border-radius: 16px;
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 2000;
+        }
+
+        .toast.show { opacity: 1; }
+    </style>
+</head>
+<body>
+    <div class="status-bar">
+        <span>2:01</span>
+        <div>⚫⚫⚫⚫ 4G 🔋</div>
+    </div>
+
+    <div class="header">
+        <button class="back-btn" onclick="history.back()">‹</button>
+        <h1 style="flex: 1; text-align: center; font-size: 18px;">出款</h1>
+        <span class="badge">浮动面板</span>
+    </div>
+
+    <div class="content">
+        <div class="form-card">
+            <div class="section-title">区块链 & 代币</div>
+            <div class="selector">
+                <div class="sel-icon">₮</div>
+                <div style="flex: 1;">
+                    <div style="font-size: 12px; color: #64748b;">波场</div>
+                    <div style="font-weight: 700;">USDT (TRC20)</div>
+                </div>
+            </div>
+
+            <div class="section-title">商户</div>
+            <div class="selector" id="merchSel" onclick="selectMerchant()">
+                <div style="color: #94a3b8;">点击选择商户</div>
+                <span style="color: #94a3b8; font-size: 20px; margin-left: auto;">›</span>
+            </div>
+
+            <div class="section-title">交易详情</div>
+            <input type="text" placeholder="收款地址" id="address" oninput="update()">
+            <input type="number" placeholder="金额" id="amount" oninput="update()">
+            <textarea placeholder="备注（可选）" id="note"></textarea>
+        </div>
+    </div>
+
+    <!-- 浮动面板 -->
+    <div class="floating-panel">
+        <div class="panel-summary">
+            <div class="summary-merchant">
+                <div class="summary-merchant-name">出款商户</div>
+                <div class="summary-merchant-value" id="sumMerch">未选择</div>
+            </div>
+            <div class="summary-amount">
+                <div class="summary-amount-label">出款金额</div>
+                <div class="summary-amount-value" id="sumAmount">0</div>
+            </div>
+        </div>
+        <button class="panel-btn" id="submitBtn" disabled onclick="submit()">发起出款请求</button>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        let merchant = null;
+
+        function selectMerchant() {
+            merchant = { 
+                name: '新宿归集', 
+                balance: 170.1,
+                frozen: 0
+            };
+            
+            const selector = document.getElementById('merchSel');
+            selector.classList.add('selected');
+            selector.innerHTML = `
+                <div class="sel-icon">📦</div>
+                <div class="merchant-info">
+                    <div class="merchant-name">${merchant.name} (1212)</div>
+                    <div class="merchant-subtitle">归集商户</div>
+                    <div class="balance-info">
+                        <div class="balance-item">
+                            <span class="balance-item-icon">💵</span>
+                            <span class="balance-item-text">当前余额</span>
+                            <span class="balance-item-value available">${merchant.balance}</span>
+                            <span style="font-size: 11px; color: #94a3b8; font-weight: 600;">USDT</span>
+                        </div>
+                        <div class="balance-item">
+                            <span class="balance-item-icon">❄️</span>
+                            <span class="balance-item-text">冻结</span>
+                            <span class="balance-item-value frozen">${merchant.frozen}</span>
+                            <span style="font-size: 11px; color: #94a3b8; font-weight: 600;">USDT</span>
+                        </div>
+                    </div>
+                </div>
+                <span style="color: #10b981; font-size: 24px;">✓</span>
+            `;
+            
+            update();
+            showToast('✓ 已选择商户');
+        }
+
+        function update() {
+            const address = document.getElementById('address').value;
+            const amount = document.getElementById('amount').value;
+            
+            if (merchant) {
+                document.getElementById('sumMerch').textContent = merchant.name;
+            }
+            if (amount) {
+                document.getElementById('sumAmount').textContent = amount;
+            } else {
+                document.getElementById('sumAmount').textContent = '0';
+            }
+            
+            document.getElementById('submitBtn').disabled = !(merchant && address && amount && parseFloat(amount) > 0);
+        }
+
+        function submit() {
+            showToast('✓ 出款请求已提交');
+            setTimeout(() => location.reload(), 2000);
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+    </script>
+</body>
+</html>
+

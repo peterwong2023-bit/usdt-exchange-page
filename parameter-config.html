@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>参数配置 - Boinlive管理后台</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif;
+        }
+
+        body {
+            background: #f5f7fa;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+            font-size: 14px;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* 顶部导航 */
+        .header {
+            background: #1f2937;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            color: #fff;
+            justify-content: space-between;
+            font-size: 14px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .logo {
+            color: #fff;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .nav-items {
+            display: flex;
+            gap: 5px;
+        }
+
+        .nav-item {
+            padding: 8px 15px;
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.7);
+            transition: all 0.3s;
+            border-radius: 6px;
+        }
+
+        .nav-item:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            font-size: 13px;
+        }
+
+        .status-tag {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* 主体布局 */
+        .main-wrapper {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* 侧边栏 */
+        .sidebar {
+            width: 220px;
+            background: #1f2937;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #374151;
+        }
+
+        .sidebar-title {
+            padding: 20px;
+            font-size: 12px;
+            color: #9ca3af;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .menu-group {
+            margin-bottom: 10px;
+        }
+
+        .menu-group-title {
+            padding: 12px 20px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            color: #e5e7eb;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .menu-group-title:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .menu-item {
+            padding: 10px 20px 10px 48px;
+            font-size: 13px;
+            color: #9ca3af;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .menu-item:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .menu-item.active {
+            color: #fff;
+            background: #3b82f6;
+            font-weight: 600;
+        }
+
+        /* 内容区 */
+        .content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #f3f4f6;
+            overflow: hidden;
+        }
+
+        .content-header {
+            height: 48px;
+            background: #fff;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        .tab {
+            padding: 8px 20px;
+            background: #3b82f6;
+            font-size: 13px;
+            color: #fff;
+            border-radius: 6px 6px 0 0;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .toolbar {
+            padding: 15px 20px;
+            background: #fff;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .btn-refresh {
+            background: #fff;
+            border: 1px solid #d1d5db;
+            padding: 6px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #374151;
+            transition: all 0.2s;
+        }
+
+        .btn-refresh:hover {
+            border-color: #3b82f6;
+            color: #3b82f6;
+            background: #f0f7ff;
+        }
+
+        /* 表格 */
+        .table-container {
+            flex: 1;
+            overflow: auto;
+            padding: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid #e5e7eb;
+        }
+
+        th {
+            text-align: left;
+            padding: 15px 20px;
+            background: #f9fafb;
+            font-weight: 600;
+            color: #374151;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 14px;
+        }
+
+        td {
+            padding: 15px 20px;
+            border-bottom: 1px solid #f3f4f6;
+            color: #4b5563;
+            vertical-align: top;
+            font-size: 13px;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: #f9fafb;
+        }
+
+        .param-name {
+            font-weight: 600;
+            color: #111827;
+            width: 200px;
+        }
+
+        .param-content {
+            white-space: pre-wrap;
+            word-break: break-all;
+            color: #4b5563;
+            line-height: 1.6;
+        }
+
+        .btn-modify {
+            background: #3b82f6;
+            color: #fff;
+            border: none;
+            padding: 4px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-modify:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+
+        /* 弹窗样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #fff;
+            border-radius: 12px;
+            width: 600px;
+            max-width: 90%;
+            padding: 24px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #111827;
+        }
+
+        .modal-close {
+            cursor: pointer;
+            color: #9ca3af;
+            font-size: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .form-textarea {
+            height: 150px;
+            resize: vertical;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn-cancel {
+            padding: 8px 16px;
+            border: 1px solid #d1d5db;
+            background: #fff;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .btn-save {
+            padding: 8px 16px;
+            background: #3b82f6;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 顶部导航 -->
+    <header class="header">
+        <div class="header-left">
+            <div class="logo">Boinlive管理后台</div>
+            <nav class="nav-items">
+                <span class="nav-item">直播</span>
+                <span class="nav-item">游戏</span>
+                <span class="nav-item">推广</span>
+                <span class="nav-item">资金</span>
+                <span class="nav-item">广告</span>
+                <span class="nav-item">账号</span>
+                <span class="nav-item">系统</span>
+            </nav>
+        </div>
+        <div class="header-right">
+            <span>入款提醒 <span class="status-tag">0</span></span>
+            <span>提现提醒 <span class="status-tag">0</span></span>
+            <span>剩余钻石: <span style="color: #fbbf24; font-weight: 600;">415361688</span></span>
+            <span>剩余等(W): <span style="color: #60a5fa; font-weight: 600;">338846</span></span>
+            <span>2025-12-27 02:25:05</span>
+            <span style="font-weight: 600;">tui1</span>
+        </div>
+    </header>
+
+    <div class="main-wrapper">
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <div class="sidebar-title">
+                <i class="fas fa-chevron-right"></i> 导航
+            </div>
+            
+            <div class="menu-group">
+                <div class="menu-group-title">
+                    <i class="fas fa-envelope"></i> 短信管理
+                </div>
+                <div class="menu-item">短信接口</div>
+                <div class="menu-item">短信消息</div>
+            </div>
+
+            <div class="menu-group">
+                <div class="menu-group-title">
+                    <i class="fas fa-headset"></i> 客服管理
+                </div>
+                <div class="menu-item">客服接口</div>
+                <div class="menu-item">客服入口配置</div>
+            </div>
+
+            <div class="menu-group">
+                <div class="menu-group-title">
+                    <i class="fas fa-file-alt"></i> 操作日志
+                </div>
+                <div class="menu-item">操作日志</div>
+            </div>
+
+            <div class="menu-group">
+                <div class="menu-group-title">
+                    <i class="fas fa-industry"></i> 代付厂商
+                </div>
+                <div class="menu-item">游戏代付厂商</div>
+            </div>
+
+            <div class="menu-group">
+                <div class="menu-group-title">
+                    <i class="fas fa-cog"></i> 参数配置
+                </div>
+                <div class="menu-item active">参数配置</div>
+            </div>
+
+            <div class="menu-group">
+                <div class="menu-group-title">
+                    <i class="fas fa-box"></i> 安装包管理
+                </div>
+                <div class="menu-item">安装包列表</div>
+            </div>
+        </aside>
+
+        <!-- 内容区 -->
+        <main class="content">
+            <div class="content-header">
+                <div class="tab">参数配置 <i class="fas fa-times" style="font-size: 10px; opacity: 0.5;"></i></div>
+            </div>
+
+            <div class="toolbar">
+                <button class="btn-refresh" onclick="location.reload()">
+                    <i class="fas fa-sync-alt"></i> 刷新
+                </button>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 250px;">参数名</th>
+                            <th>内容</th>
+                            <th style="width: 100px;">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="paramTable">
+                        <!-- 数据行由 JS 填充 -->
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- 修改弹窗 -->
+    <div id="modifyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="modalTitle">修改参数</div>
+                <div class="modal-close" onclick="closeModal()">&times;</div>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">参数名</label>
+                    <input type="text" id="editParamName" class="form-control" readonly style="background: #f3f4f6;">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">内容</label>
+                    <textarea id="editParamContent" class="form-control form-textarea"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeModal()">取消</button>
+                <button class="btn-save" onclick="saveParam()">提交</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const params = [
+            { name: "易商商户ID", content: "682bf2e062834545a7cc199e8383a0b0" },
+            { name: "风控行为校验开关键", content: "0" },
+            { name: "易商ID", content: "6553cd217063dd860a39ececc628a444" },
+            { name: "易商密钥", content: "bf93027b5c69522c75505c5d8d52cb67" },
+            { name: "支付宝提现说明", content: "1111\n1. 提现金额100至500\n2. 支付宝单日提现限制2笔;\n3. 手续费为充值金额的1%;\n4. 提现成功后到账时间1-30分钟，如未到账，请联系客服;\n5. 禁止在本平台进行洗黑钱、恶意套利等行为，如发现将永久封号处理" },
+            { name: "支付宝提现手续费 2代表2%", content: "2" },
+            { name: "绑定支付宝数量", content: "3" },
+            { name: "银行卡提现说明", content: "011110A0手持滚动文字，即可查看更多提现说明\n\n1. 请绑定您本人的银行卡，并确认银行卡信息正确无误，否则提现，无法到账。\n2. 提现金额100元起，如未正常到账，请联系24小时在线客服。\n3. 如果您使用的是身份登录，请您务必绑定手机号码，以免账号丢失。\n4. 提现成功后，到账时间1-30分钟，因网络或当地银行原因可能会延迟，请刷新银行余额，注意查收。\n5. 支付密码请在【我的】-【设置】-【支付密码】进行设置，请牢记支付密码以及暗语，并妥善保管。\n6. 打码量指的是有效投注，例如：您充值100元，需要您有效投注100元或以上方可提交提现申请。\n\n禁止在本平台进行洗黑钱、恶意套利等行为，如发现将永久封号处理。\n\n温馨提示：\n强烈推荐【银行转账】充值，笔笔充值送3%现金，充值越多，赠送越多，无需申请，充值成功，系统自动添加。\n\n更多豪礼优惠活动，请点击【我的】-【活动中心】进行查看。" },
+            { name: "银行卡提现手续费 2代表2%", content: "2" },
+            { name: "发布提现说明", content: "11111手持滚动文字，即可查看更多提现说明\n\n1. 请绑定您本人的银行卡，并确认银行卡信息正确无误，否则提现无法到账。\n2. 提现金额100元起，如未正常到账，请联系24小时在线客服。\n3. 如果您使用的是身份登录，请您务必绑定手机号码，以免账号丢失。\n4. 提现成功后，到账时间1-30分钟，因网络或当地银行原因可能会延迟，请刷新银行余额，注意查收。\n5. 支付密码请在【我的】-【设置】-【支付密码】进行设置，请牢记支付密码以及暗语，并妥善保管。\n6. 打码量指的是有效投注，例如：您充值100元，需要您有效投注100元或以上方可提交提现申请。\n\n禁止在本平台进行洗黑钱、恶意套利等行为，如发现将永久封号处理。\n\n温馨提示：\n强烈推荐【银行转账】充值，笔笔充值送3%现金，充值越多，赠送越多，无需申请，充值成功，系统自动添加。\n\n更多豪礼优惠活动，请点击【我的】-【活动中心】进行查看。" },
+            { name: "发布商户开关", content: "1" }
+        ];
+
+        function renderTable() {
+            const tbody = document.getElementById('paramTable');
+            tbody.innerHTML = params.map((p, index) => `
+                <tr>
+                    <td class="param-name">${p.name}</td>
+                    <td class="param-content">${p.content}</td>
+                    <td>
+                        <button class="btn-modify" onclick="openModifyModal(${index})">修改</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        let currentIndex = -1;
+        function openModifyModal(index) {
+            currentIndex = index;
+            document.getElementById('editParamName').value = params[index].name;
+            document.getElementById('editParamContent').value = params[index].content;
+            document.getElementById('modifyModal').classList.add('show');
+        }
+
+        function closeModal() {
+            document.getElementById('modifyModal').classList.remove('show');
+        }
+
+        function saveParam() {
+            const newContent = document.getElementById('editParamContent').value;
+            params[currentIndex].content = newContent;
+            renderTable();
+            closeModal();
+            alert('修改成功！');
+        }
+
+        // 初始化渲染
+        renderTable();
+    </script>
+</body>
+</html>
+
+
+

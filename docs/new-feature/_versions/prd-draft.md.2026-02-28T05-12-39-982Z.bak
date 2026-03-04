@@ -1,0 +1,172 @@
+# 币价便签（Market）可点击原型稿（v1.2-Kline-SizeAware）
+
+## 1) 原型目标（仅 Market）
+- 覆盖 4 档严格尺寸：S/M/L/XL（禁止拖拽缩放）
+- 图表随尺寸分级展示：
+  - S/M：仅显示“迷你趋势”（Mini Trend，非完整K线）
+  - L/XL：显示完整 K 线（OHLC）+ 周期切换 + 技术指标开关
+- 覆盖 4 类失败态：Key 缺失、Key 失效、断网、限流（失败态仍要“有旧数据，不空白”）
+- 走通 3 条可点击闭环：尺寸切换、失败修复（Key 向导/重试/切 Provider）、设置面板（Tab 可切）
+
+---
+
+## 2) 图表分级规则（本次变更重点）
+### 2.1 S/M 的“迷你趋势”定义
+- 形式：Mini Trend（建议用 Sparkline；也可用极简蜡烛条，但不建议 v1.x 增复杂度）
+- 目标：一眼看方向与波动，不承诺交易级精度
+- 交互：无周期按钮、无指标按钮、不可点
+
+### 2.2 L/XL 的“完整K线”定义
+- K 线：OHLC
+- 周期：1m/5m/15m/1h（可切）
+- 指标：MA/RSI/MACD（开关态即可，不做参数配置）
+- 交互：周期切换、指标面板开关需可点通
+
+### 2.3 尺寸切换的数据/配置保留
+- 用户在 L/XL 打开的指标与周期：切到 S/M 时不展示控件与指标，但配置保留；回到 L/XL 自动恢复展示状态。
+- S/M 的迷你趋势不受指标影响（始终只画价格趋势）。
+
+---
+
+## 3) Frame 清单（按交互顺序命名，便于连线）
+### 3.1 正常态（Normal）
+1. Market-S-Normal（240×160，含 Mini Trend）
+2. Market-M-Normal（320×220，含 Mini Trend）
+3. Market-L-Normal（420×300，含 K 线 + 指标入口）
+4. Market-XL-Normal（560×380，含 K 线 + 指标区 + 当前K线高亮）
+
+### 3.2 图表交互态（仅 L/XL 有，从 L/XL Normal 可跳）
+5. Market-L-Timeframe（L：周期切换展开态）
+6. Market-XL-Timeframe（XL：周期切换展开态）
+7. Market-L-Indicators（L：指标开关展开态）
+8. Market-XL-Indicators（XL：指标开关展开态）
+
+（可选，为了让评审一眼看到“指标生效”）
+9. Market-XL-MA-On（MA 打开态）
+10. Market-XL-RSI-On（RSI 打开态）
+11. Market-XL-MACD-On（MACD 打开态）
+
+### 3.3 失败态（从任一 Normal 可跳）
+12. Market-KeyMissing（建议用 M 尺寸展示）
+13. Market-KeyInvalid（建议用 M 尺寸展示）
+14. Market-Offline（建议用 L 尺寸展示：K 线置灰；若从 S/M 进入则 Mini Trend 置灰）
+15. Market-RateLimit（建议用 L 尺寸展示：K 线置灰；若从 S/M 进入则 Mini Trend 置灰）
+
+### 3.4 设置与修复
+16. Market-Settings-Overview
+17. Market-Settings-Refresh
+18. Market-Settings-Chart（周期/指标开关；仅对 L/XL 生效）
+19. Market-Settings-Rules
+20. Market-Settings-Notify
+21. Market-Settings-DataKey
+
+22. KeyWizard-Step1（粘贴 Key）
+23. KeyWizard-Step2（试请求中）
+24. KeyWizard-Success（成功返回 Market）
+25. KeyWizard-Fail（失败示例：401 或 429 任一）
+
+（可选）26. Provider-Switch-Success / Provider-Switch-Fail
+
+---
+
+## 4) 统一布局组件（所有 Frame 共用）
+### 4.1 Header（固定）
+- 左：币种图标 + 标题（默认 BTC/USDT）
+- 右：刷新 / 齿轮 / “…”更多
+
+### 4.2 Footer（强制一致）
+- 左：最后更新：2 分钟前
+- 中：状态 Chip（正常/断网/限流/Key缺失/Key失效/已暂停）
+- 右：动作按钮（按状态）
+  - 断网：重试
+  - 限流：查看详情 / 切 Provider
+  - Key 缺失/失效：修复 Key
+
+---
+
+## 5) 各尺寸 Body 线框（“信息档位”+“图表分级”）
+### 5.1 S（240×160）— 迷你趋势
+- 大字：现价
+- 一行：24h 涨跌幅（红/绿）
+- Mini Trend：一条极简趋势线（高度很小，置于底部或中部）
+- 不显示：K 线、周期切换、指标入口、24h 高低
+
+### 5.2 M（320×220，默认）— 迷你趋势（更清晰）
+- 大字：现价
+- 一行：涨跌额 + 涨跌幅（红/绿）
+- Mini Trend：更宽趋势线 + 右侧小标签“近60m”（可选）
+- 不显示：K 线、周期切换、指标入口
+
+### 5.3 L（420×300）— 完整K线入口尺寸
+- 大字：现价
+- 一行：涨跌额 + 涨跌幅
+- 两列：24h 高 / 24h 低
+- K 线区域（主视觉）
+  - 默认周期：1m（原型先写 1m）
+  - 周期控件：1m/5m/15m/1h
+  - 指标入口：按钮“指标”（打开 MA/RSI/MACD 开关）
+
+### 5.4 XL（560×380）— 完整K线增强
+- L 全部
+- K 线更大 + 当前K线高亮（边框/点标注）
+- 指标区更适配（MA 叠加；RSI/MACD 子图）
+- 禁止：深度图、画线工具、指标参数配置、多图联动
+
+---
+
+## 6) K线与指标的交互（仅 L/XL）
+### 6.1 周期切换
+- 点击 1m/5m/15m/1h：当前周期高亮；跳转到对应 Timeframe Frame 或对应 Normal 变体
+
+### 6.2 指标开关
+- 点“指标”→ Indicators 面板（toggle）：MA/RSI/MACD（默认 Off）
+- 切换后跳转到对应 On 变体帧表达“生效”
+
+---
+
+## 7) 失败态画法（必须“有旧数据，不空白”，且随尺寸降级）
+- Key 缺失：价格“—”占位 + 文案；Footer=修复Key → KeyWizard
+- Key 失效：若有上次快照则显示旧价置灰 + 文案；Footer=修复Key
+- 断网：
+  - S/M：Mini Trend 保留但置灰 + 显示上次成功快照 + “离线，展示 X 分钟前数据”
+  - L/XL：K 线保留但置灰/停止更新
+- 限流：
+  - S/M：Mini Trend 置灰；提示“已自动放慢刷新”
+  - L/XL：K 线置灰/停止更新；提供“切 Provider”
+
+---
+
+## 8) “…”更多菜单（必须可点，且负责尺寸切换）
+- 尺寸：S / M / L / XL（当前打勾）→ 跳对应 Frame
+- 置顶（toggle）
+- 锁定位置（toggle）
+- 透明度（100/70/40）
+- 复制便签
+- 关闭
+
+严格尺寸要求：所有 Market Frame 不画 resize handle。
+
+---
+
+## 9) 设置 Popover（齿轮打开，Tab 必须可切）
+- 概览：标的、Provider、最近成功时间戳
+- 刷新：1/5/15/60（选择态）
+- 图表（Chart）：
+  - K 线周期：1m/5m/15m/1h（单选）
+  - 指标开关：MA/RSI/MACD（默认 Off）
+  - 说明：S/M 不展示 K 线与指标（仅迷你趋势）
+- 规则：价格阈值、涨跌幅阈值、去重窗口
+- 通知通道：系统通知/声音（默认 Off）
+- 数据源&Key：Provider 下拉、Key 状态、测试连接、修复 Key
+
+---
+
+## 10) 原型连线清单（交付必须点通）
+- S/M：仅展示迷你趋势；可通过“尺寸”切到 L/XL 进入 K 线能力
+- L/XL：周期切换、指标面板开关可点击闭环
+- 失败态：Footer 动作 → 修复/重试/切 Provider → 回 Normal
+- 设置：齿轮 → Tab 切换 →（Chart Tab 可改周期/指标）→ 回 L/XL 生效态
+
+--- 
+
+如需更明确：S 的 Mini Trend 是否保留（或 S 完全不画图只看数值），给一个选择口径即可，我同步改原型优先级与 Frame。

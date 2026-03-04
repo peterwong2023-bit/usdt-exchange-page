@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XG游戏大厅</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=PingFang+SC:wght@400;500;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: #F5F5F5;
+            overflow-x: hidden;
+            padding-bottom: 80px;
+        }
+
+        /* 顶部状态栏 */
+        .status-bar {
+            background: #FFFFFF;
+            padding: 8px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .time {
+            color: #000;
+            font-weight: 700;
+        }
+
+        .status-icons {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            color: #000;
+            font-size: 14px;
+        }
+
+        /* 顶部头部区域 */
+        .top-header {
+            background: #FFFFFF;
+            padding: 12px 20px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 48px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #6B5FFF 0%, #9B8FFF 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -4px;
+            font-family: Arial Black, sans-serif;
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+        .user-name {
+            font-size: 11px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        .balance-display {
+            font-size: 14px;
+            font-weight: 600;
+            color: #7D58FC;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .refresh-icon {
+            font-size: 12px;
+            color: #7D58FC;
+            cursor: pointer;
+            transition: transform 0.5s ease;
+        }
+
+        .refresh-icon:active {
+            transform: rotate(360deg);
+        }
+
+        /* 容器布局 */
+        .container {
+            display: flex;
+            background: #F5F5F5;
+        }
+
+        /* 左侧分类栏 */
+        .sidebar {
+            width: 88px;
+            background: #F5F5F5;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 20px 8px;
+            flex-shrink: 0;
+        }
+
+        .category-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 16px 10px;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #FFFFFF;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        .category-item.active {
+            background: linear-gradient(135deg, #FF6B6B, #FF8E8E);
+        }
+
+        .category-item.active .category-label {
+            color: white;
+        }
+
+        .category-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .category-label {
+            font-size: 12px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        /* 主内容区域 */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            background: #F5F5F5;
+        }
+
+        /* 轮播Banner区域 */
+        .banner-carousel {
+            width: 100%;
+            height: 220px;
+            background: linear-gradient(135deg, #DDD0F3 0%, #E8DEFF 100%);
+            position: relative;
+            overflow: hidden;
+            border-radius: 20px;
+            margin: 0 16px 16px 0;
+        }
+
+        .banner-content {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            position: relative;
+        }
+
+        .banner-logo {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            z-index: 2;
+        }
+
+        .banner-logo-text {
+            font-size: 68px;
+            font-weight: 900;
+            color: #FFA500;
+            font-family: Arial Black, sans-serif;
+            letter-spacing: -4px;
+            line-height: 1;
+        }
+
+        .banner-logo-subtitle {
+            font-size: 16px;
+            color: #333;
+            margin-top: 4px;
+            letter-spacing: 2px;
+            font-weight: 600;
+        }
+
+        .banner-image {
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        /* 公告滚动条 */
+        .announcement-bar {
+            background: #FFFFFF;
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 0 16px 16px 0;
+            border-radius: 12px;
+        }
+
+        .announcement-icon {
+            color: #6B5FFF;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .announcement-scroll {
+            flex: 1;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .announcement-text {
+            display: inline-block;
+            padding-left: 100%;
+            animation: scroll-text 15s linear infinite;
+            color: #666;
+            font-size: 14px;
+        }
+
+        @keyframes scroll-text {
+            from {
+                transform: translateX(0);
+            }
+            to {
+                transform: translateX(-100%);
+            }
+        }
+
+        /* 游戏大卡片区域 */
+        .game-cards-section {
+            padding: 0 16px 0 0;
+        }
+
+        .large-game-card {
+            width: 100%;
+            height: 200px;
+            border-radius: 20px;
+            margin-bottom: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            background: linear-gradient(135deg, #DDD0F3 0%, #E8DEFF 100%);
+        }
+
+        .large-game-card:active {
+            transform: scale(0.98);
+        }
+
+        .card-content {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+            position: relative;
+        }
+
+        .card-logo {
+            text-align: left;
+            z-index: 2;
+        }
+
+        .card-logo-text {
+            font-size: 64px;
+            font-weight: 900;
+            letter-spacing: -3px;
+            line-height: 1;
+        }
+
+        .card-logo-subtitle {
+            font-size: 14px;
+            color: #666;
+            margin-top: 6px;
+            letter-spacing: 1px;
+        }
+
+        .card-image {
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        /* 小游戏图标区域 */
+        .small-games-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            padding: 0 16px 20px 0;
+        }
+
+        .small-game-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .small-game-card:active {
+            transform: scale(0.98);
+        }
+
+        .small-game-image {
+            width: 100%;
+            height: 160px;
+            background: linear-gradient(135deg, #DDD0F3, #E8DEFF);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .small-game-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .game-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+        }
+
+        .small-game-header {
+            padding: 14px 16px;
+            background: linear-gradient(135deg, #DDD0F3, #E8DEFF);
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 8px;
+        }
+
+        .game-logo-text {
+            font-size: 18px;
+            font-weight: 800;
+            color: #FF6600;
+        }
+
+        .game-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #666;
+        }
+
+        /* 底部导航 */
+        .bottom-navigation {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            padding: 8px 0 20px;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.08);
+            z-index: 1000;
+        }
+
+        .nav-button {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            color: #999;
+            transition: color 0.3s;
+        }
+
+        .nav-button.active {
+            color: #7D58FC;
+        }
+
+        .nav-button-icon {
+            font-size: 24px;
+        }
+
+        .nav-button-label {
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        /* 滚动条样式 */
+        .main-content::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .main-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .main-content::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 2px;
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 70px;
+                padding: 12px 6px;
+            }
+
+            .category-icon {
+                font-size: 24px;
+            }
+
+            .category-label {
+                font-size: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部状态栏 -->
+    <div class="status-bar">
+        <span class="time" id="currentTime">9:27</span>
+        <div class="status-icons">
+            <i class="fas fa-signal"></i>
+            <i class="fas fa-wifi"></i>
+            <i class="fas fa-battery-three-quarters"></i>
+        </div>
+    </div>
+
+    <!-- 顶部头部 -->
+    <div class="top-header">
+        <div class="logo">XG</div>
+        <div class="user-info">
+            <div class="user-name">用户名称</div>
+            <div class="balance-display">
+                <span>¥ 1000.00</span>
+                <i class="fas fa-sync-alt refresh-icon"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- 容器 -->
+    <div class="container">
+        <!-- 左侧边栏 -->
+        <div class="sidebar">
+            <div class="category-item active">
+                <div class="category-icon">🔥</div>
+                <div class="category-label">热门</div>
+            </div>
+            <div class="category-item">
+                <div class="category-icon">🎮</div>
+                <div class="category-label">电子</div>
+            </div>
+            <div class="category-item">
+                <div class="category-icon">📺</div>
+                <div class="category-label">视讯</div>
+            </div>
+            <div class="category-item">
+                <div class="category-icon">🃏</div>
+                <div class="category-label">棋牌</div>
+            </div>
+            <div class="category-item">
+                <div class="category-icon">🎲</div>
+                <div class="category-label">彩票</div>
+            </div>
+            <div class="category-item">
+                <div class="category-icon">🎣</div>
+                <div class="category-label">捕鱼</div>
+            </div>
+        </div>
+
+        <!-- 主内容区 -->
+        <div class="main-content">
+            <!-- 轮播Banner -->
+            <div class="banner-carousel">
+                <div class="banner-content">
+                    <div class="banner-logo">
+                        <div class="banner-logo-text">CQG</div>
+                        <div class="banner-logo-subtitle">GAMING</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 公告栏 -->
+            <div class="announcement-bar">
+                <i class="fas fa-bullhorn announcement-icon"></i>
+                <div class="announcement-scroll">
+                    <div class="announcement-text">
+                        欢迎光临～欢迎光临～欢迎光临～  欢迎光临～欢迎光临～
+                    </div>
+                </div>
+            </div>
+
+            <!-- 大游戏卡片 -->
+            <div class="game-cards-section">
+                <!-- BBN 卡片 1 -->
+                <div class="large-game-card">
+                    <div class="card-content">
+                        <div class="card-logo">
+                            <div class="card-logo-text">
+                                <span style="color: #C8485E;">b</span><span style="color: #C8485E;">b</span><span style="color: #C8485E;">n</span>
+                            </div>
+                            <div class="card-logo-subtitle">宝盈集团</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CQG 卡片 1 -->
+                <div class="large-game-card">
+                    <div class="card-content">
+                        <div class="card-logo">
+                            <div class="card-logo-text" style="color: #FFA500;">CQG</div>
+                            <div class="card-logo-subtitle">GAMING</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BBN 卡片 2 -->
+                <div class="large-game-card">
+                    <div class="card-content">
+                        <div class="card-logo">
+                            <div class="card-logo-text">
+                                <span style="color: #C8485E;">b</span><span style="color: #C8485E;">b</span><span style="color: #C8485E;">n</span>
+                            </div>
+                            <div class="card-logo-subtitle">宝盈集团</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CQG 卡片 2 -->
+                <div class="large-game-card">
+                    <div class="card-content">
+                        <div class="card-logo">
+                            <div class="card-logo-text" style="color: #FFA500;">CQG</div>
+                            <div class="card-logo-subtitle">GAMING</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 小游戏图标区域 -->
+            <div class="small-games-grid">
+                <!-- AG电子 -->
+                <div class="small-game-card">
+                    <div class="small-game-image">
+                        <div class="game-placeholder">🐼</div>
+                    </div>
+                    <div class="small-game-header">
+                        <span class="game-logo-text">AG</span>
+                        <span class="game-name">AG电子</span>
+                    </div>
+                </div>
+
+                <!-- CQ9电子 -->
+                <div class="small-game-card">
+                    <div class="small-game-image">
+                        <div class="game-placeholder">🤴</div>
+                    </div>
+                    <div class="small-game-header">
+                        <span class="game-logo-text" style="color: #FFA500;">CQG</span>
+                        <span class="game-name">CQ9电子</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部导航 -->
+    <div class="bottom-navigation">
+        <button class="nav-button active">
+            <i class="nav-button-icon fas fa-home"></i>
+            <span class="nav-button-label">首页</span>
+        </button>
+        <button class="nav-button">
+            <i class="nav-button-icon far fa-clock"></i>
+            <span class="nav-button-label">记录</span>
+        </button>
+        <button class="nav-button">
+            <i class="nav-button-icon fas fa-wallet"></i>
+            <span class="nav-button-label">储值</span>
+        </button>
+        <button class="nav-button">
+            <i class="nav-button-icon far fa-user"></i>
+            <span class="nav-button-label">我的</span>
+        </button>
+    </div>
+
+    <script>
+        // 更新时间
+        function updateTime() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('currentTime').textContent = `${hours}:${minutes}`;
+        }
+        updateTime();
+        setInterval(updateTime, 60000);
+
+        // 底部导航切换
+        document.querySelectorAll('.nav-button').forEach(button => {
+            button.addEventListener('click', function() {
+                document.querySelectorAll('.nav-button').forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // 侧边栏分类切换
+        document.querySelectorAll('.category-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.category-item').forEach(cat => cat.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // 游戏卡片点击
+        document.querySelectorAll('.large-game-card, .small-game-card').forEach(card => {
+            card.addEventListener('click', function() {
+                console.log('点击了游戏卡片');
+            });
+        });
+
+        // 刷新余额
+        document.querySelector('.refresh-icon').addEventListener('click', function(e) {
+            e.stopPropagation();
+            this.style.transform = 'rotate(360deg)';
+            setTimeout(() => {
+                this.style.transform = 'rotate(0deg)';
+            }, 500);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>团伙关系图谱 - 波币AI风险监控系统</title>
+    <link rel="stylesheet" href="styles-v4.css">
+    <link rel="stylesheet" href="group-graph.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/vis-network@9.1.2/dist/vis-network.min.js"></script>
+</head>
+<body>
+    <div style="font-family: 'Font Awesome 6 Free'; font-weight: 900; position: absolute; opacity: 0; pointer-events: none;">  </div>
+    <!-- 顶部核心工具栏 -->
+    <div class="toolbar">
+        <div class="toolbar-group">
+            <div class="toolbar-title">团伙图谱</div>
+            <span class="group-id-badge" id="groupIdBadge">G1203</span>
+        </div>
+        
+        <!-- 统计气泡区块 (强制右对齐) -->
+        <div class="beautified-stats">
+            <div class="stat-bubble">
+                <div class="bubble-label">团伙成员</div>
+                <div class="bubble-value" id="memberCount">8</div>
+            </div>
+            <div class="stat-bubble risk">
+                <div class="bubble-label">风险分</div>
+                <div class="bubble-value" id="riskScore">95</div>
+            </div>
+            <div class="stat-bubble amount">
+                <div class="bubble-label">涉案金额</div>
+                <div class="bubble-value" id="totalAmount">¥125,000</div>
+            </div>
+        </div>
+
+        <div class="toolbar-group">
+            <button class="toolbar-btn" id="btnFitView" title="适应画布"><i class="fas fa-compress-arrows-alt"></i></button>
+            <button class="toolbar-btn" id="btnZoomIn"><i class="fas fa-plus"></i></button>
+            <button class="toolbar-btn" id="btnZoomOut"><i class="fas fa-minus"></i></button>
+            <div class="toolbar-divider"></div>
+            <button class="filter-btn active" data-filter="all">全部</button>
+            <button class="filter-btn" data-filter="user">用户</button>
+            <button class="toolbar-btn" id="btnExportImage" style="margin-left: 10px;" title="导出快照"><i class="fas fa-camera"></i></button>
+        </div>
+    </div>
+
+    <!-- 主内容区 -->
+    <div class="graph-container">
+        <!-- 左侧：关系图谱 -->
+        <div class="graph-canvas-wrapper">
+            <div id="graphCanvas" class="graph-canvas"></div>
+            
+            <!-- 图例 -->
+            <div class="graph-legend">
+                <div class="legend-title">图谱标识说明</div>
+                <div class="legend-items">
+                    <div class="legend-item">
+                        <div class="legend-node user"></div>
+                        <span>风险用户</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-node device"><i class="fas fa-mobile-alt"></i></div>
+                        <span>关联设备</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-node ip"><i class="fas fa-network-wired"></i></div>
+                        <span>登录IP</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-node payment"><i class="fas fa-qrcode"></i></div>
+                        <span>支付资源</span>
+                    </div>
+                </div>
+                <div class="legend-divider"></div>
+                <div class="legend-items">
+                    <div class="legend-item">
+                        <div class="legend-line solid"></div>
+                        <span>物理关联</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-line dashed"></div>
+                        <span>业务关联</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右侧：详情面板 -->
+        <div class="detail-panel" id="detailPanel">
+            <div class="detail-panel-empty">
+                <div class="empty-icon"><i class="fas fa-project-diagram"></i></div>
+                <p>请点击图谱中的节点<br>查看深层关联信息</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="group-graph-data.js"></script>
+    <script src="group-graph.js"></script>
+    <script>
+        // 如果在 iframe 中，自动进行环境适配
+        if (window.self !== window.top) {
+            document.body.classList.add('embedded');
+        }
+    </script>
+</body>
+</html>

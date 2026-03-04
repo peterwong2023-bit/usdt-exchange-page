@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>仪表板 - 活动中心</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- 顶部通知栏 -->
+    <div class="notification-bar" id="notificationBar">
+        <div class="notification-content">
+            <span class="notification-dot"></span>
+            <span>全新的活动主题上线，全新的活动Banner，供您查看</span>
+        </div>
+        <button class="notification-close" onclick="closeNotification()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <div class="app-container">
+        <!-- 侧边栏 -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <rect x="3" y="3" width="7" height="7" rx="2" fill="#fff"/>
+                            <rect x="14" y="3" width="7" height="7" rx="2" fill="#fff" opacity="0.7"/>
+                            <rect x="3" y="14" width="7" height="7" rx="2" fill="#fff" opacity="0.7"/>
+                            <rect x="14" y="14" width="7" height="7" rx="2" fill="#fff" opacity="0.5"/>
+                        </svg>
+                    </div>
+                    <div class="logo-text">
+                        <span class="logo-title">活动中心</span>
+                        <span class="logo-subtitle">CAMPAIGN CENTER</span>
+                    </div>
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <a href="dashboard.html" class="nav-item active">
+                        <i class="fas fa-chart-pie"></i>
+                        <span>仪表板</span>
+                    </a>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">业务</div>
+                    <a href="index.html" class="nav-item">
+                        <i class="fas fa-layer-group"></i>
+                        <span>平台列表</span>
+                    </a>
+                    <a href="merchant-list.html" class="nav-item">
+                        <i class="fas fa-store"></i>
+                        <span>商户列表</span>
+                    </a>
+                    <a href="activity-list.html" class="nav-item">
+                        <i class="fas fa-list-alt"></i>
+                        <span>活动列表</span>
+                    </a>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">日志</div>
+                    <a href="mining-flow.html" class="nav-item">
+                        <i class="fas fa-coins"></i>
+                        <span>挖矿流水</span>
+                    </a>
+                    <a href="item-receipt.html" class="nav-item">
+                        <i class="fas fa-gift"></i>
+                        <span>物品领取</span>
+                    </a>
+                    <a href="platform-log.html" class="nav-item">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>平台日志</span>
+                    </a>
+                    <a href="audit-log.html" class="nav-item">
+                        <i class="fas fa-clipboard-check"></i>
+                        <span>审核日志</span>
+                    </a>
+                    <a href="operation-log.html" class="nav-item">
+                        <i class="fas fa-history"></i>
+                        <span>操作日志</span>
+                    </a>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">平台数据</div>
+                    <a href="claim-data.html" class="nav-item">
+                        <i class="fas fa-download"></i>
+                        <span>领取数据</span>
+                    </a>
+                    <a href="user-behavior.html" class="nav-item">
+                        <i class="fas fa-chart-line"></i>
+                        <span>用户行为</span>
+                    </a>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">用户列表</div>
+                    <a href="user-data.html" class="nav-item">
+                        <i class="fas fa-id-card"></i>
+                        <span>用户数据</span>
+                    </a>
+                    <a href="user-detail.html" class="nav-item">
+                        <i class="fas fa-user-circle"></i>
+                        <span>用户详情</span>
+                    </a>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">系统</div>
+                    <a href="account-management.html" class="nav-item">
+                        <i class="fas fa-users"></i>
+                        <span>账号管理</span>
+                    </a>
+                    <a href="global-config.html" class="nav-item">
+                        <i class="fas fa-globe"></i>
+                        <span>全局配置</span>
+                    </a>
+                </div>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <button class="sidebar-toggle" onclick="toggleSidebar()">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+        </aside>
+
+        <!-- 主内容区 -->
+        <main class="main-content" style="padding: 0;">
+            <!-- 顶部工作区标签页 -->
+            <div class="admin-tabs">
+                <div class="admin-tab" onclick="location.href='index.html'">平台列表 <i class="fas fa-times" onclick="closeTab(this); event.stopPropagation();"></i></div>
+                <div class="admin-tab" onclick="location.href='merchant-list.html'">商户列表(Live) <i class="fas fa-times" onclick="closeTab(this); event.stopPropagation();"></i></div>
+                <div class="admin-tab active" onclick="location.href='dashboard.html'">仪表板 <i class="fas fa-times" onclick="closeTab(this); event.stopPropagation();"></i></div>
+                <div class="admin-tab" onclick="location.href='user-data.html'">用户数据 <i class="fas fa-times" onclick="closeTab(this); event.stopPropagation();"></i></div>
+                <div class="admin-tab" onclick="location.href='global-config.html'">全局配置 <i class="fas fa-times" onclick="closeTab(this); event.stopPropagation();"></i></div>
+                <div class="admin-tab" onclick="location.href='audit-log.html'">审核日志 <i class="fas fa-times" onclick="closeTab(this); event.stopPropagation();"></i></div>
+                <div class="admin-tab" onclick="location.href='operation-log.html'">操作日志 <i class="fas fa-times" onclick="closeTab(this); event.stopPropagation();"></i></div>
+                <div class="admin-tab" onclick="location.href='user-detail.html'">用户详情 <i class="fas fa-times" onclick="closeTab(this); event.stopPropagation();"></i></div>
+                <div class="admin-tab" onclick="location.href='account-management.html'">账号管理 <i class="fas fa-times" onclick="closeTab(this); event.stopPropagation();"></i></div>
+                <div class="admin-tabs-close-all" onclick="closeAllTabs()">
+                    <span>全部</span>
+                    <i class="fas fa-times"></i>
+                </div>
+            </div>
+
+            <!-- 顶部导航 -->
+            <header class="top-header">
+                <div class="header-left">
+                    <button class="menu-toggle" onclick="toggleSidebar()">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="breadcrumb">
+                        <span class="current">仪表板</span>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <div class="header-actions">
+                        <button class="action-btn theme-toggle" onclick="toggleTheme()" title="切换主题">
+                            <i class="fas fa-sun" id="themeIcon"></i>
+                        </button>
+                        <button class="action-btn" title="刷新">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                        <button class="action-btn" title="通知">
+                            <i class="fas fa-bell"></i>
+                            <span class="badge">3</span>
+                        </button>
+                        <div class="lang-switcher">
+                            <button class="action-btn" onclick="toggleLangMenu()" title="切换语言">
+                                <i class="fas fa-globe"></i>
+                                <span class="lang-code">中文</span>
+                            </button>
+                            <div class="lang-dropdown" id="langDropdown">
+                                <a href="#" class="lang-option active" onclick="switchLang('zh')">中文</a>
+                                <a href="#" class="lang-option" onclick="switchLang('en')">English</a>
+                                <a href="#" class="lang-option" onclick="switchLang('vi')">Tiếng Việt</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="user-menu">
+                        <div class="user-avatar">
+                            <img src="https://ui-avatars.com/api/?name=Peter&background=6366f1&color=fff" alt="头像">
+                        </div>
+                        <div class="user-info">
+                            <span class="user-name">peter@bt.app</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- 页面内容 -->
+            <div class="page-content">
+                <!-- 页面标题 -->
+                <div class="page-header">
+                    <div class="page-title">
+                        <h1>仪表板</h1>
+                        <p class="page-description">活动中心数据总览与关键指标监控</p>
+                    </div>
+                </div>
+
+                <!-- 筛选区域 -->
+                <div class="filter-card filter-card-compact">
+                    <div class="modal-filter-bar">
+                        <div class="filter-group-inline">
+                            <div class="filter-item">
+                                <label>平台</label>
+                                <select class="form-select-sm" style="min-width: 140px;">
+                                    <option>Live</option>
+                                    <option>Game Platform</option>
+                                    <option>Marketing Hub</option>
+                                </select>
+                            </div>
+                            <div class="filter-item">
+                                <label>商户</label>
+                                <select class="form-select-sm" style="min-width: 140px;">
+                                    <option>推1 - tu1</option>
+                                    <option>推2 - tu2</option>
+                                    <option>推3 - tu3</option>
+                                </select>
+                            </div>
+                            <div class="filter-item">
+                                <label>日期: 日/月/年</label>
+                                <div class="date-range-inline">
+                                    <div class="date-input-wrapper">
+                                        <input type="text" class="form-input-sm" value="27-01-2026" style="width: 130px;">
+                                        <i class="far fa-calendar-alt date-icon"></i>
+                                    </div>
+                                    <span class="range-separator">-</span>
+                                    <div class="date-input-wrapper">
+                                        <input type="text" class="form-input-sm" value="02-02-2026" style="width: 130px;">
+                                        <i class="far fa-calendar-alt date-icon"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="filter-actions">
+                            <button class="btn btn-primary btn-sm"><i class="fas fa-search"></i> 搜索</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 主要数据区域 -->
+                <div class="dashboard-main">
+                    <!-- 左侧环形图 -->
+                    <div class="chart-card donut-chart-card">
+                        <h3 class="card-title">按商户统计的用户总数</h3>
+                        <div class="donut-chart-container">
+                            <div class="donut-chart">
+                                <svg viewBox="0 0 200 200">
+                                    <circle cx="100" cy="100" r="80" fill="none" stroke="var(--border-light)" stroke-width="20"/>
+                                    <circle cx="100" cy="100" r="80" fill="none" stroke="url(#gradient)" stroke-width="20" 
+                                            stroke-dasharray="402" stroke-dashoffset="100" stroke-linecap="round"
+                                            transform="rotate(-90 100 100)"/>
+                                    <defs>
+                                        <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                            <stop offset="0%" style="stop-color:#667eea"/>
+                                            <stop offset="100%" style="stop-color:#4f6ef7"/>
+                                        </linearGradient>
+                                    </defs>
+                                </svg>
+                                <div class="donut-center">
+                                    <span class="donut-label">全部</span>
+                                    <span class="donut-value">102</span>
+                                </div>
+                            </div>
+                            <div class="chart-legend">
+                                <div class="legend-item">
+                                    <span class="legend-dot" style="background: var(--primary-color);"></span>
+                                    <span>推1</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 右侧用户数据 -->
+                    <div class="chart-card user-stats-card">
+                        <h3 class="card-title">用户数据</h3>
+                        <div class="user-stats-header">
+                            <div class="main-stat">
+                                <span class="main-value">174</span>
+                                <span class="stat-trend down">
+                                    <i class="fas fa-arrow-down"></i>
+                                    -3.86%
+                                </span>
+                            </div>
+                            <span class="stat-period">最近一个月访问</span>
+                        </div>
+                        <div class="user-stats-list">
+                            <div class="stat-row">
+                                <span class="stat-label">新用户</span>
+                                <div class="stat-values">
+                                    <span class="stat-number">26</span>
+                                    <span class="stat-change down">-7.14%</span>
+                                </div>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">总用户</span>
+                                <div class="stat-values">
+                                    <span class="stat-number">63</span>
+                                    <span class="stat-change up">+70.27%</span>
+                                </div>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">总领取用户</span>
+                                <div class="stat-values">
+                                    <span class="stat-number">33</span>
+                                    <span class="stat-change up">+43.47%</span>
+                                </div>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">平均日活</span>
+                                <div class="stat-values">
+                                    <span class="stat-number">9</span>
+                                    <span class="stat-change up">+80%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 统计卡片网格 -->
+                <div class="stats-cards-grid">
+                    <div class="mini-stat-card">
+                        <div class="mini-stat-icon blue">
+                            <i class="fas fa-calendar-plus"></i>
+                        </div>
+                        <div class="mini-stat-info">
+                            <span class="mini-stat-value">6</span>
+                            <span class="mini-stat-label">新活动</span>
+                        </div>
+                    </div>
+                    <div class="mini-stat-card">
+                        <div class="mini-stat-icon purple">
+                            <i class="fas fa-sparkles"></i>
+                        </div>
+                        <div class="mini-stat-info">
+                            <span class="mini-stat-value">187</span>
+                            <span class="mini-stat-label">总活动</span>
+                        </div>
+                    </div>
+                    <div class="mini-stat-card">
+                        <div class="mini-stat-icon green">
+                            <i class="fas fa-store"></i>
+                        </div>
+                        <div class="mini-stat-info">
+                            <span class="mini-stat-value">1</span>
+                            <span class="mini-stat-label">商户(使用新活动)</span>
+                        </div>
+                    </div>
+                    <div class="mini-stat-card">
+                        <div class="mini-stat-icon orange">
+                            <i class="fas fa-building"></i>
+                        </div>
+                        <div class="mini-stat-info">
+                            <span class="mini-stat-value">1</span>
+                            <span class="mini-stat-label">总商户</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 图表区域 -->
+                <div class="charts-grid">
+                    <div class="chart-card line-chart-card">
+                        <div class="chart-header">
+                            <h3 class="card-title">今日领取金额</h3>
+                            <span class="chart-subtitle">今日总领取金额: 1594</span>
+                        </div>
+                        <div class="line-chart">
+                            <svg viewBox="0 0 400 150" preserveAspectRatio="none">
+                                <defs>
+                                    <linearGradient id="lineGradient1" x1="0%" y1="0%" x2="0%" y2="100%">
+                                        <stop offset="0%" style="stop-color:#4f6ef7;stop-opacity:0.3"/>
+                                        <stop offset="100%" style="stop-color:#4f6ef7;stop-opacity:0"/>
+                                    </linearGradient>
+                                </defs>
+                                <path d="M0,120 Q50,100 80,90 T160,60 T240,80 T320,40 T400,70" 
+                                      fill="none" stroke="#4f6ef7" stroke-width="3" stroke-linecap="round"/>
+                                <path d="M0,120 Q50,100 80,90 T160,60 T240,80 T320,40 T400,70 V150 H0 Z" 
+                                      fill="url(#lineGradient1)"/>
+                            </svg>
+                            <div class="chart-x-axis">
+                                <span>01/27</span>
+                                <span>01/28</span>
+                                <span>01/29</span>
+                                <span>01/30</span>
+                                <span>01/31</span>
+                                <span>02/01</span>
+                                <span>02/02</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chart-card line-chart-card">
+                        <div class="chart-header">
+                            <h3 class="card-title">平均每日领取</h3>
+                            <span class="chart-subtitle">平均领取金额: 2w</span>
+                        </div>
+                        <div class="line-chart">
+                            <svg viewBox="0 0 400 150" preserveAspectRatio="none">
+                                <defs>
+                                    <linearGradient id="lineGradient2" x1="0%" y1="0%" x2="0%" y2="100%">
+                                        <stop offset="0%" style="stop-color:#10b981;stop-opacity:0.3"/>
+                                        <stop offset="100%" style="stop-color:#10b981;stop-opacity:0"/>
+                                    </linearGradient>
+                                </defs>
+                                <path d="M0,100 Q50,90 100,70 T200,50 T300,80 T400,60" 
+                                      fill="none" stroke="#10b981" stroke-width="3" stroke-linecap="round"/>
+                                <path d="M0,100 Q50,90 100,70 T200,50 T300,80 T400,60 V150 H0 Z" 
+                                      fill="url(#lineGradient2)"/>
+                            </svg>
+                            <div class="chart-x-axis">
+                                <span>12/15</span>
+                                <span>12/22</span>
+                                <span>12/29</span>
+                                <span>01/05</span>
+                                <span>01/12</span>
+                                <span>01/19</span>
+                                <span>01/26</span>
+                                <span>02/02</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chart-card line-chart-card">
+                        <div class="chart-header">
+                            <h3 class="card-title">总领取金额</h3>
+                            <span class="chart-subtitle">总领取金额: 11w</span>
+                        </div>
+                        <div class="line-chart">
+                            <svg viewBox="0 0 400 150" preserveAspectRatio="none">
+                                <defs>
+                                    <linearGradient id="lineGradient3" x1="0%" y1="0%" x2="0%" y2="100%">
+                                        <stop offset="0%" style="stop-color:#8b5cf6;stop-opacity:0.3"/>
+                                        <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:0"/>
+                                    </linearGradient>
+                                </defs>
+                                <path d="M0,110 Q80,100 120,70 T240,50 T360,90 T400,70" 
+                                      fill="none" stroke="#8b5cf6" stroke-width="3" stroke-linecap="round"/>
+                                <path d="M0,110 Q80,100 120,70 T240,50 T360,90 T400,70 V150 H0 Z" 
+                                      fill="url(#lineGradient3)"/>
+                            </svg>
+                            <div class="chart-x-axis">
+                                <span>12/15</span>
+                                <span>12/22</span>
+                                <span>12/29</span>
+                                <span>01/05</span>
+                                <span>01/12</span>
+                                <span>01/19</span>
+                                <span>01/26</span>
+                                <span>02/02</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast 容器 -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>退款进度 - USDT兑换</title>
+    <link rel="stylesheet" href="refund.css">
+    <style>
+        /* 状态页面特殊样式 */
+        .status-container {
+            max-width: 640px;
+            margin: 0 auto;
+            padding-bottom: 40px;
+        }
+
+        .status-header {
+            background: white;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #333;
+            cursor: pointer;
+            padding: 0;
+            width: 40px;
+        }
+
+        .status-header h1 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        /* 状态卡片 */
+        .status-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            border: 1px solid #e5e7eb;
+        }
+
+        /* 状态图标 */
+        .status-icon-wrapper {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .status-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 16px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            position: relative;
+        }
+
+        .status-icon.processing {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border: 3px solid #f59e0b;
+            animation: pulse 2s infinite;
+        }
+
+        .status-icon.success {
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+            border: 3px solid #10b981;
+        }
+
+        .status-icon.failed {
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
+            border: 3px solid #ef4444;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .status-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 8px;
+        }
+
+        .status-subtitle {
+            font-size: 14px;
+            color: #718096;
+        }
+
+        /* 退款信息 */
+        .refund-info {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        .info-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a202c;
+            text-align: right;
+            max-width: 60%;
+            word-break: break-all;
+        }
+
+        .info-value.amount {
+            font-size: 20px;
+            color: #667eea;
+        }
+
+        .info-value.hash {
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 12px;
+            color: #667eea;
+        }
+
+        /* 时间线 */
+        .timeline {
+            margin-top: 24px;
+        }
+
+        .timeline-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a202c;
+            margin-bottom: 16px;
+        }
+
+        .timeline-item {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .timeline-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 11px;
+            top: 32px;
+            bottom: -20px;
+            width: 2px;
+            background: #e5e7eb;
+        }
+
+        .timeline-item:last-child::before {
+            display: none;
+        }
+
+        .timeline-dot {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: white;
+            border: 3px solid #e5e7eb;
+            flex-shrink: 0;
+            margin-top: 4px;
+            z-index: 1;
+        }
+
+        .timeline-dot.active {
+            border-color: #667eea;
+            background: #667eea;
+        }
+
+        .timeline-dot.success {
+            border-color: #10b981;
+            background: #10b981;
+        }
+
+        .timeline-content {
+            flex: 1;
+        }
+
+        .timeline-time {
+            font-size: 12px;
+            color: #9ca3af;
+            margin-bottom: 4px;
+        }
+
+        .timeline-text {
+            font-size: 14px;
+            color: #374151;
+            font-weight: 500;
+        }
+
+        .timeline-desc {
+            font-size: 13px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+
+        /* 操作按钮 */
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .action-btn {
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .action-btn.primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .action-btn.primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+        }
+
+        .action-btn.secondary {
+            background: white;
+            color: #667eea;
+            border: 1px solid #667eea;
+        }
+
+        .action-btn.secondary:hover {
+            background: #f7f9fc;
+            transform: translateY(-2px);
+        }
+
+        /* 提示信息 */
+        .info-tip {
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 24px;
+        }
+
+        .info-tip-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #92400e;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .info-tip-content {
+            font-size: 13px;
+            color: #78350f;
+            line-height: 1.6;
+        }
+
+        /* 加载动画 */
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* 复制按钮 */
+        .copy-hash-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 4px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-left: 8px;
+        }
+
+        .copy-hash-btn:hover {
+            background: #5568d3;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="status-container">
+        <!-- 顶部导航 -->
+        <div class="status-header">
+            <button class="back-btn" onclick="window.history.back()">←</button>
+            <h1>退款进度</h1>
+            <div style="width: 40px;"></div>
+        </div>
+
+        <!-- 状态卡片 -->
+        <div class="status-card">
+            <!-- 状态图标和标题 -->
+            <div class="status-icon-wrapper">
+                <div class="status-icon success" id="statusIcon">
+                    ✓
+                </div>
+                <div class="status-title" id="statusTitle">退款成功</div>
+                <div class="status-subtitle" id="statusSubtitle">退款已完成，资金已到账</div>
+            </div>
+
+            <!-- 退款信息 -->
+            <div class="refund-info">
+                <div class="info-row">
+                    <span class="info-label">退款金额</span>
+                    <span class="info-value amount">50.00 USDT</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">退款地址</span>
+                    <span class="info-value" style="font-family: 'SF Mono', Monaco, monospace; font-size: 11px;">TXXXxxxXXXxxx...xxxXXX</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">申请时间</span>
+                    <span class="info-value">2024-01-20 14:30:25</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">完成时间</span>
+                    <span class="info-value">2024-01-20 14:35:18</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">退款哈希</span>
+                    <div style="display: flex; align-items: center; flex-wrap: wrap; justify-content: flex-end;">
+                        <span class="info-value hash" id="refundHash">0xabcd...ef123</span>
+                        <button class="copy-hash-btn" onclick="copyHash()">📋 复制</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 操作按钮 -->
+            <div style="margin-top: 24px;">
+                <button class="action-btn primary" onclick="window.location.href='index.html'" style="width: 100%;">
+                    🏠 返回首页
+                </button>
+            </div>
+
+            <!-- 提示信息 -->
+            <div class="info-tip">
+                <div class="info-tip-title">
+                    💡 温馨提示
+                </div>
+                <div class="info-tip-content">
+                    • 请在钱包中确认资金已到账<br>
+                    • 可通过链上查询验证交易详情<br>
+                    • 如有疑问请联系客服
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast提示 -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // 显示Toast提示
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast show ${type}`;
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // 复制哈希
+        function copyHash() {
+            const hash = '0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890';
+            navigator.clipboard.writeText(hash).then(() => {
+                showToast('退款哈希已复制', 'success');
+            }).catch(() => {
+                showToast('复制失败，请手动选择', 'error');
+            });
+        }
+
+        // 链上查询
+        function viewOnChain() {
+            const hash = '0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890';
+            const url = `https://tronscan.org/#/transaction/${hash}`;
+            window.open(url, '_blank');
+            showToast('正在打开区块链浏览器...', 'success');
+        }
+
+        // 模拟不同状态（可用于演示）
+        function showProcessingState() {
+            document.getElementById('statusIcon').className = 'status-icon processing';
+            document.getElementById('statusIcon').innerHTML = '<div class="loading-spinner"></div>';
+            document.getElementById('statusTitle').textContent = '退款处理中';
+            document.getElementById('statusSubtitle').textContent = '预计几分钟内完成';
+            
+            // 隐藏哈希和完成时间行
+            document.querySelectorAll('.info-row')[3].style.display = 'none';
+            document.querySelectorAll('.info-row')[4].style.display = 'none';
+            
+            // 更新时间线
+            const dots = document.querySelectorAll('.timeline-dot');
+            dots[0].className = 'timeline-dot success';
+            dots[1].className = 'timeline-dot success';
+            dots[2].className = 'timeline-dot active';
+            dots[3].className = 'timeline-dot';
+        }
+
+        function showSuccessState() {
+            document.getElementById('statusIcon').className = 'status-icon success';
+            document.getElementById('statusIcon').textContent = '✓';
+            document.getElementById('statusTitle').textContent = '退款成功';
+            document.getElementById('statusSubtitle').textContent = '退款已完成，资金已到账';
+            
+            // 显示所有信息行
+            document.querySelectorAll('.info-row').forEach(row => {
+                row.style.display = 'flex';
+            });
+            
+            // 更新时间线
+            document.querySelectorAll('.timeline-dot').forEach(dot => {
+                dot.className = 'timeline-dot success';
+            });
+        }
+
+        // 页面加载时可以根据URL参数显示不同状态
+        // 例如: refund-status.html?status=processing
+        window.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            const status = params.get('status');
+            
+            if (status === 'processing') {
+                showProcessingState();
+            } else {
+                showSuccessState();
+            }
+        });
+    </script>
+</body>
+</html>

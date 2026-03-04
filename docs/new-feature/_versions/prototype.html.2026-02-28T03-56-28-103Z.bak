@@ -1,0 +1,1729 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Sticky - 智能桌面便签原型</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --primary: #3b82f6;
+            --primary-light: #60a5fa;
+            --secondary: #10b981;
+            --accent: #f59e0b;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --success: #10b981;
+            --purple: #8b5cf6;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            
+            --glass-bg: rgba(30, 41, 59, 0.75);
+            --glass-border: rgba(148, 163, 184, 0.2);
+            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
+            --dark-glass: rgba(15, 23, 42, 0.9);
+            --card-bg: rgba(51, 65, 85, 0.6);
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+        }
+
+        body {
+            font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+            background: linear-gradient(135deg, #0a0e1a 0%, #1a1d29 25%, #2d3748 75%, #1a202c 100%);
+            height: 100vh;
+            overflow: hidden;
+            color: #f7fafc;
+            -webkit-font-smoothing: antialiased;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 15% 25%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 85% 75%, rgba(16, 185, 129, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.05) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        /* 菜单栏 */
+        .menubar {
+            height: 28px;
+            background: var(--dark-glass);
+            backdrop-filter: blur(24px) saturate(180%);
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            border-bottom: 1px solid var(--glass-border);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+        }
+
+        .menu-item {
+            padding: 4px 12px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .menu-item:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .menu-item.active {
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+        }
+
+        .menu-dropdown {
+            position: absolute;
+            top: 28px;
+            left: 12px;
+            width: 320px;
+            background: var(--dark-glass);
+            backdrop-filter: blur(30px);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.15);
+            display: none;
+        }
+
+        .menu-dropdown.show { display: block; }
+
+        .dropdown-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .dropdown-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+        }
+
+        .dropdown-title {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .dropdown-status {
+            margin-left: auto;
+            font-size: 11px;
+            color: var(--success);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 500;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+            box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .dropdown-item:hover {
+            background: rgba(255,255,255,0.08);
+        }
+
+        .dropdown-item i {
+            width: 20px;
+            text-align: center;
+            color: var(--primary-light);
+        }
+
+        .dropdown-badge {
+            margin-left: auto;
+            background: var(--danger);
+            color: white;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 10px;
+            min-width: 16px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: rgba(255,255,255,0.1);
+            margin: 8px 0;
+        }
+
+        /* 桌面工作区 */
+        .desktop {
+            position: absolute;
+            top: 28px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(255,255,255,0.05) 0%, transparent 50%);
+        }
+
+        /* 便签窗口通用样式 */
+        .sticky-window {
+            position: absolute;
+            background: var(--glass-bg);
+            backdrop-filter: blur(24px) saturate(180%);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            box-shadow: var(--glass-shadow);
+            overflow: hidden;
+            min-width: 280px;
+            min-height: 200px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: default;
+        }
+
+        .sticky-window:hover {
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .sticky-window.alert {
+            border-color: var(--danger);
+            box-shadow: 0 8px 32px rgba(239, 68, 68, 0.4);
+        }
+
+        .sticky-window.focused {
+            z-index: 100;
+        }
+
+        /* 便签头部 */
+        .sticky-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 16px;
+            background: rgba(51, 65, 85, 0.3);
+            border-bottom: 1px solid var(--glass-border);
+            cursor: grab;
+            user-select: none;
+            backdrop-filter: blur(8px);
+        }
+
+        .sticky-header:active {
+            cursor: grabbing;
+        }
+
+        .traffic-lights {
+            display: flex;
+            gap: 6px;
+        }
+
+        .traffic-light {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .traffic-light.close { background: #FF5F57; }
+        .traffic-light.minimize { background: #FFBD2E; }
+        .traffic-light.maximize { background: #28CA42; }
+
+        .sticky-title-area {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            justify-content: center;
+        }
+
+        .sticky-type-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: #fff;
+        }
+
+        .sticky-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        .sticky-actions {
+            display: flex;
+            gap: 4px;
+        }
+
+        .sticky-action-btn {
+            width: 24px;
+            height: 24px;
+            border: none;
+            background: rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.7);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 10px;
+            transition: all 0.2s;
+        }
+
+        .sticky-action-btn:hover {
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+        }
+
+        /* 便签内容区 */
+        .sticky-body {
+            padding: 16px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        /* 便签底部 */
+        .sticky-footer {
+            padding: 8px 16px;
+            background: rgba(0,0,0,0.1);
+            border-top: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 11px;
+            color: rgba(255,255,255,0.7);
+        }
+
+        .footer-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .health-indicator {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--success);
+        }
+
+        .health-indicator.error { background: var(--danger); }
+        .health-indicator.warning { background: var(--warning); }
+
+        /* 币价便签样式 */
+        .crypto-price {
+            font-size: 28px;
+            font-weight: 800;
+            color: #fff;
+            line-height: 1;
+        }
+
+        .crypto-change {
+            font-size: 14px;
+            font-weight: 600;
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .crypto-change.up { color: var(--success); }
+        .crypto-change.down { color: var(--danger); }
+
+        .crypto-pairs {
+            margin-top: 16px;
+        }
+
+        .crypto-pair {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .crypto-pair:last-child {
+            border-bottom: none;
+        }
+
+        .pair-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.9);
+        }
+
+        .pair-price {
+            font-size: 13px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .pair-change {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 4px;
+            min-width: 50px;
+            text-align: center;
+        }
+
+        .pair-change.up {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+        }
+
+        .pair-change.down {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+        }
+
+        /* 股票便签样式 */
+        .stock-main {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .stock-symbol {
+            font-size: 16px;
+            font-weight: 700;
+            color: rgba(255,255,255,0.9);
+        }
+
+        .stock-price {
+            font-size: 24px;
+            font-weight: 800;
+            color: #fff;
+        }
+
+        .stock-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .stock-item {
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        .stock-item-label {
+            font-size: 10px;
+            color: rgba(255,255,255,0.6);
+            font-weight: 500;
+        }
+
+        .stock-item-value {
+            font-size: 13px;
+            font-weight: 600;
+            color: #fff;
+            margin-top: 2px;
+        }
+
+        /* 交通便签样式 */
+        .traffic-route {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .route-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--success);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: white;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+        }
+
+        .route-info {
+            flex: 1;
+        }
+
+        .route-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .route-detail {
+            font-size: 11px;
+            color: rgba(255,255,255,0.7);
+            margin-top: 2px;
+        }
+
+        .traffic-eta {
+            font-size: 24px;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+
+        .traffic-status {
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+
+        .traffic-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--success) 0%, var(--warning) 60%, var(--danger) 100%);
+            width: 75%;
+            border-radius: 3px;
+        }
+
+        /* 天气便签样式 */
+        .weather-main {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .weather-icon {
+            font-size: 36px;
+            color: var(--warning);
+        }
+
+        .weather-temp {
+            font-size: 32px;
+            font-weight: 800;
+            color: #fff;
+        }
+
+        .weather-desc {
+            font-size: 12px;
+            color: rgba(255,255,255,0.8);
+            margin-top: 4px;
+        }
+
+        .weather-details {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .weather-detail {
+            text-align: center;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            padding: 8px 4px;
+        }
+
+        .weather-detail i {
+            font-size: 12px;
+            color: var(--primary-light);
+            margin-bottom: 4px;
+        }
+
+        .weather-detail-value {
+            font-size: 12px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .weather-detail-label {
+            font-size: 9px;
+            color: rgba(255,255,255,0.6);
+            margin-top: 2px;
+        }
+
+        /* 记事便签样式 */
+        .memo-textarea {
+            width: 100%;
+            height: 120px;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #fff;
+            font-size: 13px;
+            line-height: 1.6;
+            resize: none;
+            font-family: inherit;
+        }
+
+        .memo-textarea::placeholder {
+            color: rgba(255,255,255,0.5);
+        }
+
+        .memo-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .memo-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .memo-btn.primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .memo-btn.primary:hover {
+            background: var(--primary-light);
+        }
+
+        .memo-btn.secondary {
+            background: rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.8);
+        }
+
+        .memo-btn.secondary:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        /* 模态框样式 */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--dark-glass);
+            backdrop-filter: blur(30px);
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.15);
+            width: 500px;
+            max-width: 90vw;
+            box-shadow: 0 24px 60px rgba(0,0,0,0.4);
+            overflow: hidden;
+        }
+
+        .modal-header {
+            padding: 20px 24px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .modal-body {
+            padding: 20px 24px;
+        }
+
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .template-card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .template-card:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .template-card.selected {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: var(--primary);
+        }
+
+        .template-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            margin: 0 auto 10px;
+            color: #fff;
+        }
+
+        .template-icon.crypto { background: var(--accent); }
+        .template-icon.stock { background: var(--primary); }
+        .template-icon.traffic { background: var(--success); }
+        .template-icon.weather { background: var(--purple); }
+        .template-icon.memo { background: var(--warning); }
+
+        .template-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .template-desc {
+            font-size: 11px;
+            color: rgba(255,255,255,0.6);
+        }
+
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn.primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn.primary:hover {
+            background: var(--primary-light);
+        }
+
+        .btn.secondary {
+            background: rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.8);
+        }
+
+        .btn.secondary:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        /* 告警角标 */
+        .alert-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: var(--red);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 8px;
+            animation: alertPulse 1.5s infinite;
+        }
+
+        @keyframes alertPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* 拖拽状态 */
+        .dragging {
+            opacity: 0.8;
+            z-index: 999;
+            transform: rotate(2deg);
+        }
+
+        /* 全局搜索 */
+        .search-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: flex-start;
+            justify-content: center;
+            padding-top: 100px;
+            z-index: 3000;
+        }
+
+        .search-overlay.show {
+            display: flex;
+        }
+
+        .search-box {
+            background: var(--dark-glass);
+            backdrop-filter: blur(30px);
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.15);
+            width: 500px;
+            max-width: 90vw;
+            box-shadow: 0 16px 40px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 16px 20px;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #fff;
+            font-size: 16px;
+            font-family: inherit;
+        }
+
+        .search-input::placeholder {
+            color: rgba(255,255,255,0.5);
+        }
+
+        .search-results {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .search-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: background 0.2s;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .search-item:hover {
+            background: rgba(255,255,255,0.05);
+        }
+
+        .search-item-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #fff;
+        }
+
+        .search-item-info {
+            flex: 1;
+        }
+
+        .search-item-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .search-item-desc {
+            font-size: 12px;
+            color: rgba(255,255,255,0.6);
+            margin-top: 2px;
+        }
+
+        .search-item-status {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--green);
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .template-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .modal {
+                width: 90vw;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 菜单栏 -->
+    <div class="menubar">
+        <div class="menu-item active" onclick="toggleDropdown()">AI Sticky</div>
+        <div class="menu-item">文件</div>
+        <div class="menu-item">编辑</div>
+        <div class="menu-item">视图</div>
+        <div class="menu-item">窗口</div>
+        <div class="menu-item">帮助</div>
+    </div>
+
+    <!-- 菜单下拉 -->
+    <div class="menu-dropdown" id="menuDropdown">
+        <div class="dropdown-header">
+            <div class="dropdown-icon">
+                <i class="fas fa-note-sticky"></i>
+            </div>
+            <div>
+                <div class="dropdown-title">AI Sticky</div>
+            </div>
+            <div class="dropdown-status">
+                <div class="status-dot"></div>
+                运行中
+            </div>
+        </div>
+        
+        <div class="dropdown-item" onclick="openNewModal()">
+            <i class="fas fa-plus"></i>
+            新建便签...
+        </div>
+        
+        <div class="dropdown-item" onclick="openSearch()">
+            <i class="fas fa-search"></i>
+            搜索/切换便签...
+            <span style="margin-left: auto; font-size: 11px; color: rgba(255,255,255,0.5);">⌘K</span>
+        </div>
+        
+        <div class="dropdown-item" onclick="openAlertCenter()">
+            <i class="fas fa-bell"></i>
+            告警中心
+            <div class="dropdown-badge">3</div>
+        </div>
+        
+        <div class="dropdown-divider"></div>
+        
+        <div class="dropdown-item" onclick="toggleRefresh()">
+            <i class="fas fa-pause" id="refreshIcon"></i>
+            <span id="refreshText">暂停全部刷新</span>
+        </div>
+        
+        <div class="dropdown-item" onclick="openKeyManager()">
+            <i class="fas fa-key"></i>
+            Key 管理
+        </div>
+        
+        <div class="dropdown-divider"></div>
+        
+        <div class="dropdown-item">
+            <i class="fas fa-cog"></i>
+            设置...
+        </div>
+        
+        <div class="dropdown-item">
+            <i class="fas fa-sign-out-alt"></i>
+            退出
+        </div>
+    </div>
+
+    <!-- 桌面工作区 -->
+    <div class="desktop" id="desktop">
+        <!-- 币价便签 -->
+        <div class="sticky-window alert" id="crypto-sticky" style="left: 50px; top: 80px; width: 320px;">
+            <div class="alert-badge">!</div>
+            <div class="sticky-header" onmousedown="startDrag(event, 'crypto-sticky')">
+                <div class="traffic-lights">
+                    <div class="traffic-light close" onclick="closeSticky('crypto-sticky')"></div>
+                    <div class="traffic-light minimize"></div>
+                    <div class="traffic-light maximize"></div>
+                </div>
+                <div class="sticky-title-area">
+                    <div class="sticky-type-icon" style="background: var(--orange);">
+                        <i class="fab fa-bitcoin"></i>
+                    </div>
+                    <div class="sticky-title">加密货币监控</div>
+                </div>
+                <div class="sticky-actions">
+                    <button class="sticky-action-btn" onclick="refreshSticky('crypto-sticky')">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <button class="sticky-action-btn" onclick="openSettings('crypto-sticky')">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="sticky-body">
+                <div style="display: flex; align-items: baseline; gap: 10px; margin-bottom: 4px;">
+                    <div class="crypto-price">$67,842</div>
+                    <div class="crypto-change up">
+                        <i class="fas fa-caret-up"></i>
+                        +2.34%
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: rgba(255,255,255,0.6); margin-bottom: 16px;">BTC/USDT · 24h</div>
+                
+                <div class="crypto-pairs">
+                    <div class="crypto-pair">
+                        <div class="pair-name">ETH/USDT</div>
+                        <div class="pair-price">$3,456</div>
+                        <div class="pair-change down">-5.12%</div>
+                    </div>
+                    <div class="crypto-pair">
+                        <div class="pair-name">SOL/USDT</div>
+                        <div class="pair-price">$179</div>
+                        <div class="pair-change up">+8.67%</div>
+                    </div>
+                    <div class="crypto-pair">
+                        <div class="pair-name">DOGE/USDT</div>
+                        <div class="pair-price">$0.152</div>
+                        <div class="pair-change up">+1.23%</div>
+                    </div>
+                </div>
+            </div>
+            <div class="sticky-footer">
+                <span>更新于 12 秒前</span>
+                <div class="footer-status">
+                    <div class="health-indicator"></div>
+                    <span>API 正常</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 股票便签 -->
+        <div class="sticky-window" id="stock-sticky" style="left: 400px; top: 80px; width: 300px;">
+            <div class="sticky-header" onmousedown="startDrag(event, 'stock-sticky')">
+                <div class="traffic-lights">
+                    <div class="traffic-light close" onclick="closeSticky('stock-sticky')"></div>
+                    <div class="traffic-light minimize"></div>
+                    <div class="traffic-light maximize"></div>
+                </div>
+                <div class="sticky-title-area">
+                    <div class="sticky-type-icon" style="background: var(--blue);">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="sticky-title">美股盯盘</div>
+                </div>
+                <div class="sticky-actions">
+                    <button class="sticky-action-btn" onclick="refreshSticky('stock-sticky')">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <button class="sticky-action-btn" onclick="openSettings('stock-sticky')">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="sticky-body">
+                <div class="stock-main">
+                    <div class="stock-symbol">TSLA</div>
+                    <div class="stock-price">$168.42</div>
+                    <div class="crypto-change down">
+                        <i class="fas fa-caret-down"></i>
+                        -6.78%
+                    </div>
+                </div>
+                
+                <div class="stock-grid">
+                    <div class="stock-item">
+                        <div class="stock-item-label">今开</div>
+                        <div class="stock-item-value">$179.20</div>
+                    </div>
+                    <div class="stock-item">
+                        <div class="stock-item-label">昨收</div>
+                        <div class="stock-item-value">$180.65</div>
+                    </div>
+                    <div class="stock-item">
+                        <div class="stock-item-label">最高</div>
+                        <div class="stock-item-value">$181.30</div>
+                    </div>
+                    <div class="stock-item">
+                        <div class="stock-item-label">最低</div>
+                        <div class="stock-item-value">$166.88</div>
+                    </div>
+                </div>
+            </div>
+            <div class="sticky-footer">
+                <span>更新于 3 分钟前</span>
+                <div class="footer-status">
+                    <div class="health-indicator"></div>
+                    <span>正常</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 交通便签 -->
+        <div class="sticky-window" id="traffic-sticky" style="left: 730px; top: 80px; width: 280px;">
+            <div class="sticky-header" onmousedown="startDrag(event, 'traffic-sticky')">
+                <div class="traffic-lights">
+                    <div class="traffic-light close" onclick="closeSticky('traffic-sticky')"></div>
+                    <div class="traffic-light minimize"></div>
+                    <div class="traffic-light maximize"></div>
+                </div>
+                <div class="sticky-title-area">
+                    <div class="sticky-type-icon" style="background: var(--green);">
+                        <i class="fas fa-route"></i>
+                    </div>
+                    <div class="sticky-title">通勤路况</div>
+                </div>
+                <div class="sticky-actions">
+                    <button class="sticky-action-btn" onclick="refreshSticky('traffic-sticky')">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <button class="sticky-action-btn" onclick="openSettings('traffic-sticky')">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="sticky-body">
+                <div class="traffic-route">
+                    <div class="route-icon">
+                        <i class="fas fa-home"></i>
+                    </div>
+                    <div class="route-info">
+                        <div class="route-name">回家路线</div>
+                        <div class="route-detail">公司 → 家 · 12.3km</div>
+                    </div>
+                </div>
+                
+                <div class="traffic-eta">25 分钟</div>
+                
+                <div class="traffic-status">
+                    <div class="traffic-bar"></div>
+                </div>
+                
+                <div style="font-size: 11px; color: rgba(255,255,255,0.7);">
+                    <div style="margin-bottom: 4px;">
+                        <i class="fas fa-clock" style="margin-right: 6px;"></i>
+                        建议 18:30 出发
+                    </div>
+                    <div>
+                        <i class="fas fa-exclamation-triangle" style="margin-right: 6px; color: var(--yellow);"></i>
+                        中度拥堵
+                    </div>
+                </div>
+            </div>
+            <div class="sticky-footer">
+                <span>更新于 1 分钟前</span>
+                <div class="footer-status">
+                    <div class="health-indicator"></div>
+                    <span>正常</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 天气便签 -->
+        <div class="sticky-window" id="weather-sticky" style="left: 50px; top: 350px; width: 300px;">
+            <div class="sticky-header" onmousedown="startDrag(event, 'weather-sticky')">
+                <div class="traffic-lights">
+                    <div class="traffic-light close" onclick="closeSticky('weather-sticky')"></div>
+                    <div class="traffic-light minimize"></div>
+                    <div class="traffic-light maximize"></div>
+                </div>
+                <div class="sticky-title-area">
+                    <div class="sticky-type-icon" style="background: var(--purple);">
+                        <i class="fas fa-cloud-sun"></i>
+                    </div>
+                    <div class="sticky-title">天气预报</div>
+                </div>
+                <div class="sticky-actions">
+                    <button class="sticky-action-btn" onclick="refreshSticky('weather-sticky')">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <button class="sticky-action-btn" onclick="openSettings('weather-sticky')">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="sticky-body">
+                <div class="weather-main">
+                    <div class="weather-icon">
+                        <i class="fas fa-sun"></i>
+                    </div>
+                    <div>
+                        <div class="weather-temp">22°C</div>
+                        <div class="weather-desc">晴朗</div>
+                    </div>
+                </div>
+                
+                <div class="weather-details">
+                    <div class="weather-detail">
+                        <i class="fas fa-eye"></i>
+                        <div class="weather-detail-value">10km</div>
+                        <div class="weather-detail-label">能见度</div>
+                    </div>
+                    <div class="weather-detail">
+                        <i class="fas fa-tint"></i>
+                        <div class="weather-detail-value">45%</div>
+                        <div class="weather-detail-label">湿度</div>
+                    </div>
+                    <div class="weather-detail">
+                        <i class="fas fa-wind"></i>
+                        <div class="weather-detail-value">12km/h</div>
+                        <div class="weather-detail-label">风速</div>
+                    </div>
+                </div>
+            </div>
+            <div class="sticky-footer">
+                <span>更新于 5 分钟前</span>
+                <div class="footer-status">
+                    <div class="health-indicator"></div>
+                    <span>正常</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 记事便签 -->
+        <div class="sticky-window" id="memo-sticky" style="left: 380px; top: 350px; width: 320px;">
+            <div class="sticky-header" onmousedown="startDrag(event, 'memo-sticky')">
+                <div class="traffic-lights">
+                    <div class="traffic-light close" onclick="closeSticky('memo-sticky')"></div>
+                    <div class="traffic-light minimize"></div>
+                    <div class="traffic-light maximize"></div>
+                </div>
+                <div class="sticky-title-area">
+                    <div class="sticky-type-icon" style="background: var(--yellow);">
+                        <i class="fas fa-pen-fancy"></i>
+                    </div>
+                    <div class="sticky-title">会议记录</div>
+                </div>
+                <div class="sticky-actions">
+                    <button class="sticky-action-btn" onclick="openSettings('memo-sticky')">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="sticky-body">
+                <textarea class="memo-textarea" placeholder="输入你的想法...">产品评审会议要点：
+1. AI Sticky v1.0 功能确认
+2. 下周开始UI设计
+3. 月底前完成原型
+4. 需要补充竞品分析
+5. 确定技术栈选型</textarea>
+                
+                <div class="memo-actions">
+                    <button class="memo-btn primary" onclick="aiTidy()">
+                        <i class="fas fa-robot" style="margin-right: 4px;"></i>
+                        AI 整理
+                    </button>
+                    <button class="memo-btn secondary">
+                        <i class="fas fa-copy" style="margin-right: 4px;"></i>
+                        复制
+                    </button>
+                </div>
+            </div>
+            <div class="sticky-footer">
+                <span>自动保存</span>
+                <div class="footer-status">
+                    <div class="health-indicator"></div>
+                    <span>本地</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 新建便签模态框 -->
+    <div class="modal-overlay" id="newStickyModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">选择便签模板</div>
+            </div>
+            <div class="modal-body">
+                <div class="template-grid">
+                    <div class="template-card" onclick="selectTemplate('crypto')">
+                        <div class="template-icon crypto">
+                            <i class="fab fa-bitcoin"></i>
+                        </div>
+                        <div class="template-name">币价监控</div>
+                        <div class="template-desc">实时加密货币行情</div>
+                    </div>
+                    <div class="template-card" onclick="selectTemplate('stock')">
+                        <div class="template-icon stock">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="template-name">股票行情</div>
+                        <div class="template-desc">美股港股实时数据</div>
+                    </div>
+                    <div class="template-card" onclick="selectTemplate('traffic')">
+                        <div class="template-icon traffic">
+                            <i class="fas fa-route"></i>
+                        </div>
+                        <div class="template-name">交通路况</div>
+                        <div class="template-desc">实时导航和ETA</div>
+                    </div>
+                    <div class="template-card" onclick="selectTemplate('weather')">
+                        <div class="template-icon weather">
+                            <i class="fas fa-cloud-sun"></i>
+                        </div>
+                        <div class="template-name">天气预报</div>
+                        <div class="template-desc">本地天气和预报</div>
+                    </div>
+                    <div class="template-card" onclick="selectTemplate('memo')">
+                        <div class="template-icon memo">
+                            <i class="fas fa-pen-fancy"></i>
+                        </div>
+                        <div class="template-name">智能记事</div>
+                        <div class="template-desc">AI 辅助文本整理</div>
+                    </div>
+                    <div class="template-card" style="opacity: 0.5;">
+                        <div class="template-icon" style="background: var(--gray);">
+                            <i class="fas fa-plus"></i>
+                        </div>
+                        <div class="template-name">自定义</div>
+                        <div class="template-desc">即将支持</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn secondary" onclick="closeModal('newStickyModal')">取消</button>
+                <button class="btn primary" onclick="createSticky()">创建</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 全局搜索 -->
+    <div class="search-overlay" id="searchOverlay">
+        <div class="search-box">
+            <input type="text" class="search-input" placeholder="搜索便签..." id="searchInput" oninput="searchStickies(this.value)">
+            <div class="search-results" id="searchResults">
+                <div class="search-item" onclick="focusSticky('crypto-sticky')">
+                    <div class="search-item-icon crypto">
+                        <i class="fab fa-bitcoin"></i>
+                    </div>
+                    <div class="search-item-info">
+                        <div class="search-item-name">加密货币监控</div>
+                        <div class="search-item-desc">BTC/USDT · $67,842</div>
+                    </div>
+                    <div class="search-item-status"></div>
+                </div>
+                <div class="search-item" onclick="focusSticky('stock-sticky')">
+                    <div class="search-item-icon stock">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="search-item-info">
+                        <div class="search-item-name">美股盯盘</div>
+                        <div class="search-item-desc">TSLA · $168.42</div>
+                    </div>
+                    <div class="search-item-status" style="background: var(--red);"></div>
+                </div>
+                <div class="search-item" onclick="focusSticky('traffic-sticky')">
+                    <div class="search-item-icon traffic">
+                        <i class="fas fa-route"></i>
+                    </div>
+                    <div class="search-item-info">
+                        <div class="search-item-name">通勤路况</div>
+                        <div class="search-item-desc">回家路线 · 25分钟</div>
+                    </div>
+                    <div class="search-item-status"></div>
+                </div>
+                <div class="search-item" onclick="focusSticky('weather-sticky')">
+                    <div class="search-item-icon weather">
+                        <i class="fas fa-cloud-sun"></i>
+                    </div>
+                    <div class="search-item-info">
+                        <div class="search-item-name">天气预报</div>
+                        <div class="search-item-desc">晴朗 · 22°C</div>
+                    </div>
+                    <div class="search-item-status"></div>
+                </div>
+                <div class="search-item" onclick="focusSticky('memo-sticky')">
+                    <div class="search-item-icon memo">
+                        <i class="fas fa-pen-fancy"></i>
+                    </div>
+                    <div class="search-item-info">
+                        <div class="search-item-name">会议记录</div>
+                        <div class="search-item-desc">产品评审会议要点</div>
+                    </div>
+                    <div class="search-item-status"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isDragging = false;
+        let dragElement = null;
+        let dragOffset = { x: 0, y: 0 };
+        let selectedTemplate = null;
+        let isRefreshPaused = false;
+
+        // 菜单下拉
+        function toggleDropdown() {
+            const dropdown = document.getElementById('menuDropdown');
+            dropdown.classList.toggle('show');
+        }
+
+        // 关闭下拉菜单
+        document.addEventListener('click', (e) => {
+            const dropdown = document.getElementById('menuDropdown');
+            if (!e.target.closest('.menu-item') && !e.target.closest('.menu-dropdown')) {
+                dropdown.classList.remove('show');
+            }
+        });
+
+        // 拖拽功能
+        function startDrag(e, elementId) {
+            e.preventDefault();
+            isDragging = true;
+            dragElement = document.getElementById(elementId);
+            
+            const rect = dragElement.getBoundingClientRect();
+            dragOffset.x = e.clientX - rect.left;
+            dragOffset.y = e.clientY - rect.top;
+            
+            dragElement.classList.add('dragging');
+            dragElement.style.zIndex = '999';
+        }
+
+        document.addEventListener('mousemove', (e) => {
+            if (isDragging && dragElement) {
+                const x = e.clientX - dragOffset.x;
+                const y = e.clientY - dragOffset.y;
+                
+                dragElement.style.left = Math.max(0, x) + 'px';
+                dragElement.style.top = Math.max(28, y) + 'px';
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (isDragging && dragElement) {
+                dragElement.classList.remove('dragging');
+                dragElement.style.zIndex = '';
+                isDragging = false;
+                dragElement = null;
+            }
+        });
+
+        // 便签操作
+        function closeSticky(id) {
+            const element = document.getElementById(id);
+            element.style.transform = 'scale(0.8)';
+            element.style.opacity = '0';
+            setTimeout(() => {
+                element.style.display = 'none';
+            }, 200);
+        }
+
+        function refreshSticky(id) {
+            const btn = event.target;
+            btn.style.transform = 'rotate(360deg)';
+            setTimeout(() => {
+                btn.style.transform = '';
+            }, 500);
+        }
+
+        function openSettings(id) {
+            alert('打开便签设置：' + id);
+        }
+
+        function focusSticky(id) {
+            const element = document.getElementById(id);
+            element.style.zIndex = '100';
+            element.style.transform = 'scale(1.02)';
+            setTimeout(() => {
+                element.style.transform = '';
+                element.style.zIndex = '';
+            }, 200);
+            closeSearch();
+        }
+
+        // 模态框
+        function openNewModal() {
+            document.getElementById('newStickyModal').classList.add('show');
+            document.getElementById('menuDropdown').classList.remove('show');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('show');
+            selectedTemplate = null;
+            document.querySelectorAll('.template-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+        }
+
+        function selectTemplate(type) {
+            selectedTemplate = type;
+            document.querySelectorAll('.template-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            event.currentTarget.classList.add('selected');
+        }
+
+        function createSticky() {
+            if (!selectedTemplate) {
+                alert('请选择一个模板');
+                return;
+            }
+            
+            alert('创建便签：' + selectedTemplate);
+            closeModal('newStickyModal');
+        }
+
+        // 全局搜索
+        function openSearch() {
+            document.getElementById('searchOverlay').classList.add('show');
+            document.getElementById('searchInput').focus();
+            document.getElementById('menuDropdown').classList.remove('show');
+        }
+
+        function closeSearch() {
+            document.getElementById('searchOverlay').classList.remove('show');
+            document.getElementById('searchInput').value = '';
+        }
+
+        function searchStickies(query) {
+            // 搜索逻辑
+        }
+
+        // 键盘快捷键
+        document.addEventListener('keydown', (e) => {
+            if (e.metaKey && e.key === 'k') {
+                e.preventDefault();
+                openSearch();
+            }
+            if (e.key === 'Escape') {
+                closeSearch();
+                closeModal('newStickyModal');
+            }
+        });
+
+        // 刷新控制
+        function toggleRefresh() {
+            isRefreshPaused = !isRefreshPaused;
+            const icon = document.getElementById('refreshIcon');
+            const text = document.getElementById('refreshText');
+            
+            if (isRefreshPaused) {
+                icon.className = 'fas fa-play';
+                text.textContent = '恢复全部刷新';
+            } else {
+                icon.className = 'fas fa-pause';
+                text.textContent = '暂停全部刷新';
+            }
+            
+            document.getElementById('menuDropdown').classList.remove('show');
+        }
+
+        // AI 整理
+        function aiTidy() {
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right: 4px;"></i>整理中...';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                alert('AI 整理完成！');
+            }, 2000);
+        }
+
+        // 其他功能
+        function openAlertCenter() {
+            document.getElementById('alertCenterModal').classList.add('show');
+            document.getElementById('menuDropdown').classList.remove('show');
+        }
+
+        function openKeyManager() {
+            alert('打开 Key 管理');
+            document.getElementById('menuDropdown').classList.remove('show');
+        }
+
+        // 便签状态处理
+        function fixKey(stickyId) {
+            document.getElementById('keyWizardModal').classList.add('show');
+        }
+
+        function retrySticky(stickyId) {
+            const btn = event.target;
+            btn.textContent = '重试中...';
+            btn.disabled = true;
+            setTimeout(() => {
+                btn.textContent = '重试';
+                btn.disabled = false;
+            }, 2000);
+        }
+
+        function switchProvider(stickyId) {
+            document.getElementById('providerSwitchModal').classList.add('show');
+        }
+
+        // 告警中心功能
+        function filterAlerts(type) {
+            document.querySelectorAll('.alert-filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function selectAlert(element) {
+            document.querySelectorAll('.alert-item').forEach(item => item.classList.remove('active'));
+            element.classList.add('active');
+        }
+
+        function markAsRead() {
+            alert('已标记为已查看');
+        }
+
+        function goToSticky(stickyId) {
+            closeModal('alertCenterModal');
+            focusSticky(stickyId);
+        }
+
+        function clearAlertHistory(stickyId) {
+            if (confirm('确定要清空该便签的告警历史吗？')) {
+                alert('告警历史已清空');
+            }
+        }
+
+        // Key 向导功能
+        let currentKeyStep = 1;
+        let selectedProvider = null;
+
+        function selectProvider(provider) {
+            selectedProvider = provider;
+            document.querySelectorAll('.provider-card').forEach(card => card.classList.remove('selected'));
+            event.currentTarget.classList.add('selected');
+        }
+
+        function keyWizardNext() {
+            if (currentKeyStep === 1) {
+                if (!selectedProvider) {
+                    alert('请选择一个数据源');
+                    return;
+                }
+                document.getElementById('keyStep1').style.display = 'none';
+                document.getElementById('keyStep2').style.display = 'block';
+                document.getElementById('keyBackBtn').style.display = 'inline-block';
+                document.getElementById('keyNextBtn').textContent = '验证';
+                currentKeyStep = 2;
+            } else if (currentKeyStep === 2) {
+                const apiKey = document.getElementById('apiKey').value;
+                if (!apiKey.trim()) {
+                    alert('请输入 API Key');
+                    return;
+                }
+                document.getElementById('keyStep2').style.display = 'none';
+                document.getElementById('keyStep3').style.display = 'block';
+                document.getElementById('keyNextBtn').style.display = 'none';
+                currentKeyStep = 3;
+                
+                // 模拟验证过程
+                setTimeout(() => {
+                    document.getElementById('keyTestResult').textContent = 'API Key 验证成功';
+                    document.getElementById('keyTestDesc').textContent = '连接正常，可以开始使用';
+                    document.getElementById('keyTestDetails').innerHTML = `
+                        <div style="color: var(--success); font-size: 48px; margin-bottom: 12px;">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div style="color: var(--text-primary); font-size: 13px; font-weight: 600;">
+                            ${selectedProvider} API 连接成功
+                        </div>
+                    `;
+                    document.getElementById('keyNextBtn').style.display = 'inline-block';
+                    document.getElementById('keyNextBtn').textContent = '完成';
+                }, 2000);
+            } else {
+                closeModal('keyWizardModal');
+                resetKeyWizard();
+            }
+        }
+
+        function keyWizardBack() {
+            if (currentKeyStep === 2) {
+                document.getElementById('keyStep2').style.display = 'none';
+                document.getElementById('keyStep1').style.display = 'block';
+                document.getElementById('keyBackBtn').style.display = 'none';
+                document.getElementById('keyNextBtn').textContent = '下一步';
+                currentKeyStep = 1;
+            }
+        }
+
+        function resetKeyWizard() {
+            currentKeyStep = 1;
+            selectedProvider = null;
+            document.getElementById('keyStep1').style.display = 'block';
+            document.getElementById('keyStep2').style.display = 'none';
+            document.getElementById('keyStep3').style.display = 'none';
+            document.getElementById('keyBackBtn').style.display = 'none';
+            document.getElementById('keyNextBtn').style.display = 'inline-block';
+            document.getElementById('keyNextBtn').textContent = '下一步';
+            document.getElementById('apiKey').value = '';
+            document.getElementById('secretKey').value = '';
+            document.querySelectorAll('.provider-card').forEach(card => card.classList.remove('selected'));
+        }
+
+        // Provider 切换功能
+        function confirmProviderSwitch() {
+            closeModal('providerSwitchModal');
+            alert('数据源切换成功，正在重新获取数据...');
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            // 模拟数据更新
+            setInterval(() => {
+                if (!isRefreshPaused) {
+                    // 更新时间戳
+                    document.querySelectorAll('.sticky-footer span').forEach((span, index) => {
+                        if (span.textContent.includes('更新于')) {
+                            const times = ['刚刚', '1 分钟前', '2 分钟前', '3 分钟前', '5 分钟前'];
+                            span.textContent = '更新于 ' + times[Math.floor(Math.random() * times.length)];
+                        }
+                    });
+                }
+            }, 10000);
+        });
+    </script>
+</body>
+</html>

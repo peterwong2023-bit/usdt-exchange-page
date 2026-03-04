@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>出款</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-blue: #3b82f6;
+            --bg-gray: #f5f7fa;
+            --text-dark: #1e293b;
+            --text-medium: #64748b;
+            --text-light: #94a3b8;
+            --border-color: #e2e8f0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', sans-serif;
+            background: var(--bg-gray);
+            color: var(--text-dark);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* 状态栏 */
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: #000;
+            color: white;
+            font-size: 14px;
+        }
+
+        /* 页面容器 */
+        .page {
+            display: none;
+            min-height: 100vh;
+            background: var(--bg-gray);
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* 顶部导航 */
+        .header {
+            background: white;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .back-btn {
+            position: absolute;
+            left: 16px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--text-dark);
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .header h1 {
+            font-size: 17px;
+            font-weight: 600;
+        }
+
+        /* 商户列表页 */
+        .merchant-page-tabs {
+            display: flex;
+            background: white;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .merchant-tab {
+            flex: 1;
+            padding: 14px;
+            text-align: center;
+            background: none;
+            border: none;
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-medium);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .merchant-tab.active {
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+
+        .merchant-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--primary-blue);
+        }
+
+        .search-box {
+            padding: 12px 16px;
+            background: white;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 16px 10px 40px;
+            background: var(--bg-gray);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .search-box-wrapper {
+            position: relative;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+            font-size: 18px;
+        }
+
+        .merchant-list {
+            padding: 8px 0;
+        }
+
+        .merchant-item {
+            background: white;
+            margin: 8px 16px;
+            padding: 16px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .merchant-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .merchant-info h3 {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 4px;
+        }
+
+        .merchant-id {
+            font-size: 13px;
+            color: var(--text-medium);
+        }
+
+        .merchant-balance {
+            text-align: right;
+            font-size: 13px;
+            color: var(--text-medium);
+        }
+
+        .merchant-balance .amount {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-dark);
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .merchant-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: white;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-dark);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .action-btn:active {
+            transform: scale(0.96);
+            background: var(--bg-gray);
+        }
+
+        .action-btn.primary {
+            background: #eff6ff;
+            border-color: var(--primary-blue);
+            color: var(--primary-blue);
+        }
+
+        .action-btn.warning {
+            background: #fff7ed;
+            border-color: #f59e0b;
+            color: #ea580c;
+        }
+
+        /* 出款表单页 */
+        .form-page-content {
+            padding: 16px;
+        }
+
+        .type-indicator {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .type-indicator.collection {
+            background: #eff6ff;
+            color: var(--primary-blue);
+        }
+
+        .type-indicator.merchant {
+            background: #f0fdf4;
+            color: #16a34a;
+        }
+
+        .type-indicator.abnormal {
+            background: #fff7ed;
+            color: #ea580c;
+        }
+
+        .selected-merchant-card {
+            background: white;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .selected-merchant-card .label {
+            font-size: 13px;
+            color: var(--text-medium);
+            margin-bottom: 8px;
+        }
+
+        .selected-merchant-card .name {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 4px;
+        }
+
+        .selected-merchant-card .balance {
+            font-size: 14px;
+            color: var(--text-medium);
+        }
+
+        .selected-merchant-card .balance strong {
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+
+        .form-card {
+            background: white;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .form-section {
+            margin-bottom: 20px;
+        }
+
+        .form-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .section-title {
+            font-size: 13px;
+            color: var(--text-medium);
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .blockchain-selector {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 16px;
+            background: var(--bg-gray);
+            border-radius: 10px;
+            cursor: pointer;
+            border: 1px solid var(--border-color);
+        }
+
+        .blockchain-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .blockchain-label {
+            font-size: 14px;
+            color: var(--text-medium);
+        }
+
+        .blockchain-value {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .input-field {
+            position: relative;
+            margin-bottom: 12px;
+        }
+
+        .input-field:last-child {
+            margin-bottom: 0;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-field input,
+        .input-field textarea {
+            width: 100%;
+            padding: 14px 16px;
+            background: var(--bg-gray);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 15px;
+            color: var(--text-dark);
+            outline: none;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .input-field input:focus,
+        .input-field textarea:focus {
+            border-color: var(--primary-blue);
+            background: white;
+        }
+
+        .input-field textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .paste-btn {
+            position: absolute;
+            right: 12px;
+            padding: 4px 12px;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 13px;
+            color: var(--text-medium);
+            cursor: pointer;
+        }
+
+        .note-box {
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+
+        .note-box.info {
+            background: #f0f9ff;
+            border-left: 3px solid var(--primary-blue);
+            color: var(--text-medium);
+        }
+
+        .note-box.warning {
+            background: #fff7ed;
+            border-left: 3px solid #f59e0b;
+            color: #ea580c;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background: var(--text-light);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: not-allowed;
+        }
+
+        .submit-btn.active {
+            background: var(--primary-blue);
+            cursor: pointer;
+        }
+
+        .submit-btn.active:active {
+            transform: scale(0.98);
+        }
+
+        /* 底部导航 */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            display: flex;
+            border-top: 1px solid var(--border-color);
+            padding: 8px 0 env(safe-area-inset-bottom);
+        }
+
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 4px 0;
+            color: var(--text-medium);
+            text-decoration: none;
+            font-size: 11px;
+        }
+
+        .nav-item.active {
+            color: var(--primary-blue);
+        }
+
+        .nav-icon {
+            font-size: 24px;
+            margin-bottom: 2px;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 8px;
+            font-size: 15px;
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 2000;
+            pointer-events: none;
+            max-width: 80%;
+            text-align: center;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+    </style>
+</head>
+<body>
+    <!-- 状态栏 -->
+    <div class="status-bar">
+        <span class="time">2:07</span>
+        <div class="indicators">
+            <span>⚫⚫⚫⚫ 4G</span>
+            <span>🔋</span>
+        </div>
+    </div>
+
+    <!-- 商户选择页 -->
+    <div class="page active" id="merchantListPage">
+        <div class="header">
+            <button class="back-btn" onclick="history.back()">‹</button>
+            <h1>选择商户</h1>
+        </div>
+
+        <div class="merchant-page-tabs">
+            <button class="merchant-tab active" data-tab="return">归集商户</button>
+            <button class="merchant-tab" data-tab="normal">普通商户</button>
+        </div>
+
+        <div class="search-box">
+            <div class="search-box-wrapper">
+                <span class="search-icon">🔍</span>
+                <input type="text" class="search-input" placeholder="搜索商户" id="merchantSearch">
+            </div>
+        </div>
+
+        <div class="merchant-list" id="merchantList">
+            <!-- 商户列表动态生成 -->
+        </div>
+
+        <div style="height: 80px;"></div>
+    </div>
+
+    <!-- 出款表单页 -->
+    <div class="page" id="withdrawalFormPage">
+        <div class="header">
+            <button class="back-btn" onclick="goToMerchantList()">‹</button>
+            <h1>出款</h1>
+        </div>
+
+        <div class="form-page-content">
+            <div class="type-indicator" id="typeIndicator">归集</div>
+
+            <!-- 已选商户信息 -->
+            <div class="selected-merchant-card">
+                <div class="label">商户</div>
+                <div class="name" id="selectedMerchantName">新宿归集</div>
+                <div class="balance">余额：<strong id="selectedMerchantBalance">170.1</strong> USDT</div>
+            </div>
+
+            <!-- 说明提示 -->
+            <div class="note-box info" id="noteBox" style="display: none;">
+                💡 归集功能用于将商户账户余额转移到主账户，便于统一管理资金
+            </div>
+
+            <!-- 表单 -->
+            <div class="form-card">
+                <div class="form-section">
+                    <div class="section-title">区块链 & 代币</div>
+                    <div class="blockchain-selector">
+                        <div class="blockchain-info">
+                            <span class="blockchain-label">波场 · </span>
+                            <span class="blockchain-value">USDT (TRC20)</span>
+                        </div>
+                        <span style="color: var(--text-light); font-size: 20px;">›</span>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="section-title" id="addressLabel">收款地址</div>
+                    <div class="input-field">
+                        <div class="input-wrapper">
+                            <input type="text" placeholder="收款地址" id="address">
+                            <button class="paste-btn" onclick="pasteAddress()">粘贴</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="section-title">金额</div>
+                    <div class="input-field">
+                        <input type="number" placeholder="金额" id="amount">
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="section-title" id="noteLabel">收款备注（可选）</div>
+                    <div class="input-field">
+                        <textarea placeholder="收款备注（可选）" id="note"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div style="height: 16px;"></div>
+
+            <button class="submit-btn" id="submitBtn">发起出款请求</button>
+            
+            <div style="height: 100px;"></div>
+        </div>
+    </div>
+
+    <!-- 底部导航 -->
+    <div class="bottom-nav">
+        <a href="#" class="nav-item">
+            <div class="nav-icon">🏠</div>
+            <div>首页</div>
+        </a>
+        <a href="#" class="nav-item active">
+            <div class="nav-icon">💰</div>
+            <div>出款</div>
+        </a>
+        <a href="#" class="nav-item">
+            <div class="nav-icon">📋</div>
+            <div>记录</div>
+        </a>
+        <a href="#" class="nav-item">
+            <div class="nav-icon">⚙️</div>
+            <div>设置</div>
+        </a>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // 商户数据
+        const merchants = {
+            return: [
+                { id: 1214, name: '六本木归集', balance: 0 },
+                { id: 1212, name: '新宿归集', balance: 170.1 },
+                { id: 1210, name: '大阪归集', balance: 0 },
+                { id: 1208, name: '神田归集', balance: 0 },
+                { id: 1206, name: '马场商户归集', balance: 0 },
+                { id: 1204, name: '测试商户G归集', balance: 0.5 },
+                { id: 1202, name: '测试商户F归集', balance: 6.5 },
+                { id: 1200, name: '测试商户E归集', balance: 0.5 },
+                { id: 1197, name: '测试商户D归集', balance: 0 },
+                { id: 1195, name: 'live归集', balance: 28.7 },
+                { id: 1191, name: '测试商户C归集', balance: 0 }
+            ],
+            normal: [
+                { id: 2001, name: '测试商户A', balance: 1250.5 },
+                { id: 2002, name: '测试商户B', balance: 980.2 },
+                { id: 2003, name: '正式商户01', balance: 5000 },
+                { id: 2004, name: '正式商户02', balance: 3500.8 }
+            ]
+        };
+
+        let currentTab = 'return';
+        let currentWithdrawalType = '';
+        let selectedMerchant = null;
+
+        // 初始化
+        renderMerchantList('return');
+
+        // 切换商户类型Tab
+        document.querySelectorAll('.merchant-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.merchant-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                currentTab = this.getAttribute('data-tab');
+                renderMerchantList(currentTab);
+            });
+        });
+
+        // 渲染商户列表
+        function renderMerchantList(type) {
+            const list = document.getElementById('merchantList');
+            const merchantData = merchants[type];
+            
+            list.innerHTML = merchantData.map(m => `
+                <div class="merchant-item">
+                    <div class="merchant-header">
+                        <div class="merchant-info">
+                            <h3>${m.name}</h3>
+                            <div class="merchant-id">(${m.id})</div>
+                        </div>
+                        <div class="merchant-balance">
+                            <span class="amount">${m.balance}</span>
+                            USDT
+                        </div>
+                    </div>
+                    <div class="merchant-actions">
+                        <button class="action-btn primary" onclick="selectWithdrawal(${m.id}, '${m.name}', ${m.balance}, 'collection')">归集</button>
+                        <button class="action-btn" onclick="selectWithdrawal(${m.id}, '${m.name}', ${m.balance}, 'merchant')">商户出款</button>
+                        <button class="action-btn warning" onclick="selectWithdrawal(${m.id}, '${m.name}', ${m.balance}, 'abnormal')">异常入款</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 搜索商户
+        document.getElementById('merchantSearch').addEventListener('input', function(e) {
+            const keyword = e.target.value.toLowerCase();
+            const items = document.querySelectorAll('.merchant-item');
+            
+            items.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                item.style.display = text.includes(keyword) ? 'block' : 'none';
+            });
+        });
+
+        // 选择出款方式
+        function selectWithdrawal(id, name, balance, type) {
+            selectedMerchant = { id, name, balance };
+            currentWithdrawalType = type;
+            
+            // 更新表单页信息
+            document.getElementById('selectedMerchantName').textContent = name;
+            document.getElementById('selectedMerchantBalance').textContent = balance;
+            
+            // 更新类型指示器
+            const indicator = document.getElementById('typeIndicator');
+            const noteBox = document.getElementById('noteBox');
+            const addressLabel = document.getElementById('addressLabel');
+            const noteLabel = document.getElementById('noteLabel');
+            
+            indicator.className = 'type-indicator ' + type;
+            
+            if (type === 'collection') {
+                indicator.textContent = '📦 归集';
+                noteBox.className = 'note-box info';
+                noteBox.innerHTML = '💡 归集功能用于将商户账户余额转移到主账户，便于统一管理资金';
+                noteBox.style.display = 'block';
+                addressLabel.textContent = '收款地址';
+                noteLabel.textContent = '收款备注（可选）';
+            } else if (type === 'merchant') {
+                indicator.textContent = '💳 商户出款';
+                noteBox.style.display = 'none';
+                addressLabel.textContent = '收款地址';
+                noteLabel.textContent = '收款备注（可选）';
+            } else if (type === 'abnormal') {
+                indicator.textContent = '⚠️ 异常入款';
+                noteBox.className = 'note-box warning';
+                noteBox.innerHTML = '<strong>异常入款出款</strong>：用于处理KYC风险、黑名单地址等异常入金的退回操作。资金将原路退回至用户地址';
+                noteBox.style.display = 'block';
+                addressLabel.textContent = '收款地址（原入款地址）';
+                noteLabel.textContent = '异常原因说明（必填）';
+            }
+            
+            // 切换到表单页
+            goToFormPage();
+        }
+
+        // 跳转到表单页
+        function goToFormPage() {
+            document.getElementById('merchantListPage').classList.remove('active');
+            document.getElementById('withdrawalFormPage').classList.add('active');
+            window.scrollTo(0, 0);
+        }
+
+        // 返回商户列表页
+        function goToMerchantList() {
+            document.getElementById('withdrawalFormPage').classList.remove('active');
+            document.getElementById('merchantListPage').classList.add('active');
+            // 清空表单
+            document.getElementById('address').value = '';
+            document.getElementById('amount').value = '';
+            document.getElementById('note').value = '';
+            validateForm();
+        }
+
+        // 粘贴地址
+        async function pasteAddress() {
+            try {
+                const text = await navigator.clipboard.readText();
+                document.getElementById('address').value = text;
+                validateForm();
+                showToast('已粘贴');
+            } catch (err) {
+                showToast('粘贴失败，请手动输入');
+            }
+        }
+
+        // 表单验证
+        function validateForm() {
+            const address = document.getElementById('address').value.trim();
+            const amount = document.getElementById('amount').value.trim();
+            const note = document.getElementById('note').value.trim();
+            const submitBtn = document.getElementById('submitBtn');
+            
+            let isValid = false;
+            
+            if (currentWithdrawalType === 'abnormal') {
+                // 异常入款必须填写备注
+                isValid = address && amount && note;
+            } else {
+                isValid = address && amount;
+            }
+            
+            if (isValid) {
+                submitBtn.classList.add('active');
+            } else {
+                submitBtn.classList.remove('active');
+            }
+        }
+
+        // 监听表单输入
+        document.querySelectorAll('#address, #amount, #note').forEach(input => {
+            input.addEventListener('input', validateForm);
+        });
+
+        // 提交表单
+        document.getElementById('submitBtn').addEventListener('click', function() {
+            if (!this.classList.contains('active')) return;
+            
+            const typeText = currentWithdrawalType === 'collection' ? '归集' : 
+                           currentWithdrawalType === 'merchant' ? '商户出款' : '异常入款出款';
+            
+            console.log({
+                type: typeText,
+                merchant: selectedMerchant,
+                address: document.getElementById('address').value,
+                amount: document.getElementById('amount').value,
+                note: document.getElementById('note').value
+            });
+            
+            showToast(`${typeText}请求已提交`);
+            
+            // 1秒后返回商户列表
+            setTimeout(() => {
+                goToMerchantList();
+            }, 1500);
+        });
+
+        // Toast提示
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
+
+
+

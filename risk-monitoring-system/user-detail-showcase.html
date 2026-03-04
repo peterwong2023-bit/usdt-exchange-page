@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户风险详情（Showcase版） - 波币AI风险监控系统</title>
+    <link rel="stylesheet" href="styles-v4.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            font-family: 'Inter', sans-serif;
+        }
+
+        .showcase-container {
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        /* 超大风险分显示 */
+        .risk-score-mega {
+            width: 140px;
+            height: 140px;
+            border-radius: 28px;
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            box-shadow: 0 20px 40px rgba(220, 38, 38, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .risk-score-mega::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0% { transform: rotate(0deg) translate(-50%, -50%); }
+            100% { transform: rotate(360deg) translate(-50%, -50%); }
+        }
+
+        .risk-score-number {
+            font-size: 64px;
+            font-weight: 900;
+            font-family: 'JetBrains Mono', monospace;
+            line-height: 1;
+            position: relative;
+            z-index: 1;
+        }
+
+        .risk-score-label {
+            font-size: 14px;
+            font-weight: 600;
+            opacity: 0.9;
+            margin-top: 8px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* 统计面板 */
+        .stats-panel {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            border: 1px solid #e2e8f0;
+        }
+
+        .stat-item-large {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .stat-item-large:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            border-color: #3b82f6;
+        }
+
+        .stat-value-mega {
+            font-size: 42px;
+            font-weight: 900;
+            line-height: 1;
+            margin-bottom: 8px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* 层级统计条 */
+        .layer-stats-bar {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            padding: 16px;
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+            margin-bottom: 20px;
+        }
+
+        .layer-icon-mega {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: white;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .layer-stats-content {
+            flex: 1;
+        }
+
+        .layer-title-mega {
+            font-size: 24px;
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 8px;
+        }
+
+        .layer-progress {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .progress-bar-mega {
+            flex: 1;
+            height: 12px;
+            background: #e2e8f0;
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill-mega {
+            height: 100%;
+            background: linear-gradient(90deg, #dc2626, #f59e0b);
+            border-radius: 6px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill-mega::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .layer-stats-badges {
+            display: flex;
+            gap: 12px;
+        }
+
+        .stat-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .stat-badge.severe {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .stat-badge.hit {
+            background: #ffedd5;
+            color: #ea580c;
+        }
+
+        .stat-badge.watch {
+            background: #fef3c7;
+            color: #b45309;
+        }
+
+        .stat-badge.none {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        /* 规则卡片增强 */
+        .rule-card-showcase {
+            background: white;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            border: 2px solid #e2e8f0;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .rule-card-showcase.severe {
+            border-left: 6px solid #dc2626;
+            background: linear-gradient(90deg, rgba(220, 38, 38, 0.02) 0%, white 100%);
+        }
+
+        .rule-card-showcase.hit {
+            border-left: 6px solid #f59e0b;
+            background: linear-gradient(90deg, rgba(245, 158, 11, 0.02) 0%, white 100%);
+        }
+
+        .rule-card-showcase.watch {
+            border-left: 6px solid #fbbf24;
+            background: linear-gradient(90deg, rgba(251, 191, 36, 0.02) 0%, white 100%);
+        }
+
+        .rule-card-showcase.none {
+            border-left: 3px solid #cbd5e1;
+            opacity: 0.6;
+        }
+
+        .rule-card-showcase:hover {
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            transform: translateY(-2px);
+        }
+
+        .rule-score-mega {
+            font-size: 48px;
+            font-weight: 900;
+            font-family: 'JetBrains Mono', monospace;
+            line-height: 1;
+        }
+
+        /* Tab美化 */
+        .tab-showcase {
+            flex: 1;
+            padding: 16px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .tab-showcase:hover {
+            background: #f8fafc;
+        }
+
+        .tab-showcase.active {
+            color: #3b82f6;
+            border-bottom-color: #3b82f6;
+            background: white;
+        }
+
+        .tab-showcase.active::before {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: #3b82f6;
+            border-radius: 2px 2px 0 0;
+        }
+
+        /* 证据项美化 */
+        .evidence-item-showcase {
+            padding: 16px;
+            background: linear-gradient(135deg, #f8fafc 0%, white 100%);
+            border-radius: 10px;
+            border-left: 4px solid #3b82f6;
+            margin-bottom: 12px;
+            transition: all 0.2s;
+        }
+
+        .evidence-item-showcase:hover {
+            background: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transform: translateX(4px);
+        }
+
+        /* 时间轴美化 */
+        .timeline-event-showcase {
+            position: relative;
+            margin-bottom: 24px;
+            cursor: pointer;
+        }
+
+        .timeline-dot-mega {
+            position: absolute;
+            left: -32px;
+            top: 8px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 4px solid white;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            z-index: 2;
+        }
+
+        .timeline-content-showcase {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s;
+        }
+
+        .timeline-content-showcase:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            transform: translateX(8px);
+        }
+
+        /* 按钮美化 */
+        .btn-showcase {
+            padding: 14px 24px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .btn-showcase:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        }
+
+        .btn-showcase:active {
+            transform: translateY(-1px);
+        }
+
+        .btn-danger-showcase {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            color: white;
+        }
+
+        .btn-warning-showcase {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+        }
+
+        .btn-primary-showcase {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+        }
+
+        /* 加载动画 */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-in {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .animate-in-delay-1 {
+            animation: fadeInUp 0.6s ease-out 0.1s backwards;
+        }
+
+        .animate-in-delay-2 {
+            animation: fadeInUp 0.6s ease-out 0.2s backwards;
+        }
+
+        .animate-in-delay-3 {
+            animation: fadeInUp 0.6s ease-out 0.3s backwards;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航 -->
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <h1 class="logo">
+                    <img src="../bob.png" alt="波币" class="logo-icon">
+                    <span class="logo-text">波币AI风险监控系统</span>
+                </h1>
+                <div class="subtitle-container">
+                    <span class="subtitle-cn">抓光所有骗子</span>
+                    <span class="subtitle-divider">·</span>
+                    <span class="subtitle-en">Anti Scammer</span>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="header-actions">
+                    <button class="btn btn-outline" onclick="window.history.back()">
+                        <i class="fas fa-arrow-left"></i> 返回
+                    </button>
+                    <button class="btn btn-primary" onclick="window.location.href='index-v4.html'">
+                        <i class="fas fa-home"></i> 返回首页
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 面包屑 -->
+    <div class="showcase-container">
+        <div style="display: flex; align-items: center; gap: 8px; font-size: 14px; color: #64748b; margin-bottom: 20px;">
+            <a href="index-v4.html" style="color: #3b82f6; text-decoration: none; font-weight: 600;">首页</a>
+            <i class="fas fa-chevron-right" style="font-size: 10px;"></i>
+            <a href="users.html" style="color: #3b82f6; text-decoration: none; font-weight: 600;">用户风险列表</a>
+            <i class="fas fa-chevron-right" style="font-size: 10px;"></i>
+            <span style="font-weight: 600; color: #0f172a;">用户详情 - #9f3e_7A12345h78</span>
+        </div>
+
+        <!-- 用户基本信息（超大展示） -->
+        <div class="stats-panel animate-in" style="margin-bottom: 24px;">
+            <div style="display: flex; align-items: center; gap: 32px;">
+                <img src="https://i.pravatar.cc/150?img=1" alt="avatar" style="width: 120px; height: 120px; border-radius: 24px; border: 4px solid #e2e8f0; box-shadow: 0 8px 20px rgba(0,0,0,0.12);">
+                <div style="flex: 1;">
+                    <h1 style="font-size: 36px; font-weight: 900; color: #0f172a; margin-bottom: 12px; font-family: 'JetBrains Mono', monospace; letter-spacing: -1px;">#9f3e_7A12345h78</h1>
+                    <div style="display: flex; gap: 32px; font-size: 15px; color: #64748b;">
+                        <span style="display: flex; align-items: center; gap: 8px;">
+                            <i class="fas fa-map-marker-alt" style="color: #f59e0b; font-size: 18px;"></i>
+                            <strong style="color: #0f172a;">深圳</strong>
+                        </span>
+                        <span style="display: flex; align-items: center; gap: 8px;">
+                            <i class="fas fa-globe" style="color: #3b82f6; font-size: 18px;"></i>
+                            <code style="background: #f1f5f9; padding: 4px 8px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; color: #0f172a;">112.25.67.89</code>
+                        </span>
+                        <span style="display: flex; align-items: center; gap: 8px;">
+                            <i class="fas fa-clock" style="color: #10b981; font-size: 18px;"></i>
+                            <strong style="color: #0f172a;">2025-11-28 14:23:15</strong>
+                        </span>
+                    </div>
+                </div>
+                <div class="risk-score-mega">
+                    <div class="risk-score-number">91</div>
+                    <div class="risk-score-label">风险分</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Risk Summary（超级直观） -->
+        <div class="stats-panel animate-in-delay-1" style="background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border: 3px solid #fbbf24; margin-bottom: 24px;">
+            <div style="margin-bottom: 20px;">
+                <h2 style="font-size: 24px; font-weight: 900; color: #92400e; display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 28px;"></i>
+                    为什么91分高危？
+                </h2>
+                <p style="font-size: 14px; color: #92400e; margin: 0;">运营10秒速览 - Top3致命原因 + 证据 + 建议处理</p>
+            </div>
+
+            <!-- Top3原因（超大卡片） -->
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px;">
+                <div class="stats-panel" style="border-left: 6px solid #dc2626; cursor: pointer; transition: all 0.3s;" onclick="scrollToRule('SEC_DEVICE_FP_CHANGE')" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                    <div style="font-size: 16px; font-weight: 800; color: #0f172a; margin-bottom: 8px;">
+                        🔴 设备指纹24h变化
+                    </div>
+                    <div style="font-size: 14px; color: #64748b; margin-bottom: 12px;">
+                        触发<strong style="color: #dc2626;">4次</strong>
+                    </div>
+                    <div style="font-size: 56px; font-weight: 900; color: #dc2626; font-family: 'JetBrains Mono', monospace; line-height: 1;">
+                        -32
+                    </div>
+                    <div style="font-size: 12px; color: #dc2626; margin-top: 8px; font-weight: 600;">
+                        ⚠️ 已达上限
+                    </div>
+                </div>
+
+                <div class="stats-panel" style="border-left: 6px solid #f59e0b; cursor: pointer; transition: all 0.3s;" onclick="scrollToRule('SEC_IP_CITY_DRIFT')" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                    <div style="font-size: 16px; font-weight: 800; color: #0f172a; margin-bottom: 8px;">
+                        🟠 24h跨城市登录
+                    </div>
+                    <div style="font-size: 14px; color: #64748b; margin-bottom: 12px;">
+                        跨越<strong style="color: #f59e0b;">4次</strong>，最远<strong style="color: #dc2626;">962km</strong>
+                    </div>
+                    <div style="font-size: 56px; font-weight: 900; color: #f59e0b; font-family: 'JetBrains Mono', monospace; line-height: 1;">
+                        -24
+                    </div>
+                </div>
+
+                <div class="stats-panel" style="border-left: 6px solid #f59e0b; cursor: pointer; transition: all 0.3s;" onclick="scrollToRule('TRADE_HIGH_CANCEL')" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                    <div style="font-size: 16px; font-weight: 800; color: #0f172a; margin-bottom: 8px;">
+                        🟠 频繁取消订单
+                    </div>
+                    <div style="font-size: 14px; color: #64748b; margin-bottom: 12px;">
+                        取消<strong style="color: #f59e0b;">3次</strong>/24h
+                    </div>
+                    <div style="font-size: 56px; font-weight: 900; color: #f59e0b; font-family: 'JetBrains Mono', monospace; line-height: 1;">
+                        -20
+                    </div>
+                </div>
+            </div>
+
+            <!-- 关键证据（信息卡片） -->
+            <div class="stats-panel" style="margin-bottom: 20px;">
+                <div style="font-size: 14px; font-weight: 700; color: #0f172a; margin-bottom: 12px;">
+                    <i class="fas fa-fingerprint"></i> 关键证据摘要
+                </div>
+                <div style="font-size: 14px; color: #475569; line-height: 1.8;">
+                    🔸 <strong>设备：</strong>24h内变化4次（DFP_889977 → DFP_445566 → DFP_778899 → DFP_223344）<br>
+                    🔸 <strong>IP：</strong>跨城市登录（上海→深圳→广州→北京，最远跨越1962km）<br>
+                    🔸 <strong>交易：</strong>24h内取消3笔订单（¥5800、¥6300、¥4500，均为用户主动）<br>
+                    🔸 <strong>支付：</strong>收款码QR_889922与3个账号共享<br>
+                    🔸 <strong>对手：</strong>交易对手集中度84%（Top对手占比过高）
+                </div>
+            </div>
+
+            <!-- 推荐动作（大按钮） -->
+            <div style="display: flex; gap: 16px;">
+                <button class="btn-danger-showcase btn-showcase" style="flex: 1;">
+                    <i class="fas fa-clipboard-check" style="font-size: 20px;"></i>
+                    <div style="text-align: left;">
+                        <div style="font-size: 16px;">建议：进入待审核</div>
+                        <div style="font-size: 11px; opacity: 0.9;">立即人工核实</div>
+                    </div>
+                </button>
+                <button class="btn-warning-showcase btn-showcase">
+                    <i class="fas fa-ban" style="font-size: 20px;"></i>
+                    <span>限制提现</span>
+                </button>
+                <button class="btn-primary-showcase btn-showcase">
+                    <i class="fas fa-folder-plus" style="font-size: 20px;"></i>
+                    <span>建立案件</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- 用户画像（超级直观） -->
+        <div class="stats-panel animate-in-delay-2" style="margin-bottom: 24px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+                <h3 style="font-size: 20px; font-weight: 800; color: #0f172a; margin: 0;">
+                    <i class="fas fa-user-circle" style="color: #3b82f6; font-size: 24px;"></i>
+                    用户画像
+                </h3>
+                <button class="btn btn-outline" style="font-size: 13px;" onclick="toggleProfile()">
+                    <i class="fas fa-expand-alt"></i> 展开详情
+                </button>
+            </div>
+
+            <!-- 核心指标（大卡片） -->
+            <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; margin-bottom: 20px;">
+                <div class="stat-item-large">
+                    <div class="stat-value-mega" style="color: #3b82f6;">88天</div>
+                    <div style="font-size: 13px; color: #64748b; font-weight: 600;">账户年龄</div>
+                </div>
+                <div class="stat-item-large">
+                    <div class="stat-value-mega" style="color: #3b82f6;">52笔</div>
+                    <div style="font-size: 13px; color: #64748b; font-weight: 600;">30天交易</div>
+                </div>
+                <div class="stat-item-large">
+                    <div class="stat-value-mega" style="color: #f59e0b;">高</div>
+                    <div style="font-size: 13px; color: #64748b; font-weight: 600;">活跃等级</div>
+                </div>
+                <div class="stat-item-large" style="border-color: #dc2626;">
+                    <div class="stat-value-mega" style="color: #dc2626; font-size: 32px;">净流出</div>
+                    <div style="font-size: 13px; color: #64748b; font-weight: 600;">资金流向</div>
+                    <div style="font-size: 11px; color: #dc2626; margin-top: 4px;">⚠️ 异常</div>
+                </div>
+                <div class="stat-item-large">
+                    <div class="stat-value-mega" style="color: #10b981;">¥28K</div>
+                    <div style="font-size: 13px; color: #64748b; font-weight: 600;">24h交易额</div>
+                </div>
+                <div class="stat-item-large">
+                    <div class="stat-value-mega" style="color: #8b5cf6;">156</div>
+                    <div style="font-size: 13px; color: #64748b; font-weight: 600;">总交易笔数</div>
+                </div>
+            </div>
+
+            <!-- 标签云 -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div>
+                    <div style="font-size: 14px; font-weight: 700; color: #64748b; margin-bottom: 12px;">
+                        <i class="fas fa-tags"></i> 行为特征标签
+                    </div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                        <span class="region-risk-tag" style="cursor: pointer; font-size: 12px; padding: 6px 14px;">高取消率45%</span>
+                        <span class="region-risk-tag" style="cursor: pointer; font-size: 12px; padding: 6px 14px;">多设备4个</span>
+                        <span class="region-risk-tag" style="cursor: pointer; font-size: 12px; padding: 6px 14px;">频繁换绑</span>
+                        <span class="region-risk-tag" style="cursor: pointer; font-size: 12px; padding: 6px 14px;">跨地域活动</span>
+                        <span class="region-risk-tag" style="cursor: pointer; font-size: 12px; padding: 6px 14px;">夜间高频62%</span>
+                        <span class="region-risk-tag" style="cursor: pointer; font-size: 12px; padding: 6px 14px;">对手集中84%</span>
+                    </div>
+                </div>
+                <div>
+                    <div style="font-size: 14px; font-weight: 700; color: #64748b; margin-bottom: 12px;">
+                        <i class="fas fa-shield-alt"></i> 风险检测标签
+                    </div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                        <span class="risk-tag-small" style="background: #fee2e2; border-color: #fecaca; color: #991b1b; cursor: pointer; font-size: 12px; padding: 6px 14px; font-weight: 700;" onclick="scrollToRule('SEC_DEVICE_FP_CHANGE')">设备风险</span>
+                        <span class="risk-tag-small" style="background: #fee2e2; border-color: #fecaca; color: #991b1b; cursor: pointer; font-size: 12px; padding: 6px 14px; font-weight: 700;" onclick="scrollToRule('SEC_IP_CITY_DRIFT')">IP风险</span>
+                        <span class="risk-tag-small" style="background: #ffedd5; border-color: #fed7aa; color: #9a3412; cursor: pointer; font-size: 12px; padding: 6px 14px; font-weight: 700;" onclick="scrollToRule('TRADE_HIGH_CANCEL')">交易风险</span>
+                        <span class="risk-tag-small" style="background: #fef3c7; border-color: #fde68a; color: #92400e; cursor: pointer; font-size: 12px; padding: 6px 14px; font-weight: 700;">支付风险</span>
+                        <span class="risk-tag-small" style="background: #fef3c7; border-color: #fde68a; color: #92400e; cursor: pointer; font-size: 12px; padding: 6px 14px; font-weight: 700;">团伙关联</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 详细信息展开区 -->
+            <div id="profileDetails" style="display: none; margin-top: 20px; padding-top: 20px; border-top: 2px solid rgba(251, 191, 36, 0.3);">
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
+                    <!-- 账户信息卡片 -->
+                    <div class="stats-panel" style="border-left: 4px solid #3b82f6;">
+                        <div style="font-size: 14px; font-weight: 700; color: #0f172a; margin-bottom: 12px;">
+                            <i class="fas fa-id-card"></i> 账户信息
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 13px;">
+                            <div>
+                                <div style="color: #64748b; margin-bottom: 4px;">注册时间</div>
+                                <div style="color: #0f172a; font-weight: 700;">2025-09-01</div>
+                            </div>
+                            <div>
+                                <div style="color: #64748b; margin-bottom: 4px;">实名状态</div>
+                                <div style="color: #10b981; font-weight: 700;">✓ 已认证</div>
+                            </div>
+                            <div>
+                                <div style="color: #64748b; margin-bottom: 4px;">账户余额</div>
+                                <div style="color: #3b82f6; font-weight: 700; font-size: 16px;">¥12,580</div>
+                            </div>
+                            <div>
+                                <div style="color: #64748b; margin-bottom: 4px;">冻结金额</div>
+                                <div style="color: #dc2626; font-weight: 700; font-size: 16px;">¥3,200</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 交易统计卡片 -->
+                    <div class="stats-panel" style="border-left: 4px solid #10b981;">
+                        <div style="font-size: 14px; font-weight: 700; color: #0f172a; margin-bottom: 12px;">
+                            <i class="fas fa-chart-line"></i> 交易统计
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+                            <div style="padding: 10px; background: #f8fafc; border-radius: 6px; text-align: center;">
+                                <div style="font-size: 20px; font-weight: 800; color: #10b981;">¥156K</div>
+                                <div style="font-size: 11px; color: #64748b;">30天总额</div>
+                            </div>
+                            <div style="padding: 10px; background: #f8fafc; border-radius: 6px; text-align: center;">
+                                <div style="font-size: 20px; font-weight: 800; color: #3b82f6;">28/24</div>
+                                <div style="font-size: 11px; color: #64748b;">买/卖单</div>
+                            </div>
+                            <div style="padding: 10px; background: #fffbeb; border-radius: 6px; text-align: center; border: 1px solid #fde68a;">
+                                <div style="font-size: 20px; font-weight: 800; color: #dc2626;">45%</div>
+                                <div style="font-size: 11px; color: #92400e;">取消率</div>
+                                <div style="font-size: 10px; color: #dc2626; margin-top: 2px;">↑ vs 15%</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 设备与IP -->
+                    <div class="stats-panel" style="border-left: 4px solid #f59e0b;">
+                        <div style="font-size: 14px; font-weight: 700; color: #0f172a; margin-bottom: 12px;">
+                            <i class="fas fa-laptop"></i> 设备与IP信息
+                        </div>
+                        <div style="font-size: 12px;">
+                            <div style="margin-bottom: 8px;">
+                                <strong style="color: #dc2626;">⚠️ 24h设备数：4个</strong>
+                                <span style="color: #64748b;">（正常应<2）</span>
+                            </div>
+                            <div style="margin-bottom: 8px;">
+                                <strong style="color: #dc2626;">⚠️ 7天IP变化：12次</strong>
+                                <span style="color: #64748b;">（频繁变化）</span>
+                            </div>
+                            <div style="padding: 8px; background: #f8fafc; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 11px;">
+                                常用：DFP_889977 (4次)<br>
+                                常用IP：112.25.67.89 (深圳,12次)
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 交易对手 -->
+                    <div class="stats-panel" style="border-left: 4px solid #8b5cf6;">
+                        <div style="font-size: 14px; font-weight: 700; color: #0f172a; margin-bottom: 12px;">
+                            <i class="fas fa-users"></i> 交易对手分析
+                        </div>
+                        <div style="font-size: 12px;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
+                                <div>
+                                    <div style="color: #64748b;">对手数量</div>
+                                    <div style="font-size: 24px; font-weight: 800; color: #3b82f6;">8人</div>
+                                </div>
+                                <div>
+                                    <div style="color: #64748b;">集中度</div>
+                                    <div style="font-size: 24px; font-weight: 800; color: #dc2626;">84%</div>
+                                    <div style="font-size: 10px; color: #dc2626;">⚠️ 过高</div>
+                                </div>
+                            </div>
+                            <div style="padding: 8px; background: #f8fafc; border-radius: 4px;">
+                                Top对手：#2c7b (43笔,84%)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 继续添加规则详情... -->
+        <div style="color: #94a3b8; text-align: center; padding: 40px; font-size: 14px;">
+            📝 Showcase版本已加载完毕 - 更多规则详情请继续滚动查看
+        </div>
+    </div>
+
+    <script>
+        function toggleProfile() {
+            const details = document.getElementById('profileDetails');
+            const btn = event.target.closest('button');
+            if (details.style.display === 'none' || !details.style.display) {
+                details.style.display = 'block';
+                btn.innerHTML = '<i class="fas fa-compress-alt"></i> 收起详情';
+            } else {
+                details.style.display = 'none';
+                btn.innerHTML = '<i class="fas fa-expand-alt"></i> 展开详情';
+            }
+        }
+
+        function scrollToRule(ruleId) {
+            alert('跳转到规则：' + ruleId + '\n\n(Showcase版本，完整功能请查看下方规则列表)');
+        }
+
+        // 页面加载动画
+        window.addEventListener('load', function() {
+            document.body.style.opacity = '0';
+            setTimeout(() => {
+                document.body.style.transition = 'opacity 0.8s ease';
+                document.body.style.opacity = '1';
+            }, 100);
+        });
+    </script>
+</body>
+</html>

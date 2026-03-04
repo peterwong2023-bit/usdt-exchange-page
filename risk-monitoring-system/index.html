@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI风险监控系统 - C2C交易平台</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <h1 class="logo">
+                    <i class="fas fa-shield-alt"></i>
+                    AI风险监控系统
+                </h1>
+                <span class="subtitle">C2C交易平台风控中心</span>
+            </div>
+            <div class="header-right">
+                <div class="header-stats">
+                    <div class="stat-item">
+                        <span class="stat-value" id="totalUsers">2,847</span>
+                        <span class="stat-label">监控用户</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" id="highRiskUsers">156</span>
+                        <span class="stat-label">高风险用户</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" id="activeAlerts">23</span>
+                        <span class="stat-label">活跃告警</span>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-outline">
+                        <i class="fas fa-cog"></i>
+                        设置
+                    </button>
+                    <button class="btn btn-primary">
+                        <i class="fas fa-refresh"></i>
+                        刷新
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主内容区域 -->
+    <main class="main-content">
+        <!-- 过滤栏 -->
+        <section class="filter-section" id="filterBar">
+            <div class="filter-container">
+                <div class="filter-group">
+                    <label class="filter-label">风险等级</label>
+                    <select class="filter-select" id="riskLevel">
+                        <option value="">全部</option>
+                        <option value="high">高风险</option>
+                        <option value="medium">中风险</option>
+                        <option value="low">低风险</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">风险类型</label>
+                    <select class="filter-select" id="riskType">
+                        <option value="">全部</option>
+                        <option value="device">设备风险</option>
+                        <option value="ip">IP风险</option>
+                        <option value="trade">交易风险</option>
+                        <option value="payment">支付风险</option>
+                        <option value="syndicate">团伙风险</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">日期范围</label>
+                    <div class="date-range">
+                        <input type="date" class="filter-input" id="startDate">
+                        <span class="date-separator">至</span>
+                        <input type="date" class="filter-input" id="endDate">
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">用户ID</label>
+                    <input type="text" class="filter-input" id="userId" placeholder="输入用户ID">
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">设备ID</label>
+                    <input type="text" class="filter-input" id="deviceId" placeholder="输入设备指纹">
+                </div>
+
+                <div class="filter-actions">
+                    <button class="btn btn-secondary" id="resetFilters">
+                        <i class="fas fa-undo"></i>
+                        重置
+                    </button>
+                    <button class="btn btn-primary" id="applyFilters">
+                        <i class="fas fa-search"></i>
+                        搜索
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 主表格区域 -->
+        <section class="table-section">
+            <div class="table-container">
+                <div class="table-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-users"></i>
+                        风险用户列表
+                    </h2>
+                    <div class="table-actions">
+                        <button class="btn btn-outline" id="exportData">
+                            <i class="fas fa-download"></i>
+                            导出
+                        </button>
+                        <button class="btn btn-outline" id="refreshTable">
+                            <i class="fas fa-sync-alt"></i>
+                            刷新
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-wrapper">
+                    <table class="risk-table" id="riskUserTable">
+                        <thead>
+                            <tr>
+                                <th>用户ID</th>
+                                <th>风险评分</th>
+                                <th>风险等级</th>
+                                <th>触发事件</th>
+                                <th>最后登录城市</th>
+                                <th>24h设备数</th>
+                                <th>高风险关联</th>
+                                <th>更新时间</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <!-- 数据将通过JavaScript动态加载 -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="table-pagination">
+                    <div class="pagination-info">
+                        显示 <span id="startRecord">1</span> - <span id="endRecord">50</span> 条，共 <span id="totalRecords">2847</span> 条
+                    </div>
+                    <div class="pagination-controls">
+                        <button class="btn btn-outline" id="prevPage" disabled>
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <span class="page-info">第 <span id="currentPage">1</span> 页，共 <span id="totalPages">57</span> 页</span>
+                        <button class="btn btn-outline" id="nextPage">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 下方面板区域 -->
+        <section class="panels-section">
+            <div class="panels-container">
+                <!-- 关系图表面板 -->
+                <div class="panel graph-panel">
+                    <div class="panel-header">
+                        <h3 class="panel-title">
+                            <i class="fas fa-project-diagram"></i>
+                            关系图分析
+                        </h3>
+                        <div class="panel-actions">
+                            <select class="graph-select" id="graphType">
+                                <option value="device">设备关系图</option>
+                                <option value="ip">IP关系图</option>
+                                <option value="payment">支付关系图</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="graph-container" id="relationshipGraph">
+                            <!-- 图表将通过JavaScript动态渲染 -->
+                            <div class="graph-placeholder">
+                                <i class="fas fa-chart-network"></i>
+                                <p>选择用户查看关系图</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 用户资料面板 -->
+                <div class="panel profile-panel">
+                    <div class="panel-header">
+                        <h3 class="panel-title">
+                            <i class="fas fa-user-circle"></i>
+                            用户资料
+                        </h3>
+                    </div>
+                    <div class="panel-body">
+                        <div class="profile-container" id="userProfile">
+                            <div class="profile-placeholder">
+                                <i class="fas fa-user"></i>
+                                <p>选择用户查看详细信息</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI风险评分面板 -->
+                <div class="panel ai-score-panel">
+                    <div class="panel-header">
+                        <h3 class="panel-title">
+                            <i class="fas fa-brain"></i>
+                            AI风险评分
+                        </h3>
+                    </div>
+                    <div class="panel-body">
+                        <div class="ai-score-container" id="aiScoring">
+                            <div class="score-placeholder">
+                                <i class="fas fa-robot"></i>
+                                <p>选择用户查看AI分析</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 审计日志区域 -->
+        <section class="audit-section">
+            <div class="audit-container">
+                <div class="audit-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-history"></i>
+                        审计日志
+                    </h2>
+                    <div class="audit-actions">
+                        <button class="btn btn-outline" id="clearLogs">
+                            <i class="fas fa-trash"></i>
+                            清空日志
+                        </button>
+                    </div>
+                </div>
+
+                <div class="audit-table-wrapper">
+                    <table class="audit-table" id="auditLogTable">
+                        <thead>
+                            <tr>
+                                <th>日志ID</th>
+                                <th>用户ID</th>
+                                <th>风险事件</th>
+                                <th>操作</th>
+                                <th>操作员</th>
+                                <th>时间</th>
+                            </tr>
+                        </thead>
+                        <tbody id="auditBody">
+                            <!-- 审计日志将通过JavaScript动态加载 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 右侧边栏 -->
+    <aside class="right-sidebar" id="rightSidebar">
+        <div class="sidebar-header">
+            <h3 class="sidebar-title">
+                <i class="fas fa-info-circle"></i>
+                风险详情
+            </h3>
+            <button class="sidebar-close" id="closeSidebar">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="sidebar-content" id="sidebarContent">
+            <div class="sidebar-placeholder">
+                <i class="fas fa-arrow-left"></i>
+                <p>从左侧表格选择用户查看详情</p>
+            </div>
+        </div>
+    </aside>
+
+    <!-- 加载动画 -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>加载中...</p>
+        </div>
+    </div>
+
+    <!-- 脚本文件 -->
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
+
+
+

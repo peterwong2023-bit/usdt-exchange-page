@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>资金全链路路由逻辑示意图（中文）</title>
+    <style>
+        :root {
+            --low: #22c55e;
+            --mid: #f59e0b;
+            --high: #ef4444;
+            --severe: #7f1d1d;
+            --blue: #3b82f6;
+            --purple: #8b5cf6;
+            --border: #e2e8f0;
+            --text: #0f172a;
+            --muted: #64748b;
+            --bg: #f5f7fb;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "PingFang SC", "Microsoft YaHei", sans-serif; }
+        body { background: var(--bg); padding: 32px 16px; color: var(--text); }
+
+        .wrap {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 24px;
+            padding: 36px 28px 28px;
+            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+        }
+
+        .title {
+            text-align: center;
+            margin-bottom: 18px;
+        }
+
+        .title h1 { font-size: 26px; font-weight: 800; }
+        .title p { margin-top: 8px; color: var(--muted); font-size: 14px; }
+
+        .diagram {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        svg {
+            width: 100%;
+            height: auto;
+            min-width: 1200px;
+            display: block;
+        }
+
+        .box {
+            fill: #fff;
+            stroke: var(--border);
+            stroke-width: 1.2;
+            rx: 12;
+            ry: 12;
+        }
+
+        .box-blue { stroke: var(--blue); }
+        .box-purple { stroke: var(--purple); }
+        .box-low { stroke: var(--low); }
+        .box-mid { stroke: var(--mid); }
+        .box-high { stroke: var(--high); }
+        .box-severe { stroke: var(--severe); }
+
+        .pill {
+            fill: #f1f5f9;
+            stroke: #e2e8f0;
+            rx: 14;
+            ry: 14;
+        }
+
+        .arrow { stroke: #94a3b8; stroke-width: 2; fill: none; }
+        .arrow-strong { stroke: #64748b; stroke-width: 2.4; }
+        .dash { stroke-dasharray: 6 4; }
+
+        .tag {
+            font-size: 12px;
+            fill: var(--muted);
+        }
+
+        .t { font-size: 14px; fill: var(--text); font-weight: 700; }
+        .s { font-size: 12px; fill: var(--muted); }
+
+        .ok { fill: #16a34a; }
+        .no { fill: #ef4444; }
+        .go { fill: #111827; }
+        .white { fill: #fff; }
+
+        .panel {
+            fill: #fff5f5;
+            stroke: #fecaca;
+            stroke-width: 1.2;
+            rx: 14;
+            ry: 14;
+        }
+
+        .panel-title { font-size: 14px; font-weight: 800; fill: #b91c1c; }
+        .panel-text { font-size: 12px; fill: #7f1d1d; }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <div class="title">
+            <h1>资金全链路路由逻辑示意图（中文）</h1>
+            <p>清晰展示：入款 → KYT → 分流 → 归集 → 出款 → KYA → 结果</p>
+        </div>
+
+        <div class="diagram">
+            <svg viewBox="0 0 1400 900" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <marker id="arrowHead" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+                        <path d="M0,0 L10,5 L0,10 Z" fill="#94a3b8"/>
+                    </marker>
+                </defs>
+
+                <!-- 顶部分区标题 -->
+                <rect x="80" y="30" width="150" height="32" class="pill"/>
+                <text x="155" y="51" text-anchor="middle" class="tag">入款</text>
+                <rect x="300" y="30" width="170" height="32" class="pill"/>
+                <text x="385" y="51" text-anchor="middle" class="tag">KYT 分析</text>
+                <rect x="520" y="30" width="170" height="32" class="pill"/>
+                <text x="605" y="51" text-anchor="middle" class="tag">分流引擎</text>
+                <rect x="740" y="30" width="180" height="32" class="pill"/>
+                <text x="830" y="51" text-anchor="middle" class="tag">归集与出款</text>
+                <rect x="980" y="30" width="170" height="32" class="pill"/>
+                <text x="1065" y="51" text-anchor="middle" class="tag">KYA 校验</text>
+                <rect x="1180" y="30" width="160" height="32" class="pill"/>
+                <text x="1260" y="51" text-anchor="middle" class="tag">最终结果</text>
+
+                <!-- 入款 -->
+                <rect x="60" y="110" width="210" height="70" class="box box-blue"/>
+                <text x="165" y="140" text-anchor="middle" class="t">入款 Detect/Confirm</text>
+                <text x="165" y="160" text-anchor="middle" class="s">检测广播 · 多确认入账</text>
+
+                <!-- KYT -->
+                <rect x="300" y="110" width="210" height="70" class="box box-purple"/>
+                <text x="405" y="140" text-anchor="middle" class="t">一次 KYT 扫描</text>
+                <text x="405" y="160" text-anchor="middle" class="s">输出 in_score + risk_label</text>
+
+                <!-- 分流 -->
+                <polygon points="560,145 610,95 660,145 610,195" fill="#fff" stroke="#8b5cf6" stroke-width="2"/>
+                <text x="610" y="140" text-anchor="middle" class="t">分流</text>
+                <text x="610" y="158" text-anchor="middle" class="s">风险路由</text>
+
+                <!-- 主线箭头 -->
+                <line x1="270" y1="145" x2="300" y2="145" class="arrow arrow-strong" marker-end="url(#arrowHead)"/>
+                <line x1="510" y1="145" x2="560" y2="145" class="arrow arrow-strong" marker-end="url(#arrowHead)"/>
+
+                <!-- 4条分流 -->
+                <line x1="660" y1="145" x2="720" y2="90" class="arrow" marker-end="url(#arrowHead)"/>
+                <line x1="660" y1="145" x2="720" y2="230" class="arrow" marker-end="url(#arrowHead)"/>
+                <line x1="660" y1="145" x2="720" y2="370" class="arrow" marker-end="url(#arrowHead)"/>
+                <line x1="660" y1="145" x2="720" y2="510" class="arrow" marker-end="url(#arrowHead)"/>
+
+                <!-- L/M/H/S 归集 -->
+                <rect x="730" y="60" width="190" height="60" class="box box-low"/>
+                <text x="825" y="90" text-anchor="middle" class="t">Low 归集</text>
+                <text x="825" y="110" text-anchor="middle" class="s">阈值/闲置/手动</text>
+
+                <rect x="730" y="200" width="190" height="60" class="box box-mid"/>
+                <text x="825" y="230" text-anchor="middle" class="t">Mid 归集</text>
+                <text x="825" y="250" text-anchor="middle" class="s">阈值/闲置/手动</text>
+
+                <rect x="730" y="340" width="190" height="60" class="box box-high"/>
+                <text x="825" y="370" text-anchor="middle" class="t">High 归集</text>
+                <text x="825" y="390" text-anchor="middle" class="s">阈值/闲置/手动</text>
+
+                <rect x="730" y="480" width="190" height="60" class="box box-severe"/>
+                <text x="825" y="510" text-anchor="middle" class="t">Severe 归集</text>
+                <text x="825" y="530" text-anchor="middle" class="s">确认后即时归集</text>
+
+                <!-- 出款 -->
+                <rect x="940" y="60" width="170" height="60" class="box box-low"/>
+                <text x="1025" y="90" text-anchor="middle" class="t">Low 出款</text>
+
+                <rect x="940" y="200" width="170" height="60" class="box box-mid"/>
+                <text x="1025" y="230" text-anchor="middle" class="t">Mid 出款</text>
+
+                <rect x="940" y="340" width="170" height="60" class="box box-high"/>
+                <text x="1025" y="370" text-anchor="middle" class="t">High 出款</text>
+
+                <rect x="940" y="480" width="170" height="60" class="box box-severe"/>
+                <text x="1025" y="510" text-anchor="middle" class="t">Severe 出款</text>
+
+                <!-- KYA -->
+                <rect x="1120" y="60" width="170" height="60" class="box"/>
+                <text x="1205" y="90" text-anchor="middle" class="t">KYA 必做</text>
+                <text x="1205" y="110" text-anchor="middle" class="s">仅允许 Clean</text>
+
+                <rect x="1120" y="200" width="170" height="60" class="box"/>
+                <text x="1205" y="230" text-anchor="middle" class="t">KYA 必做</text>
+                <text x="1205" y="250" text-anchor="middle" class="s">拦截非 Clean</text>
+
+                <rect x="1120" y="340" width="170" height="60" class="box"/>
+                <text x="1205" y="370" text-anchor="middle" class="t">KYA 必做</text>
+                <text x="1205" y="390" text-anchor="middle" class="s">拦截风险地址</text>
+
+                <rect x="1120" y="480" width="170" height="60" class="box dash"/>
+                <text x="1205" y="510" text-anchor="middle" class="t">KYA 可选</text>
+                <text x="1205" y="530" text-anchor="middle" class="s">仅记录不拦截</text>
+
+                <!-- 结果 -->
+                <rect x="1300" y="60" width="90" height="60" rx="12" ry="12" class="ok"/>
+                <text x="1345" y="98" text-anchor="middle" class="white t">允许</text>
+
+                <rect x="1300" y="200" width="90" height="60" rx="12" ry="12" class="ok"/>
+                <text x="1345" y="238" text-anchor="middle" class="white t">允许</text>
+
+                <rect x="1300" y="340" width="90" height="60" rx="12" ry="12" class="no"/>
+                <text x="1345" y="378" text-anchor="middle" class="white t">拒绝</text>
+
+                <rect x="1300" y="480" width="90" height="60" rx="12" ry="12" class="go"/>
+                <text x="1345" y="518" text-anchor="middle" class="white t">直通</text>
+
+                <!-- 横向箭头 -->
+                <line x1="920" y1="90" x2="940" y2="90" class="arrow" marker-end="url(#arrowHead)"/>
+                <line x1="920" y1="230" x2="940" y2="230" class="arrow" marker-end="url(#arrowHead)"/>
+                <line x1="920" y1="370" x2="940" y2="370" class="arrow" marker-end="url(#arrowHead)"/>
+                <line x1="920" y1="510" x2="940" y2="510" class="arrow" marker-end="url(#arrowHead)"/>
+
+                <line x1="1110" y1="90" x2="1120" y2="90" class="arrow" marker-end="url(#arrowHead)"/>
+                <line x1="1110" y1="230" x2="1120" y2="230" class="arrow" marker-end="url(#arrowHead)"/>
+                <line x1="1110" y1="370" x2="1120" y2="370" class="arrow" marker-end="url(#arrowHead)"/>
+                <line x1="1110" y1="510" x2="1120" y2="510" class="arrow" marker-end="url(#arrowHead)"/>
+
+                <line x1="1290" y1="90" x2="1300" y2="90" class="arrow" marker-end="url(#arrowHead)"/>
+                <line x1="1290" y1="230" x2="1300" y2="230" class="arrow" marker-end="url(#arrowHead)"/>
+                <line x1="1290" y1="370" x2="1300" y2="370" class="arrow" marker-end="url(#arrowHead)"/>
+                <line x1="1290" y1="510" x2="1300" y2="510" class="arrow" marker-end="url(#arrowHead)"/>
+
+                <!-- 规则面板 -->
+                <rect x="980" y="610" width="350" height="230" class="panel"/>
+                <text x="1155" y="640" text-anchor="middle" class="panel-title">严格规则（中文）</text>
+                <text x="1000" y="670" class="panel-text">• 禁止跨池补足（Severe 不参与）</text>
+                <text x="1000" y="695" class="panel-text">• High 不足 → Mid → Low</text>
+                <text x="1000" y="720" class="panel-text">• Low 不足 → Mid → High</text>
+                <text x="1000" y="745" class="panel-text">• Mid 不足 → 相邻桶补足（顺序写死）</text>
+                <text x="1000" y="775" class="panel-text">• Severe 禁止借入 / 借出</text>
+
+                <line x1="1050" y1="540" x2="1050" y2="610" class="arrow dash" marker-end="url(#arrowHead)"/>
+                <text x="1060" y="590" class="s">Severe 隔离说明</text>
+            </svg>
+        </div>
+    </div>
+</body>
+</html>

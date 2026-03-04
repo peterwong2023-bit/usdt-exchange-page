@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>事件详情 - 只读日志</title>
+    <link rel="stylesheet" href="styles-v4.css">
+    <link rel="stylesheet" href="styles-v4-enhanced.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body style="background: #f8fafc; padding: 24px;">
+    <div class="dashboard-card" style="padding: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px;">
+            <div>
+                <span class="event-severity-badge critical">严重</span>
+                <h2 style="font-size: 20px; font-weight: 800; margin: 12px 0 4px 0;">支付二维码被 4 个账号共享 (A83923)</h2>
+                <p style="color: #64748b; font-size: 13px;">发生时间：2025-11-28 14:35:22 (绝对时间)</p>
+            </div>
+            <div style="text-align: right;">
+                <div style="font-size: 12px; color: #94a3b8; font-weight: 700;">事件来源</div>
+                <div style="font-size: 14px; font-weight: 800; color: #3b82f6;">AI 模型预测 (v2.4.1)</div>
+            </div>
+        </div>
+
+        <div style="background: #f1f5f9; padding: 16px; border-radius: 12px; margin-bottom: 24px;">
+            <div style="font-size: 13px; font-weight: 700; color: #475569; margin-bottom: 8px;">事件摘要</div>
+            <div style="font-size: 15px; color: #0f172a; line-height: 1.6;">系统检测到支付方式 <code style="background: #e2e8f0; padding: 2px 6px; border-radius: 4px;">QR_889922</code> 在过去 24 小时内被 4 个不同的独立账号共享使用，符合团伙洗钱特征。</div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px;">
+            <div class="dashboard-card" style="padding: 16px;">
+                <div style="font-size: 12px; font-weight: 800; color: #64748b; margin-bottom: 12px; text-transform: uppercase;">命中依据</div>
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <div style="font-size: 13px;"><strong>规则 ID:</strong> R-GROUP-SHARE-01</div>
+                    <div style="font-size: 13px;"><strong>判定逻辑:</strong> 共享支付资源数 >= 3</div>
+                    <div style="font-size: 13px;"><strong>严重程度计算:</strong> 基础分 -15 * 共享系数 1.5 = -22.5</div>
+                </div>
+            </div>
+            <div class="dashboard-card" style="padding: 16px;">
+                <div style="font-size: 12px; font-weight: 800; color: #64748b; margin-bottom: 12px; text-transform: uppercase;">涉及实体</div>
+                <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                    <span class="event-entity-tag">QR_889922</span>
+                    <span class="event-entity-tag">FP_772211</span>
+                    <span class="event-entity-tag">113.116.45.88</span>
+                </div>
+            </div>
+        </div>
+
+        <div style="border-top: 1px solid #e2e8f0; padding-top: 20px;">
+            <div style="font-size: 14px; font-weight: 800; color: #0f172a; margin-bottom: 16px;">关联用户清单</div>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: white; border: 1px solid #e2e8f0; border-radius: 10px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <img src="https://i.pravatar.cc/150?img=1" style="width: 32px; height: 32px; border-radius: 50%;">
+                        <span style="font-family: 'JetBrains Mono', monospace; font-weight: 700;">#9f3e_7A12345h78</span>
+                    </div>
+                    <button class="btn-event-action primary" onclick="window.parent.app.viewUserDetail('#9f3e_7A12345h78')">查看该用户</button>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: white; border: 1px solid #e2e8f0; border-radius: 10px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <img src="https://i.pravatar.cc/150?img=2" style="width: 32px; height: 32px; border-radius: 50%;">
+                        <span style="font-family: 'JetBrains Mono', monospace; font-weight: 700;">#2c7b_4E67890j23</span>
+                    </div>
+                    <button class="btn-event-action primary" onclick="window.parent.app.viewUserDetail('#2c7b_4E67890j23')">查看该用户</button>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top: 32px; padding: 16px; background: #fff7ed; border: 1px solid #fed7aa; border-radius: 12px; display: flex; align-items: center; gap: 12px;">
+            <i class="fas fa-check-circle" style="color: #ea580c; font-size: 18px;"></i>
+            <div style="font-size: 13px; color: #9a3412; font-weight: 600;">系统处理记录：✅ 规则命中已记录，AI 风险提示已生成 (Observe Only)</div>
+        </div>
+    </div>
+</body>
+</html>
+

@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>方案8：悬浮助手</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
+            background: #f8fafc;
+            padding-bottom: 100px;
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            color: white;
+            font-size: 14px;
+        }
+
+        .header {
+            background: white;
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+        }
+
+        .badge {
+            padding: 4px 10px;
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            color: white;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            margin-left: auto;
+        }
+
+        .content {
+            padding: 16px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .form-card {
+            background: white;
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+
+        .section-title {
+            font-size: 13px;
+            color: #64748b;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .selector {
+            padding: 18px;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 16px 18px;
+            background: #f8fafc;
+            border: 2px solid transparent;
+            border-radius: 14px;
+            font-size: 15px;
+            outline: none;
+            margin-bottom: 12px;
+            font-family: inherit;
+        }
+
+        input:focus, textarea:focus {
+            border-color: #8b5cf6;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1);
+        }
+
+        textarea { min-height: 100px; }
+
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-size: 17px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+        }
+
+        /* 悬浮助手 */
+        .floating-assistant {
+            position: fixed;
+            right: 20px;
+            bottom: 100px;
+            z-index: 1000;
+        }
+
+        .assistant-btn {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(139, 92, 246, 0.4);
+            transition: all 0.3s;
+        }
+
+        .assistant-btn:active {
+            transform: scale(0.9);
+        }
+
+        .assistant-menu {
+            position: absolute;
+            bottom: 75px;
+            right: 0;
+            background: white;
+            border-radius: 16px;
+            padding: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            display: none;
+            min-width: 160px;
+        }
+
+        .assistant-menu.show {
+            display: block;
+            animation: menuIn 0.3s;
+        }
+
+        @keyframes menuIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .menu-item {
+            padding: 12px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s;
+            margin-bottom: 4px;
+        }
+
+        .menu-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .menu-item:hover {
+            background: #f8fafc;
+        }
+
+        .menu-item:active {
+            background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%);
+        }
+
+        .menu-icon {
+            font-size: 20px;
+        }
+
+        .menu-text {
+            font-size: 14px;
+            font-weight: 600;
+            color: #0f172a;
+        }
+    </style>
+</head>
+<body>
+    <div class="status-bar">
+        <span>2:01</span>
+        <div>⚫⚫⚫⚫ 4G 🔋</div>
+    </div>
+
+    <div class="header">
+        <button class="back-btn" onclick="history.back()">‹</button>
+        <h1 style="flex: 1; text-align: center; font-size: 18px;">出款</h1>
+        <span class="badge">悬浮助手</span>
+    </div>
+
+    <div class="content">
+        <div class="form-card">
+            <div class="section-title">区块链 & 代币</div>
+            <div class="selector">
+                <div style="width: 44px; height: 44px; background: linear-gradient(135deg, #8b5cf6, #7c3aed); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; box-shadow: 0 4px 12px rgba(139,92,246,0.3);">₮</div>
+                <div style="flex: 1;">
+                    <div style="font-size: 12px; color: #64748b;">波场</div>
+                    <div style="font-weight: 700;">USDT (TRC20)</div>
+                </div>
+            </div>
+
+            <div class="section-title">商户</div>
+            <div class="selector" id="merchSel">
+                <div style="color: #94a3b8;">点击选择商户</div>
+                <span style="color: #94a3b8; font-size: 20px;">›</span>
+            </div>
+
+            <div class="section-title">交易详情</div>
+            <input type="text" placeholder="收款地址" id="address">
+            <input type="number" placeholder="金额" id="amount">
+            <textarea placeholder="备注（可选）"></textarea>
+
+            <button class="submit-btn" onclick="submit()">发起出款请求</button>
+        </div>
+    </div>
+
+    <!-- 悬浮助手 -->
+    <div class="floating-assistant">
+        <div class="assistant-menu" id="assistantMenu">
+            <div class="menu-item" onclick="pasteAddress()">
+                <span class="menu-icon">📋</span>
+                <span class="menu-text">粘贴地址</span>
+            </div>
+            <div class="menu-item" onclick="scanQR()">
+                <span class="menu-icon">📷</span>
+                <span class="menu-text">扫码填充</span>
+            </div>
+            <div class="menu-item" onclick="checkBalance()">
+                <span class="menu-icon">💰</span>
+                <span class="menu-text">查询余额</span>
+            </div>
+            <div class="menu-item" onclick="viewHistory()">
+                <span class="menu-icon">📊</span>
+                <span class="menu-text">历史记录</span>
+            </div>
+            <div class="menu-item" onclick="quickFill()">
+                <span class="menu-icon">⚡</span>
+                <span class="menu-text">快速填充</span>
+            </div>
+        </div>
+        <div class="assistant-btn" onclick="toggleMenu()">
+            🎈
+        </div>
+    </div>
+
+    <script>
+        function toggleMenu() {
+            document.getElementById('assistantMenu').classList.toggle('show');
+        }
+
+        async function pasteAddress() {
+            try {
+                const text = await navigator.clipboard.readText();
+                document.getElementById('address').value = text;
+                showToast('✓ 已粘贴地址');
+            } catch (err) {
+                showToast('粘贴失败');
+            }
+            toggleMenu();
+        }
+
+        function scanQR() {
+            showToast('📷 打开扫码功能');
+            toggleMenu();
+        }
+
+        function checkBalance() {
+            showToast('💰 查询余额中...');
+            setTimeout(() => showToast('余额：1,250.50 USDT'), 1000);
+            toggleMenu();
+        }
+
+        function viewHistory() {
+            showToast('📊 打开历史记录');
+            toggleMenu();
+        }
+
+        function quickFill() {
+            document.getElementById('merchSel').innerHTML = `
+                <div style="width: 44px; height: 44px; background: linear-gradient(135deg, #8b5cf6, #7c3aed); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px;">📦</div>
+                <div style="flex: 1;">
+                    <div style="font-size: 12px; color: #64748b;">归集商户</div>
+                    <div style="font-weight: 700;">新宿归集</div>
+                </div>
+            `;
+            document.getElementById('address').value = 'TXYZabc123...def456';
+            document.getElementById('amount').value = '170.1';
+            showToast('⚡ 已快速填充');
+            toggleMenu();
+        }
+
+        function submit() {
+            if (!document.getElementById('address').value || !document.getElementById('amount').value) {
+                showToast('请填写完整信息');
+                return;
+            }
+            showToast('✓ 出款请求已提交');
+            setTimeout(() => location.reload(), 2000);
+        }
+
+        function showToast(msg) {
+            const div = document.createElement('div');
+            div.textContent = msg;
+            div.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(15, 23, 42, 0.92); color: white; padding: 18px 32px; border-radius: 16px; z-index: 2000; font-size: 15px; font-weight: 600;';
+            document.body.appendChild(div);
+            setTimeout(() => div.remove(), 2000);
+        }
+
+        // 点击外部关闭菜单
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.floating-assistant')) {
+                document.getElementById('assistantMenu').classList.remove('show');
+            }
+        });
+    </script>
+</body>
+</html>
+
+
+

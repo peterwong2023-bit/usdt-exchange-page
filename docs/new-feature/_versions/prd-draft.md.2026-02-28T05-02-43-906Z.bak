@@ -1,0 +1,164 @@
+# 币价便签（Market）可点击原型稿（v1.0）
+
+## 1) 原型目标（仅 Market）
+- 覆盖 4 档严格尺寸：S/M/L/XL（禁止拖拽缩放）
+- L/XL 必须展示 Sparkline（近 60m）
+- 覆盖 4 类失败态：Key 缺失、Key 失效、断网、限流
+- 走通 3 条可点击闭环：尺寸切换、失败修复（Key 向导/重试/切 Provider）、设置面板（Tab 可切）
+
+---
+
+## 2) Frame 清单（按交互顺序命名，便于连线）
+### 2.1 正常态（Normal）
+1. Market-S-Normal（240×160）
+2. Market-M-Normal（320×220）
+3. Market-L-Normal（420×300，含 Sparkline）
+4. Market-XL-Normal（560×380，含 Sparkline + 当前点标注）
+
+### 2.2 失败态（从任一 Normal 可跳）
+5. Market-KeyMissing（建议用 M 尺寸展示）
+6. Market-KeyInvalid（建议用 M 尺寸展示）
+7. Market-Offline（建议用 L 尺寸展示，趋势线置灰）
+8. Market-RateLimit（建议用 L 尺寸展示，趋势线置灰）
+
+### 2.3 设置与修复（弹层/独立 Frame 均可）
+9. Market-Settings-Overview
+10. Market-Settings-Refresh
+11. Market-Settings-Rules
+12. Market-Settings-Notify
+13. Market-Settings-DataKey
+
+14. KeyWizard-Step1（粘贴 Key）
+15. KeyWizard-Step2（试请求中）
+16. KeyWizard-Success（成功返回 Market）
+17. KeyWizard-Fail（失败示例：401 或 429 任一）
+
+（可选）18. Provider-Switch-Success / Provider-Switch-Fail（限流态点“切 Provider”用）
+
+---
+
+## 3) 统一布局组件（所有 Frame 共用）
+### 3.1 Header（高度固定）
+- 左：币种图标 + 标题（默认 BTC/USDT，可编辑但原型先只展示）
+- 右：刷新按钮 / 齿轮 / “…”更多
+
+### 3.2 Footer（强制一致）
+- 左：最后更新：2 分钟前
+- 中：状态 Chip（正常/断网/限流/Key缺失/Key失效/已暂停）
+- 右：动作按钮（按状态）
+  - 正常：无或“查看告警”(可先不做)
+  - 断网：重试
+  - 限流：查看详情 / 切 Provider
+  - Key 缺失/失效：修复 Key
+
+---
+
+## 4) 各尺寸 Body 线框（画面内容必须符合“信息档位”）
+### 4.1 S（240×160）
+- 大字：现价
+- 一行：24h 涨跌幅（红/绿）
+- 不显示 Sparkline，不显示 24h 高低
+
+### 4.2 M（320×220，默认）
+- 大字：现价
+- 一行：涨跌额 + 涨跌幅（红/绿）
+- 小字：来源/交易所（可选一行）
+
+### 4.3 L（420×300，必含 Sparkline）
+- 大字：现价
+- 一行：涨跌额 + 涨跌幅
+- 两列：24h 高 / 24h 低
+- Sparkline：标注“近60m”（仅展示，无交互）
+
+### 4.4 XL（560×380，必含 Sparkline）
+- L 全部
+- Sparkline 更宽 + 当前点圆点标注 + 右上角标签“近60m”
+- 禁止加入：周期切换、指标按钮（MA/RSI/MACD）
+
+---
+
+## 5) 失败态画法（必须“有旧数据，不空白”）
+### 5.1 Key 缺失（Market-KeyMissing）
+- Body：价格用 “—” 占位 + 文案「需要 API Key 才能拉取数据」
+- Footer：状态=Key缺失；动作=修复Key（连到 KeyWizard-Step1）
+
+### 5.2 Key 失效（Market-KeyInvalid）
+- Body：若有上次快照则显示旧价并置灰 + 文案「Key 无效或已过期」
+- Footer：状态=Key失效；动作=修复Key → KeyWizard
+
+### 5.3 断网（Market-Offline）
+- Body：显示上次成功快照（价格/涨跌仍可读）+ 文案「离线，展示的是 X 分钟前数据」
+- L/XL：Sparkline 仍显示但置灰
+- Footer：状态=断网；动作=重试（连回对应 Normal）
+
+### 5.4 限流（Market-RateLimit）
+- Body：显示上次快照 + 文案「请求过于频繁，已自动放慢刷新」
+- L/XL：Sparkline 置灰（不追加新点）
+- Footer：状态=限流；动作=切Provider（连到 Provider 切换成功/失败，或直接连回 Normal）
+
+---
+
+## 6) “…”更多菜单（必须可点，且负责尺寸切换）
+菜单项（原型至少做可点击跳转与勾选态）
+- 尺寸：S / M / L / XL（当前打勾）→ 跳对应 Frame
+- 置顶（toggle 勾选）
+- 锁定位置（toggle 勾选）
+- 透明度（可先做 3 档：100/70/40）
+- 复制便签
+- 关闭
+
+严格尺寸要求：所有 Market Frame **不画 resize handle**。
+
+---
+
+## 7) 设置 Popover（齿轮打开，Tab 必须可切）
+### 概览
+- 标的、Provider、最近成功时间戳（只展示）
+
+### 刷新
+- 1/5/15/60 分钟（选择态即可）
+
+### 规则
+- 价格阈值（示例：price < X）
+- 涨跌幅阈值（示例：abs(change24hPct) > X%）
+- 去重窗口（10min，先只展示）
+
+### 通知通道
+- 系统通知 Off（默认）
+- 声音 Off（默认）
+
+### 数据源 & Key
+- Provider 下拉（至少 2 个占位选项）
+- Key 状态（有效/缺失/失效/限流）
+- 测试连接（跳成功/失败态均可）
+- 修复 Key（跳 KeyWizard）
+
+---
+
+## 8) Key 向导（最小三步，可点击闭环）
+- Step1：粘贴 Key（输入框 + 下一步）
+- Step2：试请求中（loading）
+- Success：成功（按钮「返回便签」）→ 回 Market-M-Normal（更新时间刷新）
+- Fail：失败（展示人话原因，如「Key 无效」或「请求太频繁」+ 重试/返回）
+
+---
+
+## 9) 原型连线清单（交付时必须点通）
+- Market 任意 Normal：
+  - 点齿轮 → Settings（Tab 可切）
+  - 点“…” → 尺寸 S/M/L/XL 跳转
+  - 点 Footer 状态动作 → 对应修复页 → 回 Normal
+- KeyMissing/KeyInvalid → 修复Key → KeyWizard-Success → 回 Normal
+- Offline → 重试 → 回 Normal
+- RateLimit → 切 Provider（或查看详情）→ 回 Normal
+
+---
+
+## 10) 交付给设计的“画面优先级”
+1) Market-M-Normal（主基准）
+2) Market-L-Normal（含 Sparkline 基准）
+3) KeyMissing、Offline（两种最常见失败态）
+4) “…”菜单尺寸切换（严格尺寸策略的核心）
+5) Settings（5 Tab）+ KeyWizard（闭环）
+
+下一步你确认：Market 默认尺寸用 M（320×220）是否不变；Traffic 默认用 L 的策略后续再核对。

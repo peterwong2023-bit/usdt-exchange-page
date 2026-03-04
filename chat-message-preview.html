@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>聊天消息风险告警预览</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+
+        .formats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .chat-window {
+            background: #f0f2f5;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .chat-header {
+            background: white;
+            padding: 12px 15px;
+            border-radius: 8px 8px 0 0;
+            margin: -15px -15px 15px -15px;
+            border-bottom: 1px solid #e4e6eb;
+            font-weight: 600;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .format-label {
+            font-size: 13px;
+            color: #65676b;
+            margin-left: auto;
+        }
+
+        .message-bubble {
+            background: white;
+            border-radius: 8px;
+            padding: 12px 14px;
+            max-width: 100%;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            position: relative;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #050505;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .message-bubble.compact {
+            font-size: 13px;
+        }
+
+        .message-bubble.telegram {
+            border-radius: 12px;
+            padding: 10px 12px;
+        }
+
+        .message-bubble.wechat {
+            background: #95ec69;
+            border-radius: 4px;
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: #65676b;
+            margin-top: 4px;
+            text-align: right;
+        }
+
+        /* 不同风格的样式 */
+        .style-telegram {
+            background: #0088cc;
+        }
+
+        .style-wechat {
+            background: #09b83e;
+        }
+
+        .style-whatsapp {
+            background: #25d366;
+        }
+
+        .style-discord {
+            background: #5865f2;
+        }
+
+        /* 按钮样式 */
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            background: #e4e6eb;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            color: #050505;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .action-btn:hover {
+            background: #d8dadf;
+        }
+
+        .action-btn.primary {
+            background: #0084ff;
+            color: white;
+        }
+
+        .action-btn.danger {
+            background: #fa3e3e;
+            color: white;
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .formats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>聊天软件风险告警消息格式预览</h1>
+        
+        <div class="formats-grid">
+            <!-- 格式1：极简版 -->
+            <div class="chat-window">
+                <div class="chat-header">
+                    🤖 风控机器人
+                    <span class="format-label">格式1：极简版</span>
+                </div>
+                <div class="message-bubble">🚨 高风险交易告警 (入款)
+
+商户 测试商户G (ID: 1188)
+金额 1 USDT
+风险 99分 - 黑死手工
+
+交易哈希
+4a5144e9175342b8d71c04cb7b61a744a382add22fe7f2908c5ce353a8176439
+
+发送 TLmJWDJ761pfdsUfrRFD5zyMvb1p7i9mYCk
+接收 TG2AeucasSSWPu5J81ErFbJnBVfv2rFhbn
+
+⚠️ 发送者地址存在风险
+🚩 已标记为有风险并轮换新钱包
+🌍 使用配置 HK, US</div>
+                <div class="message-time">刚刚</div>
+            </div>
+
+            <!-- 格式2：超紧凑版 -->
+            <div class="chat-window">
+                <div class="chat-header">
+                    🤖 风控机器人
+                    <span class="format-label">格式2：超紧凑</span>
+                </div>
+                <div class="message-bubble compact">🚨 高风险(99分) 商户1188
+
+💰 1 USDT 入款
+🚩 黑死手工
+
+TxHash
+4a5144e9175342b8d71c04cb7b61a744a382
+add22fe7f2908c5ce353a8176439
+
+From TLmJWDJ761pfdsUfrRF...1p7i9mYCk
+To TG2AeucasSSWPu5J81ErF...v2rFhbn
+
+⚠️ 发送地址风险 | 已标记轮换 | HK/US</div>
+                <div class="message-time">刚刚</div>
+            </div>
+
+            <!-- 格式3：列表式 -->
+            <div class="chat-window">
+                <div class="chat-header">
+                    🤖 风控机器人
+                    <span class="format-label">格式3：列表式</span>
+                </div>
+                <div class="message-bubble compact">🚨 风险告警 #1188
+
+▪️ 1 USDT 入款
+▪️ 评分 99 (黑死手工)
+▪️ 4a5144e9175...8176439
+▪️ From TLmJW...9mYCk
+▪️ To TG2Ae...2rFhbn
+▪️ 发送地址存在风险
+▪️ 已标记轮换 HK/US</div>
+                <div class="message-time">刚刚</div>
+            </div>
+
+            <!-- 格式4：卡片式 -->
+            <div class="chat-window">
+                <div class="chat-header">
+                    🤖 风控机器人
+                    <span class="format-label">格式4：卡片式</span>
+                </div>
+                <div class="message-bubble">🚨 高风险交易告警
+
+商户 1188 | 入款 | 1 USDT
+风险评分 99 - 黑死手工
+
+━━━━━━━━━━━━━━━━━━
+
+交易哈希
+4a5144e9175342b8d71c04cb7b61a744a382
+add22fe7f2908c5ce353a8176439
+
+━━━━━━━━━━━━━━━━━━
+
+📤 TLmJWDJ761pfdsUfrRFD5zyMvb1p7i9mYCk
+📥 TG2AeucasSSWPu5J81ErFbJnBVfv2rFhbn
+
+━━━━━━━━━━━━━━━━━━
+
+⚠️ 发送者地址存在风险
+🚩 已标记为有风险并轮换新钱包
+🌍 使用配置 HK, US</div>
+                <div class="message-time">刚刚</div>
+            </div>
+
+            <!-- 格式5：Telegram风格 -->
+            <div class="chat-window">
+                <div class="chat-header style-telegram" style="color: white;">
+                    🤖 风控机器人
+                    <span class="format-label" style="color: rgba(255,255,255,0.8);">格式5：Telegram</span>
+                </div>
+                <div class="message-bubble telegram compact">🚨 高风险告警
+
+ID 1188 | 1 USDT 入款
+风险 99 - 黑死手工
+
+Tx 4a5144e91...8176439
+
+From TLmJ...mYCk
+To TG2A...Fhbn
+
+⚠️ 发送地址风险
+已标记轮换 HK/US</div>
+                <div class="message-time">刚刚</div>
+            </div>
+
+            <!-- 格式6：微信风格 -->
+            <div class="chat-window">
+                <div class="chat-header style-wechat" style="color: white;">
+                    🤖 风控机器人
+                    <span class="format-label" style="color: rgba(255,255,255,0.8);">格式6：微信</span>
+                </div>
+                <div class="message-bubble wechat">【⚠️ 高风险告警】
+
+商户：1188
+金额：1 USDT (入款)
+风险：99分 - 黑死手工
+
+交易哈希：
+4a5144e9175342b8d71c04cb7b61a744a382
+add22fe7f2908c5ce353a8176439
+
+发送：TLmJWDJ761pfdsUfrRFD5zyMvb1p7i9mYCk
+接收：TG2AeucasSSWPu5J81ErFbJnBVfv2rFhbn
+
+⚠️ 风险原因：发送者地址存在风险
+🚩 处理措施：已标记为有风险并轮换新钱包
+🌍 使用配置：HK, US</div>
+                <div class="message-time">刚刚</div>
+            </div>
+
+            <!-- 格式7：单行关键信息 -->
+            <div class="chat-window">
+                <div class="chat-header">
+                    🤖 风控机器人
+                    <span class="format-label">格式7：单行关键</span>
+                </div>
+                <div class="message-bubble compact">🚨 #1188 风险99 | 1 USDT入款 | 黑死手工
+
+Tx: 4a5144e9175342b8d71c04cb7b61a744a382add22fe7f2908c5ce353a8176439
+
+From: TLmJWDJ761pfdsUfrRFD5zyMvb1p7i9mYCk
+To: TG2AeucasSSWPu5J81ErFbJnBVfv2rFhbn
+
+⚠️ 发送地址风险 → 已标记轮换 (HK/US)</div>
+                <div class="message-time">刚刚</div>
+            </div>
+
+            <!-- 格式8：表情+简写 -->
+            <div class="chat-window">
+                <div class="chat-header">
+                    🤖 风控机器人
+                    <span class="format-label">格式8：最精简</span>
+                </div>
+                <div class="message-bubble compact">🚨 告警 #1188
+
+💰 1 USDT 入
+⚡ 99分 黑死
+🔗 4a5144...176439
+📤 TLmJ...mYCk
+📥 TG2A...Fhbn
+
+⚠️ 发送地址风险
+🚩 已标记轮换
+🌍 HK/US</div>
+                <div class="message-time">刚刚</div>
+            </div>
+
+            <!-- 格式9：紧凑表格 -->
+            <div class="chat-window">
+                <div class="chat-header">
+                    🤖 风控机器人
+                    <span class="format-label">格式9：表格式</span>
+                </div>
+                <div class="message-bubble compact">🚨 风险告警
+
+商户 │ 1188
+金额 │ 1 USDT 入款
+风险 │ 99 - 黑死手工
+哈希 │ 4a5144e91...76439
+
+地址
+📤 TLmJ...mYCk
+📥 TG2A...Fhbn
+
+⚠️ 发送地址风险
+🚩 已标记轮换 HK/US</div>
+                <div class="message-time">刚刚</div>
+            </div>
+
+            <!-- 格式10：带操作按钮 -->
+            <div class="chat-window">
+                <div class="chat-header">
+                    🤖 风控机器人
+                    <span class="format-label">格式10：带按钮</span>
+                </div>
+                <div class="message-bubble">🚨 高风险 #1188 (99分)
+
+1 USDT 入款 | 黑死手工
+
+Tx: 4a5144...176439
+
+📤 TLmJWDJ761pfdsUfrRFD5zyMvb1p7i9mYCk
+📥 TG2AeucasSSWPu5J81ErFbJnBVfv2rFhbn
+
+⚠️ 发送地址风险 | 已标记轮换 | HK/US
+                    <div class="action-buttons">
+                        <button class="action-btn primary">查看详情</button>
+                        <button class="action-btn">标记安全</button>
+                        <button class="action-btn danger">冻结交易</button>
+                    </div>
+                </div>
+                <div class="message-time">刚刚</div>
+            </div>
+
+            <!-- 极致精简版本 A -->
+            <div class="chat-window">
+                <div class="chat-header style-discord" style="color: white;">
+                    🤖 风控机器人
+                    <span class="format-label" style="color: rgba(255,255,255,0.8);">极致精简A</span>
+                </div>
+                <div class="message-bubble compact">🚨 #1188 风险99
+
+💰 1U 入款 黑死
+🔗 4a51...6439
+📤 TLmJ...mYCk
+📥 TG2A...Fhbn
+
+⚠️ 发送地址风险
+🚩 已标记 HK/US</div>
+                <div class="message-time">刚刚</div>
+            </div>
+
+            <!-- 极致精简版本 B -->
+            <div class="chat-window">
+                <div class="chat-header style-discord" style="color: white;">
+                    🤖 风控机器人
+                    <span class="format-label" style="color: rgba(255,255,255,0.8);">极致精简B</span>
+                </div>
+                <div class="message-bubble compact">🚨 风险99 | #1188
+
+1U入款·黑死手工
+4a51...6439
+
+TLmJ...mYCk → TG2A...Fhbn
+
+⚠️ 发送地址风险·已轮换</div>
+                <div class="message-time">刚刚</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 添加一些交互效果
+        document.querySelectorAll('.action-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const action = this.textContent;
+                alert(`执行操作: ${action}`);
+            });
+        });
+
+        // 模拟实时时间更新
+        function updateTime() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+            document.querySelectorAll('.message-time').forEach(el => {
+                if (el.textContent === '刚刚') {
+                    // 保持"刚刚"显示
+                } else {
+                    el.textContent = timeStr;
+                }
+            });
+        }
+        
+        setInterval(updateTime, 1000);
+    </script>
+</body>
+</html>
+
+
+

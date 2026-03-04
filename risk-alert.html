@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>高风险交易告警</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: #1c1c1e;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 聊天容器 */
+        .chat-container {
+            max-width: 480px;
+            width: 100%;
+        }
+
+        /* 告警卡片 */
+        .alert-card {
+            background: linear-gradient(135deg, #2d2d2f 0%, #252527 100%);
+            border-radius: 16px;
+            padding: 0;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* 告警头部 */
+        .alert-header {
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .alert-icon {
+            width: 32px;
+            height: 32px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .alert-title {
+            flex: 1;
+        }
+
+        .alert-title h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 2px;
+        }
+
+        .alert-subtitle {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* 内容区域 */
+        .alert-content {
+            padding: 20px;
+        }
+
+        /* 信息行 */
+        .info-row {
+            margin-bottom: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .info-label {
+            font-size: 13px;
+            color: #8e8e93;
+            font-weight: 500;
+        }
+
+        .info-value {
+            font-size: 14px;
+            color: #ffffff;
+            font-weight: 500;
+            word-break: break-all;
+            line-height: 1.5;
+        }
+
+        .info-value.highlight {
+            color: #ef4444;
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .info-value.warning {
+            color: #fbbf24;
+            font-weight: 600;
+        }
+
+        .info-value.address {
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px 12px;
+            border-radius: 8px;
+            color: #a1a1aa;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* 风险评分 */
+        .risk-score {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(239, 68, 68, 0.15);
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .risk-score-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #ef4444;
+        }
+
+        .risk-score-label {
+            font-size: 12px;
+            color: #fca5a5;
+        }
+
+        /* 分隔线 */
+        .divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            margin: 16px 0;
+        }
+
+        /* 风险详情列表 */
+        .risk-details {
+            background: rgba(239, 68, 68, 0.08);
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .risk-details-title {
+            font-size: 13px;
+            color: #8e8e93;
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+
+        .risk-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            margin-bottom: 10px;
+            font-size: 13px;
+            color: #e5e5e7;
+            line-height: 1.6;
+        }
+
+        .risk-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .risk-bullet {
+            color: #ef4444;
+            font-weight: bold;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        /* 底部警告 */
+        .alert-footer {
+            background: rgba(239, 68, 68, 0.1);
+            padding: 14px 20px;
+            border-top: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .alert-footer-text {
+            font-size: 13px;
+            color: #fca5a5;
+            text-align: center;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .alert-footer-icon {
+            font-size: 16px;
+        }
+
+        /* 标签样式 */
+        .tag {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 6px;
+            margin-bottom: 4px;
+        }
+
+        .tag-danger {
+            background: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .tag-warning {
+            background: rgba(251, 191, 36, 0.2);
+            color: #fcd34d;
+            border: 1px solid rgba(251, 191, 36, 0.3);
+        }
+
+        /* 响应式 */
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+
+            .alert-content {
+                padding: 16px;
+            }
+
+            .alert-header {
+                padding: 14px 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <!-- 告警卡片 -->
+        <div class="alert-card">
+            <!-- 头部 -->
+            <div class="alert-header">
+                <div class="alert-icon">⚠️</div>
+                <div class="alert-title">
+                    <h3>高风险交易告警</h3>
+                    <div class="alert-subtitle">KYT策略评分</div>
+                </div>
+            </div>
+
+            <!-- 内容 -->
+            <div class="alert-content">
+                <!-- 商户信息 -->
+                <div class="info-row">
+                    <span class="info-label">商户</span>
+                    <span class="info-value">测试商户G (ID: 1205)</span>
+                </div>
+
+                <!-- 交易类型 -->
+                <div class="info-row">
+                    <span class="info-label">交易类型</span>
+                    <span class="info-value">
+                        <span class="tag tag-warning">入款</span>
+                    </span>
+                </div>
+
+                <!-- 交易哈希 -->
+                <div class="info-row">
+                    <span class="info-label">交易哈希</span>
+                    <span class="info-value address">6c08948e132bff4a5880456ec3dbc7df7d6ea75
+7847d978558a0b08e08d3fee2</span>
+                </div>
+
+                <!-- 交易金额 -->
+                <div class="info-row">
+                    <span class="info-label">交易金额</span>
+                    <span class="info-value highlight">10 USDT</span>
+                </div>
+
+                <!-- 风险评分 -->
+                <div class="info-row">
+                    <span class="info-label">最大风险评分</span>
+                    <div>
+                        <div class="risk-score">
+                            <span class="risk-score-value">80</span>
+                            <span class="risk-score-label">高风险</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="divider"></div>
+
+                <!-- 发送地址 -->
+                <div class="info-row">
+                    <span class="info-label">发送地址</span>
+                    <span class="info-value address">TSyhPB9aBdauugRuVAqQWFob56k9EbzPui</span>
+                </div>
+
+                <!-- 接收地址 -->
+                <div class="info-row">
+                    <span class="info-label">接收地址</span>
+                    <span class="info-value address">TKZW8k2MBJEP1sRv3xqeot49YTgTjwQizb3</span>
+                </div>
+
+                <div class="divider"></div>
+
+                <!-- 风险详情 -->
+                <div class="risk-details">
+                    <div class="risk-details-title">风险详情</div>
+                    <div class="risk-item">
+                        <span class="risk-bullet">•</span>
+                        <span>[Bitrace] 入向：黑灰** (black-gray-goods) – 分数:10</span>
+                    </div>
+                    <div class="risk-item">
+                        <span class="risk-bullet">•</span>
+                        <span>[Chainalysis] 入向：赌博施 (34) – 等级:严重风险</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 底部警告 -->
+            <div class="alert-footer">
+                <div class="alert-footer-text">
+                    <span class="alert-footer-icon">⚠️</span>
+                    <span>请立即检查此交易的安全性！</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>直播APP 多主题皮肤方案 — 客户选择手册</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --red: #E8465A;
+  --red-light: #FFF0F1;
+  --red-mid: #FFD6DA;
+  --green: #4DC890;
+  --green-light: #EDFFF6;
+  --green-mid: #C8F5DE;
+  --blue: #3B8FE3;
+  --blue-light: #EDF5FF;
+  --blue-mid: #C4DEFF;
+  --orange: #F0923B;
+  --orange-light: #FFF5EC;
+  --orange-mid: #FFE0C2;
+  --pink: #E86B9E;
+  --pink-light: #FFF0F6;
+  --pink-mid: #FFD6E8;
+  --text-primary: #1A1A2E;
+  --text-secondary: #5A5A7A;
+  --text-muted: #9A9AB0;
+}
+
+html { font-size: 16px; }
+body {
+  font-family: 'Noto Sans SC', 'Inter', -apple-system, sans-serif;
+  color: var(--text-primary);
+  background: white;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+@page {
+  size: A4 portrait;
+  margin: 0;
+}
+
+.page {
+  width: 210mm;
+  height: 297mm;
+  padding: 12mm 14mm;
+  page-break-after: always;
+  position: relative;
+  overflow: hidden;
+  background: white;
+}
+.page:last-child { page-break-after: auto; }
+
+@media screen {
+  body {
+    background: #E0E2EA;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    padding: 24px 0;
+  }
+  .page {
+    box-shadow: 0 8px 40px rgba(0,0,0,0.12);
+    border-radius: 4px;
+  }
+}
+
+/* ===== COVER ===== */
+.cover {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  background: linear-gradient(160deg, #FAFBFF 0%, #F0F2FA 50%, #E8ECF8 100%);
+}
+.cover::before {
+  content: '';
+  position: absolute;
+  top: -80mm;
+  right: -50mm;
+  width: 200mm;
+  height: 200mm;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(232,107,158,0.08) 0%, transparent 70%);
+}
+.cover::after {
+  content: '';
+  position: absolute;
+  bottom: -60mm;
+  left: -40mm;
+  width: 180mm;
+  height: 180mm;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(232,107,158,0.04) 0%, transparent 70%);
+}
+
+/* Cover background phone screenshots */
+.cover-bg-phones {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.cover-bg-phone {
+  position: absolute;
+  width: 40mm;
+  border-radius: 12% / 5.5%;
+  overflow: hidden;
+  opacity: 0.15;
+  filter: blur(0.5px) saturate(0.6);
+  box-shadow: 0 2px 20px rgba(0,0,0,0.04);
+}
+.cover-bg-phone img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.cover-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: white;
+  border: 1px solid #E0E0EE;
+  border-radius: 20px;
+  padding: 6px 18px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  letter-spacing: 1px;
+  margin-bottom: 28px;
+  z-index: 1;
+}
+.cover-badge::before {
+  content: '';
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+}
+
+.cover h1 {
+  font-size: 42px;
+  font-weight: 900;
+  line-height: 1.25;
+  letter-spacing: -1px;
+  margin-bottom: 10px;
+  z-index: 1;
+  background: linear-gradient(135deg, #1A1A2E 40%, #5A5A7A);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.cover-subtitle {
+  font-size: 15px;
+  color: var(--text-secondary);
+  font-weight: 400;
+  margin-bottom: 52px;
+  z-index: 1;
+  letter-spacing: 0.5px;
+}
+
+.cover-colors {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 52px;
+  z-index: 1;
+}
+.cover-color-dot {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  border: 3px solid white;
+  box-shadow: 0 3px 14px rgba(0,0,0,0.12);
+}
+
+.cover-info {
+  display: flex;
+  gap: 48px;
+  font-size: 11px;
+  color: var(--text-muted);
+  z-index: 1;
+}
+.cover-info-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.cover-info-value {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--text-primary);
+  font-family: 'Inter', sans-serif;
+}
+
+.cover-footer {
+  position: absolute;
+  bottom: 12mm;
+  left: 14mm;
+  right: 14mm;
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+  color: var(--text-muted);
+  border-top: 1px solid #E0E0EE;
+  padding-top: 10px;
+  z-index: 1;
+}
+
+/* ===== THEME DETAIL PAGE ===== */
+.theme-page { padding: 6mm 8mm; }
+
+.theme-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 2mm;
+  padding-bottom: 8px;
+  border-bottom: 2.5px solid;
+}
+.theme-color-block {
+  width: 40px; height: 40px;
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.theme-color-block svg {
+  width: 20px; height: 20px;
+  fill: white;
+}
+.theme-name {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+}
+.theme-name-en {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-weight: 500;
+  font-family: 'Inter', sans-serif;
+}
+
+.theme-palette {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+.palette-swatch {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+.palette-box {
+  width: 30px; height: 18px;
+  border-radius: 4px;
+  border: 1px solid rgba(0,0,0,0.06);
+}
+.palette-label {
+  font-size: 7px;
+  color: var(--text-muted);
+  font-family: 'Inter', monospace;
+}
+
+/* ===== PHONE MOCKUPS WITH REAL SCREENSHOTS ===== */
+.phones-grid-2x3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px 10px;
+  margin-top: 3mm;
+  padding: 0 6mm;
+}
+
+.phone-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.phone-label {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+  letter-spacing: 0.3px;
+  text-align: center;
+}
+
+.phone-frame {
+  width: 100%;
+  max-width: 52mm;
+  overflow: hidden;
+  position: relative;
+  background: white;
+  margin: 0 auto;
+  border: none;
+  border-radius: 0;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.1);
+}
+.phone-frame img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 0;
+}
+
+/* ===== FEATURES ===== */
+.theme-features {
+  margin-top: 3mm;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1.5px solid #E8E8F0;
+  background: #F8F9FC;
+}
+.theme-features-title {
+  font-size: 10px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.theme-features-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 6px;
+}
+.feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+}
+.feature-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  margin-top: 3px;
+  flex-shrink: 0;
+}
+.feature-text {
+  font-size: 8px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* ===== PAGE NUMBER ===== */
+.page-number {
+  position: absolute;
+  bottom: 8mm;
+  right: 12mm;
+  font-size: 9px;
+  font-family: 'Inter', sans-serif;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+.page-watermark {
+  position: absolute;
+  bottom: 8mm;
+  left: 12mm;
+  font-size: 8px;
+  color: #D0D0E0;
+  font-weight: 500;
+}
+
+/* ===== OVERVIEW PAGE ===== */
+.section-header { margin-bottom: 16px; }
+.section-tag {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 4px;
+  margin-bottom: 6px;
+}
+.section-title {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+.section-desc {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+  line-height: 1.6;
+}
+
+/* Color comparison bar */
+.comparison-strip {
+  display: flex;
+  gap: 6px;
+  margin-top: 14px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: #F8F9FC;
+  border: 1px solid #E8E8F0;
+}
+.comparison-item { flex: 1; text-align: center; }
+.comparison-bar {
+  height: 30px;
+  border-radius: 6px;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 9px;
+  font-weight: 700;
+}
+.comparison-label {
+  font-size: 8px;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+/* Overview mini preview cards */
+.overview-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 14px;
+}
+.overview-card {
+  border: 1.5px solid #E8E8F0;
+  border-radius: 12px;
+  padding: 14px;
+  position: relative;
+  overflow: hidden;
+  background: white;
+}
+.overview-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+}
+.overview-card.red::before { background: var(--red); }
+.overview-card.green::before { background: var(--green); }
+.overview-card.blue::before { background: var(--blue); }
+.overview-card.orange::before { background: var(--orange); }
+.overview-card.pink::before { background: var(--pink); }
+
+.overview-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.overview-color-dot {
+  width: 26px; height: 26px;
+  border-radius: 7px;
+  flex-shrink: 0;
+}
+.overview-card-name {
+  font-size: 13px;
+  font-weight: 700;
+}
+.overview-card-hex {
+  font-size: 8px;
+  font-family: 'Inter', monospace;
+  color: var(--text-muted);
+}
+.overview-card-full {
+  grid-column: 1 / -1;
+}
+.overview-card-desc {
+  font-size: 8.5px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-top: 6px;
+}
+
+.emotion-tags {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+.emotion-tag {
+  font-size: 8px;
+  padding: 3px 9px;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.overview-mini-phones {
+  display: flex;
+  gap: 5px;
+  margin-top: 10px;
+}
+.mini-phone-frame {
+  width: 52px;
+  border-radius: 11.5% / 5.3%;
+  overflow: hidden;
+  background: #F0F0F5;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+.overview-card-full .mini-phone-frame {
+  width: 60px;
+}
+.mini-phone-frame img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Featured pink card style */
+.overview-card-featured {
+  grid-column: 1 / -1;
+  background: linear-gradient(135deg, var(--pink-light) 0%, white 50%);
+  border-color: var(--pink-mid);
+  padding: 16px 18px;
+}
+.overview-card-featured .overview-card-name {
+  font-size: 15px;
+}
+.overview-card-featured .overview-card-desc {
+  font-size: 9px;
+  margin-top: 8px;
+}
+.overview-card-featured .emotion-tag {
+  font-size: 8.5px;
+  padding: 3px 10px;
+}
+
+/* ===== SELECTION PAGE ===== */
+.selection-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 18px;
+}
+.selection-card {
+  border: 2px solid #E8E8F0;
+  border-radius: 14px;
+  padding: 16px;
+  text-align: center;
+  position: relative;
+}
+.selection-checkbox {
+  position: absolute;
+  top: 12px; right: 12px;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  border: 2.5px solid #D0D0E0;
+}
+.selection-color {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  margin: 0 auto 8px;
+}
+.selection-name {
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+.selection-desc {
+  font-size: 9px;
+  color: var(--text-muted);
+}
+.selection-card-full { grid-column: 1 / -1; }
+
+.selection-notes {
+  margin-top: 18px;
+  border: 1.5px dashed #D0D0E0;
+  border-radius: 12px;
+  padding: 14px;
+}
+.selection-notes-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+}
+.note-line {
+  border-bottom: 1px solid #E8E8F0;
+  height: 1px;
+  margin-bottom: 16px;
+}
+
+.selection-footer {
+  margin-top: 24px;
+  text-align: center;
+  font-size: 10px;
+  color: var(--text-muted);
+  line-height: 1.8;
+}
+</style>
+</head>
+<body>
+
+<!-- PAGE 1: COVER -->
+<div class="page cover">
+  <div class="cover-badge">2026 版本</div>
+  <h1>直播APP 主题皮肤<br>选择方案手册</h1>
+  <p class="cover-subtitle">Theme Selection Guide — 请选择您心仪的界面风格</p>
+  <div class="cover-colors">
+    <div class="cover-color-dot" style="background:var(--pink)"></div>
+    <div class="cover-color-dot" style="background:var(--red)"></div>
+    <div class="cover-color-dot" style="background:var(--green)"></div>
+    <div class="cover-color-dot" style="background:var(--blue)"></div>
+    <div class="cover-color-dot" style="background:var(--orange)"></div>
+  </div>
+  <div class="cover-info">
+    <div class="cover-info-item"><div class="cover-info-value">5</div><div>主题配色</div></div>
+    <div class="cover-info-item"><div class="cover-info-value">6</div><div>核心页面</div></div>
+    <div class="cover-info-item"><div class="cover-info-value">30</div><div>界面展示</div></div>
+  </div>
+  <div class="cover-footer">
+    <span>CONFIDENTIAL — 仅供内部评审使用</span>
+    <span>2026.02</span>
+  </div>
+</div>
+
+<!-- PAGE 2: COLOR DESIGN OVERVIEW -->
+<div class="page" style="padding:14mm 16mm 12mm;background:linear-gradient(180deg,#FAFBFF 0%,#FFFFFF 100%);">
+  <div style="text-align:center;margin-bottom:10mm;">
+    <div style="display:inline-block;font-size:8px;font-weight:600;color:var(--blue);background:#EDF2FF;padding:3px 14px;border-radius:20px;letter-spacing:1px;margin-bottom:4mm;">COLOR DESIGN OVERVIEW</div>
+    <div style="font-size:22px;font-weight:900;color:var(--text-primary);letter-spacing:-0.5px;">五大主题配色设计概览</div>
+    <div style="font-size:9px;color:var(--text-muted);margin-top:2mm;line-height:1.6;">每套主题色彩均基于用户心理学与直播场景特性精心调配<br>以下为各方案的设计灵感、配色体系与视觉定位</div>
+  </div>
+
+  <!-- 5 Theme Cards -->
+  <div style="display:flex;flex-direction:column;gap:6mm;">
+
+    <!-- Pink -->
+    <div style="display:flex;align-items:stretch;gap:5mm;padding:5mm;background:linear-gradient(135deg,rgba(255,105,180,0.06),rgba(255,20,147,0.03));border:1px solid rgba(255,105,180,0.15);border-radius:14px;">
+      <div style="width:8mm;background:linear-gradient(180deg,#FF69B4,#FF1493);border-radius:8px;flex-shrink:0;"></div>
+      <div style="flex:1;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:3mm;">
+          <span style="font-size:14px;font-weight:800;color:#D63384;">浪漫粉</span>
+          <span style="font-size:9px;color:#E75AAF;font-weight:500;">Pink Theme</span>
+          <span style="font-size:7px;background:#FF69B4;color:white;padding:1px 8px;border-radius:10px;font-weight:600;margin-left:auto;">推荐</span>
+        </div>
+        <div style="font-size:8.5px;color:#555;line-height:1.7;margin-bottom:3mm;">
+          设计灵感源自日式少女漫画与韩系美妆App的视觉语言。粉色渐变营造甜美暧昧氛围，自带柔光美颜效果，能最大程度衬托女性主播的魅力与亲和力。心理学研究表明，粉色调可降低用户防御心理、延长停留时长，是直播打赏转化率最高的配色方案。
+        </div>
+        <div style="display:flex;gap:3mm;align-items:center;">
+          <div style="display:flex;gap:2px;">
+            <div style="width:24px;height:24px;border-radius:6px;background:#FF69B4;"></div>
+            <div style="width:24px;height:24px;border-radius:6px;background:#FF1493;"></div>
+            <div style="width:24px;height:24px;border-radius:6px;background:#FFB6D9;"></div>
+            <div style="width:24px;height:24px;border-radius:6px;background:#FFF0F5;"></div>
+          </div>
+          <div style="font-size:7px;color:#999;margin-left:4px;">#FF69B4 · #FF1493 · #FFB6D9 · #FFF0F5</div>
+          <div style="display:flex;gap:3px;margin-left:auto;">
+            <span style="font-size:7px;background:#FFF0F5;color:#D63384;padding:2px 8px;border-radius:8px;font-weight:500;">甜美暧昧</span>
+            <span style="font-size:7px;background:#FFF0F5;color:#D63384;padding:2px 8px;border-radius:8px;font-weight:500;">柔光美颜</span>
+            <span style="font-size:7px;background:#FFF0F5;color:#D63384;padding:2px 8px;border-radius:8px;font-weight:500;">高转化率</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Red -->
+    <div style="display:flex;align-items:stretch;gap:5mm;padding:5mm;background:linear-gradient(135deg,rgba(231,76,60,0.06),rgba(192,57,43,0.03));border:1px solid rgba(231,76,60,0.15);border-radius:14px;">
+      <div style="width:8mm;background:linear-gradient(180deg,#E74C3C,#C0392B);border-radius:8px;flex-shrink:0;"></div>
+      <div style="flex:1;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:3mm;">
+          <span style="font-size:14px;font-weight:800;color:#C0392B;">热情红</span>
+          <span style="font-size:9px;color:#E74C3C;font-weight:500;">Red Theme</span>
+        </div>
+        <div style="font-size:8.5px;color:#555;line-height:1.7;margin-bottom:3mm;">
+          灵感来自中国传统喜庆色彩与直播平台热度视觉体系。红色具有极强的视觉冲击力，能瞬间点燃直播间氛围，传递人气爆棚的热闹感。研究表明红色可刺激多巴胺分泌，激发冲动消费行为，尤其适合大型活动、节日促销与PK赛场景。
+        </div>
+        <div style="display:flex;gap:3mm;align-items:center;">
+          <div style="display:flex;gap:2px;">
+            <div style="width:24px;height:24px;border-radius:6px;background:#E74C3C;"></div>
+            <div style="width:24px;height:24px;border-radius:6px;background:#C0392B;"></div>
+            <div style="width:24px;height:24px;border-radius:6px;background:#F5A9A9;"></div>
+            <div style="width:24px;height:24px;border-radius:6px;background:#FFF5F5;"></div>
+          </div>
+          <div style="font-size:7px;color:#999;margin-left:4px;">#E74C3C · #C0392B · #F5A9A9 · #FFF5F5</div>
+          <div style="display:flex;gap:3px;margin-left:auto;">
+            <span style="font-size:7px;background:#FFF5F5;color:#C0392B;padding:2px 8px;border-radius:8px;font-weight:500;">热烈奔放</span>
+            <span style="font-size:7px;background:#FFF5F5;color:#C0392B;padding:2px 8px;border-radius:8px;font-weight:500;">人气爆棚</span>
+            <span style="font-size:7px;background:#FFF5F5;color:#C0392B;padding:2px 8px;border-radius:8px;font-weight:500;">刺激消费</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Green -->
+    <div style="display:flex;align-items:stretch;gap:5mm;padding:5mm;background:linear-gradient(135deg,rgba(46,204,113,0.06),rgba(39,174,96,0.03));border:1px solid rgba(46,204,113,0.15);border-radius:14px;">
+      <div style="width:8mm;background:linear-gradient(180deg,#2ECC71,#27AE60);border-radius:8px;flex-shrink:0;"></div>
+      <div style="flex:1;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:3mm;">
+          <span style="font-size:14px;font-weight:800;color:#27AE60;">清新绿</span>
+          <span style="font-size:9px;color:#2ECC71;font-weight:500;">Green Theme</span>
+        </div>
+        <div style="font-size:8.5px;color:#555;line-height:1.7;margin-bottom:3mm;">
+          灵感来自自然清新的视觉美学与高端护肤品牌的配色策略。绿色背景能完美反衬主播肤色白皙通透，营造健康自然的直播氛围。在竞品普遍采用红粉暖色调的市场中，清新绿形成强烈的差异化辨识度，清爽配色久看不腻，有效提升用户长时间留存。
+        </div>
+        <div style="display:flex;gap:3mm;align-items:center;">
+          <div style="display:flex;gap:2px;">
+            <div style="width:24px;height:24px;border-radius:6px;background:#2ECC71;"></div>
+            <div style="width:24px;height:24px;border-radius:6px;background:#27AE60;"></div>
+            <div style="width:24px;height:24px;border-radius:6px;background:#A3E4C1;"></div>
+            <div style="width:24px;height:24px;border-radius:6px;background:#F0FFF5;"></div>
+          </div>
+          <div style="font-size:7px;color:#999;margin-left:4px;">#2ECC71 · #27AE60 · #A3E4C1 · #F0FFF5</div>
+          <div style="display:flex;gap:3px;margin-left:auto;">
+            <span style="font-size:7px;background:#F0FFF5;color:#27AE60;padding:2px 8px;border-radius:8px;font-weight:500;">衬肤白皙</span>
+            <span style="font-size:7px;background:#F0FFF5;color:#27AE60;padding:2px 8px;border-radius:8px;font-weight:500;">清爽耐看</span>
+            <span style="font-size:7px;background:#F0FFF5;color:#27AE60;padding:2px 8px;border-radius:8px;font-weight:500;">差异突围</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Blue -->
+    <div style="display:flex;align-items:stretch;gap:5mm;padding:5mm;background:linear-gradient(135deg,rgba(59,130,246,0.06),rgba(37,99,235,0.03));border:1px solid rgba(59,130,246,0.15);border-radius:14px;">
+      <div style="width:8mm;background:linear-gradient(180deg,#3B82F6,#2563EB);border-radius:8px;flex-shrink:0;"></div>
+      <div style="flex:1;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:3mm;">
+          <span style="font-size:14px;font-weight:800;color:#2563EB;">商务蓝</span>
+          <span style="font-size:9px;color:#3B82F6;font-weight:500;">Blue Theme</span>
+        </div>
+        <div style="font-size:8.5px;color:#555;line-height:1.7;margin-bottom:3mm;">
+          灵感来自高端夜店与奢华品牌的深邃蓝调视觉体系。深蓝营造出沉浸式的夜场氛围，冷暖色调的对比让主播形象更加突出鲜明。蓝色传递信任感与高级感，适合打造高端付费直播间定位，吸引高净值用户群体，提升客单价与用户忠诚度。
+        </div>
+        <div style="display:flex;gap:3mm;align-items:center;">
+          <div style="display:flex;gap:2px;">
+            <div style="width:24px;height:24px;border-radius:6px;background:#3B82F6;"></div>
+            <div style="width:24px;height:24px;border-radius:6px;background:#2563EB;"></div>
+            <div style="width:24px;height:24px;border-radius:6px;background:#93C5FD;"></div>
+            <div style="width:24px;height:24px;border-radius:6px;background:#EFF6FF;"></div>
+          </div>
+          <div style="font-size:7px;color:#999;margin-left:4px;">#3B82F6 · #2563EB · #93C5FD · #EFF6FF</div>
+          <div style="display:flex;gap:3px;margin-left:auto;">
+            <span style="font-size:7px;background:#EFF6FF;color:#2563EB;padding:2px 8px;border-radius:8px;font-weight:500;">夜场高端</span>
+            <span style="font-size:7px;background:#EFF6FF;color:#2563EB;padding:2px 8px;border-radius:8px;font-weight:500;">冷艳沉浸</span>
+            <span style="font-size:7px;background:#EFF6FF;color:#2563EB;padding:2px 8px;border-radius:8px;font-weight:500;">高净值客群</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Orange -->
+    <div style="display:flex;align-items:stretch;gap:5mm;padding:5mm;background:linear-gradient(135deg,rgba(243,156,18,0.06),rgba(230,126,34,0.03));border:1px solid rgba(243,156,18,0.15);border-radius:14px;">
+      <div style="width:8mm;background:linear-gradient(180deg,#F39C12,#E67E22);border-radius:8px;flex-shrink:0;"></div>
+      <div style="flex:1;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:3mm;">
+          <span style="font-size:14px;font-weight:800;color:#E67E22;">活力橙</span>
+          <span style="font-size:9px;color:#F39C12;font-weight:500;">Orange Theme</span>
+        </div>
+        <div style="font-size:8.5px;color:#555;line-height:1.7;margin-bottom:3mm;">
+          灵感来自年轻社交平台与潮流娱乐品牌的活力视觉。暖橙色调传递亲切感与活力，营造热闹欢快的互动氛围，让用户自然产生参与和停留的冲动。橙色在色彩心理学中代表创造力与社交性，精准触达18-30岁年轻用户群体，是拉新与活跃度最佳的配色选择。
+        </div>
+        <div style="display:flex;gap:3mm;align-items:center;">
+          <div style="display:flex;gap:2px;">
+            <div style="width:24px;height:24px;border-radius:6px;background:#F39C12;"></div>
+            <div style="width:24px;height:24px;border-radius:6px;background:#E67E22;"></div>
+            <div style="width:24px;height:24px;border-radius:6px;background:#FCCF70;"></div>
+            <div style="width:24px;height:24px;border-radius:6px;background:#FFF8EC;"></div>
+          </div>
+          <div style="font-size:7px;color:#999;margin-left:4px;">#F39C12 · #E67E22 · #FCCF70 · #FFF8EC</div>
+          <div style="display:flex;gap:3px;margin-left:auto;">
+            <span style="font-size:7px;background:#FFF8EC;color:#E67E22;padding:2px 8px;border-radius:8px;font-weight:500;">暖调亲和</span>
+            <span style="font-size:7px;background:#FFF8EC;color:#E67E22;padding:2px 8px;border-radius:8px;font-weight:500;">热闹互动</span>
+            <span style="font-size:7px;background:#FFF8EC;color:#E67E22;padding:2px 8px;border-radius:8px;font-weight:500;">年轻活跃</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="page-watermark">Theme Selection Guide</div>
+  <div class="page-number">01</div>
+</div>
+
+<!-- PAGE 3: PINK THEME (方案一) -->
+<div class="page theme-page">
+  <div class="theme-header" style="border-color:var(--pink-mid);">
+    <div class="theme-color-block" style="background:var(--pink);"><svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></div>
+    <div><div class="theme-name">方案一 · 浪漫粉</div><div class="theme-name-en">PINK THEME — Romantic & Elegant</div></div>
+    <div class="theme-palette">
+      <div class="palette-swatch"><div class="palette-box" style="background:var(--pink);"></div><div class="palette-label">主色</div></div>
+      <div class="palette-swatch"><div class="palette-box" style="background:var(--pink-mid);"></div><div class="palette-label">辅色</div></div>
+      <div class="palette-swatch"><div class="palette-box" style="background:var(--pink-light);"></div><div class="palette-label">背景</div></div>
+      <div class="palette-swatch"><div class="palette-box" style="background:#1A1A2E;"></div><div class="palette-label">文字</div></div>
+    </div>
+  </div>
+  <div class="phones-grid-2x3">
+    <div class="phone-col"><div class="phone-label">首页</div><div class="phone-frame"><img src="theme-screenshots/pink/home.png" alt="首页"></div></div>
+    <div class="phone-col"><div class="phone-label">游戏</div><div class="phone-frame"><img src="theme-screenshots/pink/game.png" alt="游戏"></div></div>
+    <div class="phone-col"><div class="phone-label">动态</div><div class="phone-frame"><img src="theme-screenshots/pink/feed.png" alt="动态"></div></div>
+    <div class="phone-col"><div class="phone-label">作品</div><div class="phone-frame"><img src="theme-screenshots/pink/works.png" alt="作品"></div></div>
+    <div class="phone-col"><div class="phone-label">充值</div><div class="phone-frame"><img src="theme-screenshots/pink/payment.png" alt="充值"></div></div>
+    <div class="phone-col"><div class="phone-label">个人中心</div><div class="phone-frame"><img src="theme-screenshots/pink/profile.png" alt="个人中心"></div></div>
+  </div>
+  <div class="theme-features">
+    <div class="theme-features-title"><span style="color:var(--pink);">●</span> 粉色主题设计亮点</div>
+    <div class="theme-features-grid">
+      <div class="feature-item"><div class="feature-dot" style="background:var(--pink);"></div><div class="feature-text">粉色渐变营造甜美暧昧氛围，完美衬托女主播魅力</div></div>
+      <div class="feature-item"><div class="feature-dot" style="background:var(--pink);"></div><div class="feature-text">柔和粉调自带美颜滤镜效果，提升直播间视觉质感</div></div>
+      <div class="feature-item"><div class="feature-dot" style="background:var(--pink);"></div><div class="feature-text">浪漫色彩激发用户互动与打赏欲望，转化率最高</div></div>
+    </div>
+  </div>
+  <div class="page-watermark">Theme Selection Guide</div>
+  <div class="page-number">02</div>
+</div>
+
+<!-- PAGE 4: RED THEME (方案二 - Android) -->
+<div class="page theme-page android">
+  <div class="theme-header" style="border-color:var(--red-mid);">
+    <div class="theme-color-block" style="background:var(--red);">
+      <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+    </div>
+    <div>
+      <div class="theme-name">方案二 · 热情红</div>
+      <div class="theme-name-en">RED THEME — Passionate & Energetic</div>
+    </div>
+    <div class="theme-palette">
+      <div class="palette-swatch"><div class="palette-box" style="background:var(--red);"></div><div class="palette-label">主色</div></div>
+      <div class="palette-swatch"><div class="palette-box" style="background:var(--red-mid);"></div><div class="palette-label">辅色</div></div>
+      <div class="palette-swatch"><div class="palette-box" style="background:var(--red-light);"></div><div class="palette-label">背景</div></div>
+      <div class="palette-swatch"><div class="palette-box" style="background:#1A1A2E;"></div><div class="palette-label">文字</div></div>
+    </div>
+  </div>
+  <div class="phones-grid-2x3">
+    <div class="phone-col"><div class="phone-label">首页</div><div class="phone-frame"><img src="theme-screenshots/red/home.png" alt="首页"></div></div>
+    <div class="phone-col"><div class="phone-label">游戏</div><div class="phone-frame"><img src="theme-screenshots/red/game.png" alt="游戏"></div></div>
+    <div class="phone-col"><div class="phone-label">动态</div><div class="phone-frame"><img src="theme-screenshots/red/feed.png" alt="动态"></div></div>
+    <div class="phone-col"><div class="phone-label">作品</div><div class="phone-frame"><img src="theme-screenshots/red/works.png" alt="作品"></div></div>
+    <div class="phone-col"><div class="phone-label">充值</div><div class="phone-frame"><img src="theme-screenshots/red/payment.png" alt="充值"></div></div>
+    <div class="phone-col"><div class="phone-label">个人中心</div><div class="phone-frame"><img src="theme-screenshots/red/profile.png" alt="个人中心"></div></div>
+  </div>
+  <div class="theme-features">
+    <div class="theme-features-title"><span style="color:var(--red);">●</span> 红色主题设计亮点</div>
+    <div class="theme-features-grid">
+      <div class="feature-item"><div class="feature-dot" style="background:var(--red);"></div><div class="feature-text">红色热烈奔放，烘托性感魅力，直播间人气氛围拉满</div></div>
+      <div class="feature-item"><div class="feature-dot" style="background:var(--red);"></div><div class="feature-text">暖色调刺激用户打赏冲动，礼物与充值转化率高</div></div>
+      <div class="feature-item"><div class="feature-dot" style="background:var(--red);"></div><div class="feature-text">契合娱乐直播调性，节日活动与促销运营效果突出</div></div>
+    </div>
+  </div>
+  <div class="page-watermark">Theme Selection Guide</div>
+  <div class="page-number">03</div>
+</div>
+
+<!-- PAGE 5: GREEN THEME (方案三) -->
+<div class="page theme-page">
+  <div class="theme-header" style="border-color:var(--green-mid);">
+    <div class="theme-color-block" style="background:var(--green);"><svg viewBox="0 0 24 24"><path d="M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66.95-2.3c.48.17.98.3 1.34.3C19 20 22 3 22 3c-1 2-8 2.25-13 3.25S2 11.5 2 13.5s1.75 3.75 1.75 3.75C7 8 17 8 17 8z"/></svg></div>
+    <div><div class="theme-name">方案三 · 清新绿</div><div class="theme-name-en">GREEN THEME — Fresh & Alluring</div></div>
+    <div class="theme-palette">
+      <div class="palette-swatch"><div class="palette-box" style="background:var(--green);"></div><div class="palette-label">主色</div></div>
+      <div class="palette-swatch"><div class="palette-box" style="background:var(--green-mid);"></div><div class="palette-label">辅色</div></div>
+      <div class="palette-swatch"><div class="palette-box" style="background:var(--green-light);"></div><div class="palette-label">背景</div></div>
+      <div class="palette-swatch"><div class="palette-box" style="background:#1A1A2E;"></div><div class="palette-label">文字</div></div>
+    </div>
+  </div>
+  <div class="phones-grid-2x3">
+    <div class="phone-col"><div class="phone-label">首页</div><div class="phone-frame"><img src="theme-screenshots/green/home.png" alt="首页"></div></div>
+    <div class="phone-col"><div class="phone-label">游戏</div><div class="phone-frame"><img src="theme-screenshots/green/game.png" alt="游戏"></div></div>
+    <div class="phone-col"><div class="phone-label">动态</div><div class="phone-frame"><img src="theme-screenshots/green/feed.png" alt="动态"></div></div>
+    <div class="phone-col"><div class="phone-label">作品</div><div class="phone-frame"><img src="theme-screenshots/green/works.png" alt="作品"></div></div>
+    <div class="phone-col"><div class="phone-label">充值</div><div class="phone-frame"><img src="theme-screenshots/green/payment.png" alt="充值"></div></div>
+    <div class="phone-col"><div class="phone-label">个人中心</div><div class="phone-frame"><img src="theme-screenshots/green/profile.png" alt="个人中心"></div></div>
+  </div>
+  <div class="theme-features">
+    <div class="theme-features-title"><span style="color:var(--green);">●</span> 绿色主题设计亮点</div>
+    <div class="theme-features-grid">
+      <div class="feature-item"><div class="feature-dot" style="background:var(--green);"></div><div class="feature-text">绿色背景反衬主播肤色更白皙通透，画面观感好</div></div>
+      <div class="feature-item"><div class="feature-dot" style="background:var(--green);"></div><div class="feature-text">清爽配色久看不腻，延长用户深夜观看停留时长</div></div>
+      <div class="feature-item"><div class="feature-dot" style="background:var(--green);"></div><div class="feature-text">差异化视觉风格，在同类美女直播产品中一眼突围</div></div>
+    </div>
+  </div>
+  <div class="page-watermark">Theme Selection Guide</div>
+  <div class="page-number">04</div>
+</div>
+
+<!-- PAGE 6: BLUE THEME (方案四) -->
+<div class="page theme-page">
+  <div class="theme-header" style="border-color:var(--blue-mid);">
+    <div class="theme-color-block" style="background:var(--blue);"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div>
+    <div><div class="theme-name">方案四 · 商务蓝</div><div class="theme-name-en">BLUE THEME — Premium & Immersive</div></div>
+    <div class="theme-palette">
+      <div class="palette-swatch"><div class="palette-box" style="background:var(--blue);"></div><div class="palette-label">主色</div></div>
+      <div class="palette-swatch"><div class="palette-box" style="background:var(--blue-mid);"></div><div class="palette-label">辅色</div></div>
+      <div class="palette-swatch"><div class="palette-box" style="background:var(--blue-light);"></div><div class="palette-label">背景</div></div>
+      <div class="palette-swatch"><div class="palette-box" style="background:#1A1A2E;"></div><div class="palette-label">文字</div></div>
+    </div>
+  </div>
+  <div class="phones-grid-2x3">
+    <div class="phone-col"><div class="phone-label">首页</div><div class="phone-frame"><img src="theme-screenshots/blue/home.png" alt="首页"></div></div>
+    <div class="phone-col"><div class="phone-label">游戏</div><div class="phone-frame"><img src="theme-screenshots/blue/game.png" alt="游戏"></div></div>
+    <div class="phone-col"><div class="phone-label">动态</div><div class="phone-frame"><img src="theme-screenshots/blue/feed.png" alt="动态"></div></div>
+    <div class="phone-col"><div class="phone-label">作品</div><div class="phone-frame"><img src="theme-screenshots/blue/works.png" alt="作品"></div></div>
+    <div class="phone-col"><div class="phone-label">充值</div><div class="phone-frame"><img src="theme-screenshots/blue/payment.png" alt="充值"></div></div>
+    <div class="phone-col"><div class="phone-label">个人中心</div><div class="phone-frame"><img src="theme-screenshots/blue/profile.png" alt="个人中心"></div></div>
+  </div>
+  <div class="theme-features">
+    <div class="theme-features-title"><span style="color:var(--blue);">●</span> 蓝色主题设计亮点</div>
+    <div class="theme-features-grid">
+      <div class="feature-item"><div class="feature-dot" style="background:var(--blue);"></div><div class="feature-text">深蓝色调营造高端夜场氛围，提升平台品质感</div></div>
+      <div class="feature-item"><div class="feature-dot" style="background:var(--blue);"></div><div class="feature-text">冷暖对比突出主播形象，画面层次丰富更具吸引力</div></div>
+      <div class="feature-item"><div class="feature-dot" style="background:var(--blue);"></div><div class="feature-text">沉稳配色增强用户信任感，提升充值与付费意愿</div></div>
+    </div>
+  </div>
+  <div class="page-watermark">Theme Selection Guide</div>
+  <div class="page-number">05</div>
+</div>
+
+<!-- PAGE 7: ORANGE THEME (方案五) -->
+<div class="page theme-page">
+  <div class="theme-header" style="border-color:var(--orange-mid);">
+    <div class="theme-color-block" style="background:var(--orange);"><svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"/></svg></div>
+    <div><div class="theme-name">方案五 · 活力橙</div><div class="theme-name-en">ORANGE THEME — Vibrant & Creative</div></div>
+    <div class="theme-palette">
+      <div class="palette-swatch"><div class="palette-box" style="background:var(--orange);"></div><div class="palette-label">主色</div></div>
+      <div class="palette-swatch"><div class="palette-box" style="background:var(--orange-mid);"></div><div class="palette-label">辅色</div></div>
+      <div class="palette-swatch"><div class="palette-box" style="background:var(--orange-light);"></div><div class="palette-label">背景</div></div>
+      <div class="palette-swatch"><div class="palette-box" style="background:#1A1A2E;"></div><div class="palette-label">文字</div></div>
+    </div>
+  </div>
+  <div class="phones-grid-2x3">
+    <div class="phone-col"><div class="phone-label">首页</div><div class="phone-frame"><img src="theme-screenshots/orange/home.png" alt="首页"></div></div>
+    <div class="phone-col"><div class="phone-label">游戏</div><div class="phone-frame"><img src="theme-screenshots/orange/game.png" alt="游戏"></div></div>
+    <div class="phone-col"><div class="phone-label">动态</div><div class="phone-frame"><img src="theme-screenshots/orange/feed.png" alt="动态"></div></div>
+    <div class="phone-col"><div class="phone-label">作品</div><div class="phone-frame"><img src="theme-screenshots/orange/works.png" alt="作品"></div></div>
+    <div class="phone-col"><div class="phone-label">充值</div><div class="phone-frame"><img src="theme-screenshots/orange/payment.png" alt="充值"></div></div>
+    <div class="phone-col"><div class="phone-label">个人中心</div><div class="phone-frame"><img src="theme-screenshots/orange/profile.png" alt="个人中心"></div></div>
+  </div>
+  <div class="theme-features">
+    <div class="theme-features-title"><span style="color:var(--orange);">●</span> 橙色主题设计亮点</div>
+    <div class="theme-features-grid">
+      <div class="feature-item"><div class="feature-dot" style="background:var(--orange);"></div><div class="feature-text">暖橙色调烘托主播亲和力，拉近与粉丝的互动距离</div></div>
+      <div class="feature-item"><div class="feature-dot" style="background:var(--orange);"></div><div class="feature-text">热闹活跃的视觉氛围，吸引用户停留并参与弹幕</div></div>
+      <div class="feature-item"><div class="feature-dot" style="background:var(--orange);"></div><div class="feature-text">年轻潮流的配色风格，精准触达目标用户群体</div></div>
+    </div>
+  </div>
+  <div class="page-watermark">Theme Selection Guide</div>
+  <div class="page-number">06</div>
+</div>
+
+<!-- PAGE 8: SELECTION -->
+<div class="page" style="padding:12mm 14mm;">
+  <div class="section-header">
+    <div class="section-tag" style="background:#F8F9FC;color:var(--text-primary);">SELECTION</div>
+    <div class="section-title">请选择您心仪的主题方案</div>
+    <div class="section-desc">请在下方对应主题的圆圈内打勾 ✓，并可在备注区域写下您的意见或修改建议。</div>
+  </div>
+  <div class="selection-grid">
+    <div class="selection-card selection-card-full"><div class="selection-checkbox"></div><div class="selection-color" style="background:var(--pink);"></div><div class="selection-name">方案一 · 浪漫粉</div><div class="selection-desc">甜美暧昧 · 衬托魅力 · 最受欢迎</div></div>
+    <div class="selection-card"><div class="selection-checkbox"></div><div class="selection-color" style="background:var(--red);"></div><div class="selection-name">方案二 · 热情红</div><div class="selection-desc">热烈奔放 · 人气爆棚 · 刺激打赏</div></div>
+    <div class="selection-card"><div class="selection-checkbox"></div><div class="selection-color" style="background:var(--green);"></div><div class="selection-name">方案三 · 清新绿</div><div class="selection-desc">反衬肤白 · 久看不腻 · 差异突围</div></div>
+    <div class="selection-card"><div class="selection-checkbox"></div><div class="selection-color" style="background:var(--blue);"></div><div class="selection-name">方案四 · 商务蓝</div><div class="selection-desc">夜场高端 · 冷艳高级 · 沉浸观看</div></div>
+    <div class="selection-card"><div class="selection-checkbox"></div><div class="selection-color" style="background:var(--orange);"></div><div class="selection-name">方案五 · 活力橙</div><div class="selection-desc">暖调亲和 · 热闹互动 · 吸引停留</div></div>
+  </div>
+  <div class="selection-notes">
+    <div class="selection-notes-title">客户备注 / 修改建议：</div>
+    <div class="note-line"></div><div class="note-line"></div><div class="note-line"></div><div class="note-line"></div><div class="note-line"></div><div class="note-line"></div>
+  </div>
+  <div class="selection-footer">
+    <p>感谢您的选择！我们将根据您的反馈进行定制开发。</p>
+    <p style="margin-top:4px;font-size:9px;">如需调整配色细节，欢迎随时沟通 — 我们支持完全自定义色值方案。</p>
+  </div>
+  <div class="page-watermark">Theme Selection Guide</div>
+  <div class="page-number">07</div>
+</div>
+
+</body>
+</html>

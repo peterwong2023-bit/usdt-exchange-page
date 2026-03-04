@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>出款 - 优化版</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
+
+        /* 状态栏 */
+        .status-bar {
+            height: 44px;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .time {
+            font-weight: 600;
+        }
+
+        .status-icons {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+
+        /* 顶部导航 */
+        .header {
+            background: white;
+            padding: 12px 16px;
+            text-align: center;
+            font-size: 17px;
+            font-weight: 600;
+            color: #333;
+            box-shadow: 0 1px 0 rgba(0,0,0,0.05);
+        }
+
+        /* 主容器 */
+        .container {
+            padding: 12px;
+        }
+
+        /* 卡片 */
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .card-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        /* 下拉选择器 */
+        .select-field {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px;
+            background: #f7f8fa;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .select-field:active {
+            background: #eef0f3;
+        }
+
+        .select-field .left {
+            font-size: 15px;
+            color: #333;
+        }
+
+        .select-field .right {
+            color: #3b82f6;
+            font-size: 20px;
+        }
+
+        /* 余额显示区域 - 优化版 */
+        .balance-section {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .balance-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .balance-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .balance-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .balance-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            font-size: 18px;
+        }
+
+        .balance-icon.current {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .balance-icon.frozen {
+            background: rgba(255,255,255,0.15);
+        }
+
+        .balance-info {
+            flex: 1;
+        }
+
+        .balance-label {
+            font-size: 13px;
+            color: rgba(255,255,255,0.8);
+            margin-bottom: 4px;
+        }
+
+        .balance-amount {
+            font-size: 24px;
+            font-weight: 700;
+            color: white;
+            letter-spacing: 0.5px;
+            font-variant-numeric: tabular-nums;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .balance-main {
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+        }
+
+        .balance-amount .currency {
+            font-size: 15px;
+            font-weight: 600;
+            opacity: 0.9;
+        }
+
+        .balance-wan {
+            font-size: 14px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .balance-wan .wan-number {
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.95);
+        }
+
+        .balance-item.frozen .balance-amount {
+            font-size: 20px;
+        }
+
+        .balance-item.frozen .balance-label {
+            opacity: 0.7;
+        }
+
+        .balance-item.frozen .balance-wan {
+            font-size: 13px;
+        }
+
+        /* 分隔线 */
+        .balance-divider {
+            height: 1px;
+            background: rgba(255,255,255,0.2);
+            margin: 16px 0;
+        }
+
+        /* 交易详情 */
+        .transaction-section {
+            margin-top: 12px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .section-title {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .section-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .icon-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            background: #f7f8fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-size: 16px;
+        }
+
+        .icon-btn:active {
+            background: #eef0f3;
+        }
+
+        /* 交易地址输入框 */
+        .input-field {
+            background: #f7f8fa;
+            border-radius: 8px;
+            padding: 14px;
+            font-size: 14px;
+            color: #333;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+            font-family: 'Courier New', monospace;
+            position: relative;
+        }
+
+        .input-field:focus {
+            outline: none;
+            background: white;
+            border-color: #3b82f6;
+        }
+
+        .input-wrapper {
+            position: relative;
+            margin-bottom: 12px;
+        }
+
+        .input-actions {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            gap: 4px;
+        }
+
+        .input-action-btn {
+            padding: 6px 12px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            font-size: 12px;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .input-action-btn:active {
+            background: #f7f8fa;
+        }
+
+        .clear-btn {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #d1d5db;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            cursor: pointer;
+            padding: 0;
+            border: none;
+        }
+
+        /* 地址提示 */
+        .address-hint {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            font-size: 12px;
+            color: #3b82f6;
+            margin-top: 8px;
+        }
+
+        .address-hint-icon {
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        /* 金额输入区域 */
+        .amount-section {
+            margin-bottom: 12px;
+        }
+
+        .amount-input-wrapper {
+            position: relative;
+        }
+
+        .amount-input {
+            width: 100%;
+            padding: 14px 80px 14px 14px;
+            background: #f7f8fa;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            font-size: 16px;
+            color: #333;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .amount-input:focus {
+            outline: none;
+            background: white;
+            border-color: #3b82f6;
+        }
+
+        .amount-input::placeholder {
+            color: #9ca3af;
+        }
+
+        .amount-suffix {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .amount-unit {
+            font-size: 14px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .available-amount {
+            font-size: 12px;
+            color: #9ca3af;
+            margin-top: 8px;
+            text-align: right;
+        }
+
+        .available-amount .highlight {
+            color: #3b82f6;
+            font-weight: 600;
+        }
+
+        /* 备注输入框 */
+        .textarea-field {
+            width: 100%;
+            min-height: 80px;
+            padding: 14px;
+            background: #f7f8fa;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #333;
+            resize: vertical;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        .textarea-field:focus {
+            outline: none;
+            background: white;
+            border-color: #3b82f6;
+        }
+
+        .textarea-field::placeholder {
+            color: #9ca3af;
+        }
+
+        /* 提交按钮 */
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .submit-btn:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+        }
+
+        .submit-btn:disabled {
+            background: #d1d5db;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* 底部导航 */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            display: flex;
+            padding: 8px 0 20px;
+            box-shadow: 0 -1px 0 rgba(0,0,0,0.05);
+        }
+
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            padding: 4px 0;
+        }
+
+        .nav-icon {
+            font-size: 24px;
+            color: #9ca3af;
+        }
+
+        .nav-item.active .nav-icon {
+            color: #3b82f6;
+        }
+
+        .nav-label {
+            font-size: 11px;
+            color: #9ca3af;
+        }
+
+        .nav-item.active .nav-label {
+            color: #3b82f6;
+            font-weight: 500;
+        }
+
+        /* 弹窗覆盖层 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* 警告弹窗 - 优化版 */
+        .alert-modal {
+            background: white;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 320px;
+            padding: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            transform: scale(0.9);
+            transition: transform 0.3s;
+        }
+
+        .modal-overlay.show .alert-modal {
+            transform: scale(1);
+        }
+
+        .alert-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .alert-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 16px;
+        }
+
+        .alert-content {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .alert-message {
+            font-size: 14px;
+            color: #92400e;
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+
+        .alert-details {
+            background: white;
+            border-radius: 6px;
+            padding: 12px;
+            margin-top: 12px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-size: 13px;
+            align-items: center;
+        }
+
+        .detail-row:not(:last-child) {
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .detail-label {
+            color: #78716c;
+            min-width: 80px;
+        }
+
+        .detail-value {
+            color: #292524;
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+            text-align: right;
+            flex: 1;
+        }
+
+        .detail-value.highlight {
+            color: #ef4444;
+            font-size: 16px;
+        }
+
+        .detail-value.success {
+            color: #10b981;
+            font-size: 16px;
+        }
+
+        .modal-amount-main {
+            font-weight: 700;
+        }
+
+        .alert-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .alert-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .alert-btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .alert-btn-primary:active {
+            background: #2563eb;
+        }
+
+        /* 数字格式化增强 */
+        .formatted-number {
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 0.5px;
+        }
+
+        /* 加载状态 */
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* 成功状态动画 */
+        @keyframes successPulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .success-animation {
+            animation: successPulse 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+    <!-- 状态栏 -->
+    <div class="status-bar">
+        <div class="time">6:16</div>
+        <div class="status-icons">
+            <span>📶 4G 🔋</span>
+        </div>
+    </div>
+
+    <!-- 顶部导航 -->
+    <div class="header">出款</div>
+
+    <!-- 主容器 -->
+    <div class="container">
+        <!-- 区块链选择 -->
+        <div class="card">
+            <div class="card-label">区块链 & 代币</div>
+            <div class="select-field" onclick="showBlockchainPicker()">
+                <div class="left">波场 · USDT (TRC20)</div>
+                <div class="right">∨</div>
+            </div>
+        </div>
+
+        <!-- 商户选择 -->
+        <div class="card">
+            <div class="card-label">商户</div>
+            <div class="select-field" onclick="showMerchantPicker()">
+                <div class="left">福建归集 (1065)</div>
+                <div class="right">›</div>
+            </div>
+        </div>
+
+        <!-- 余额显示 - 优化版 -->
+        <div class="card">
+            <div class="balance-section">
+                <div class="balance-item current">
+                    <div class="balance-icon current">💰</div>
+                    <div class="balance-info">
+                        <div class="balance-label">当前余额</div>
+                        <div class="balance-amount">
+                            <div class="balance-main formatted-number">
+                                <span id="currentBalance" data-raw="12345678.9">12,345,678.9</span>
+                                <span class="currency">USDT</span>
+                            </div>
+                            <div class="balance-wan">
+                                (≈ <span class="wan-number" id="currentBalanceWan">1234.57</span> 万)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="balance-divider"></div>
+                
+                <div class="balance-item frozen">
+                    <div class="balance-icon frozen">❄️</div>
+                    <div class="balance-info">
+                        <div class="balance-label">冻结金额</div>
+                        <div class="balance-amount formatted-number">
+                            <span id="frozenBalance">0</span>
+                            <span class="currency">USDT</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 交易详情 -->
+        <div class="card transaction-section">
+            <div class="section-header">
+                <div class="section-title">交易详情</div>
+                <div class="section-actions">
+                    <div class="icon-btn" onclick="showQRScanner()" title="扫码">📷</div>
+                    <div class="icon-btn" onclick="toggleFullscreen()" title="全屏">⛶</div>
+                </div>
+            </div>
+
+            <!-- 交易地址 -->
+            <div class="input-wrapper">
+                <input type="text" 
+                       class="input-field" 
+                       id="transactionAddress"
+                       placeholder="TV1676HpAwsD9fmLv89FtN9dsWaQjap4jf"
+                       value="TV1676HpAwsD9fmLv89FtN9dsWaQjap4jf">
+                <div class="input-actions">
+                    <button class="clear-btn" onclick="clearAddress()" title="清除">×</button>
+                </div>
+            </div>
+            
+            <div class="address-hint">
+                <span class="address-hint-icon">ℹ️</span>
+                <span>加入到地址本</span>
+            </div>
+
+            <!-- 金额输入 -->
+            <div class="amount-section">
+                <div class="amount-input-wrapper">
+                    <input type="text" 
+                           class="amount-input" 
+                           id="amountInput"
+                           placeholder="72121225555"
+                           value="72121225555"
+                           oninput="formatAmountInput(this); validateAmount()">
+                    <div class="amount-suffix">
+                        <span class="amount-unit">USDT</span>
+                    </div>
+                </div>
+                <div class="available-amount">
+                    可用: <span class="highlight formatted-number" id="availableDisplay">12,345,678.9</span> USDT
+                    <span style="color: #9ca3af;">(≈ <span id="availableDisplayWan">1234.57</span> 万)</span>
+                </div>
+            </div>
+
+            <!-- 备注 -->
+            <div class="amount-section">
+                <textarea class="textarea-field" 
+                          id="remarkInput"
+                          placeholder="难道你说呢">难道你说呢</textarea>
+            </div>
+        </div>
+
+        <!-- 提交按钮 -->
+        <div class="card">
+            <button class="submit-btn" onclick="submitWithdrawal()">
+                发起出款请求
+            </button>
+        </div>
+    </div>
+
+    <!-- 底部导航 -->
+    <div class="bottom-nav">
+        <div class="nav-item">
+            <div class="nav-icon">🏠</div>
+            <div class="nav-label">首页</div>
+        </div>
+        <div class="nav-item active">
+            <div class="nav-icon">💳</div>
+            <div class="nav-label">出款</div>
+        </div>
+        <div class="nav-item">
+            <div class="nav-icon">📋</div>
+            <div class="nav-label">记录</div>
+        </div>
+        <div class="nav-item">
+            <div class="nav-icon">⚙️</div>
+            <div class="nav-label">设置</div>
+        </div>
+    </div>
+
+    <!-- 金额超限警告弹窗 - 优化版 -->
+    <div class="modal-overlay" id="limitModal">
+        <div class="alert-modal">
+            <div class="alert-header">
+                <div class="alert-title">金额超限</div>
+            </div>
+            
+            <div class="alert-content">
+                <div class="alert-message">
+                    输入金额超过当前可用余额
+                </div>
+                
+                <div class="alert-details">
+                    <div class="detail-row">
+                        <span class="detail-label">输入金额:</span>
+                        <span class="detail-value highlight formatted-number" id="modalInputAmount">
+                            <span class="modal-amount-main">72,121,224</span>
+                        </span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label"></span>
+                        <span class="detail-value" style="font-size: 13px; color: #78716c;">
+                            (≈ <span class="modal-amount-wan" style="font-weight: 600; color: #292524;">7212.12</span> 万)
+                        </span>
+                    </div>
+                    <div class="detail-row" style="margin-top: 8px;">
+                        <span class="detail-label">可用金额:</span>
+                        <span class="detail-value success formatted-number" id="modalAvailableAmount">
+                            <span class="modal-amount-main">12,345,678.9</span>
+                        </span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label"></span>
+                        <span class="detail-value" style="font-size: 13px; color: #78716c;">
+                            (≈ <span class="modal-available-wan" style="font-weight: 600; color: #292524;">1234.57</span> 万)
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="alert-actions">
+                <button class="alert-btn alert-btn-primary" onclick="closeModal()">
+                    确定
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 格式化数字 - 智能显示(自动判断是否使用"万"单位)
+        function formatNumber(num, options = {}) {
+            if (!num && num !== 0) return '0';
+            
+            const { 
+                useWan = true,           // 是否使用"万"单位
+                threshold = 10000,       // 超过此值使用"万"
+                decimals = 2,            // 小数位数
+                showUnit = false         // 是否显示单位文字
+            } = options;
+            
+            const absNum = Math.abs(num);
+            
+            // 如果启用"万"单位且数字大于等于阈值
+            if (useWan && absNum >= threshold) {
+                const wanValue = num / 10000;
+                const formatted = wanValue.toFixed(decimals).replace(/\.?0+$/, '');
+                return showUnit ? formatted + '万' : formatted;
+            }
+            
+            // 小于1万的数字，使用千位分隔符
+            const parts = num.toString().split('.');
+            parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+            
+            // 控制小数位数
+            if (parts[1] && decimals >= 0) {
+                parts[1] = parts[1].substring(0, decimals);
+            }
+            
+            return parts.join('.');
+        }
+
+        // 解析格式化的数字(支持"万"单位)
+        function parseFormattedNumber(str) {
+            if (!str) return 0;
+            
+            // 移除逗号
+            str = str.replace(/,/g, '');
+            
+            // 如果包含"万"，转换回数字
+            if (str.includes('万')) {
+                const num = parseFloat(str.replace('万', ''));
+                return num * 10000;
+            }
+            
+            return parseFloat(str);
+        }
+
+        // 格式化金额输入
+        function formatAmountInput(input) {
+            let value = input.value.replace(/,/g, '');
+            
+            // 只允许数字和小数点
+            value = value.replace(/[^\d.]/g, '');
+            
+            // 只允许一个小数点
+            const parts = value.split('.');
+            if (parts.length > 2) {
+                value = parts[0] + '.' + parts.slice(1).join('');
+            }
+            
+            // 限制小数位数
+            if (parts.length === 2 && parts[1].length > 2) {
+                value = parts[0] + '.' + parts[1].substring(0, 2);
+            }
+            
+            // 不格式化输入框中的数字(避免光标跳动)
+            input.value = value;
+        }
+
+        // 验证金额
+        function validateAmount() {
+            const amountInput = document.getElementById('amountInput');
+            const currentBalanceEl = document.getElementById('currentBalance');
+            
+            // 从data-raw属性获取原始值，如果没有则解析显示的文本
+            const currentBalance = parseFloat(currentBalanceEl.dataset.raw) || 
+                                  parseFormattedNumber(currentBalanceEl.textContent);
+            
+            const inputAmount = parseFloat(amountInput.value.replace(/,/g, ''));
+            
+            if (inputAmount > currentBalance) {
+                // 显示警告弹窗
+                showLimitModal(inputAmount, currentBalance);
+                return false;
+            }
+            return true;
+        }
+
+        // 显示金额超限弹窗
+        function showLimitModal(inputAmount, availableAmount) {
+            // 格式化完整数字（带千位分隔符）
+            const formattedInputFull = formatNumber(inputAmount, { useWan: false, decimals: 2 });
+            const formattedAvailableFull = formatNumber(availableAmount, { useWan: false, decimals: 2 });
+            
+            // 计算万单位（保留2位小数）
+            const inputWan = (inputAmount / 10000).toFixed(2);
+            const availableWan = (availableAmount / 10000).toFixed(2);
+            
+            // 更新弹窗显示
+            const inputAmountEl = document.getElementById('modalInputAmount');
+            const availableAmountEl = document.getElementById('modalAvailableAmount');
+            
+            inputAmountEl.querySelector('.modal-amount-main').textContent = formattedInputFull;
+            document.querySelector('.modal-amount-wan').textContent = inputWan;
+            
+            availableAmountEl.querySelector('.modal-amount-main').textContent = formattedAvailableFull;
+            document.querySelector('.modal-available-wan').textContent = availableWan;
+            
+            document.getElementById('limitModal').classList.add('show');
+        }
+
+        // 关闭弹窗
+        function closeModal() {
+            document.getElementById('limitModal').classList.remove('show');
+        }
+
+        // 点击遮罩关闭弹窗
+        document.getElementById('limitModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // 清除地址
+        function clearAddress() {
+            document.getElementById('transactionAddress').value = '';
+            document.getElementById('transactionAddress').focus();
+        }
+
+        // 提交出款
+        function submitWithdrawal() {
+            const amountInput = document.getElementById('amountInput');
+            const addressInput = document.getElementById('transactionAddress');
+            
+            if (!addressInput.value) {
+                alert('请输入交易地址');
+                return;
+            }
+            
+            if (!amountInput.value || parseFloat(amountInput.value) <= 0) {
+                alert('请输入有效的金额');
+                return;
+            }
+            
+            if (!validateAmount()) {
+                return;
+            }
+            
+            // 模拟提交
+            const btn = document.querySelector('.submit-btn');
+            btn.innerHTML = '<span class="loading"></span>';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                btn.innerHTML = '✓ 提交成功';
+                btn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+                
+                setTimeout(() => {
+                    btn.innerHTML = '发起出款请求';
+                    btn.style.background = '';
+                    btn.disabled = false;
+                }, 2000);
+            }, 1500);
+        }
+
+        // 其他功能占位函数
+        function showBlockchainPicker() {
+            alert('区块链选择器');
+        }
+
+        function showMerchantPicker() {
+            alert('商户选择器');
+        }
+
+        function showQRScanner() {
+            alert('扫码功能');
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        // 初始化 - 格式化显示的余额
+        document.addEventListener('DOMContentLoaded', function() {
+            // 格式化余额显示
+            const currentBalanceEl = document.getElementById('currentBalance');
+            const currentBalanceWanEl = document.getElementById('currentBalanceWan');
+            const frozenBalanceEl = document.getElementById('frozenBalance');
+            const availableDisplayEl = document.getElementById('availableDisplay');
+            const availableDisplayWanEl = document.getElementById('availableDisplayWan');
+            
+            // 获取原始数值
+            const currentBalanceRaw = parseFloat(currentBalanceEl.dataset.raw) || 12345678.9;
+            const frozenBalanceRaw = parseFloat(frozenBalanceEl.textContent) || 0;
+            
+            // 格式化并显示完整数字（带千位分隔符）
+            currentBalanceEl.textContent = formatNumber(currentBalanceRaw, { useWan: false, decimals: 1 });
+            frozenBalanceEl.textContent = formatNumber(frozenBalanceRaw, { useWan: false, decimals: 1 });
+            availableDisplayEl.textContent = formatNumber(currentBalanceRaw, { useWan: false, decimals: 1 });
+            
+            // 显示万单位换算
+            if (currentBalanceRaw >= 10000) {
+                const wanValue = (currentBalanceRaw / 10000).toFixed(2);
+                currentBalanceWanEl.textContent = wanValue;
+                availableDisplayWanEl.textContent = wanValue;
+            } else {
+                // 小于1万，隐藏万单位显示
+                currentBalanceWanEl.parentElement.style.display = 'none';
+            }
+            
+            // 自动触发一次验证以展示弹窗效果
+            setTimeout(() => {
+                validateAmount();
+            }, 500);
+        });
+    </script>
+</body>
+</html>
+

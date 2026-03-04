@@ -1,0 +1,1738 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>USDT充值</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            cursor: default;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+            background: #e5e5e5;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .header {
+            background: white;
+            color: #2c3e50;
+            padding: 20px 24px;
+            text-align: left;
+            position: relative;
+            border-bottom: 1px solid #e8e8e8;
+        }
+
+        .header h1 {
+            font-size: 18px;
+            margin-bottom: 0;
+            font-weight: 600;
+            letter-spacing: 0;
+            color: #1a1a1a;
+        }
+
+        .header p {
+            display: none;
+        }
+
+        .content {
+            padding: 24px;
+        }
+
+        /* 安全检测入口 */
+        .security-banner {
+            background: white;
+            border: 2px solid #e8eaed;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 16px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        .security-banner::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(74, 144, 226, 0.05), transparent);
+            transition: left 0.6s;
+        }
+
+        .security-banner:hover::before {
+            left: 100%;
+        }
+
+        .security-banner:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+            border-color: #4a90e2;
+        }
+
+        .security-banner:active {
+            transform: translateY(0);
+        }
+
+        .security-icon {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(74, 144, 226, 0.25);
+        }
+
+        .security-content {
+            flex: 1;
+        }
+
+        .security-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: 0;
+        }
+
+        .security-badge {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            color: white;
+            font-size: 11px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
+        }
+
+        .security-desc {
+            font-size: 13px;
+            color: #555;
+            line-height: 1.6;
+            letter-spacing: 0;
+        }
+
+        .security-arrow {
+            color: #bbb;
+            font-size: 24px;
+            transition: transform 0.3s;
+        }
+
+        .security-banner:hover .security-arrow {
+            transform: translateX(4px);
+            color: #4a90e2;
+        }
+
+        .quota-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .quota-text {
+            font-size: 12px;
+            color: #4a90e2;
+            font-weight: 600;
+            white-space: nowrap;
+            letter-spacing: 0;
+        }
+
+        .quota-bar {
+            flex: 1;
+            height: 6px;
+            background: #e8f2fc;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .quota-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4a90e2 0%, #357abd 100%);
+            border-radius: 3px;
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 8px rgba(74, 144, 226, 0.3);
+        }
+
+        /* 充值信息区域 */
+        .warning-banner {
+            background: #fff3cd;
+            border-left: 3px solid #ffc107;
+            padding: 12px 16px;
+            border-radius: 4px;
+            margin: 16px;
+        }
+
+        .warning-banner p {
+            font-size: 13px;
+            color: #856404;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        .merchant-info-container {
+            display: flex;
+            background: #f8f9fa;
+            padding: 12px 16px;
+        }
+
+        .merchant-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .merchant-info:first-child {
+            flex: 1;
+        }
+
+        .merchant-info .label {
+            color: #666;
+            font-size: 14px;
+            font-weight: normal;
+        }
+
+        .merchant-info .value {
+            color: #333;
+            font-weight: normal;
+            font-size: 14px;
+        }
+
+        .qr-container {
+            text-align: center;
+            margin: 24px 0;
+            display: none;
+        }
+
+        .qr-container.show {
+            display: block;
+        }
+
+        .qr-code {
+            width: 220px;
+            height: 220px;
+            background: #fafafa;
+            margin: 0 auto 16px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #e8e8e8;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            transition: all 0.3s;
+        }
+
+        .qr-code:hover {
+            border-color: #d0d0d0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .qr-code.placeholder {
+            position: relative;
+            background: linear-gradient(135deg, #f8f8f8 0%, #fafafa 100%);
+        }
+
+        .qr-placeholder {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            padding: 45px;
+        }
+
+        .qr-corner {
+            width: 55px;
+            height: 55px;
+            border: 5px solid #c8c8c8;
+            position: relative;
+            border-radius: 2px;
+        }
+
+        .qr-corner::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 18px;
+            height: 18px;
+            background: #c8c8c8;
+            border-radius: 1px;
+        }
+
+        .qr-timing {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+            justify-content: flex-end;
+        }
+
+        .qr-timing span {
+            width: 10px;
+            height: 10px;
+            background: #c8c8c8;
+            border-radius: 1px;
+        }
+
+        .qr-data {
+            display: flex;
+            gap: 5px;
+            flex-direction: column;
+        }
+
+        .qr-data span {
+            width: 100%;
+            height: 10px;
+            background: #c8c8c8;
+            border-radius: 1px;
+        }
+
+        .qr-code canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        .address-display {
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            padding: 18px;
+            border-radius: 10px;
+            margin: 16px;
+            word-break: break-all;
+            border: 2px solid #e8e8e8;
+            display: none;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            transition: all 0.3s;
+        }
+
+        .address-display.show {
+            display: block;
+            animation: slideDown 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .address-display:hover {
+            border-color: #d0d0d0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .address-label {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .address-text {
+            color: #4a90e2;
+            font-size: 13px;
+            font-weight: 500;
+            font-family: 'Monaco', 'Menlo', monospace;
+            letter-spacing: 0.5px;
+            word-break: break-all;
+            padding: 12px;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #e8e8e8;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: normal;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 12px;
+        }
+
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-weight: normal;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .radio-group label:hover {
+            background: #f5f7fa;
+        }
+
+        .radio-group input[type="radio"] {
+            margin-right: 8px;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 0;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:active::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(74, 144, 226, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(74, 144, 226, 0.3);
+        }
+
+        /* 地址检测工具模态框 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: fadeIn 0.3s;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-container {
+            background: white;
+            border-radius: 16px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        @keyframes slideUp {
+            from { 
+                opacity: 0;
+                transform: translateY(50px) scale(0.95);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .modal-header {
+            background: white;
+            color: #1a1a1a;
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .modal-title {
+            font-size: 19px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+        }
+
+        .modal-subtitle {
+            font-size: 13px;
+            color: #6b7280;
+            margin-top: 5px;
+            font-weight: 400;
+        }
+
+        .close-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #f3f4f6;
+            border: none;
+            color: #6b7280;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.25s;
+        }
+
+        .close-btn:hover {
+            background: #e5e7eb;
+            color: #1a1a1a;
+            transform: rotate(90deg);
+        }
+
+        .modal-content {
+            padding: 24px;
+        }
+
+        /* 步骤指示器 */
+        .steps {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 32px;
+            position: relative;
+        }
+
+        .steps::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 30px;
+            right: 30px;
+            height: 2px;
+            background: #e0e0e0;
+            z-index: 0;
+        }
+
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+            flex: 1;
+        }
+
+        .step-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #f3f4f6;
+            color: #9ca3af;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            margin-bottom: 8px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .step.active .step-circle {
+            background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+            color: white;
+            transform: scale(1.1);
+            box-shadow: 0 2px 12px rgba(74, 144, 226, 0.3);
+        }
+
+        .step.completed .step-circle {
+            background: #10b981;
+            color: white;
+        }
+
+        .step-label {
+            font-size: 12px;
+            color: #9ca3af;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .step.active .step-label {
+            color: #4a90e2;
+            font-weight: 600;
+        }
+
+        .info-box {
+            background: #f8f9fa;
+            border-left: 3px solid #4a90e2;
+            padding: 18px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            border: 1px solid #e8eaed;
+            border-left: 3px solid #4a90e2;
+        }
+
+        .info-box h3 {
+            font-size: 15px;
+            color: #1a1a1a;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            letter-spacing: 0;
+        }
+
+        .info-box h3::before {
+            content: '💡';
+            margin-right: 8px;
+            font-size: 18px;
+        }
+
+        .info-box p {
+            font-size: 14px;
+            color: #555;
+            line-height: 1.7;
+            letter-spacing: 0;
+        }
+
+        .info-box ul {
+            margin-top: 14px;
+            padding-left: 22px;
+        }
+
+        .info-box li {
+            font-size: 14px;
+            color: #555;
+            line-height: 1.9;
+            letter-spacing: 0;
+        }
+
+        .check-section {
+            display: none;
+        }
+
+        .check-section.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: #fafbfc;
+        }
+
+        .form-group input:hover {
+            border-color: #d1d5db;
+            background: white;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #4a90e2;
+            box-shadow: 0 0 0 4px rgba(74, 144, 226, 0.1);
+            background: white;
+            transform: translateY(-1px);
+        }
+
+        .form-group input.error {
+            border-color: #f44336;
+        }
+
+        .error-message {
+            color: #f44336;
+            font-size: 12px;
+            margin-top: 6px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #6b7280;
+            margin-top: 12px;
+            border: 2px solid #e5e7eb;
+        }
+
+        .btn-secondary:hover {
+            background: #f8f9fa;
+            color: #4a90e2;
+            border-color: #4a90e2;
+        }
+
+        /* 加载动画 */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #6366f1;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        /* 结果显示 */
+        .result {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .result.active {
+            display: block;
+        }
+
+        .result-icon {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin: 0 auto 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0;
+            position: relative;
+            animation: iconAppear 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes iconAppear {
+            from {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .result-icon::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 0.3;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 0;
+            }
+        }
+
+        .result-icon svg {
+            width: 50px;
+            height: 50px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .result.safe .result-icon {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
+        }
+
+        .result.safe .result-icon::before {
+            background: #10b981;
+        }
+
+        .result.warning .result-icon {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            box-shadow: 0 8px 24px rgba(245, 158, 11, 0.3);
+        }
+
+        .result.warning .result-icon::before {
+            background: #f59e0b;
+        }
+
+        .result.danger .result-icon {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            box-shadow: 0 8px 24px rgba(239, 68, 68, 0.3);
+        }
+
+        .result.danger .result-icon::before {
+            background: #ef4444;
+        }
+
+        .result h2 {
+            font-size: 22px;
+            margin-bottom: 10px;
+            font-weight: 600;
+            letter-spacing: 0;
+        }
+
+        .result.safe h2 {
+            color: #10b981;
+        }
+
+        .result.warning h2 {
+            color: #f59e0b;
+        }
+
+        .result.danger h2 {
+            color: #ef4444;
+        }
+
+        .result p {
+            color: #555;
+            font-size: 14px;
+            margin-bottom: 20px;
+            letter-spacing: 0;
+            line-height: 1.6;
+        }
+
+        .result-details {
+            background: linear-gradient(135deg, #fafbfc 0%, #f8f9fa 100%);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 24px 0;
+            text-align: left;
+            border: 1px solid #e8eaed;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            color: #888;
+            font-size: 13px;
+            font-weight: normal;
+            letter-spacing: 0;
+        }
+
+        .detail-value {
+            color: #1a1a1a;
+            font-weight: 600;
+            font-size: 14px;
+            letter-spacing: 0;
+        }
+
+        .risk-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .risk-badge.safe {
+            background: #e8f5e9;
+            color: #4caf50;
+        }
+
+        .risk-badge.warning {
+            background: #fff3e0;
+            color: #ff9800;
+        }
+
+        .risk-badge.danger {
+            background: #ffebee;
+            color: #f44336;
+        }
+
+        .recommendation {
+            background: #fff;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 16px;
+            margin-bottom: 24px;
+            text-align: left;
+        }
+
+        .recommendation h4 {
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .recommendation p {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        /* 风险详情 */
+        .risk-details {
+            margin-top: 20px;
+            text-align: left;
+        }
+
+
+        .risk-level-box {
+            background: linear-gradient(135deg, #fff8e1 0%, #fff3cd 100%);
+            border: 1px solid #ffc107;
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .risk-level-title {
+            font-size: 14px;
+            color: #f57c00;
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .risk-level-title::before {
+            content: '⚠️';
+            font-size: 16px;
+        }
+
+        .risk-level-desc {
+            font-size: 13px;
+            color: #856404;
+            line-height: 1.7;
+        }
+
+        .block-reason {
+            margin-top: 16px;
+            margin-bottom: 24px;
+        }
+
+        .block-reason-label {
+            font-size: 13px;
+            color: #999;
+            margin-bottom: 10px;
+        }
+
+        .block-reason-content {
+            background: white;
+            border: 1.5px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 14px 16px;
+            font-size: 13px;
+            color: #555;
+            line-height: 1.7;
+        }
+
+        .block-keyword {
+            color: #dc3545;
+            font-weight: 600;
+            background: #fff5f5;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        /* 次数限制提示 */
+        .quota-warning {
+            background: #fff3e0;
+            border-left: 4px solid #ff9800;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .quota-warning.show {
+            display: block;
+        }
+
+        .quota-warning p {
+            font-size: 13px;
+            color: #e65100;
+            line-height: 1.6;
+        }
+
+        .quota-warning strong {
+            color: #e65100;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>USDT充值</h1>
+            <p>安全快捷的数字货币充值服务</p>
+        </div>
+
+        <div class="content">
+            <!-- 安全检测入口横幅 -->
+            <div class="security-banner" id="securityBanner">
+                <div class="security-icon">🛡️</div>
+                <div class="security-content">
+                    <div class="security-title">
+                        地址安全自测工具
+                        <span class="security-badge">推荐</span>
+                    </div>
+                    <div class="security-desc">检测转账地址风险，避免风控退款</div>
+                    <div class="quota-info">
+                        <span class="quota-text" id="quotaText">今日剩余 47/50 次</span>
+                        <div class="quota-bar">
+                            <div class="quota-fill" id="quotaFill" style="width: 94%;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="security-arrow">›</div>
+            </div>
+
+            <!-- 充值信息 -->
+            <div class="warning-banner">
+                <p>*请仔细核对后台与确认账上的钱包地址是否一致，若不相同，请找财务对接是否再充值。</p>
+            </div>
+
+            <div class="merchant-info-container">
+                <div class="merchant-info">
+                    <span class="label">商户</span>
+                    <span class="value">woshishanghu</span>
+                </div>
+                <div class="merchant-info">
+                    <span class="label">当前汇率</span>
+                    <span class="value">7.34</span>
+                </div>
+            </div>
+
+            <div class="qr-container" id="qrContainer">
+                <div class="qr-code placeholder" id="qrcodeBox">
+                    <div class="qr-placeholder">
+                        <div class="qr-corner"></div>
+                        <div class="qr-timing">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                        <div class="qr-data">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                        <div class="qr-corner"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="address-display" id="addressDisplay">
+                <div class="address-label">USDT收款地址：</div>
+                <div class="address-text" id="addressText"></div>
+            </div>
+
+            <div class="form-group" style="padding: 0 16px;">
+                <label>钱包类型</label>
+                <div class="radio-group">
+                    <label>
+                        <input type="radio" name="wallet" value="tron" checked>
+                        <span>tron</span>
+                    </label>
+                </div>
+            </div>
+
+            <div style="padding: 16px;">
+                <button class="btn btn-primary" id="getAddressBtn">
+                    <span>获取钱包地址</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 地址检测工具模态框 -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <div>
+                    <div class="modal-title">🛡️ 地址安全检测</div>
+                    <div class="modal-subtitle">保障您的充值安全，避免风控退款</div>
+                </div>
+                <button class="close-btn" id="closeBtn">✕</button>
+            </div>
+
+            <div class="modal-content">
+                <!-- 次数限制警告 -->
+                <div class="quota-warning" id="quotaWarning">
+                    <p>⚠️ <strong>检测次数不足：</strong>您今日的检测次数已用完（0/50），请明天再试或联系客服。</p>
+                </div>
+
+                <!-- 步骤指示器 -->
+                <div class="steps">
+                    <div class="step active" id="step1">
+                        <div class="step-circle">1</div>
+                        <div class="step-label">输入地址</div>
+                    </div>
+                    <div class="step" id="step2">
+                        <div class="step-circle">2</div>
+                        <div class="step-label">安全检测</div>
+                    </div>
+                    <div class="step" id="step3">
+                        <div class="step-circle">3</div>
+                        <div class="step-label">查看结果</div>
+                    </div>
+                </div>
+
+                <!-- 步骤1: 地址输入 -->
+                <div class="check-section active" id="checkInput">
+                    <div class="info-box">
+                        <h3>为什么要检测转账地址？</h3>
+                        <p>为了保障资金安全和交易顺利，我们建议您在充值前检测转账地址的安全性。</p>
+                        <ul>
+                            <li>🔍 检测地址是否被标记为高风险</li>
+                            <li>⚠️ 避免因地址问题导致被风控退款</li>
+                            <li>✅ 确保交易快速到账</li>
+                        </ul>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="addressInput">请输入您的USDT转账地址</label>
+                        <div class="input-wrapper">
+                            <input 
+                                type="text" 
+                                id="addressInput" 
+                                placeholder="例如：TGcEXj1mB6Cf7qdiTnsBozNhq8ks8gcPLK"
+                                autocomplete="off"
+                            >
+                        </div>
+                        <div class="error-message" id="addressError">请输入有效的USDT地址</div>
+                    </div>
+
+                    <button class="btn btn-primary" id="checkBtn">
+                        <span>🔍 开始检测</span>
+                    </button>
+
+                    <button class="btn btn-secondary" id="skipBtn">
+                        <span>跳过检测，返回充值</span>
+                    </button>
+                </div>
+
+                <!-- 加载中 -->
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>正在检测地址安全性...</p>
+                    <p style="font-size: 12px; color: #999; margin-top: 8px;">预计需要3-5秒</p>
+                </div>
+
+                <!-- 步骤2&3: 检测结果 -->
+                <div class="result" id="result">
+                    <div class="result-icon" id="resultIcon"></div>
+                    <h2 id="resultTitle"></h2>
+                    <p id="resultDesc"></p>
+
+                    <div class="result-details">
+                        <div class="detail-row">
+                            <span class="detail-label">检测地址</span>
+                            <span class="detail-value" id="checkedAddress"></span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">剩余次数</span>
+                            <span class="detail-value" id="remainingQuota"></span>
+                        </div>
+                    </div>
+
+                <div class="recommendation" id="recommendation">
+                    <h4>💡 建议</h4>
+                    <p id="recommendationText"></p>
+                </div>
+
+                <!-- 风险详情 -->
+                <div class="risk-details" id="riskDetails" style="display: none;">
+                    <div class="risk-level-box">
+                        <div class="risk-level-title">风险等级：<span id="riskLevelText"></span></div>
+                        <div class="risk-level-desc" id="riskLevelDesc"></div>
+                    </div>
+
+                    <div class="block-reason">
+                        <div class="block-reason-label">阻挡原因：</div>
+                        <div class="block-reason-content" id="blockReasonContent"></div>
+                    </div>
+                </div>
+
+                    <button class="btn btn-primary" id="proceedBtn"></button>
+                    <button class="btn btn-secondary" id="recheckBtn" style="display: none;">更换地址重新检测</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 商户配置
+        const MERCHANT_ID = 'woshishanghu';
+        const DAILY_LIMIT = 50;
+
+        // 获取本地存储的检测次数
+        function getQuotaData() {
+            const today = new Date().toDateString();
+            const stored = localStorage.getItem('addressCheckQuota');
+            
+            if (stored) {
+                const data = JSON.parse(stored);
+                // 如果是今天的数据，返回；否则重置
+                if (data.date === today && data.merchant === MERCHANT_ID) {
+                    return data;
+                }
+            }
+            
+            // 重置为新的一天
+            const newData = {
+                merchant: MERCHANT_ID,
+                date: today,
+                used: 0,
+                remaining: DAILY_LIMIT
+            };
+            localStorage.setItem('addressCheckQuota', JSON.stringify(newData));
+            return newData;
+        }
+
+        // 更新检测次数
+        function updateQuota() {
+            const data = getQuotaData();
+            if (data.remaining > 0) {
+                data.used += 1;
+                data.remaining -= 1;
+                localStorage.setItem('addressCheckQuota', JSON.stringify(data));
+                return true;
+            }
+            return false;
+        }
+
+        // 更新UI显示的次数
+        function updateQuotaDisplay() {
+            const data = getQuotaData();
+            const quotaText = document.getElementById('quotaText');
+            const quotaFill = document.getElementById('quotaFill');
+            
+            quotaText.textContent = `今日剩余 ${data.remaining}/${DAILY_LIMIT} 次`;
+            quotaFill.style.width = `${(data.remaining / DAILY_LIMIT) * 100}%`;
+            
+            // 如果次数少于10次，改变颜色警告
+            if (data.remaining < 10) {
+                quotaText.style.color = '#ff9800';
+                quotaFill.style.background = '#ff9800';
+            }
+            
+            if (data.remaining === 0) {
+                quotaText.style.color = '#f44336';
+                quotaFill.style.background = '#f44336';
+            }
+        }
+
+        // 检查是否还有次数
+        function hasQuotaRemaining() {
+            const data = getQuotaData();
+            return data.remaining > 0;
+        }
+
+        // 步骤管理
+        const steps = {
+            current: 1,
+            updateStep(step) {
+                this.current = step;
+                document.querySelectorAll('.step').forEach((el, index) => {
+                    const stepNum = index + 1;
+                    el.classList.remove('active', 'completed');
+                    if (stepNum < step) {
+                        el.classList.add('completed');
+                    } else if (stepNum === step) {
+                        el.classList.add('active');
+                    }
+                });
+            }
+        };
+
+        // 地址验证
+        function validateAddress(address) {
+            const trc20Pattern = /^T[A-Za-z0-9]{33}$/;
+            const erc20Pattern = /^0x[A-Fa-f0-9]{40}$/;
+            return trc20Pattern.test(address) || erc20Pattern.test(address);
+        }
+
+        // 测试地址（符合TRC20格式：T开头34位）
+        const TEST_ADDRESSES = {
+            safe: 'TGcEXj1mB6Cf7qdiTnsBozNhq8ks8gcPLK',  // 安全地址
+            danger: 'TRiskAddr1mB6Cf7qdiTnsBozNhq8ksABC'  // 高风险地址
+        };
+
+        // 模拟地址检测API
+        function checkAddressRisk(address) {
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    let result;
+
+                    // 检查是否是测试地址
+                    if (address === TEST_ADDRESSES.safe) {
+                        // 安全地址
+                        result = {
+                            status: 'safe',
+                            title: '地址安全',
+                            desc: '该地址未发现任何风险标记，可以安全使用',
+                            riskLevel: '低风险',
+                            txCount: 328,
+                            blacklisted: '未列入',
+                            recommendation: '您的地址安全性良好，可以继续进行充值操作。预计到账时间为5-15分钟。',
+                            canProceed: true
+                        };
+                    } else if (address === TEST_ADDRESSES.danger) {
+                        // 高危地址
+                        result = {
+                            status: 'danger',
+                            title: '高风险地址',
+                            desc: '该地址被标记为高风险，可能导致充值失败或延迟',
+                            riskLevel: '高风险',
+                            txCount: 23,
+                            blacklisted: '已列入观察名单',
+                            recommendation: '为了您的资金安全，强烈建议您更换其他钱包地址进行充值。',
+                            canProceed: false
+                        };
+                    } else {
+                        // 其他地址随机
+                        const random = Math.random();
+                        if (random < 0.7) {
+                            result = {
+                                status: 'safe',
+                                title: '地址安全',
+                                desc: '该地址未发现任何风险标记，可以安全使用',
+                                riskLevel: '低风险',
+                                txCount: Math.floor(Math.random() * 500) + 50,
+                                blacklisted: '未列入',
+                                recommendation: '您的地址安全性良好，可以继续进行充值操作。预计到账时间为5-15分钟。',
+                                canProceed: true
+                            };
+                        } else if (random < 0.9) {
+                            result = {
+                                status: 'warning',
+                                title: '检测到潜在风险',
+                                desc: '该地址可能存在一些异常交易记录',
+                                riskLevel: '中风险',
+                                txCount: Math.floor(Math.random() * 100) + 10,
+                                blacklisted: '未列入',
+                                recommendation: '建议您：1) 确认该地址近期交易记录正常；2) 或使用其他钱包地址进行充值。',
+                                canProceed: true
+                            };
+                        } else {
+                            result = {
+                                status: 'danger',
+                                title: '高风险地址',
+                                desc: '该地址被标记为高风险，可能导致充值失败或延迟',
+                                riskLevel: '高风险',
+                                txCount: Math.floor(Math.random() * 50),
+                                blacklisted: '已列入观察名单',
+                                recommendation: '为了您的资金安全，强烈建议您更换其他钱包地址进行充值。',
+                                canProceed: false
+                            };
+                        }
+                    }
+
+                    result.address = address;
+                    resolve(result);
+                }, 3000);
+            });
+        }
+
+        // UI元素
+        const securityBanner = document.getElementById('securityBanner');
+        const modalOverlay = document.getElementById('modalOverlay');
+        const closeBtn = document.getElementById('closeBtn');
+        const checkInput = document.getElementById('checkInput');
+        const loading = document.getElementById('loading');
+        const result = document.getElementById('result');
+        const addressInput = document.getElementById('addressInput');
+        const addressError = document.getElementById('addressError');
+        const checkBtn = document.getElementById('checkBtn');
+        const skipBtn = document.getElementById('skipBtn');
+        const recheckBtn = document.getElementById('recheckBtn');
+        const proceedBtn = document.getElementById('proceedBtn');
+        const quotaWarning = document.getElementById('quotaWarning');
+
+        // 初始化
+        updateQuotaDisplay();
+
+        // 打开模态框
+        securityBanner.addEventListener('click', () => {
+            const hasQuota = hasQuotaRemaining();
+            
+            if (!hasQuota) {
+                // 显示次数用完的提示
+                quotaWarning.classList.add('show');
+                checkBtn.disabled = true;
+                checkBtn.style.opacity = '0.5';
+                checkBtn.style.cursor = 'not-allowed';
+            } else {
+                quotaWarning.classList.remove('show');
+                checkBtn.disabled = false;
+                checkBtn.style.opacity = '1';
+                checkBtn.style.cursor = 'pointer';
+            }
+            
+            modalOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+
+        // 关闭模态框
+        function closeModal() {
+            modalOverlay.classList.remove('active');
+            document.body.style.overflow = '';
+            
+            // 重置状态
+            setTimeout(() => {
+                checkInput.classList.add('active');
+                loading.classList.remove('active');
+                result.classList.remove('active');
+                steps.updateStep(1);
+                addressInput.value = '';
+                addressInput.classList.remove('error');
+                addressError.classList.remove('show');
+            }, 300);
+        }
+
+        closeBtn.addEventListener('click', closeModal);
+        skipBtn.addEventListener('click', closeModal);
+
+        // 点击遮罩关闭
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) {
+                closeModal();
+            }
+        });
+
+        // 开始检测
+        checkBtn.addEventListener('click', async () => {
+            const address = addressInput.value.trim();
+
+            // 验证地址
+            if (!validateAddress(address)) {
+                addressInput.classList.add('error');
+                addressError.classList.add('show');
+                return;
+            }
+
+            // 检查次数
+            if (!hasQuotaRemaining()) {
+                alert('检测次数已用完，请明天再试！');
+                return;
+            }
+
+            addressInput.classList.remove('error');
+            addressError.classList.remove('show');
+
+            // 扣除次数
+            updateQuota();
+            updateQuotaDisplay();
+
+            // 显示加载动画
+            checkInput.classList.remove('active');
+            loading.classList.add('active');
+            steps.updateStep(2);
+
+            // 执行检测
+            const checkResult = await checkAddressRisk(address);
+
+            // 显示结果
+            loading.classList.remove('active');
+            result.classList.add('active');
+            result.className = `result active ${checkResult.status}`;
+            steps.updateStep(3);
+
+            // 填充结果数据 - SVG图标
+            const resultIcon = document.getElementById('resultIcon');
+            resultIcon.innerHTML = '';
+            
+            if (checkResult.status === 'safe') {
+                resultIcon.innerHTML = `
+                    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                `;
+            } else if (checkResult.status === 'warning') {
+                resultIcon.innerHTML = `
+                    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                        <line x1="12" y1="9" x2="12" y2="13"></line>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                `;
+            } else {
+                resultIcon.innerHTML = `
+                    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="15" y1="9" x2="9" y2="15"></line>
+                        <line x1="9" y1="9" x2="15" y2="15"></line>
+                    </svg>
+                `;
+            }
+            document.getElementById('resultTitle').textContent = checkResult.title;
+            document.getElementById('resultDesc').textContent = checkResult.desc;
+            document.getElementById('checkedAddress').textContent = 
+                checkResult.address.substring(0, 10) + '...' + checkResult.address.substring(checkResult.address.length - 8);
+            
+            const quotaData = getQuotaData();
+            document.getElementById('remainingQuota').textContent = `${quotaData.remaining}/${DAILY_LIMIT} 次`;
+            
+            document.getElementById('recommendationText').textContent = checkResult.recommendation;
+
+            // 显示风险详情
+            const riskDetails = document.getElementById('riskDetails');
+            const recommendation = document.getElementById('recommendation');
+            
+            if (checkResult.status === 'warning' || checkResult.status === 'danger') {
+                // 显示风险详情
+                recommendation.style.display = 'none';
+                riskDetails.style.display = 'block';
+                
+                // 填充风险详情 - 合并原因和等级
+                const levelText = checkResult.status === 'danger' ? '严重' : '中等';
+                const reasonDesc = checkResult.status === 'danger' ? 
+                    '该地址存在严重安全隐患，不建议使用。此地址可能涉及可疑交易活动，使用该地址充值可能导致风控退款。' : 
+                    '该地址存在潜在安全隐患，此地址存在异常交易记录，建议更换其他地址。';
+                
+                document.getElementById('riskLevelText').textContent = levelText;
+                document.getElementById('riskLevelDesc').textContent = reasonDesc;
+                
+                document.getElementById('blockReasonContent').innerHTML = 
+                    '检测到与 <span class="block-keyword">black-gray-goods-manual</span> 相关的活动记录';
+            } else {
+                // 安全地址不显示建议
+                recommendation.style.display = 'none';
+                riskDetails.style.display = 'none';
+            }
+
+            // 设置按钮
+            if (checkResult.canProceed) {
+                if (checkResult.status === 'safe') {
+                    // 安全地址：只显示返回充值按钮
+                    proceedBtn.textContent = '✅ 确认，返回充值';
+                    proceedBtn.onclick = closeModal;
+                    recheckBtn.style.display = 'none';
+                } else {
+                    // 警告地址：显示继续充值和重新检测两个按钮
+                    proceedBtn.textContent = '⚠️ 了解风险，继续充值';
+                    proceedBtn.onclick = closeModal;
+                    recheckBtn.style.display = 'block';
+                }
+            } else {
+                // 高危地址：只显示更换地址按钮
+                proceedBtn.textContent = '🔄 更换地址重新检测';
+                proceedBtn.onclick = () => {
+                    result.classList.remove('active');
+                    checkInput.classList.add('active');
+                    steps.updateStep(1);
+                    addressInput.value = '';
+                    addressInput.focus();
+                };
+                recheckBtn.style.display = 'none';
+            }
+        });
+
+        // 重新检测
+        recheckBtn.addEventListener('click', () => {
+            if (!hasQuotaRemaining()) {
+                alert('检测次数已用完（0/50），请明天再试！');
+                return;
+            }
+            
+            result.classList.remove('active');
+            checkInput.classList.add('active');
+            steps.updateStep(1);
+            addressInput.value = '';
+            addressInput.focus();
+        });
+
+        // 输入时清除错误状态
+        addressInput.addEventListener('input', () => {
+            addressInput.classList.remove('error');
+            addressError.classList.remove('show');
+        });
+
+        // 回车触发检测
+        addressInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !checkBtn.disabled) {
+                checkBtn.click();
+            }
+        });
+        // 生成二维码
+        function generateQRCode(text) {
+            const qrcodeBox = document.getElementById('qrcodeBox');
+            qrcodeBox.innerHTML = '';
+            qrcodeBox.classList.remove('placeholder');
+            
+            const size = 200;
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            
+            // 背景
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, size, size);
+            
+            // 绘制二维码样式的图案
+            ctx.fillStyle = '#000000';
+            const cellSize = size / 25;
+            
+            // 简化的二维码图案
+            const pattern = [
+                [1,1,1,1,1,1,1,0,1,0,0,1,0,1,0,0,0,1,1,1,1,1,1,1,1],
+                [1,0,0,0,0,0,1,0,0,1,1,0,1,0,1,0,0,1,0,0,0,0,0,0,1],
+                [1,0,1,1,1,0,1,0,1,0,1,1,0,1,0,1,0,1,0,1,1,1,0,0,1],
+                [1,0,1,1,1,0,1,0,0,1,0,1,1,0,1,1,0,1,0,1,1,1,0,0,1],
+                [1,0,1,1,1,0,1,0,1,1,1,0,0,1,0,0,0,1,0,1,1,1,0,0,1],
+                [1,0,0,0,0,0,1,0,0,0,1,1,1,0,1,1,0,1,0,0,0,0,0,0,1],
+                [1,1,1,1,1,1,1,0,1,0,1,0,1,0,1,0,1,1,1,1,1,1,1,1,1],
+                [0,0,0,0,0,0,0,0,0,1,0,1,0,1,0,1,0,0,0,0,0,0,0,0,0],
+                [1,0,1,1,0,1,1,1,1,0,1,1,0,0,1,1,0,1,1,0,0,1,1,0,1],
+                [0,1,0,1,1,0,0,0,0,1,0,0,1,1,0,0,1,0,0,1,1,0,0,1,0],
+                [1,1,1,0,0,1,1,1,1,0,1,1,0,0,1,1,0,1,1,0,0,1,1,0,1],
+                [0,0,0,1,1,0,0,0,0,1,0,0,1,1,0,0,1,0,0,1,1,0,0,1,0],
+                [1,1,1,0,0,1,1,1,1,0,1,1,0,0,1,1,0,1,1,0,0,1,1,0,1],
+                [0,1,0,1,1,0,0,0,0,1,0,0,1,1,0,0,1,0,0,1,1,0,0,1,0],
+                [1,0,1,0,0,1,1,1,1,0,1,1,0,0,1,1,0,1,1,0,0,1,1,0,1],
+                [0,1,0,1,1,0,0,0,0,1,0,0,1,1,0,0,1,0,0,1,1,0,0,1,0],
+                [1,1,1,0,0,1,1,1,1,0,1,1,0,0,1,1,0,1,1,0,0,1,1,0,1],
+                [0,0,0,0,0,0,0,0,1,0,1,0,1,0,1,0,1,0,0,0,0,0,0,0,0],
+                [1,1,1,1,1,1,1,0,0,1,0,1,0,1,0,1,0,1,1,1,1,1,1,1,1],
+                [1,0,0,0,0,0,1,0,1,0,1,1,1,0,1,1,0,1,0,0,0,0,0,0,1],
+                [1,0,1,1,1,0,1,0,1,1,0,0,0,1,0,0,1,1,0,1,1,1,0,0,1],
+                [1,0,1,1,1,0,1,0,0,0,1,1,1,0,1,1,0,1,0,1,1,1,0,0,1],
+                [1,0,1,1,1,0,1,0,1,1,0,0,0,1,0,0,1,1,0,1,1,1,0,0,1],
+                [1,0,0,0,0,0,1,0,0,0,1,1,1,0,1,1,0,1,0,0,0,0,0,0,1],
+                [1,1,1,1,1,1,1,0,1,1,0,0,0,1,0,0,1,1,1,1,1,1,1,1,1],
+            ];
+            
+            pattern.forEach((row, i) => {
+                row.forEach((cell, j) => {
+                    if (cell === 1) {
+                        ctx.fillRect(j * cellSize, i * cellSize, cellSize, cellSize);
+                    }
+                });
+            });
+            
+            qrcodeBox.appendChild(canvas);
+        }
+
+        // 获取充值地址
+        const getAddressBtn = document.getElementById('getAddressBtn');
+        const qrContainer = document.getElementById('qrContainer');
+        const addressDisplay = document.getElementById('addressDisplay');
+        const addressText = document.getElementById('addressText');
+
+        getAddressBtn.addEventListener('click', () => {
+            // 模拟获取地址
+            const address = 'TGcEXj1mB6Cf7qdiTnsBozNhq8ks8gcPLK';
+            
+            // 显示二维码和地址
+            qrContainer.classList.add('show');
+            addressDisplay.classList.add('show');
+            addressText.textContent = address;
+            
+            // 生成二维码
+            generateQRCode(address);
+            
+            // 修改按钮文字
+            getAddressBtn.innerHTML = '<span>刷新钱包地址</span>';
+        });
+    </script>
+</body>
+</html>

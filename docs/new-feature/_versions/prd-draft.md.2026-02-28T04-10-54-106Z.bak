@@ -1,0 +1,174 @@
+# AI Sticky v1.0 可点击原型制作稿（交付给设计/评审）
+
+## 0. 原型目标（本次必须做到）
+- 评审可“点通”四条闭环：新建便签 → 设置 → 失败修复 → 回到正常；日历授权闭环；告警查看闭环；全局暂停刷新闭环
+- 便签窗口具备“可缩放”的交互展示（至少在原型中用状态页演示缩放前后布局）
+- 覆盖模板：基础 5 个（币价/股票/交通/天气/记事）+ P0 扩展 3 个（日历/番茄钟/纪念日）
+
+---
+
+## 1. Frame 目录（Figma 页面结构）
+建议 Figma Pages：
+- Page A：00-组件库 Components
+- Page B：01-入口 & 新建流程
+- Page C：02-便签模板（8 张示例）
+- Page D：03-便签设置 Popover
+- Page E：04-告警中心
+- Page F：05-Key 管理 & Key 向导
+- Page G：06-状态/失败态总集（必须）
+
+---
+
+## 2. 核心组件（先做组件再铺页面）
+### 2.1 Sticky Window Shell（通用便签壳）
+- Header：图标 + 标题（可编辑态/只读态两种） + 按钮（刷新/齿轮/…）
+- Body：Slot（不同模板塞不同内容）
+- Footer（强制一致）：
+  - 左：Last Updated（相对时间）
+  - 中：Status Chip（Normal/Offline/RateLimit/KeyMissing/KeyInvalid/PermissionMissing/Paused）
+  - 右：Action（Retry/Fix Key/Authorize/Switch Provider/View Alerts）
+
+### 2.2 Popover（设置弹层）
+Tabs（v1.0 固定）：
+- 概览 / 刷新 / 规则 / 通知通道 / 数据源&Key
+
+### 2.3 状态 Chip（组件变体）
+- Normal（绿点/灰字）
+- Offline（红）
+- RateLimit 429（黄）
+- KeyMissing（红）
+- KeyInvalid 401（红）
+- PermissionMissing（日历用，红）
+- Paused（灰）
+
+### 2.4 Primary Actions（按钮规范）
+- 主按钮：修复 Key / 点击授权 / 重试
+- 次按钮：查看详情 / 切换 Provider
+
+---
+
+## 3. 原型必须可点击的“连线清单”（评审门槛）
+### 3.1 入口与新建
+1) 菜单栏下拉 →「+ 新建便签」→ 模板选择器  
+2) 模板选择器 →（选任意模板）→ 最小配置页 →「创建」→ 对应便签窗口出现  
+3) 菜单栏下拉 →「搜索/切换便签」→ 全局切换器 → 回车聚焦某便签（跳到该便签窗口 Frame）
+
+### 3.2 便签内交互
+4) 便签齿轮可点 → 打开设置 Popover（可切 Tab）  
+5) 便签「…」可点 → 弹菜单（置顶/锁定/透明度/关闭），至少置顶/锁定有勾选态  
+6) 便签 Footer 的动作可点（Retry/Fix Key/Authorize）→ 对应修复弹层 → 成功态页面
+
+### 3.3 告警闭环（最小）
+7) 便签右下角告警角标（或 Footer“View Alerts”）→ 告警中心（默认筛选到该便签）  
+8) 告警列表点一条 → 右侧详情展示“阈值/触发值/时间戳/合并次数”  
+9) 告警详情「跳转到便签」→ 回到该便签窗口
+
+### 3.4 Key/权限闭环（你们的死命令）
+10) KeyMissing/KeyInvalid 状态 → 点「修复 Key」→ Key 向导（粘贴 Key）→ 试请求成功 → 回到便签 Normal  
+11) 日历 PermissionMissing 状态 → 点「点击授权」→ 授权成功态 → 显示下一场会议倒计时
+
+---
+
+## 4. 必做模板的低保真布局（8 张便签示例 Frame）
+每个模板至少做 2 个状态：Normal + 1 个失败/特殊态（见第 6 节）
+
+### A1 币价（Market）
+- Body：标的 + 现价大字 + 24h 涨跌（红绿）+（可选小趋势）
+- Footer：Last Updated + Normal
+
+### A2 股票（Stock）
+- Body：代码/名称 + 现价 + 涨跌幅
+- Footer：Normal
+
+### A3 交通（Traffic）
+- Body：路线（家→公司）+ ETA 大字 + 拥堵条
+- Footer：Normal + Provider 显示在设置页
+
+### A4 天气（Weather）
+- Body：城市/定位 + 温度大字 + 降雨概率
+- Footer：Normal
+
+### A5 记事（Note）
+- Body：文本编辑区 + 右上角「AI 整理」按钮（点了跳到“整理结果态”）
+- Footer：Normal（记事默认无网络状态也行，但仍显示“本地/无刷新”）
+
+### P0-1 日历/会议倒计时（Calendar）
+- Body：下一场会议标题 + 开始时间 + T-xx 倒计时 + Join 按钮（若有会议链接）
+- Footer：Normal 或 PermissionMissing
+
+### P0-2 番茄钟（Pomodoro）
+- Body：剩余时间大字 + 状态（专注/休息/暂停）+ 三按钮（开始/暂停/重置）
+- Footer：Normal（本地）
+
+### P0-3 纪念日（Anniversary）
+- Body：事件名 + D-天数（或剩余小时）
+- Footer：Normal（本地）
+
+---
+
+## 5. 设置 Popover（必须做成可点击 Tab）
+每个 Tab 只做最低字段，能演示闭环即可：
+
+### 5.1 概览
+- 便签类型/标的/地点
+- 当前 Provider（若适用）
+- 最近一次成功时间戳
+- 「打开告警历史」
+
+### 5.2 刷新
+- 刷新档位：1/5/15/60（本地模板可显示“本地计算”）
+- 开关：可见优先 / 后台降频
+- 按钮：暂停此便签刷新（可选，但建议做）
+
+### 5.3 规则
+- 规则列表（1 条示例即可）
+- 去重窗口（默认 10 分钟）
+- 动作：变色/角标开关
+
+### 5.4 通知通道（默认全关）
+- 系统通知 toggle（默认 off）
+- 声音 toggle（默认 off）
+- 文案说明：仅显式开启后才会发送
+
+### 5.5 数据源 & Key
+- Provider 下拉（交通/天气必须可切换）
+- Key 状态（有效/无/失效/限流）
+- 「测试连接」「修复 Key」「切换 Provider」
+
+---
+
+## 6. 必须补齐的状态页（否则评审不过）
+放在 Page G：06-状态/失败态总集，并从对应便签 Footer 连线过去。
+
+每个联网模板至少具备以下 4 种之一（建议都做成独立 Frame 便于连线）：
+1) Offline：展示“上次成功快照 + 上次成功时间”，Footer=Offline，动作=Retry  
+2) RateLimit 429：展示上次快照，Footer=RateLimit，动作=查看详情/切 Provider  
+3) KeyMissing：Body 展示占位，Footer=KeyMissing，动作=Fix Key  
+4) KeyInvalid 401：同上，动作=Fix Key  
+日历额外：
+5) PermissionMissing：Body 显示授权引导，Footer=PermissionMissing，动作=点击授权
+
+---
+
+## 7. 缩放能力在原型里的呈现方式（必须明确）
+Figma 无法真实缩放窗口行为，采用“两个 Frame 表示缩放前后”：
+- Frame：Sticky-Resize-Small（最小尺寸 220×140）
+- Frame：Sticky-Resize-Large（例如 420×260）
+在便签右下角画出 resize handle，并用热点连线：点击 handle → 跳到 Large；Large 再点 → 回 Small。  
+标注规则：Header/Footer 固定高度，Body 自适应。
+
+---
+
+## 8. 交付验收（原型完成的判断标准）
+- 任意一张联网便签：Normal →（切到 KeyMissing/Offline）→ 点 Footer 修复/重试 → 回 Normal，整条链路可点击演示
+- 日历：PermissionMissing → 点击授权 → 回 Normal 并出现会议倒计时
+- 告警：便签角标 → 告警中心 → 详情 → 跳回便签
+- 缩放：Small ↔ Large 两态可切换演示
+
+---
+
+## 9. 需要你确认的 2 个原型口径（今天定死）
+1) 失败时 Body：是否强制显示“上次成功快照”（建议：所有联网模板强制显示）  
+2) 触发态颜色清除：条件解除自动恢复颜色 vs 需手动清除（建议：条件解除自动恢复；告警历史仍保留）
+
+确认后按上述目录直接出可点击原型即可进入下一轮评审。

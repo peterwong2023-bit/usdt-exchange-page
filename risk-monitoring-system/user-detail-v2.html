@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户风险详情 - 波币AI风险监控系统</title>
+    <link rel="stylesheet" href="styles-v4.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body style="background: #f8fafc;">
+    <!-- 顶部导航栏 -->
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <h1 class="logo">
+                    <img src="../bob.png" alt="波币" class="logo-icon">
+                    <span class="logo-text">波币AI风险监控系统</span>
+                </h1>
+                <div class="subtitle-container">
+                    <span class="subtitle-cn">抓光所有骗子</span>
+                    <span class="subtitle-divider">·</span>
+                    <span class="subtitle-en">Anti Scammer</span>
+                </div>
+            </div>
+            
+            <div class="header-right">
+                <div class="header-actions">
+                    <button class="btn btn-outline" onclick="window.history.back()">
+                        <i class="fas fa-arrow-left"></i>
+                        返回
+                    </button>
+                    <button class="btn btn-primary" onclick="window.location.href='index-v4.html'">
+                        <i class="fas fa-home"></i>
+                        返回首页
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 面包屑导航 -->
+    <div style="max-width: 1600px; margin: 0 auto; padding: 16px 24px;">
+        <div style="display: flex; align-items: center; gap: 8px; font-size: 14px; color: #64748b;">
+            <a href="index-v4.html" style="color: #3b82f6; text-decoration: none;">首页</a>
+            <i class="fas fa-chevron-right" style="font-size: 10px;"></i>
+            <a href="users.html" style="color: #3b82f6; text-decoration: none;">用户风险列表</a>
+            <i class="fas fa-chevron-right" style="font-size: 10px;"></i>
+            <span>用户详情 - #9f3e_7A12345h78</span>
+        </div>
+    </div>
+
+    <!-- 主内容 -->
+    <div style="max-width: 1600px; margin: 0 auto; padding: 0 24px 24px;">
+        <!-- 用户基本信息卡片 -->
+        <div class="dashboard-card" style="margin-bottom: 20px;">
+            <div style="padding: 24px; display: flex; align-items: center; gap: 24px;">
+                <img src="https://i.pravatar.cc/150?img=1" alt="avatar" style="width: 80px; height: 80px; border-radius: 16px; border: 3px solid #e2e8f0; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                <div style="flex: 1;">
+                    <h1 style="font-size: 28px; font-weight: 800; color: #0f172a; margin-bottom: 8px; font-family: 'JetBrains Mono', monospace;">#9f3e_7A12345h78</h1>
+                    <div style="display: flex; gap: 24px; font-size: 14px; color: #64748b;">
+                        <span><i class="fas fa-map-marker-alt" style="color: #94a3b8;"></i> 深圳</span>
+                        <span><i class="fas fa-globe" style="color: #94a3b8;"></i> 112.25.67.89</span>
+                        <span><i class="fas fa-clock" style="color: #94a3b8;"></i> 2025-11-28 14:23:15</span>
+                    </div>
+                </div>
+                <div style="width: 100px; height: 100px; border-radius: 20px; background: linear-gradient(135deg, #dc2626, #b91c1c); display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; box-shadow: 0 8px 20px rgba(220, 38, 38, 0.3);">
+                    <div style="font-size: 48px; font-weight: 900; font-family: 'JetBrains Mono', monospace;">91</div>
+                    <div style="font-size: 12px; font-weight: 600; opacity: 0.9;">风险分</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Risk Summary 风险总结 -->
+        <div class="dashboard-card" style="margin-bottom: 20px; background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border: 2px solid #fbbf24;">
+            <div style="padding: 20px;">
+                <h2 style="font-size: 18px; font-weight: 700; color: #92400e; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    风险总结 - 为什么91分高危
+                </h2>
+                
+                <!-- Top3原因 -->
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px;">
+                    <div class="dashboard-card" style="cursor: pointer; padding: 16px; border-left: 4px solid #dc2626; transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'" onclick="scrollToRule('SEC_DEVICE_FP_CHANGE')">
+                        <div style="font-size: 14px; font-weight: 700; color: #0f172a; margin-bottom: 6px;">设备指纹24h变化</div>
+                        <div style="font-size: 12px; color: #64748b; margin-bottom: 8px;">触发4次</div>
+                        <div style="font-size: 24px; font-weight: 800; color: #dc2626; font-family: 'JetBrains Mono', monospace;">-32</div>
+                    </div>
+                    
+                    <div class="dashboard-card" style="cursor: pointer; padding: 16px; border-left: 4px solid #f59e0b; transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'" onclick="scrollToRule('SEC_IP_CITY_DRIFT')">
+                        <div style="font-size: 14px; font-weight: 700; color: #0f172a; margin-bottom: 6px;">24h跨城市登录</div>
+                        <div style="font-size: 12px; color: #64748b; margin-bottom: 8px;">跨越4次，最远962km</div>
+                        <div style="font-size: 24px; font-weight: 800; color: #f59e0b; font-family: 'JetBrains Mono', monospace;">-24</div>
+                    </div>
+                    
+                    <div class="dashboard-card" style="cursor: pointer; padding: 16px; border-left: 4px solid #f59e0b; transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'" onclick="scrollToRule('TRADE_HIGH_CANCEL')">
+                        <div style="font-size: 14px; font-weight: 700; color: #0f172a; margin-bottom: 6px;">频繁取消订单</div>
+                        <div style="font-size: 12px; color: #64748b; margin-bottom: 8px;">3次取消</div>
+                        <div style="font-size: 24px; font-weight: 800; color: #f59e0b; font-family: 'JetBrains Mono', monospace;">-20</div>
+                    </div>
+                </div>
+
+                <!-- 关键证据摘要 -->
+                <div class="dashboard-card" style="background: white; padding: 16px; margin-bottom: 16px;">
+                    <div style="font-size: 13px; color: #475569; line-height: 1.6;">
+                        <strong style="color: #0f172a;">关键证据：</strong>
+                        设备指纹24h内变化4次（DFP_889977→DFP_445566→DFP_778899→DFP_223344） | 
+                        IP跨城市登录（上海→深圳→广州→北京） | 
+                        24h内取消3笔订单（订单金额¥5800、¥6300、¥4500）
+                    </div>
+                </div>
+
+                <!-- 推荐动作 -->
+                <div style="display: flex; gap: 12px;">
+                    <button class="btn" style="flex: 1; background: #dc2626; color: white; padding: 12px; font-size: 14px; font-weight: 600;">
+                        <i class="fas fa-clipboard-check"></i> 建议：进入待审核
+                    </button>
+                    <button class="btn" style="flex: 1; background: #f59e0b; color: white; padding: 12px; font-size: 14px; font-weight: 600;">
+                        <i class="fas fa-ban"></i> 限制提现
+                    </button>
+                    <button class="btn" style="flex: 1; background: #3b82f6; color: white; padding: 12px; font-size: 14px; font-weight: 600;">
+                        <i class="fas fa-folder-plus"></i> 建立案件
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 用户画像（完整版） -->
+        <div class="dashboard-card" style="margin-bottom: 20px;">
+            <div class="card-header" style="background: #f8fafc; border-bottom: 2px solid #e2e8f0; padding: 16px 20px;">
+                <h3 style="font-size: 16px; font-weight: 700; color: #0f172a; margin: 0; display: flex; align-items: center; justify-content: space-between;">
+                    <span><i class="fas fa-user-circle" style="color: #3b82f6;"></i> 用户画像</span>
+                    <button class="btn btn-outline" style="font-size: 12px; padding: 6px 12px;" onclick="toggleProfile()">
+                        <i class="fas fa-expand-alt"></i> 展开全部
+                    </button>
+                </h3>
+            </div>
+            <div class="card-body" style="padding: 20px;">
+                <!-- 核心指标 -->
+                <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin-bottom: 20px;">
+                    <div style="text-align: center; padding: 16px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#fff'; this.style.borderColor='#3b82f6'" onmouseout="this.style.background='#f8fafc'; this.style.borderColor='#e2e8f0'">
+                        <div style="font-size: 28px; font-weight: 800; color: #3b82f6; margin-bottom: 4px;">88天</div>
+                        <div style="font-size: 12px; color: #64748b;">账户年龄</div>
+                    </div>
+                    <div style="text-align: center; padding: 16px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#fff'; this.style.borderColor='#3b82f6'" onmouseout="this.style.background='#f8fafc'; this.style.borderColor='#e2e8f0'">
+                        <div style="font-size: 28px; font-weight: 800; color: #3b82f6; margin-bottom: 4px;">52</div>
+                        <div style="font-size: 12px; color: #64748b;">30天交易</div>
+                    </div>
+                    <div style="text-align: center; padding: 16px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#fff'; this.style.borderColor='#f59e0b'" onmouseout="this.style.background='#f8fafc'; this.style.borderColor='#e2e8f0'">
+                        <div style="font-size: 28px; font-weight: 800; color: #f59e0b; margin-bottom: 4px;">高</div>
+                        <div style="font-size: 12px; color: #64748b;">活跃等级</div>
+                    </div>
+                    <div style="text-align: center; padding: 16px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#fff'; this.style.borderColor='#dc2626'" onmouseout="this.style.background='#f8fafc'; this.style.borderColor='#e2e8f0'">
+                        <div style="font-size: 24px; font-weight: 800; color: #dc2626; margin-bottom: 4px;">净流出</div>
+                        <div style="font-size: 12px; color: #64748b;">资金流向</div>
+                    </div>
+                    <div style="text-align: center; padding: 16px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#fff'; this.style.borderColor='#10b981'" onmouseout="this.style.background='#f8fafc'; this.style.borderColor='#e2e8f0'">
+                        <div style="font-size: 28px; font-weight: 800; color: #10b981; margin-bottom: 4px;">¥28K</div>
+                        <div style="font-size: 12px; color: #64748b;">24h交易额</div>
+                    </div>
+                    <div style="text-align: center; padding: 16px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#fff'; this.style.borderColor='#3b82f6'" onmouseout="this.style.background='#f8fafc'; this.style.borderColor='#e2e8f0'">
+                        <div style="font-size: 28px; font-weight: 800; color: #8b5cf6; margin-bottom: 4px;">156</div>
+                        <div style="font-size: 12px; color: #64748b;">总交易笔数</div>
+                    </div>
+                </div>
+
+                <!-- 详细信息（可展开） -->
+                <div id="profileDetails" style="display: none;">
+                    <!-- 账户信息 -->
+                    <div class="dashboard-card" style="margin-bottom: 16px; border-left: 4px solid #3b82f6;">
+                        <div style="padding: 16px;">
+                            <div style="font-size: 14px; font-weight: 700; color: #0f172a; margin-bottom: 12px;">📋 账户信息</div>
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; font-size: 13px;">
+                                <div>
+                                    <span style="color: #64748b;">注册时间：</span>
+                                    <span style="color: #0f172a; font-weight: 600;">2025-09-01 15:23:10</span>
+                                </div>
+                                <div>
+                                    <span style="color: #64748b;">实名状态：</span>
+                                    <span style="color: #10b981; font-weight: 600;">✓ 已认证</span>
+                                </div>
+                                <div>
+                                    <span style="color: #64748b;">手机号：</span>
+                                    <span style="color: #0f172a; font-weight: 600;">138****6789</span>
+                                </div>
+                                <div>
+                                    <span style="color: #64748b;">邮箱：</span>
+                                    <span style="color: #0f172a; font-weight: 600;">abc***@gmail.com</span>
+                                </div>
+                                <div>
+                                    <span style="color: #64748b;">账户余额：</span>
+                                    <span style="color: #3b82f6; font-weight: 700;">¥12,580</span>
+                                </div>
+                                <div>
+                                    <span style="color: #64748b;">冻结金额：</span>
+                                    <span style="color: #dc2626; font-weight: 700;">¥3,200</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 交易统计 -->
+                    <div class="dashboard-card" style="margin-bottom: 16px; border-left: 4px solid #10b981;">
+                        <div style="padding: 16px;">
+                            <div style="font-size: 14px; font-weight: 700; color: #0f172a; margin-bottom: 12px;">💰 交易统计</div>
+                            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">
+                                <div style="padding: 12px; background: #f8fafc; border-radius: 6px; text-align: center;">
+                                    <div style="font-size: 20px; font-weight: 700; color: #10b981; margin-bottom: 4px;">¥156K</div>
+                                    <div style="font-size: 11px; color: #64748b;">30天交易总额</div>
+                                </div>
+                                <div style="padding: 12px; background: #f8fafc; border-radius: 6px; text-align: center;">
+                                    <div style="font-size: 20px; font-weight: 700; color: #3b82f6; margin-bottom: 4px;">28</div>
+                                    <div style="font-size: 11px; color: #64748b;">买单数量</div>
+                                </div>
+                                <div style="padding: 12px; background: #f8fafc; border-radius: 6px; text-align: center;">
+                                    <div style="font-size: 20px; font-weight: 700; color: #3b82f6; margin-bottom: 4px;">24</div>
+                                    <div style="font-size: 11px; color: #64748b;">卖单数量</div>
+                                </div>
+                                <div style="padding: 12px; background: #f8fafc; border-radius: 6px; text-align: center;">
+                                    <div style="font-size: 20px; font-weight: 700; color: #dc2626; margin-bottom: 4px;">45%</div>
+                                    <div style="font-size: 11px; color: #64748b;">取消率</div>
+                                </div>
+                            </div>
+                            <div style="margin-top: 12px; padding: 12px; background: #fffbeb; border-radius: 6px; border: 1px solid #fde68a;">
+                                <div style="font-size: 12px; color: #92400e;">
+                                    <strong>异常特征：</strong>高取消率（45% > 平台均值15%）、对手集中度84%（交易对手过于集中）
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 设备与IP信息 -->
+                    <div class="dashboard-card" style="margin-bottom: 16px; border-left: 4px solid #f59e0b;">
+                        <div style="padding: 16px;">
+                            <div style="font-size: 14px; font-weight: 700; color: #0f172a; margin-bottom: 12px;">🖥️ 设备与IP信息</div>
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+                                <div>
+                                    <div style="font-size: 12px; color: #64748b; margin-bottom: 6px;">常用设备</div>
+                                    <div style="padding: 8px 12px; background: #f8fafc; border-radius: 6px; font-size: 12px; font-family: 'JetBrains Mono', monospace; color: #0f172a;">
+                                        DFP_889977 (4次)<br>
+                                        DFP_445566 (3次)<br>
+                                        DFP_778899 (2次)
+                                    </div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 12px; color: #64748b; margin-bottom: 6px;">常用IP地址</div>
+                                    <div style="padding: 8px 12px; background: #f8fafc; border-radius: 6px; font-size: 12px; font-family: 'JetBrains Mono', monospace; color: #0f172a;">
+                                        112.25.67.89 (深圳, 12次)<br>
+                                        58.33.142.90 (广州, 8次)<br>
+                                        121.77.88.156 (上海, 6次)
+                                    </div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 12px; color: #64748b; margin-bottom: 6px;">24h设备数</div>
+                                    <div style="font-size: 20px; font-weight: 700; color: #dc2626;">4个</div>
+                                    <div style="font-size: 11px; color: #f59e0b;">⚠️ 异常（正常应<2）</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 12px; color: #64748b; margin-bottom: 6px;">7天IP变化</div>
+                                    <div style="font-size: 20px; font-weight: 700; color: #dc2626;">12次</div>
+                                    <div style="font-size: 11px; color: #f59e0b;">⚠️ 频繁变化</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 交易对手分析 -->
+                    <div class="dashboard-card" style="margin-bottom: 16px; border-left: 4px solid #8b5cf6;">
+                        <div style="padding: 16px;">
+                            <div style="font-size: 14px; font-weight: 700; color: #0f172a; margin-bottom: 12px;">👥 交易对手分析</div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                                <div>
+                                    <div style="font-size: 12px; color: #64748b; margin-bottom: 6px;">对手数量（30天）</div>
+                                    <div style="font-size: 24px; font-weight: 700; color: #3b82f6; margin-bottom: 4px;">8人</div>
+                                    <div style="font-size: 11px; color: #64748b;">集中度: 84%</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 12px; color: #64748b; margin-bottom: 6px;">Top对手占比</div>
+                                    <div style="font-size: 24px; font-weight: 700; color: #dc2626; margin-bottom: 4px;">84%</div>
+                                    <div style="font-size: 11px; color: #f59e0b;">⚠️ 过度集中</div>
+                                </div>
+                            </div>
+                            <div style="margin-top: 12px; font-size: 12px; color: #64748b;">
+                                <div style="margin-bottom: 4px;">Top3交易对手：</div>
+                                <div style="padding: 8px; background: #f8fafc; border-radius: 4px;">
+                                    1. #2c7b_4E (43笔, 84%)<br>
+                                    2. #5d8a_9B (6笔, 12%)<br>
+                                    3. #8e4f_3C (3笔, 4%)
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 支付方式 -->
+                    <div class="dashboard-card" style="margin-bottom: 16px; border-left: 4px solid #10b981;">
+                        <div style="padding: 16px;">
+                            <div style="font-size: 14px; font-weight: 700; color: #0f172a; margin-bottom: 12px;">💳 支付方式</div>
+                            <div style="font-size: 12px; color: #64748b; margin-bottom: 8px;">
+                                绑定支付方式：5个 | 最近变更：2次/7天
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 6px;">
+                                <div style="padding: 8px 12px; background: #f8fafc; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="font-size: 12px; color: #0f172a;">
+                                        <i class="fas fa-qrcode" style="color: #3b82f6;"></i> QR_889922
+                                    </span>
+                                    <span style="font-size: 11px; color: #64748b;">主要(68%)</span>
+                                </div>
+                                <div style="padding: 8px 12px; background: #f8fafc; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="font-size: 12px; color: #0f172a;">
+                                        <i class="fas fa-university" style="color: #3b82f6;"></i> BANK_***6789
+                                    </span>
+                                    <span style="font-size: 11px; color: #64748b;">备用(24%)</span>
+                                </div>
+                                <div style="padding: 8px 12px; background: #fffbeb; border-radius: 4px; border: 1px solid #fde68a; display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="font-size: 12px; color: #92400e;">
+                                        <i class="fas fa-qrcode" style="color: #f59e0b;"></i> QR_334455 
+                                    </span>
+                                    <span style="font-size: 11px; color: #f59e0b; font-weight: 600;">⚠️ 与他人共享</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 时间行为模式 -->
+                    <div class="dashboard-card" style="border-left: 4px solid #6366f1;">
+                        <div style="padding: 16px;">
+                            <div style="font-size: 14px; font-weight: 700; color: #0f172a; margin-bottom: 12px;">⏰ 活动时间模式</div>
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 12px;">
+                                <div style="padding: 8px; background: #f8fafc; border-radius: 4px; text-align: center;">
+                                    <div style="font-size: 18px; font-weight: 700; color: #3b82f6;">62%</div>
+                                    <div style="font-size: 11px; color: #64748b;">夜间活跃</div>
+                                </div>
+                                <div style="padding: 8px; background: #f8fafc; border-radius: 4px; text-align: center;">
+                                    <div style="font-size: 18px; font-weight: 700; color: #3b82f6;">23%</div>
+                                    <div style="font-size: 11px; color: #64748b;">周末活跃</div>
+                                </div>
+                                <div style="padding: 8px; background: #fffbeb; border-radius: 4px; text-align: center; border: 1px solid #fde68a;">
+                                    <div style="font-size: 18px; font-weight: 700; color: #f59e0b;">⚠️</div>
+                                    <div style="font-size: 11px; color: #92400e;">异常时段</div>
+                                </div>
+                            </div>
+                            <div style="font-size: 11px; color: #64748b;">
+                                高频时段：23:00-02:00 (占比62%) | 平均交易间隔：15分钟
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 标签区域 -->
+                <div style="margin-top: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div>
+                        <div style="font-size: 13px; font-weight: 600; color: #64748b; margin-bottom: 8px;">
+                            <i class="fas fa-tag"></i> 行为标签
+                        </div>
+                        <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                            <span class="region-risk-tag" style="cursor: pointer;" onclick="alert('查看高取消率详情')">高取消率</span>
+                            <span class="region-risk-tag" style="cursor: pointer;" onclick="alert('查看多设备登录详情')">多设备登录</span>
+                            <span class="region-risk-tag" style="cursor: pointer;">频繁换绑</span>
+                            <span class="region-risk-tag" style="cursor: pointer;">跨地域活动</span>
+                            <span class="region-risk-tag" style="cursor: pointer;">夜间高频</span>
+                            <span class="region-risk-tag" style="cursor: pointer;">对手集中</span>
+                        </div>
+                    </div>
+                    <div>
+                        <div style="font-size: 13px; font-weight: 600; color: #64748b; margin-bottom: 8px;">
+                            <i class="fas fa-shield-alt"></i> 安全标签
+                        </div>
+                        <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                            <span class="risk-tag-small" style="background: #fee2e2; border-color: #fecaca; color: #991b1b; cursor: pointer;" onclick="scrollToRule('SEC_DEVICE_FP_CHANGE')">设备风险</span>
+                            <span class="risk-tag-small" style="background: #fee2e2; border-color: #fecaca; color: #991b1b; cursor: pointer;" onclick="scrollToRule('SEC_IP_CITY_DRIFT')">IP风险</span>
+                            <span class="risk-tag-small" style="background: #ffedd5; border-color: #fed7aa; color: #9a3412; cursor: pointer;">支付风险</span>
+                            <span class="risk-tag-small" style="background: #fef3c7; border-color: #fde68a; color: #92400e; cursor: pointer;">团伙关联</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 主内容区域 -->
+        <div style="display: grid; grid-template-columns: 1fr 400px; gap: 20px;">
+            <!-- 左侧：规则详情 -->
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                <!-- 安全层 -->
+                <div class="dashboard-card">
+                    <div class="card-header" style="background: #f8fafc; border-bottom: 2px solid #e2e8f0; padding: 16px 20px;">
+                        <h3 style="font-size: 18px; font-weight: 700; color: #0f172a; display: flex; align-items: center; justify-content: space-between; margin: 0;">
+                            <span><i class="fas fa-shield-alt" style="color: #3b82f6;"></i> 安全层</span>
+                            <span style="color: #dc2626; font-size: 24px; font-family: 'JetBrains Mono', monospace;">-56</span>
+                        </h3>
+                        <div style="margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap;">
+                            <span class="region-risk-tag" onclick="scrollToRule('SEC_DEVICE_FP_CHANGE')" style="cursor: pointer;">设备指纹变化 -32</span>
+                            <span class="region-risk-tag" onclick="scrollToRule('SEC_IP_CITY_DRIFT')" style="cursor: pointer;">跨城市登录 -24</span>
+                        </div>
+                    </div>
+                    <div class="card-body" style="padding: 16px;">
+                        <!-- 规则卡片1 -->
+                        <div class="dashboard-card" id="SEC_DEVICE_FP_CHANGE" style="margin-bottom: 12px; border-left: 4px solid #dc2626; cursor: pointer;" onclick="toggleCard(this)">
+                            <div style="padding: 16px; display: flex; justify-content: space-between; align-items: center;">
+                                <div style="flex: 1;">
+                                    <div style="font-size: 15px; font-weight: 700; color: #0f172a; margin-bottom: 4px;">设备指纹24h变化</div>
+                                    <div style="font-size: 11px; color: #94a3b8; font-family: 'JetBrains Mono', monospace; margin-bottom: 6px;">SEC_DEVICE_FP_CHANGE_24H</div>
+                                    <div style="font-size: 13px; color: #64748b;">触发：4次/24h，距离最远962km</div>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <span class="risk-level-badge critical">严重</span>
+                                    <span style="font-size: 28px; font-weight: 800; color: #dc2626; font-family: 'JetBrains Mono', monospace;">-32</span>
+                                    <i class="fas fa-chevron-down" style="color: #94a3b8; transition: transform 0.3s;"></i>
+                                </div>
+                            </div>
+                            
+                            <!-- 展开内容 -->
+                            <div class="card-expanded-content" style="display: none; border-top: 2px solid #f1f5f9; background: #f8fafc;">
+                                <!-- Tab标签 -->
+                                <div style="display: flex; background: white; border-bottom: 1px solid #e2e8f0;">
+                                    <div class="detail-tab active" onclick="switchDetailTab(this, 'evidence-1')" style="flex: 1; padding: 12px; text-align: center; font-size: 13px; font-weight: 600; color: #64748b; cursor: pointer; border-bottom: 2px solid transparent;">
+                                        📄 证据 Evidence
+                                    </div>
+                                    <div class="detail-tab" onclick="switchDetailTab(this, 'calc-1')" style="flex: 1; padding: 12px; text-align: center; font-size: 13px; font-weight: 600; color: #64748b; cursor: pointer; border-bottom: 2px solid transparent;">
+                                        🧮 计算 Calc
+                                    </div>
+                                    <div class="detail-tab" onclick="switchDetailTab(this, 'action-1')" style="flex: 1; padding: 12px; text-align: center; font-size: 13px; font-weight: 600; color: #64748b; cursor: pointer; border-bottom: 2px solid transparent;">
+                                        💡 建议 Action
+                                    </div>
+                                </div>
+                                
+                                <!-- Tab内容 -->
+                                <div class="tab-content active" id="evidence-1" style="padding: 16px;">
+                                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                                        <div style="padding: 12px; background: white; border-radius: 6px; border-left: 3px solid #3b82f6;">
+                                            <div style="font-size: 11px; color: #94a3b8; margin-bottom: 4px;">2025-11-27 10:00</div>
+                                            <div style="font-size: 13px; color: #475569;">上海 → 深圳 | IP: 112.25.67.89 | 设备: DFP_889977</div>
+                                        </div>
+                                        <div style="padding: 12px; background: white; border-radius: 6px; border-left: 3px solid #3b82f6;">
+                                            <div style="font-size: 11px; color: #94a3b8; margin-bottom: 4px;">2025-11-27 15:30</div>
+                                            <div style="font-size: 13px; color: #475569;">深圳 → 广州 | IP: 58.33.142.90 | 设备: DFP_445566</div>
+                                        </div>
+                                        <div style="padding: 12px; background: white; border-radius: 6px; border-left: 3px solid #3b82f6;">
+                                            <div style="font-size: 11px; color: #94a3b8; margin-bottom: 4px;">2025-11-27 19:45</div>
+                                            <div style="font-size: 13px; color: #475569;">广州 → 北京 | IP: 183.45.199.123 | 设备: DFP_778899</div>
+                                        </div>
+                                        <div style="padding: 12px; background: white; border-radius: 6px; border-left: 3px solid #3b82f6;">
+                                            <div style="font-size: 11px; color: #94a3b8; margin-bottom: 4px;">2025-11-28 02:15</div>
+                                            <div style="font-size: 13px; color: #475569;">北京 → 杭州 | IP: 220.167.88.45 | 设备: DFP_223344</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="tab-content" id="calc-1" style="padding: 16px; display: none;">
+                                    <div style="background: white; padding: 16px; border-radius: 8px;">
+                                        <div style="margin-bottom: 12px;">
+                                            <div style="font-size: 12px; color: #64748b; margin-bottom: 4px;">⏰ 时间窗口</div>
+                                            <div style="font-size: 14px; font-weight: 600; color: #0f172a;">24小时（滚动窗口）</div>
+                                        </div>
+                                        <div style="margin-bottom: 12px;">
+                                            <div style="font-size: 12px; color: #64748b; margin-bottom: 4px;">📊 触发阈值</div>
+                                            <div style="font-size: 13px; color: #0f172a; line-height: 1.6;">
+                                                <div>🟡 watch: count>=2 且 distance>300km → -8分</div>
+                                                <div>🟠 hit: count>=3 且 distance>500km → -16分</div>
+                                                <div>🔴 severe: count>=4 且 distance>800km → -24分</div>
+                                            </div>
+                                        </div>
+                                        <div style="margin-bottom: 12px;">
+                                            <div style="font-size: 12px; color: #64748b; margin-bottom: 4px;">🔑 去重键 Dedup Key</div>
+                                            <div style="font-size: 13px; font-weight: 600; color: #0f172a; font-family: 'JetBrains Mono', monospace;">from_city + to_city + device_fp</div>
+                                        </div>
+                                        <div style="margin-bottom: 12px;">
+                                            <div style="font-size: 12px; color: #64748b; margin-bottom: 4px;">🎯 扣分上限 Cap</div>
+                                            <div style="font-size: 14px; font-weight: 700; color: #dc2626;">-32分/24h <span style="color: #64748b; font-size: 12px; font-weight: 500;">（已达上限）</span></div>
+                                        </div>
+                                        <div style="margin-bottom: 12px;">
+                                            <div style="font-size: 12px; color: #64748b; margin-bottom: 4px;">⏳ 衰减规则</div>
+                                            <div style="font-size: 13px; color: #0f172a;">6小时无新触发，分数回落20%</div>
+                                        </div>
+                                        <div>
+                                            <div style="font-size: 12px; color: #64748b; margin-bottom: 4px;">🧮 计算公式</div>
+                                            <div style="font-size: 13px; font-family: 'JetBrains Mono', monospace; color: #0f172a; background: #f8fafc; padding: 8px; border-radius: 4px; border: 1px solid #e2e8f0;">
+                                                count=4 && distance_max=962km >= 800<br>
+                                                => -24 * 1.33 = -32 (capped at -32)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="tab-content" id="action-1" style="padding: 16px; display: none;">
+                                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+                                        <button class="btn" style="background: #dc2626; color: white; padding: 16px; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                                            <i class="fas fa-ban" style="font-size: 24px;"></i>
+                                            <span>限制交易</span>
+                                        </button>
+                                        <button class="btn btn-outline" style="padding: 16px; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                                            <i class="fas fa-clipboard-check" style="font-size: 24px;"></i>
+                                            <span>人工审核</span>
+                                        </button>
+                                        <button class="btn btn-outline" style="padding: 16px; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                                            <i class="fas fa-folder-plus" style="font-size: 24px;"></i>
+                                            <span>建立案件</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 规则卡片2：24h跨城市登录 -->
+                        <div class="dashboard-card" id="SEC_IP_CITY_DRIFT" style="margin-bottom: 12px; border-left: 4px solid #f59e0b; cursor: pointer;" onclick="toggleCard(this)">
+                            <div style="padding: 16px; display: flex; justify-content: space-between; align-items: center;">
+                                <div style="flex: 1;">
+                                    <div style="font-size: 15px; font-weight: 700; color: #0f172a; margin-bottom: 4px;">24h跨城市登录</div>
+                                    <div style="font-size: 11px; color: #94a3b8; font-family: 'JetBrains Mono', monospace; margin-bottom: 6px;">SEC_IP_CITY_DRIFT_24H</div>
+                                    <div style="font-size: 13px; color: #64748b;">触发：4次/24h，最远1962km</div>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <span class="risk-level-badge high">命中</span>
+                                    <span style="font-size: 28px; font-weight: 800; color: #f59e0b; font-family: 'JetBrains Mono', monospace;">-24</span>
+                                    <i class="fas fa-chevron-down" style="color: #94a3b8;"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 交易层 -->
+                <div class="dashboard-card">
+                    <div class="card-header" style="background: #f8fafc; border-bottom: 2px solid #e2e8f0; padding: 16px 20px;">
+                        <h3 style="font-size: 18px; font-weight: 700; color: #0f172a; display: flex; align-items: center; justify-content: space-between; margin: 0;">
+                            <span><i class="fas fa-exchange-alt" style="color: #3b82f6;"></i> 交易层</span>
+                            <span style="color: #f59e0b; font-size: 24px; font-family: 'JetBrains Mono', monospace;">-20</span>
+                        </h3>
+                        <div style="margin-top: 12px;">
+                            <span class="region-risk-tag" onclick="scrollToRule('TRADE_HIGH_CANCEL')" style="cursor: pointer;">频繁取消订单 -20</span>
+                        </div>
+                    </div>
+                    <div class="card-body" style="padding: 16px;">
+                        <div class="dashboard-card" id="TRADE_HIGH_CANCEL" style="border-left: 4px solid #f59e0b; cursor: pointer;" onclick="toggleCard(this)">
+                            <div style="padding: 16px; display: flex; justify-content: space-between; align-items: center;">
+                                <div style="flex: 1;">
+                                    <div style="font-size: 15px; font-weight: 700; color: #0f172a; margin-bottom: 4px;">频繁取消订单</div>
+                                    <div style="font-size: 11px; color: #94a3b8; font-family: 'JetBrains Mono', monospace; margin-bottom: 6px;">TRADE_FREQUENT_CANCEL_24H</div>
+                                    <div style="font-size: 13px; color: #64748b;">触发：3次/24h（排除对手方原因）</div>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <span class="risk-level-badge high">命中</span>
+                                    <span style="font-size: 28px; font-weight: 800; color: #f59e0b; font-family: 'JetBrains Mono', monospace;">-20</span>
+                                    <i class="fas fa-chevron-down" style="color: #94a3b8;"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 团伙层 -->
+                <div class="dashboard-card">
+                    <div class="card-header" style="background: #f8fafc; border-bottom: 2px solid #e2e8f0; padding: 16px 20px;">
+                        <h3 style="font-size: 18px; font-weight: 700; color: #0f172a; display: flex; align-items: center; justify-content: space-between; margin: 0;">
+                            <span><i class="fas fa-users" style="color: #3b82f6;"></i> 团伙层</span>
+                            <span style="color: #fbbf24; font-size: 24px; font-family: 'JetBrains Mono', monospace;">-15</span>
+                        </h3>
+                        <div style="margin-top: 12px;">
+                            <span class="region-risk-tag">收款码共享 -15</span>
+                        </div>
+                    </div>
+                    <div class="card-body" style="padding: 16px;">
+                        <div class="dashboard-card" style="border-left: 4px solid #fbbf24; cursor: pointer;" onclick="toggleCard(this)">
+                            <div style="padding: 16px; display: flex; justify-content: space-between; align-items: center;">
+                                <div style="flex: 1;">
+                                    <div style="font-size: 15px; font-weight: 700; color: #0f172a; margin-bottom: 4px;">支付二维码共享</div>
+                                    <div style="font-size: 11px; color: #94a3b8; font-family: 'JetBrains Mono', monospace; margin-bottom: 6px;">SYNDICATE_SHARED_PAYMENT</div>
+                                    <div style="font-size: 13px; color: #64748b;">与3个账号共享</div>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <span class="risk-level-badge medium">观察</span>
+                                    <span style="font-size: 28px; font-weight: 800; color: #fbbf24; font-family: 'JetBrains Mono', monospace;">-15</span>
+                                    <i class="fas fa-chevron-down" style="color: #94a3b8;"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧：分数贡献时间轴 -->
+            <div class="dashboard-card" style="height: fit-content; max-height: 1000px; overflow-y: auto;">
+                <div class="card-header" style="background: #f8fafc; border-bottom: 2px solid #e2e8f0; padding: 16px 20px;">
+                    <h3 style="font-size: 16px; font-weight: 700; color: #0f172a; margin: 0;">
+                        <i class="fas fa-history" style="color: #3b82f6;"></i>
+                        分数贡献时间轴
+                    </h3>
+                </div>
+                <div class="card-body" style="padding: 16px;">
+                    <div style="position: relative; padding-left: 30px;">
+                        <!-- 时间线 -->
+                        <div style="position: absolute; left: 8px; top: 0; bottom: 0; width: 2px; background: #e2e8f0;"></div>
+                        
+                        <!-- 事件1 -->
+                        <div style="position: relative; margin-bottom: 20px; cursor: pointer;" onclick="scrollToRule('SEC_DEVICE_FP_CHANGE')">
+                            <div style="position: absolute; left: -26px; top: 4px; width: 16px; height: 16px; border-radius: 50%; background: #dc2626; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"></div>
+                            <div style="background: #fff; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; transition: all 0.2s;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                                    <div style="font-size: 14px; font-weight: 700; color: #0f172a;">设备指纹变化</div>
+                                    <div style="font-size: 18px; font-weight: 800; color: #dc2626; font-family: 'JetBrains Mono', monospace;">-32</div>
+                                </div>
+                                <div style="font-size: 11px; color: #94a3b8; margin-bottom: 4px; font-family: 'JetBrains Mono', monospace;">SEC_DEVICE_FP_CHANGE_24H</div>
+                                <div style="font-size: 12px; color: #64748b;">2025-11-28 02:15 | 触发4次</div>
+                            </div>
+                        </div>
+
+                        <!-- 事件2 -->
+                        <div style="position: relative; margin-bottom: 20px; cursor: pointer;" onclick="scrollToRule('SEC_IP_CITY_DRIFT')">
+                            <div style="position: absolute; left: -26px; top: 4px; width: 16px; height: 16px; border-radius: 50%; background: #f59e0b; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"></div>
+                            <div style="background: #fff; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                                    <div style="font-size: 14px; font-weight: 700; color: #0f172a;">跨城市登录</div>
+                                    <div style="font-size: 18px; font-weight: 800; color: #f59e0b; font-family: 'JetBrains Mono', monospace;">-24</div>
+                                </div>
+                                <div style="font-size: 11px; color: #94a3b8; margin-bottom: 4px; font-family: 'JetBrains Mono', monospace;">SEC_IP_CITY_DRIFT_24H</div>
+                                <div style="font-size: 12px; color: #64748b;">2025-11-27 19:45 | 最远1962km</div>
+                            </div>
+                        </div>
+
+                        <!-- 事件3 -->
+                        <div style="position: relative; margin-bottom: 20px; cursor: pointer;" onclick="scrollToRule('TRADE_HIGH_CANCEL')">
+                            <div style="position: absolute; left: -26px; top: 4px; width: 16px; height: 16px; border-radius: 50%; background: #f59e0b; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"></div>
+                            <div style="background: #fff; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                                    <div style="font-size: 14px; font-weight: 700; color: #0f172a;">频繁取消订单</div>
+                                    <div style="font-size: 18px; font-weight: 800; color: #f59e0b; font-family: 'JetBrains Mono', monospace;">-20</div>
+                                </div>
+                                <div style="font-size: 11px; color: #94a3b8; margin-bottom: 4px; font-family: 'JetBrains Mono', monospace;">TRADE_FREQUENT_CANCEL_24H</div>
+                                <div style="font-size: 12px; color: #64748b;">2025-11-28 08:20 | 3次取消</div>
+                            </div>
+                        </div>
+
+                        <!-- 事件4 -->
+                        <div style="position: relative; margin-bottom: 20px;">
+                            <div style="position: absolute; left: -26px; top: 4px; width: 16px; height: 16px; border-radius: 50%; background: #fbbf24; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"></div>
+                            <div style="background: #fff; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                                    <div style="font-size: 14px; font-weight: 700; color: #0f172a;">支付二维码共享</div>
+                                    <div style="font-size: 18px; font-weight: 800; color: #fbbf24; font-family: 'JetBrains Mono', monospace;">-15</div>
+                                </div>
+                                <div style="font-size: 11px; color: #94a3b8; margin-bottom: 4px; font-family: 'JetBrains Mono', monospace;">SYNDICATE_SHARED_PAYMENT</div>
+                                <div style="font-size: 12px; color: #64748b;">2025-11-27 14:30 | 3个账号共享</div>
+                            </div>
+                        </div>
+
+                        <!-- 正常事件 -->
+                        <div style="position: relative;">
+                            <div style="position: absolute; left: -26px; top: 4px; width: 16px; height: 16px; border-radius: 50%; background: #94a3b8; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"></div>
+                            <div style="background: #fff; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                                    <div style="font-size: 14px; font-weight: 700; color: #0f172a;">普通登录</div>
+                                    <div style="font-size: 18px; font-weight: 800; color: #10b981; font-family: 'JetBrains Mono', monospace;">0</div>
+                                </div>
+                                <div style="font-size: 11px; color: #94a3b8; margin-bottom: 4px;">正常活动</div>
+                                <div style="font-size: 12px; color: #64748b;">2025-11-28 14:23</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleProfile() {
+            const details = document.getElementById('profileDetails');
+            const btn = event.target.closest('button');
+            if (details.style.display === 'none') {
+                details.style.display = 'block';
+                btn.innerHTML = '<i class="fas fa-compress-alt"></i> 收起';
+            } else {
+                details.style.display = 'none';
+                btn.innerHTML = '<i class="fas fa-expand-alt"></i> 展开全部';
+            }
+        }
+
+        function scrollToRule(ruleId) {
+            const element = document.getElementById(ruleId);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                element.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.3)';
+                setTimeout(() => {
+                    element.style.boxShadow = '';
+                }, 3000);
+                
+                // 自动展开卡片
+                if (!element.querySelector('.card-expanded-content')?.style.display || 
+                    element.querySelector('.card-expanded-content').style.display === 'none') {
+                    toggleCard(element);
+                }
+            }
+        }
+
+        function toggleCard(card) {
+            event.stopPropagation();
+            const expandedContent = card.querySelector('.card-expanded-content');
+            const icon = card.querySelector('.fa-chevron-down');
+            
+            if (expandedContent) {
+                if (expandedContent.style.display === 'none' || !expandedContent.style.display) {
+                    expandedContent.style.display = 'block';
+                    if (icon) icon.style.transform = 'rotate(180deg)';
+                } else {
+                    expandedContent.style.display = 'none';
+                    if (icon) icon.style.transform = 'rotate(0deg)';
+                }
+            }
+        }
+
+        function switchDetailTab(tabElement, contentId) {
+            event.stopPropagation();
+            
+            const card = tabElement.closest('.dashboard-card');
+            const tabs = card.querySelectorAll('.detail-tab');
+            const contents = card.querySelectorAll('.tab-content');
+            
+            tabs.forEach(tab => {
+                tab.classList.remove('active');
+                tab.style.color = '#64748b';
+                tab.style.borderBottomColor = 'transparent';
+                tab.style.background = '';
+            });
+            
+            contents.forEach(content => {
+                content.classList.remove('active');
+                content.style.display = 'none';
+            });
+            
+            tabElement.classList.add('active');
+            tabElement.style.color = '#3b82f6';
+            tabElement.style.borderBottomColor = '#3b82f6';
+            tabElement.style.background = 'white';
+            
+            document.getElementById(contentId).style.display = 'block';
+        }
+    </script>
+</body>
+</html>

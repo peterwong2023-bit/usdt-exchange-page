@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>直播APP 五大主题总览</title>
+<style>
+  @page {
+    size: A4 landscape;
+    margin: 0;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --pink: #FF69B4;
+    --red: #E74C3C;
+    --green: #2ECC71;
+    --blue: #3B82F6;
+    --orange: #F39C12;
+  }
+
+  body {
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #E8EAF0;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .page {
+    width: 297mm;
+    background: #FFFFFF;
+    position: relative;
+    padding: 4mm 4mm 3mm;
+  }
+  .page + .page {
+    margin-top: 6mm;
+  }
+
+  /* Theme badge */
+  .theme-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 12px 3px 8px;
+    border-radius: 4px;
+    margin-bottom: 2mm;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+  }
+  .theme-badge .dot {
+    width: 7px;
+    height: 7px;
+    background: rgba(255,255,255,0.6);
+    border-radius: 50%;
+  }
+  .theme-badge-sub {
+    display: inline-block;
+    margin-left: 6px;
+    font-size: 9px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.8);
+    letter-spacing: 0;
+  }
+
+  /* Screenshots row */
+  .screenshots-row {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 2mm;
+  }
+
+  .screenshot-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1mm;
+  }
+
+  .screenshot-label {
+    font-size: 8px;
+    font-weight: 600;
+    color: #666;
+    background: #F3F4F8;
+    padding: 1px 8px;
+    border-radius: 3px;
+  }
+
+  .screenshot-frame {
+    width: 100%;
+  }
+  .screenshot-frame img {
+    width: 100%;
+    display: block;
+    border-radius: 0;
+    border: none;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.1);
+  }
+
+  /* Page number */
+  .page-num {
+    position: absolute;
+    bottom: 3mm;
+    right: 6mm;
+    font-size: 8px;
+    color: #ccc;
+  }
+</style>
+</head>
+<body>
+
+<!-- Page 1: Pink -->
+<div class="page">
+  <div class="theme-badge" style="background: linear-gradient(135deg, #FF69B4, #FF1493);">
+    <span class="dot"></span>
+    浪漫粉主题
+    <span class="theme-badge-sub">Romantic Pink Theme · 最受欢迎</span>
+  </div>
+  <div class="screenshots-row">
+    <div class="screenshot-col">
+      <div class="screenshot-label">首页</div>
+      <div class="screenshot-frame"><img src="theme-screenshots/pink/home.png" alt=""></div>
+    </div>
+    <div class="screenshot-col">
+      <div class="screenshot-label">游戏</div>
+      <div class="screenshot-frame"><img src="theme-screenshots/pink/game.png" alt=""></div>
+    </div>
+    <div class="screenshot-col">
+      <div class="screenshot-label">动态</div>
+      <div class="screenshot-frame"><img src="theme-screenshots/pink/feed.png" alt=""></div>
+    </div>
+    <div class="screenshot-col">
+      <div class="screenshot-label">作品</div>
+      <div class="screenshot-frame"><img src="theme-screenshots/pink/works.png" alt=""></div>
+    </div>
+    <div class="screenshot-col">
+      <div class="screenshot-label">充值</div>
+      <div class="screenshot-frame"><img src="theme-screenshots/pink/payment.png" alt=""></div>
+    </div>
+    <div class="screenshot-col">
+      <div class="screenshot-label">个人中心</div>
+      <div class="screenshot-frame"><img src="theme-screenshots/pink/profile.png" alt=""></div>
+    </div>
+  </div>
+  <div class="page-num">01</div>
+</div>
+
+<!-- Page 2: Red (Android) -->
+<div class="page android">
+  <div class="theme-badge" style="background: linear-gradient(135deg, #E74C3C, #C0392B);">
+    <span class="dot"></span>
+    热情红主题
+    <span class="theme-badge-sub">Passionate Red Theme</span>
+  </div>
+  <div class="screenshots-row">
+    <div class="screenshot-col">
+      <div class="screenshot-label">首页</div>
+      <div class="screenshot-frame"><img src="theme-screenshots/red/home.png" alt=""></div>
+    </div>
+    <div class="screenshot-col">
+      <div class="screenshot-label">游戏</div>
+      <div class="screenshot-frame"><img src="theme-screenshots/red/game.png" alt=""></div>
+    </div>
+    <div class="screenshot-col">
+      <div class="screenshot-label">动态</div>
+      <div class="screenshot-frame"><img src="theme-screenshots/red/feed.png" alt=""></div>
+    </div>
+    <div class="screenshot-col">
+      <div class="screenshot-label">作品</div>
+      <div class="screenshot-frame"><img src="theme-screenshots/red/works.png" alt=""></div>
+    </div>
+    <div class="screenshot-col">
+      <div class="screenshot-label">充值</div>
+      <div class="screenshot-frame"><img src="theme-screenshots/red/payment.png" alt=""></div>
+    </div>
+    <div class="screenshot-col">
+      <div class="screenshot-label">个人中心</div>
+      <div class="screenshot-frame"><img src="theme-screenshots/red/profile.png" alt=""></div>
+    </div>
+  </div>
+  <div class="page-num">02</div>
+</div>
+
+<!-- Page 3: Green -->
+<div class="page">
+  <div class="theme-badge" style="background: linear-gradient(135deg, #2ECC71, #27AE60);">
+    <span class="dot"></span>
+    清新绿主题
+    <span class="theme-badge-sub">Fresh Green Theme</span>
+  </div>
+  <div class="screenshots-row">
+    <div class="screenshot-col">
+      <div class="screenshot-label">首页</div>
+      <div class="screenshot-frame"><img src="theme-screenshots/green/home.png" alt=""></div>
+    </div>
+    <div class="screenshot-col">
+      <div class="screenshot-label">游戏</div>
+      <div class="screenshot-frame"><img src="theme-screenshots/green/game.png" alt=""></div>
+    </div>
+    <div class="screenshot-col">
+      <div class="screenshot-label">动态</div>
+      <div class="screenshot-frame"><img src="theme-screenshots/green/feed.png" alt=""></div>
+    </div>
+    <div class="screenshot-col">
+      <div class="screenshot-label">作品</div>
+      <div class="screenshot-frame"><img src="theme-screenshots/green/works.png" alt=""></div>
+    </div>
+    <div class="screenshot-col">
+      <div class="screenshot-label">充值</div>
+      <div class="screenshot-frame"><img src="theme-screenshots/green/payment.png" alt=""></div>
+    </div>
+    <div class="screenshot-col">
+      <div class="screenshot-label">个人中心</div>
+      <div class="screenshot-frame"><img src="theme-screenshots/green/profile.png" alt=""></div>
+    </div>
+  </div>
+  <div class="page-num">03</div>
+</div>
+
+<!-- Page 4: Blue -->
+<div class="page">
+  <div class="theme-badge" style="background: linear-gradient(135deg, #3B82F6, #2563EB);">
+    <span class="dot"></span>
+    商务蓝主题
+    <span class="theme-badge-sub">Premium Blue Theme</span>
+  </div>
+  <div class="screenshots-row">
+    <div class="screenshot-col">
+      <div class="screenshot-label">首页</div>
+      <div class="screenshot-frame"><img src="theme-screenshots/blue/home.png" alt=""></div>
+    </div>
+    <div class="screenshot-col">
+      <div class="screenshot-label">游戏</div>
+      <div class="screenshot-frame"><img src="theme-screenshots/blue/game.png" alt=""></div>
+    </div>
+    <div class="screenshot-col">
+      <div class="screenshot-label">动态</div>
+      <div class="screenshot-frame"><img src="theme-screenshots/blue/feed.png" alt=""></div>
+    </div>
+    <div class="screenshot-col">
+      <div class="screenshot-label">作品</div>
+      <div class="screenshot-frame"><img src="theme-screenshots/blue/works.png" alt=""></div>
+    </div>
+    <div class="screenshot-col">
+      <div class="screenshot-label">充值</div>
+      <div class="screenshot-frame"><img src="theme-screenshots/blue/payment.png" alt=""></div>
+    </div>
+    <div class="screenshot-col">
+      <div class="screenshot-label">个人中心</div>
+      <div class="screenshot-frame"><img src="theme-screenshots/blue/profile.png" alt=""></div>
+    </div>
+  </div>
+  <div class="page-num">04</div>
+</div>
+
+<!-- Page 5: Orange -->
+<div class="page">
+  <div class="theme-badge" style="background: linear-gradient(135deg, #F39C12, #E67E22);">
+    <span class="dot"></span>
+    活力橙主题
+    <span class="theme-badge-sub">Vibrant Orange Theme</span>
+  </div>
+  <div class="screenshots-row">
+    <div class="screenshot-col">
+      <div class="screenshot-label">首页</div>
+      <div class="screenshot-frame"><img src="theme-screenshots/orange/home.png" alt=""></div>
+    </div>
+    <div class="screenshot-col">
+      <div class="screenshot-label">游戏</div>
+      <div class="screenshot-frame"><img src="theme-screenshots/orange/game.png" alt=""></div>
+    </div>
+    <div class="screenshot-col">
+      <div class="screenshot-label">动态</div>
+      <div class="screenshot-frame"><img src="theme-screenshots/orange/feed.png" alt=""></div>
+    </div>
+    <div class="screenshot-col">
+      <div class="screenshot-label">作品</div>
+      <div class="screenshot-frame"><img src="theme-screenshots/orange/works.png" alt=""></div>
+    </div>
+    <div class="screenshot-col">
+      <div class="screenshot-label">充值</div>
+      <div class="screenshot-frame"><img src="theme-screenshots/orange/payment.png" alt=""></div>
+    </div>
+    <div class="screenshot-col">
+      <div class="screenshot-label">个人中心</div>
+      <div class="screenshot-frame"><img src="theme-screenshots/orange/profile.png" alt=""></div>
+    </div>
+  </div>
+  <div class="page-num">05</div>
+</div>
+
+</body>
+</html>

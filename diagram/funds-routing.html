@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Funds Routing Diagram for Multi-Risk Pools</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: #f0f4f8;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 32px 16px;
+        }
+        .page-header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        .page-header h1 {
+            font-size: 32px;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+        .page-header p {
+            font-size: 16px;
+            color: #64748b;
+        }
+        .svg-container {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(15,23,42,0.1);
+            overflow: hidden;
+        }
+        .actions {
+            margin-top: 20px;
+        }
+        .btn {
+            background: #3b82f6;
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn:hover { background: #2563eb; }
+    </style>
+</head>
+<body>
+    <div class="page-header">
+        <h1>Funds Routing Diagram for Multi-Risk Pools</h1>
+        <p>Clean, minimal flow with one-time KYT and strict pool isolation</p>
+    </div>
+
+    <div class="svg-container">
+        <svg id="diagram" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900">
+            <defs>
+                <!-- Arrow markers -->
+                <marker id="arrowSolid" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+                    <path d="M0,0 L10,5 L0,10 Z" fill="#475569"/>
+                </marker>
+                <marker id="arrowBranch" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+                    <path d="M0,0 L10,5 L0,10 Z" fill="#334155"/>
+                </marker>
+                <marker id="arrowDash" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+                    <path d="M0,0 L10,5 L0,10 Z" fill="#2563eb"/>
+                </marker>
+
+                <!-- Shadow filter -->
+                <filter id="shadow" x="-10%" y="-10%" width="130%" height="130%">
+                    <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#1e293b" flood-opacity="0.08"/>
+                </filter>
+
+                <!-- Cylinder gradients -->
+                <linearGradient id="gradLow" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#22c55e"/>
+                    <stop offset="50%" stop-color="#4ade80"/>
+                    <stop offset="100%" stop-color="#22c55e"/>
+                </linearGradient>
+                <linearGradient id="gradMid" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#f59e0b"/>
+                    <stop offset="50%" stop-color="#fbbf24"/>
+                    <stop offset="100%" stop-color="#f59e0b"/>
+                </linearGradient>
+                <linearGradient id="gradHigh" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#ef4444"/>
+                    <stop offset="50%" stop-color="#f87171"/>
+                    <stop offset="100%" stop-color="#ef4444"/>
+                </linearGradient>
+                <linearGradient id="gradSevere" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#7f1d1d"/>
+                    <stop offset="50%" stop-color="#991b1b"/>
+                    <stop offset="100%" stop-color="#7f1d1d"/>
+                </linearGradient>
+
+                <!-- Cylinder top gradients (lighter) -->
+                <linearGradient id="topLow" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#86efac"/>
+                    <stop offset="100%" stop-color="#22c55e"/>
+                </linearGradient>
+                <linearGradient id="topMid" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#fde68a"/>
+                    <stop offset="100%" stop-color="#f59e0b"/>
+                </linearGradient>
+                <linearGradient id="topHigh" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#fca5a5"/>
+                    <stop offset="100%" stop-color="#ef4444"/>
+                </linearGradient>
+                <linearGradient id="topSevere" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#b91c1c"/>
+                    <stop offset="100%" stop-color="#7f1d1d"/>
+                </linearGradient>
+            </defs>
+
+            <!-- Background -->
+            <rect width="1600" height="900" fill="#f8fafc"/>
+
+            <!-- ==================== SECTION 1: DEPOSIT ==================== -->
+            <g id="section-deposit">
+                <rect x="40" y="60" width="280" height="380" rx="16" fill="#fff" filter="url(#shadow)"/>
+                <rect x="40" y="60" width="280" height="48" rx="16" fill="#3b82f6"/>
+                <rect x="40" y="92" width="280" height="16" fill="#3b82f6"/>
+                <text x="180" y="92" font-size="18" font-weight="700" fill="#fff" text-anchor="middle">Deposit</text>
+
+                <!-- Deposit detected -->
+                <rect x="60" y="130" width="240" height="80" rx="10" fill="#f1f5f9" stroke="#e2e8f0" stroke-width="1"/>
+                <text x="180" y="160" font-size="14" font-weight="700" fill="#1e293b" text-anchor="middle">Deposit Detected</text>
+                <text x="180" y="180" font-size="12" fill="#64748b" text-anchor="middle">Monitor broadcast</text>
+                <text x="180" y="196" font-size="12" fill="#64748b" text-anchor="middle">& confirmations</text>
+
+                <!-- Arrow down (internal) -->
+                <line x1="180" y1="215" x2="180" y2="255" stroke="#64748b" stroke-width="2" marker-end="url(#arrowSolid)"/>
+
+                <!-- One-time KYT -->
+                <rect x="60" y="260" width="240" height="100" rx="10" fill="#f5f3ff" stroke="#c4b5fd" stroke-width="2"/>
+                <text x="180" y="295" font-size="14" font-weight="700" fill="#7c3aed" text-anchor="middle">One-time KYT</text>
+                <text x="180" y="315" font-size="11" fill="#64748b" text-anchor="middle">Output: risk_score</text>
+                <text x="180" y="332" font-size="11" fill="#64748b" text-anchor="middle">+ risk_label</text>
+                <text x="180" y="349" font-size="10" fill="#8b5cf6" text-anchor="middle">(Low / Mid / High / Severe)</text>
+
+                <!-- Label binds note -->
+                <text x="180" y="400" font-size="10" fill="#94a3b8" text-anchor="middle" font-style="italic">Label binds to each deposit record</text>
+            </g>
+
+            <!-- ==================== SECTION 2: POOLS & COLLECTION ==================== -->
+            <g id="section-collection">
+                <rect x="400" y="60" width="440" height="500" rx="16" fill="#fff" filter="url(#shadow)"/>
+                <rect x="400" y="60" width="440" height="48" rx="16" fill="#64748b"/>
+                <rect x="400" y="92" width="440" height="16" fill="#64748b"/>
+                <text x="620" y="92" font-size="18" font-weight="700" fill="#fff" text-anchor="middle">Pools &amp; Collection</text>
+                <text x="780" y="92" font-size="12" fill="#fef3c7" text-anchor="middle">(No more KYT)</text>
+
+                <!-- Cylinder: Low -->
+                <g id="cyl-low" transform="translate(440, 140)">
+                    <ellipse cx="45" cy="70" rx="45" ry="12" fill="#166534" opacity="0.3"/>
+                    <rect x="0" y="15" width="90" height="55" fill="url(#gradLow)"/>
+                    <ellipse cx="45" cy="70" rx="45" ry="12" fill="url(#gradLow)"/>
+                    <ellipse cx="45" cy="15" rx="45" ry="12" fill="url(#topLow)"/>
+                    <text x="45" y="48" font-size="14" font-weight="700" fill="#fff" text-anchor="middle">Low</text>
+                </g>
+                <text x="485" y="235" font-size="11" fill="#64748b" text-anchor="middle">Score: 0-30</text>
+
+                <!-- Cylinder: Mid -->
+                <g id="cyl-mid" transform="translate(560, 140)">
+                    <ellipse cx="45" cy="70" rx="45" ry="12" fill="#92400e" opacity="0.3"/>
+                    <rect x="0" y="15" width="90" height="55" fill="url(#gradMid)"/>
+                    <ellipse cx="45" cy="70" rx="45" ry="12" fill="url(#gradMid)"/>
+                    <ellipse cx="45" cy="15" rx="45" ry="12" fill="url(#topMid)"/>
+                    <text x="45" y="48" font-size="14" font-weight="700" fill="#fff" text-anchor="middle">Mid</text>
+                </g>
+                <text x="605" y="235" font-size="11" fill="#64748b" text-anchor="middle">Score: 31-60</text>
+
+                <!-- Cylinder: High -->
+                <g id="cyl-high" transform="translate(680, 140)">
+                    <ellipse cx="45" cy="70" rx="45" ry="12" fill="#991b1b" opacity="0.3"/>
+                    <rect x="0" y="15" width="90" height="55" fill="url(#gradHigh)"/>
+                    <ellipse cx="45" cy="70" rx="45" ry="12" fill="url(#gradHigh)"/>
+                    <ellipse cx="45" cy="15" rx="45" ry="12" fill="url(#topHigh)"/>
+                    <text x="45" y="48" font-size="14" font-weight="700" fill="#fff" text-anchor="middle">High</text>
+                </g>
+                <text x="725" y="235" font-size="11" fill="#64748b" text-anchor="middle">Score: 61-90</text>
+
+                <!-- Cylinder: Severe -->
+                <g id="cyl-severe" transform="translate(560, 270)">
+                    <ellipse cx="45" cy="70" rx="45" ry="12" fill="#450a0a" opacity="0.3"/>
+                    <rect x="0" y="15" width="90" height="55" fill="url(#gradSevere)"/>
+                    <ellipse cx="45" cy="70" rx="45" ry="12" fill="url(#gradSevere)"/>
+                    <ellipse cx="45" cy="15" rx="45" ry="12" fill="url(#topSevere)"/>
+                    <text x="45" y="48" font-size="14" font-weight="700" fill="#fff" text-anchor="middle">Severe</text>
+                </g>
+                <text x="605" y="365" font-size="11" fill="#64748b" text-anchor="middle">Score: &gt;90 (Isolated)</text>
+
+                <!-- Collection rules box -->
+                <rect x="420" y="400" width="400" height="80" rx="10" fill="#f1f5f9" stroke="#e2e8f0"/>
+                <text x="620" y="425" font-size="12" font-weight="600" fill="#1e293b" text-anchor="middle">Collection Rules</text>
+                <text x="620" y="445" font-size="11" fill="#64748b" text-anchor="middle">• Collect strictly by risk_label</text>
+                <text x="620" y="462" font-size="11" fill="#64748b" text-anchor="middle">• No cross-pool mixing (deposit / collection / accounting)</text>
+            </g>
+
+            <!-- ==================== SECTION 3: PAYOUT ==================== -->
+            <g id="section-payout">
+                <rect x="920" y="60" width="320" height="500" rx="16" fill="#fff" filter="url(#shadow)"/>
+                <rect x="920" y="60" width="320" height="48" rx="16" fill="#059669"/>
+                <rect x="920" y="92" width="320" height="16" fill="#059669"/>
+                <text x="1080" y="92" font-size="18" font-weight="700" fill="#fff" text-anchor="middle">Payout</text>
+
+                <!-- Low/Mid/High Payout -->
+                <rect x="940" y="130" width="280" height="150" rx="10" fill="#f0fdf4" stroke="#86efac" stroke-width="2"/>
+                <text x="1080" y="155" font-size="13" font-weight="700" fill="#166534" text-anchor="middle">Low / Mid / High Payout</text>
+                
+                <text x="960" y="180" font-size="12" fill="#1e293b">1) KYA Required</text>
+                <text x="960" y="200" font-size="12" fill="#1e293b">2) CLEAN address →</text>
+                <rect x="1100" y="188" width="60" height="20" rx="10" fill="#22c55e"/>
+                <text x="1130" y="202" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">ALLOW</text>
+                
+                <text x="960" y="225" font-size="12" fill="#1e293b">3) Non-CLEAN address →</text>
+                <rect x="1130" y="213" width="50" height="20" rx="10" fill="#ef4444"/>
+                <text x="1155" y="227" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">DENY</text>
+
+                <text x="1080" y="265" font-size="10" fill="#64748b" text-anchor="middle" font-style="italic">Deny payout if KYA fails</text>
+
+                <!-- Severe Payout -->
+                <rect x="940" y="300" width="280" height="130" rx="10" fill="#fef2f2" stroke="#fca5a5" stroke-width="2"/>
+                <text x="1080" y="325" font-size="13" font-weight="700" fill="#991b1b" text-anchor="middle">Severe Payout</text>
+                
+                <text x="960" y="350" font-size="12" fill="#1e293b">1) Allow ANY address</text>
+                <text x="980" y="368" font-size="10" fill="#64748b">(including risky / dirty)</text>
+                <text x="960" y="390" font-size="12" fill="#1e293b">2) KYA optional (record-only)</text>
+                <text x="960" y="410" font-size="12" fill="#1e293b">3) No manual review</text>
+
+                <!-- Balance top-up box -->
+                <rect x="940" y="450" width="280" height="90" rx="10" fill="#fffbeb" stroke="#fcd34d" stroke-width="1" stroke-dasharray="6,3"/>
+                <text x="1080" y="472" font-size="11" font-weight="700" fill="#92400e" text-anchor="middle">Balance Top-up (L/M/H only)</text>
+                <text x="960" y="492" font-size="10" fill="#64748b">• High insufficient → Mid → Low</text>
+                <text x="960" y="508" font-size="10" fill="#64748b">• Low insufficient → Mid → High</text>
+                <text x="960" y="524" font-size="10" fill="#64748b">• Mid insufficient → nearest (fixed)</text>
+            </g>
+
+            <!-- ==================== SECTION 4: RULES ==================== -->
+            <g id="section-rules">
+                <rect x="1260" y="60" width="300" height="360" rx="16" fill="#fff" filter="url(#shadow)"/>
+                <rect x="1260" y="60" width="300" height="48" rx="16" fill="#dc2626"/>
+                <rect x="1260" y="92" width="300" height="16" fill="#dc2626"/>
+                <text x="1410" y="92" font-size="18" font-weight="700" fill="#fff" text-anchor="middle">Rules / Constraints</text>
+
+                <!-- Rule 1 -->
+                <rect x="1280" y="130" width="260" height="60" rx="8" fill="#fef2f2"/>
+                <text x="1300" y="155" font-size="12" font-weight="600" fill="#991b1b">No Cross-Pool Mixing</text>
+                <text x="1300" y="175" font-size="11" fill="#64748b">For deposit, collection, accounting</text>
+
+                <!-- Rule 2 -->
+                <rect x="1280" y="200" width="260" height="70" rx="8" fill="#fffbeb"/>
+                <text x="1300" y="225" font-size="12" font-weight="600" fill="#92400e">Top-up Only for L/M/H</text>
+                <text x="1300" y="245" font-size="11" fill="#64748b">Follow fixed borrowing order</text>
+                <text x="1300" y="260" font-size="10" fill="#64748b">(See payout section)</text>
+
+                <!-- Rule 3 -->
+                <rect x="1280" y="280" width="260" height="70" rx="8" fill="#fce7f3"/>
+                <text x="1300" y="305" font-size="12" font-weight="600" fill="#9d174d">Severe Isolation</text>
+                <text x="1300" y="325" font-size="11" fill="#64748b">• Cannot borrow from others</text>
+                <text x="1300" y="342" font-size="11" fill="#64748b">• Cannot lend to others</text>
+
+                <!-- Warning icon -->
+                <circle cx="1520" cy="320" r="15" fill="#dc2626"/>
+                <text x="1520" y="325" font-size="14" fill="#fff" text-anchor="middle" font-weight="700">!</text>
+            </g>
+
+            <!-- ==================== LEGEND ==================== -->
+            <g id="legend" transform="translate(1260, 460)">
+                <rect x="0" y="0" width="300" height="100" rx="12" fill="#f8fafc" stroke="#e2e8f0"/>
+                <text x="150" y="25" font-size="12" font-weight="700" fill="#1e293b" text-anchor="middle">Legend</text>
+                
+                <!-- Solid arrow -->
+                <line x1="20" y1="50" x2="60" y2="50" stroke="#475569" stroke-width="3" marker-end="url(#arrowSolid)"/>
+                <text x="75" y="54" font-size="11" fill="#64748b">Main flow</text>
+
+                <!-- Dashed arrow -->
+                <line x1="20" y1="75" x2="60" y2="75" stroke="#2563eb" stroke-width="2.5" stroke-dasharray="6,6" marker-end="url(#arrowDash)"/>
+                <text x="75" y="79" font-size="11" fill="#64748b">Routing / Top-up</text>
+
+                <!-- Risk levels -->
+                <circle cx="180" cy="50" r="8" fill="#22c55e"/>
+                <text x="195" y="54" font-size="10" fill="#64748b">Low</text>
+                <circle cx="230" cy="50" r="8" fill="#f59e0b"/>
+                <text x="245" y="54" font-size="10" fill="#64748b">Mid</text>
+                <circle cx="180" cy="75" r="8" fill="#ef4444"/>
+                <text x="195" y="79" font-size="10" fill="#64748b">High</text>
+                <circle cx="230" cy="75" r="8" fill="#7f1d1d"/>
+                <text x="245" y="79" font-size="10" fill="#64748b">Severe</text>
+            </g>
+
+            <!-- ==================== WIRING: TOP-UP ROUTING (dashed, below main) ==================== -->
+            <g id="wires-routing">
+                <!-- T1: High insufficient → Mid → Low -->
+                <path d="M770,130 L770,120 L605,120 L605,130" stroke="#2563eb" stroke-width="2.5" stroke-dasharray="6,6" fill="none" marker-end="url(#arrowDash)"/>
+                <!-- Step dots -->
+                <circle cx="770" cy="120" r="4" fill="#2563eb"/>
+                <circle cx="680" cy="120" r="4" fill="#2563eb"/>
+                <text x="690" y="112" font-size="9" fill="#2563eb" font-weight="600">(T1) High → Mid → Low</text>
+
+                <!-- T2: Low insufficient → Mid → High -->
+                <path d="M530,130 L530,138 L770,138 L770,130" stroke="#2563eb" stroke-width="2.5" stroke-dasharray="6,6" fill="none" marker-end="url(#arrowDash)"/>
+                <!-- Step dots -->
+                <circle cx="530" cy="138" r="4" fill="#2563eb"/>
+                <circle cx="650" cy="138" r="4" fill="#2563eb"/>
+                <text x="610" y="150" font-size="9" fill="#2563eb" font-weight="600">(T2) Low → Mid → High</text>
+
+                <!-- Mid note -->
+                <text x="605" y="162" font-size="8" fill="#64748b" text-anchor="middle" font-style="italic">Mid: nearest (fixed)</text>
+            </g>
+
+            <!-- ==================== WIRING: MAIN FLOW ==================== -->
+            <g id="wires-main">
+                <!-- A) KYT → Pools (4 orthogonal branching lines) -->
+                
+                <!-- (1) KYT → Low: (300,310) → (350,310) → (350,185) → (440,185) -->
+                <path d="M300,310 L350,310 L350,185 L440,185" stroke="#334155" stroke-width="3" fill="none" marker-end="url(#arrowBranch)"/>
+                <circle cx="350" cy="310" r="4" fill="#334155"/>
+                <circle cx="350" cy="185" r="4" fill="#334155"/>
+                <rect x="305" y="296" width="20" height="16" rx="8" fill="#334155"/>
+                <text x="315" y="308" font-size="10" fill="#fff" text-anchor="middle" font-weight="700">1</text>
+
+                <!-- (2) KYT → Mid: (300,310) → (370,310) → (370,185) → (560,185) -->
+                <path d="M300,310 L370,310 L370,185 L560,185" stroke="#334155" stroke-width="3" fill="none" marker-end="url(#arrowBranch)"/>
+                <circle cx="370" cy="310" r="4" fill="#334155"/>
+                <circle cx="370" cy="185" r="4" fill="#334155"/>
+                <rect x="325" y="318" width="20" height="16" rx="8" fill="#334155"/>
+                <text x="335" y="330" font-size="10" fill="#fff" text-anchor="middle" font-weight="700">2</text>
+
+                <!-- (3) KYT → High: (300,310) → (390,310) → (390,185) → (680,185) -->
+                <path d="M300,310 L390,310 L390,185 L680,185" stroke="#334155" stroke-width="3" fill="none" marker-end="url(#arrowBranch)"/>
+                <circle cx="390" cy="310" r="4" fill="#334155"/>
+                <circle cx="390" cy="185" r="4" fill="#334155"/>
+                <rect x="345" y="340" width="20" height="16" rx="8" fill="#334155"/>
+                <text x="355" y="352" font-size="10" fill="#fff" text-anchor="middle" font-weight="700">3</text>
+
+                <!-- (4) KYT → Severe: (300,310) → (410,310) → (410,315) → (560,315) -->
+                <path d="M300,310 L410,310 L410,315 L560,315" stroke="#334155" stroke-width="3" fill="none" marker-end="url(#arrowBranch)"/>
+                <circle cx="410" cy="310" r="4" fill="#334155"/>
+                <circle cx="410" cy="315" r="4" fill="#334155"/>
+                <rect x="365" y="362" width="20" height="16" rx="8" fill="#334155"/>
+                <text x="375" y="374" font-size="10" fill="#fff" text-anchor="middle" font-weight="700">4</text>
+
+                <!-- B) Pools → Payout (main flow) -->
+                
+                <!-- Drop lines from L/M/H to bus -->
+                <line x1="485" y1="225" x2="485" y2="260" stroke="#475569" stroke-width="4"/>
+                <line x1="605" y1="225" x2="605" y2="260" stroke="#475569" stroke-width="4"/>
+                <line x1="725" y1="225" x2="725" y2="260" stroke="#475569" stroke-width="4"/>
+                
+                <!-- Junction dots at drop points -->
+                <circle cx="485" cy="260" r="5" fill="#475569"/>
+                <circle cx="605" cy="260" r="5" fill="#475569"/>
+                <circle cx="725" cy="260" r="5" fill="#475569"/>
+
+                <!-- Bus line (horizontal) -->
+                <line x1="485" y1="260" x2="725" y2="260" stroke="#475569" stroke-width="4"/>
+
+                <!-- Merge point -->
+                <circle cx="605" cy="260" r="6" fill="#1e293b"/>
+
+                <!-- Bus → LMH Payout: (605,260) → (840,260) → (840,205) → (940,205) -->
+                <path d="M605,260 L840,260 L840,205 L940,205" stroke="#475569" stroke-width="4" fill="none" marker-end="url(#arrowSolid)"/>
+                <circle cx="840" cy="260" r="5" fill="#475569"/>
+                <circle cx="840" cy="205" r="5" fill="#475569"/>
+                
+                <!-- Label for LMH flow -->
+                <rect x="750" y="240" width="130" height="16" rx="8" fill="#f1f5f9" stroke="#cbd5e1"/>
+                <text x="815" y="252" font-size="9" fill="#475569" text-anchor="middle" font-weight="600">(5) Main → L/M/H Payout</text>
+
+                <!-- Severe → Severe Payout: (650,315) → (840,315) → (840,365) → (940,365) -->
+                <path d="M650,315 L840,315 L840,365 L940,365" stroke="#475569" stroke-width="4" fill="none" marker-end="url(#arrowSolid)"/>
+                <circle cx="840" cy="315" r="5" fill="#475569"/>
+                <circle cx="840" cy="365" r="5" fill="#475569"/>
+                
+                <!-- Label for Severe flow -->
+                <rect x="700" y="370" width="130" height="16" rx="8" fill="#fef2f2" stroke="#fca5a5"/>
+                <text x="765" y="382" font-size="9" fill="#991b1b" text-anchor="middle" font-weight="600">(6) Main → Severe Payout</text>
+            </g>
+
+            <!-- ==================== SEVERE ISOLATION ANNOTATION ==================== -->
+            <g id="severe-isolation">
+                <!-- Lock icon near Severe cylinder -->
+                <circle cx="680" cy="320" r="12" fill="#fef2f2" stroke="#dc2626" stroke-width="1.5"/>
+                <rect x="675" y="318" width="10" height="8" rx="2" fill="none" stroke="#dc2626" stroke-width="1.5"/>
+                <path d="M677,318 L677,314 A3,3 0 0,1 683,314 L683,318" fill="none" stroke="#dc2626" stroke-width="1.5"/>
+                
+                <text x="700" y="325" font-size="9" fill="#991b1b" font-weight="600">Severe: no borrow / no lend</text>
+            </g>
+
+            <!-- ==================== FOOTER ==================== -->
+            <text x="800" y="870" font-size="12" fill="#94a3b8" text-anchor="middle">Funds Routing Diagram v1.0 — Multi-Risk Pool Management System</text>
+
+        </svg>
+    </div>
+
+    <div class="actions">
+        <button class="btn" onclick="downloadSVG()">Download SVG</button>
+    </div>
+
+    <script>
+        function downloadSVG() {
+            const svg = document.getElementById('diagram');
+            const serializer = new XMLSerializer();
+            const source = serializer.serializeToString(svg);
+            const blob = new Blob([source], { type: 'image/svg+xml;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'funds-routing-diagram.svg';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>

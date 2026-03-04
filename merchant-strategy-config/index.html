@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>商户策略配置中心</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f8f9fa;
+      --card: #ffffff;
+      --border: #e5e7eb;
+      --text: #111827;
+      --text-secondary: #6b7280;
+      --text-muted: #9ca3af;
+      --accent: #3b82f6;
+      --accent-light: #eff6ff;
+      --success: #10b981;
+      --success-light: #ecfdf5;
+      --warning: #f59e0b;
+      --warning-light: #fffbeb;
+      --danger: #ef4444;
+      --danger-light: #fef2f2;
+      --purple: #8b5cf6;
+      --purple-light: #f5f3ff;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    .app {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 32px 24px;
+    }
+
+    /* Header */
+    .header {
+      margin-bottom: 24px;
+    }
+
+    .header h1 {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .header p {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      background: var(--card);
+      padding: 4px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      margin-bottom: 20px;
+    }
+
+    .tab {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 16px;
+      border: none;
+      background: transparent;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .tab:hover {
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    .tab.active {
+      background: var(--accent);
+      color: white;
+    }
+
+    .tab svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* Panel */
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    /* Section Title */
+    .section-title {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-title svg {
+      width: 18px;
+      height: 18px;
+      color: var(--accent);
+    }
+
+    /* Bucket Grid */
+    .bucket-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .bucket-card {
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      text-align: center;
+      transition: all 0.15s;
+    }
+
+    .bucket-card:hover {
+      border-color: var(--text-muted);
+    }
+
+    .bucket-ring {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 10px;
+      position: relative;
+    }
+
+    .bucket-ring svg {
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg);
+    }
+
+    .bucket-ring-bg {
+      fill: none;
+      stroke: var(--border);
+      stroke-width: 3;
+    }
+
+    .bucket-ring-fill {
+      fill: none;
+      stroke-width: 3;
+      stroke-linecap: round;
+    }
+
+    .bucket-card.low .bucket-ring-fill { stroke: var(--success); }
+    .bucket-card.mid .bucket-ring-fill { stroke: var(--warning); }
+    .bucket-card.high .bucket-ring-fill { stroke: var(--danger); }
+    .bucket-card.severe .bucket-ring-fill { stroke: var(--purple); }
+
+    .bucket-dot {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+
+    .bucket-card.low .bucket-dot { background: var(--success); }
+    .bucket-card.mid .bucket-dot { background: var(--warning); }
+    .bucket-card.high .bucket-dot { background: var(--danger); }
+    .bucket-card.severe .bucket-dot { background: var(--purple); }
+
+    .bucket-name {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 2px;
+    }
+
+    .bucket-value {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    /* Range Bar */
+    .range-group {
+      margin-bottom: 16px;
+    }
+
+    .range-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .range-label svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .range-bar {
+      height: 6px;
+      border-radius: 3px;
+      display: flex;
+      overflow: hidden;
+      margin-bottom: 6px;
+    }
+
+    .range-seg.low { background: var(--success); }
+    .range-seg.mid { background: var(--warning); }
+    .range-seg.high { background: var(--danger); }
+    .range-seg.severe { background: var(--purple); }
+
+    .range-marks {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    /* Flow */
+    .flow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 16px;
+      background: var(--bg);
+      border-radius: 10px;
+      margin-top: 16px;
+    }
+
+    .flow-node {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 14px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    .flow-node.active {
+      border-color: var(--accent);
+      background: var(--accent-light);
+    }
+
+    .flow-node.success {
+      border-color: var(--success);
+      background: var(--success-light);
+    }
+
+    .flow-node svg {
+      width: 18px;
+      height: 18px;
+      color: var(--text-secondary);
+    }
+
+    .flow-node.active svg { color: var(--accent); }
+    .flow-node.success svg { color: var(--success); }
+
+    .flow-node span {
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+
+    .flow-arrow {
+      color: var(--text-muted);
+    }
+
+    .flow-arrow svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* Routing Grid */
+    .routing-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .routing-card {
+      padding: 14px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+
+    .routing-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .routing-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .routing-dot.low { background: var(--success); }
+    .routing-dot.mid { background: var(--warning); }
+    .routing-dot.high { background: var(--danger); }
+    .routing-dot.severe { background: var(--purple); }
+
+    .routing-name {
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .routing-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .routing-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .routing-num {
+      width: 16px;
+      height: 16px;
+      background: var(--bg);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 600;
+    }
+
+    /* Toggle */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      background: var(--bg);
+      border-radius: 10px;
+      margin-bottom: 12px;
+    }
+
+    .toggle-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .toggle-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .toggle-icon svg {
+      width: 16px;
+      height: 16px;
+      color: var(--text-secondary);
+    }
+
+    .toggle-text h4 {
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .toggle-text p {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .toggle-switch {
+      width: 40px;
+      height: 22px;
+      background: #d1d5db;
+      border-radius: 11px;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.15s;
+    }
+
+    .toggle-switch.on {
+      background: var(--accent);
+    }
+
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 18px;
+      height: 18px;
+      background: white;
+      border-radius: 50%;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+      transition: all 0.15s;
+    }
+
+    .toggle-switch.on::after {
+      left: 20px;
+    }
+
+    /* Input Grid */
+    .input-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .input-card {
+      padding: 14px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+
+    .input-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .input-label svg {
+      width: 12px;
+      height: 12px;
+    }
+
+    .input-field {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      background: var(--bg);
+    }
+
+    .input-field:focus {
+      outline: none;
+      border-color: var(--accent);
+      background: white;
+    }
+
+    .input-unit {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* Collection Grid */
+    .collection-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .collection-card {
+      padding: 14px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+
+    .collection-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .collection-name {
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .collection-stats {
+      display: flex;
+      gap: 16px;
+    }
+
+    .collection-stat {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .collection-stat svg {
+      width: 12px;
+      height: 12px;
+      color: var(--text-muted);
+    }
+
+    .collection-alert {
+      padding: 10px;
+      background: var(--warning-light);
+      border-radius: 6px;
+      font-size: 11px;
+      color: #92400e;
+    }
+
+    /* Mode Grid */
+    .mode-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .mode-option {
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .mode-option:hover {
+      border-color: var(--text-muted);
+    }
+
+    .mode-option.active {
+      border-color: var(--accent);
+      background: var(--accent-light);
+    }
+
+    .mode-icon {
+      width: 36px;
+      height: 36px;
+      margin: 0 auto 10px;
+      background: var(--bg);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .mode-option.active .mode-icon {
+      background: white;
+    }
+
+    .mode-icon svg {
+      width: 18px;
+      height: 18px;
+      color: var(--text-secondary);
+    }
+
+    .mode-option.active .mode-icon svg {
+      color: var(--accent);
+    }
+
+    .mode-label {
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 2px;
+    }
+
+    .mode-desc {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* Chips */
+    .chip-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .chip {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .chip:hover {
+      border-color: var(--text-muted);
+    }
+
+    .chip.selected {
+      border-color: var(--accent);
+      background: var(--accent-light);
+      color: var(--accent);
+    }
+
+    .chip-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+
+    .chip-dot.low { background: var(--success); }
+    .chip-dot.mid { background: var(--warning); }
+    .chip-dot.high { background: var(--danger); }
+    .chip-dot.severe { background: var(--purple); }
+
+    .chip svg {
+      width: 12px;
+      height: 12px;
+      opacity: 0;
+    }
+
+    .chip.selected svg {
+      opacity: 1;
+    }
+
+    /* Alert */
+    .alert {
+      display: flex;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      font-size: 12px;
+    }
+
+    .alert.info { background: var(--accent-light); color: #1e40af; }
+    .alert.warning { background: var(--warning-light); color: #92400e; }
+    .alert.success { background: var(--success-light); color: #065f46; }
+
+    .alert svg {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* Save */
+    .save-bar {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    .save-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 20px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .save-btn:hover {
+      background: #2563eb;
+    }
+
+    .save-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .tabs { flex-wrap: wrap; }
+      .tab { flex: none; width: calc(50% - 2px); }
+      .bucket-grid { grid-template-columns: repeat(2, 1fr); }
+      .routing-grid { grid-template-columns: repeat(2, 1fr); }
+      .mode-grid { grid-template-columns: 1fr; }
+      .input-grid { grid-template-columns: 1fr; }
+      .collection-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState } = React;
+
+    // Icons
+    const Icons = {
+      chart: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>,
+      route: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg>,
+      box: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>,
+      refresh: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>,
+      shield: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,
+      arrow: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>,
+      check: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg>,
+      dollar: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>,
+      clock: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
+      hash: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></svg>,
+      calendar: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>,
+      percent: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>,
+      ban: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>,
+      target: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>,
+      repeat: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>,
+      lock: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>,
+      x: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>,
+      info: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>,
+      alert: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>,
+      scan: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/></svg>,
+      layers: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>,
+      home: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>,
+      eye: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>,
+    };
+
+    const BUCKETS = {
+      low: { name: '低风险', color: 'var(--success)' },
+      mid: { name: '中风险', color: 'var(--warning)' },
+      high: { name: '高风险', color: 'var(--danger)' },
+      severe: { name: '严重', color: 'var(--purple)' }
+    };
+
+    const BUCKET_KEYS = ['low', 'mid', 'high', 'severe'];
+
+    const initialConfig = {
+      thresholds: {
+        kyt: { low: [0, 30], mid: [30, 55], high: [55, 75], severe: [75, 100] },
+        kya: { low: [0, 25], mid: [25, 50], high: [50, 70], severe: [70, 100] }
+      },
+      routing: {
+        low: ['low', 'mid', 'high'],
+        mid: ['mid', 'low', 'high'],
+        high: ['high', 'mid', 'low'],
+        severe: ['severe']
+      },
+      topUp: { enabled: true, limits: { perTx: 10, daily: 30, max: 100000 } },
+      collection: {
+        low: { threshold: 1000, cooldown: 30 },
+        mid: { threshold: 5000, cooldown: 60 },
+        high: { threshold: 10000, cooldown: 120 },
+        severe: { immediate: true }
+      },
+      rotation: { mode: 'W1', triggers: ['high', 'severe'], count: 10, amount: 50000, cooldown: 30 },
+      severe: { isolate: true, block: true }
+    };
+
+    // Components
+    const BucketRing = ({ percent }) => {
+      const r = 20, c = 2 * Math.PI * r;
+      return (
+        <svg viewBox="0 0 48 48">
+          <circle className="bucket-ring-bg" cx="24" cy="24" r={r} />
+          <circle className="bucket-ring-fill" cx="24" cy="24" r={r} strokeDasharray={c} strokeDashoffset={c - (percent / 100) * c} />
+        </svg>
+      );
+    };
+
+    const RangeBar = ({ thresholds, label, icon }) => (
+      <div className="range-group">
+        <div className="range-label">{icon}{label}</div>
+        <div className="range-bar">
+          {BUCKET_KEYS.map(k => <div key={k} className={`range-seg ${k}`} style={{ width: `${thresholds[k][1] - thresholds[k][0]}%` }} />)}
+        </div>
+        <div className="range-marks">{[0, 25, 50, 75, 100].map(v => <span key={v}>{v}</span>)}</div>
+      </div>
+    );
+
+    const Flow = ({ steps }) => (
+      <div className="flow">
+        {steps.map((s, i) => (
+          <React.Fragment key={i}>
+            {i > 0 && <span className="flow-arrow">{Icons.arrow}</span>}
+            <div className={`flow-node ${s.type || ''}`}>{s.icon}<span>{s.label}</span></div>
+          </React.Fragment>
+        ))}
+      </div>
+    );
+
+    const Toggle = ({ on, onChange }) => <div className={`toggle-switch ${on ? 'on' : ''}`} onClick={() => onChange(!on)} />;
+
+    // Tab Panels
+    const ThresholdPanel = ({ config }) => (
+      <>
+        <div className="section-title">{Icons.chart} 风险评分阈值</div>
+        <div className="bucket-grid">
+          {BUCKET_KEYS.map(k => (
+            <div key={k} className={`bucket-card ${k}`}>
+              <div className="bucket-ring"><BucketRing percent={config.thresholds.kyt[k][1]} /><div className="bucket-dot" /></div>
+              <div className="bucket-name">{BUCKETS[k].name}</div>
+              <div className="bucket-value">{config.thresholds.kyt[k][0]}-{config.thresholds.kyt[k][1]}</div>
+            </div>
+          ))}
+        </div>
+        <RangeBar thresholds={config.thresholds.kyt} label="KYT 交易分析" icon={Icons.scan} />
+        <RangeBar thresholds={config.thresholds.kya} label="KYA 地址分析" icon={Icons.layers} />
+        <Flow steps={[
+          { icon: Icons.box, label: '收到交易', type: 'active' },
+          { icon: Icons.scan, label: 'KYT 扫描' },
+          { icon: Icons.chart, label: '评分计算' },
+          { icon: Icons.layers, label: '分桶归类', type: 'success' }
+        ]} />
+      </>
+    );
+
+    const RoutingPanel = ({ config, setConfig }) => (
+      <>
+        <div className="section-title">{Icons.route} 出款路由矩阵</div>
+        <div className="alert info">{Icons.info}<span>根据目标地址风险等级，按优先级选择资金来源</span></div>
+        <div className="routing-grid">
+          {BUCKET_KEYS.map(d => (
+            <div key={d} className="routing-card">
+              <div className="routing-header"><div className={`routing-dot ${d}`} /><span className="routing-name">{BUCKETS[d].name}</span></div>
+              <div className="routing-list">
+                {config.routing[d].map((s, i) => (
+                  <div key={i} className="routing-item"><span className="routing-num">{i + 1}</span><div className={`routing-dot ${s}`} /><span>{BUCKETS[s].name}</span></div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="toggle-row">
+          <div className="toggle-left">
+            <div className="toggle-icon">{Icons.dollar}</div>
+            <div className="toggle-text"><h4>资金借调</h4><p>余额不足时从其他桶借调</p></div>
+          </div>
+          <Toggle on={config.topUp.enabled} onChange={v => setConfig(p => ({ ...p, topUp: { ...p.topUp, enabled: v } }))} />
+        </div>
+        {config.topUp.enabled && (
+          <div className="input-grid">
+            <div className="input-card"><div className="input-label">{Icons.percent} 单笔比例</div><input type="number" className="input-field" value={config.topUp.limits.perTx} onChange={e => setConfig(p => ({ ...p, topUp: { ...p.topUp, limits: { ...p.topUp.limits, perTx: +e.target.value } } }))} /><div className="input-unit">%</div></div>
+            <div className="input-card"><div className="input-label">{Icons.calendar} 日累计</div><input type="number" className="input-field" value={config.topUp.limits.daily} onChange={e => setConfig(p => ({ ...p, topUp: { ...p.topUp, limits: { ...p.topUp.limits, daily: +e.target.value } } }))} /><div className="input-unit">%</div></div>
+            <div className="input-card"><div className="input-label">{Icons.dollar} 绝对上限</div><input type="number" className="input-field" value={config.topUp.limits.max} onChange={e => setConfig(p => ({ ...p, topUp: { ...p.topUp, limits: { ...p.topUp.limits, max: +e.target.value } } }))} /><div className="input-unit">USDT</div></div>
+          </div>
+        )}
+      </>
+    );
+
+    const CollectionPanel = ({ config }) => (
+      <>
+        <div className="section-title">{Icons.box} 归集策略</div>
+        <div className="alert info">{Icons.info}<span>当地址余额达到阈值且冷却结束后，自动归集到热钱包</span></div>
+        <div className="collection-grid">
+          {BUCKET_KEYS.map(k => (
+            <div key={k} className="collection-card">
+              <div className="collection-header"><div className={`routing-dot ${k}`} /><span className="collection-name">{BUCKETS[k].name}</span></div>
+              {k === 'severe' ? (
+                <div className="collection-alert">严重风险资金立即隔离处理</div>
+              ) : (
+                <div className="collection-stats">
+                  <div className="collection-stat">{Icons.dollar}<span>{config.collection[k].threshold} USDT</span></div>
+                  <div className="collection-stat">{Icons.clock}<span>{config.collection[k].cooldown} 分钟</span></div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+        <Flow steps={[
+          { icon: Icons.box, label: '收款', type: 'active' },
+          { icon: Icons.layers, label: '分桶' },
+          { icon: Icons.clock, label: '冷却' },
+          { icon: Icons.home, label: '热钱包', type: 'success' }
+        ]} />
+      </>
+    );
+
+    const RotationPanel = ({ config, setConfig }) => (
+      <>
+        <div className="section-title">{Icons.refresh} 地址轮换策略</div>
+        <div className="mode-grid">
+          {[
+            { value: 'W0', icon: Icons.ban, label: '不轮换', desc: '地址永久使用' },
+            { value: 'W1', icon: Icons.target, label: '触发轮换', desc: '满足条件时轮换' },
+            { value: 'W2', icon: Icons.repeat, label: '定期轮换', desc: '按周期自动轮换' }
+          ].map(m => (
+            <div key={m.value} className={`mode-option ${config.rotation.mode === m.value ? 'active' : ''}`} onClick={() => setConfig(p => ({ ...p, rotation: { ...p.rotation, mode: m.value } }))}>
+              <div className="mode-icon">{m.icon}</div>
+              <div className="mode-label">{m.label}</div>
+              <div className="mode-desc">{m.desc}</div>
+            </div>
+          ))}
+        </div>
+        {config.rotation.mode !== 'W0' && (
+          <>
+            <div className="chip-group">
+              {BUCKET_KEYS.map(k => {
+                const sel = config.rotation.triggers.includes(k);
+                return (
+                  <div key={k} className={`chip ${sel ? 'selected' : ''}`} onClick={() => {
+                    const t = sel ? config.rotation.triggers.filter(x => x !== k) : [...config.rotation.triggers, k];
+                    setConfig(p => ({ ...p, rotation: { ...p.rotation, triggers: t } }));
+                  }}>
+                    <div className={`chip-dot ${k}`} /><span>{BUCKETS[k].name}</span>{Icons.check}
+                  </div>
+                );
+              })}
+            </div>
+            <div className="input-grid">
+              <div className="input-card"><div className="input-label">{Icons.hash} 交易次数</div><input type="number" className="input-field" value={config.rotation.count} onChange={e => setConfig(p => ({ ...p, rotation: { ...p.rotation, count: +e.target.value } }))} /><div className="input-unit">笔</div></div>
+              <div className="input-card"><div className="input-label">{Icons.dollar} 金额阈值</div><input type="number" className="input-field" value={config.rotation.amount} onChange={e => setConfig(p => ({ ...p, rotation: { ...p.rotation, amount: +e.target.value } }))} /><div className="input-unit">USDT</div></div>
+              <div className="input-card"><div className="input-label">{Icons.calendar} 冷却天数</div><input type="number" className="input-field" value={config.rotation.cooldown} onChange={e => setConfig(p => ({ ...p, rotation: { ...p.rotation, cooldown: +e.target.value } }))} /><div className="input-unit">天</div></div>
+            </div>
+          </>
+        )}
+        <Flow steps={[
+          { icon: Icons.home, label: '活跃', type: 'active' },
+          { icon: Icons.alert, label: '触发' },
+          { icon: Icons.lock, label: '隔离' },
+          { icon: Icons.clock, label: '冷却' },
+          { icon: Icons.refresh, label: '复用', type: 'success' }
+        ]} />
+      </>
+    );
+
+    const SeverePanel = ({ config, setConfig }) => (
+      <>
+        <div className="section-title">{Icons.shield} 严重风险管控</div>
+        <div className="alert warning">{Icons.alert}<span>严重风险的资金需要特殊处理，请谨慎配置</span></div>
+        <div className="toggle-row">
+          <div className="toggle-left"><div className="toggle-icon">{Icons.lock}</div><div className="toggle-text"><h4>隔离入款</h4><p>高风险入款立即隔离</p></div></div>
+          <Toggle on={config.severe.isolate} onChange={v => setConfig(p => ({ ...p, severe: { ...p.severe, isolate: v } }))} />
+        </div>
+        <div className="toggle-row">
+          <div className="toggle-left"><div className="toggle-icon">{Icons.x}</div><div className="toggle-text"><h4>拦截出款</h4><p>高风险出款自动拒绝</p></div></div>
+          <Toggle on={config.severe.block} onChange={v => setConfig(p => ({ ...p, severe: { ...p.severe, block: v } }))} />
+        </div>
+        <Flow steps={[
+          { icon: Icons.shield, label: '检测', type: 'active' },
+          { icon: Icons.lock, label: '隔离' },
+          { icon: Icons.eye, label: '审核' },
+          { icon: Icons.check, label: '完成', type: 'success' }
+        ]} />
+        <div className="alert success" style={{ marginTop: 16 }}>{Icons.check}<span>核心约束：归集不做KYT · 禁止跨桶拼单 · 严重风险不借贷 · 审计日志必开</span></div>
+      </>
+    );
+
+    // App
+    const App = () => {
+      const [tab, setTab] = useState('threshold');
+      const [config, setConfig] = useState(initialConfig);
+
+      const tabs = [
+        { key: 'threshold', label: '风险阈值', icon: Icons.chart },
+        { key: 'routing', label: '出款路由', icon: Icons.route },
+        { key: 'collection', label: '归集策略', icon: Icons.box },
+        { key: 'rotation', label: '地址轮换', icon: Icons.refresh },
+        { key: 'severe', label: '风险管控', icon: Icons.shield }
+      ];
+
+      return (
+        <div className="app">
+          <div className="header">
+            <h1>商户策略配置中心</h1>
+            <p>配置 KYT/KYA 分桶、归集、出款路由、地址轮换等策略</p>
+          </div>
+
+          <div className="tabs">
+            {tabs.map(t => (
+              <button key={t.key} className={`tab ${tab === t.key ? 'active' : ''}`} onClick={() => setTab(t.key)}>
+                {t.icon}<span>{t.label}</span>
+              </button>
+            ))}
+          </div>
+
+          <div className="panel">
+            {tab === 'threshold' && <ThresholdPanel config={config} />}
+            {tab === 'routing' && <RoutingPanel config={config} setConfig={setConfig} />}
+            {tab === 'collection' && <CollectionPanel config={config} />}
+            {tab === 'rotation' && <RotationPanel config={config} setConfig={setConfig} />}
+            {tab === 'severe' && <SeverePanel config={config} setConfig={setConfig} />}
+
+            <div className="save-bar">
+              <button className="save-btn">{Icons.check} 保存配置</button>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>

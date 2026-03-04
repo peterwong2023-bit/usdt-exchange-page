@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>整套风控路径示意图（出款风控）</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: #f8fafc;
+      min-height: 100vh;
+      padding: 40px 20px;
+      color: #1e293b;
+    }
+
+    .container {
+      max-width: 1800px;
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 20px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 10px 40px -10px rgba(0, 0, 0, 0.08);
+      padding: 50px;
+      overflow-x: auto;
+      border: 1px solid #e2e8f0;
+    }
+
+    .title {
+      text-align: center;
+      margin-bottom: 45px;
+    }
+
+    .title h1 {
+      font-size: 34px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 10px;
+      letter-spacing: 1px;
+    }
+
+    .title h1 span {
+      color: #0ea5e9;
+    }
+
+    .title p {
+      font-size: 14px;
+      color: #94a3b8;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .diagram-wrapper {
+      overflow-x: auto;
+      padding: 20px 0;
+      min-width: 1400px;
+    }
+
+    .legend {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 32px;
+      margin-top: 45px;
+      padding-top: 30px;
+      border-top: 1px solid #f1f5f9;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      color: #64748b;
+      font-weight: 500;
+    }
+
+    .legend-color {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+    }
+
+    .legend-color.primary { background: #0ea5e9; }
+    .legend-color.gray { background: #94a3b8; }
+    .legend-color.green { background: #22c55e; }
+    .legend-color.amber { background: #f59e0b; }
+    .legend-color.red { background: #ef4444; }
+
+    .legend-note {
+      font-size: 12px;
+      color: #94a3b8;
+      padding-left: 24px;
+      border-left: 2px solid #e2e8f0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="title">
+      <h1>整套风控路径示意图<span>（出款风控）</span></h1>
+      <p>Withdrawal Risk Control Flow Diagram</p>
+    </div>
+
+    <div class="diagram-wrapper">
+      <svg width="1400" height="730" viewBox="0 0 1400 730" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <!-- Gradients -->
+          <linearGradient id="primaryGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#0ea5e9"/>
+            <stop offset="100%" style="stop-color:#06b6d4"/>
+          </linearGradient>
+          <linearGradient id="greenGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#22c55e"/>
+            <stop offset="100%" style="stop-color:#4ade80"/>
+          </linearGradient>
+          <linearGradient id="amberGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#f59e0b"/>
+            <stop offset="100%" style="stop-color:#fbbf24"/>
+          </linearGradient>
+          <linearGradient id="orangeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#f97316"/>
+            <stop offset="100%" style="stop-color:#fb923c"/>
+          </linearGradient>
+          <linearGradient id="redGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#ef4444"/>
+            <stop offset="100%" style="stop-color:#f87171"/>
+          </linearGradient>
+
+          <!-- Arrows -->
+          <marker id="arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+            <path d="M0,0 L10,4 L0,8 L2,4 Z" fill="#0ea5e9"/>
+          </marker>
+          <marker id="arrow-light" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+            <path d="M0,0 L10,4 L0,8 L2,4 Z" fill="#cbd5e1"/>
+          </marker>
+
+          <!-- Shadows -->
+          <filter id="cardShadow" x="-10%" y="-10%" width="120%" height="130%">
+            <feDropShadow dx="0" dy="2" stdDeviation="6" flood-color="#0ea5e9" flood-opacity="0.08"/>
+          </filter>
+          <filter id="softShadow" x="-10%" y="-10%" width="120%" height="130%">
+            <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#000" flood-opacity="0.06"/>
+          </filter>
+          <filter id="stateShadow" x="-10%" y="-10%" width="120%" height="130%">
+            <feDropShadow dx="0" dy="3" stdDeviation="8" flood-color="#000" flood-opacity="0.1"/>
+          </filter>
+        </defs>
+
+        <!-- ========== Main Flow ========== -->
+
+        <!-- 出款请求 -->
+        <g id="node-withdraw" transform="translate(20, 55)">
+          <rect x="0" y="0" width="105" height="62" rx="12" fill="#fff" stroke="#e2e8f0" stroke-width="1.5" filter="url(#softShadow)"/>
+          <rect x="0" y="0" width="105" height="4" rx="2" fill="url(#primaryGradient)"/>
+          <text x="52" y="30" text-anchor="middle" font-size="14" font-weight="600" fill="#1e293b">出款请求</text>
+          <text x="52" y="48" text-anchor="middle" font-size="10" fill="#94a3b8" font-weight="500">Withdraw Request</text>
+        </g>
+
+        <path d="M130,86 L158,86" stroke="#0ea5e9" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+
+        <!-- 基础校验 -->
+        <g id="node-precheck" transform="translate(168, 40)">
+          <rect x="0" y="0" width="115" height="92" rx="12" fill="#fff" stroke="#e2e8f0" stroke-width="1.5" filter="url(#softShadow)"/>
+          <rect x="0" y="0" width="115" height="4" rx="2" fill="#94a3b8"/>
+          <text x="57" y="28" text-anchor="middle" font-size="14" font-weight="600" fill="#1e293b">基础校验</text>
+          <text x="57" y="48" text-anchor="middle" font-size="11" fill="#64748b">商户状态</text>
+          <text x="57" y="64" text-anchor="middle" font-size="11" fill="#64748b">钱包状态</text>
+          <text x="57" y="80" text-anchor="middle" font-size="11" fill="#64748b">基础限额</text>
+        </g>
+
+        <path d="M288,86 L316,86" stroke="#0ea5e9" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+
+        <!-- 进入风控引擎 -->
+        <g id="node-engine" transform="translate(326, 45)">
+          <rect x="0" y="0" width="115" height="82" rx="12" fill="url(#primaryGradient)" filter="url(#cardShadow)"/>
+          <text x="57" y="32" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">进入风控引擎</text>
+          <text x="57" y="50" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.85)" font-weight="500">Risk Engine</text>
+          <text x="57" y="66" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.7)">金额规则评估</text>
+        </g>
+
+        <!-- Split to 3 rules -->
+        <path d="M446,86 L470,86" stroke="#0ea5e9" stroke-width="2" fill="none"/>
+        <path d="M470,86 L470,38" stroke="#0ea5e9" stroke-width="2" fill="none"/>
+        <path d="M470,86 L470,134" stroke="#0ea5e9" stroke-width="2" fill="none"/>
+        <path d="M470,38 L488,38" stroke="#0ea5e9" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+        <path d="M470,86 L488,86" stroke="#0ea5e9" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+        <path d="M470,134 L488,134" stroke="#0ea5e9" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+
+        <!-- 3 Rules -->
+        <g id="node-rule-single" transform="translate(498, 8)">
+          <rect x="0" y="0" width="155" height="60" rx="10" fill="#f0f9ff" stroke="#bae6fd" stroke-width="1.5" filter="url(#softShadow)"/>
+          <text x="77" y="26" text-anchor="middle" font-size="13" font-weight="600" fill="#0369a1">a. 单笔金额异常</text>
+          <text x="77" y="44" text-anchor="middle" font-size="10" fill="#64748b">amount vs P99_30d</text>
+        </g>
+
+        <g id="node-rule-sum" transform="translate(498, 78)">
+          <rect x="0" y="0" width="155" height="60" rx="10" fill="#f0f9ff" stroke="#bae6fd" stroke-width="1.5" filter="url(#softShadow)"/>
+          <text x="77" y="26" text-anchor="middle" font-size="13" font-weight="600" fill="#0369a1">b. 累计金额异常</text>
+          <text x="77" y="44" text-anchor="middle" font-size="10" fill="#64748b">sum_W vs baseline × K</text>
+        </g>
+
+        <g id="node-rule-concentration" transform="translate(498, 148)">
+          <rect x="0" y="0" width="155" height="60" rx="10" fill="#f0f9ff" stroke="#bae6fd" stroke-width="1.5" filter="url(#softShadow)"/>
+          <text x="77" y="26" text-anchor="middle" font-size="13" font-weight="600" fill="#0369a1">c. 地址集中度异常</text>
+          <text x="77" y="44" text-anchor="middle" font-size="10" fill="#64748b">占比 top1/top2</text>
+        </g>
+
+        <text x="575" y="230" text-anchor="middle" font-size="11" fill="#94a3b8" font-weight="500">并行 3 条规则</text>
+
+        <!-- Converge -->
+        <path d="M658,38 L685,38" stroke="#0ea5e9" stroke-width="2" fill="none"/>
+        <path d="M658,108 L685,108" stroke="#0ea5e9" stroke-width="2" fill="none"/>
+        <path d="M658,178 L685,178" stroke="#0ea5e9" stroke-width="2" fill="none"/>
+        <path d="M685,38 L685,178" stroke="#0ea5e9" stroke-width="2" fill="none"/>
+        <path d="M685,108 L713,108" stroke="#0ea5e9" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+
+        <!-- 规则命中聚合 -->
+        <g id="node-aggregate" transform="translate(723, 70)">
+          <rect x="0" y="0" width="135" height="76" rx="12" fill="#fff" stroke="#e2e8f0" stroke-width="1.5" filter="url(#softShadow)"/>
+          <rect x="0" y="0" width="135" height="4" rx="2" fill="#06b6d4"/>
+          <text x="67" y="30" text-anchor="middle" font-size="13" font-weight="600" fill="#1e293b">规则命中聚合</text>
+          <text x="67" y="48" text-anchor="middle" font-size="11" fill="#64748b">仅金额规则计分</text>
+          <text x="67" y="64" text-anchor="middle" font-size="10" fill="#94a3b8">笔数/频率不参与</text>
+        </g>
+
+        <path d="M863,108 L891,108" stroke="#0ea5e9" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+
+        <!-- 计算 RiskScore -->
+        <g id="node-score" transform="translate(901, 55)">
+          <rect x="0" y="0" width="130" height="106" rx="14" fill="url(#primaryGradient)" filter="url(#cardShadow)"/>
+          <text x="65" y="30" text-anchor="middle" font-size="12" font-weight="600" fill="rgba(255,255,255,0.9)">计算 RiskScore</text>
+          <text x="65" y="68" text-anchor="middle" font-size="32" font-weight="800" fill="#fff">0–100</text>
+          <text x="65" y="92" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.7)">UI可显示100+</text>
+        </g>
+
+        <!-- Arrow down -->
+        <path d="M966,166 L966,255" stroke="#0ea5e9" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+
+        <!-- ========== Four States ========== -->
+
+        <!-- NORMAL -->
+        <g id="state-normal" transform="translate(810, 268)">
+          <rect x="0" y="0" width="180" height="58" rx="14" fill="#f0fdf4" stroke="#22c55e" stroke-width="2" filter="url(#stateShadow)"/>
+          <circle cx="28" cy="29" r="14" fill="url(#greenGradient)"/>
+          <text x="28" y="34" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">N</text>
+          <text x="112" y="28" text-anchor="middle" font-size="16" font-weight="700" fill="#16a34a">正常观察</text>
+          <text x="112" y="46" text-anchor="middle" font-size="11" fill="#4ade80" font-weight="500">score &lt; 40 (NORMAL)</text>
+        </g>
+
+        <!-- WARNING -->
+        <g id="state-warning" transform="translate(810, 336)">
+          <rect x="0" y="0" width="180" height="58" rx="14" fill="#fffbeb" stroke="#f59e0b" stroke-width="2" filter="url(#stateShadow)"/>
+          <circle cx="28" cy="29" r="14" fill="url(#amberGradient)"/>
+          <text x="28" y="34" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">W</text>
+          <text x="112" y="28" text-anchor="middle" font-size="16" font-weight="700" fill="#d97706">xbb警告</text>
+          <text x="112" y="46" text-anchor="middle" font-size="11" fill="#fbbf24" font-weight="500">40 – 69 (WARNING)</text>
+        </g>
+
+        <!-- LIMITED -->
+        <g id="state-limited" transform="translate(810, 404)">
+          <rect x="0" y="0" width="180" height="58" rx="14" fill="#fff7ed" stroke="#f97316" stroke-width="2" filter="url(#stateShadow)"/>
+          <circle cx="28" cy="29" r="14" fill="url(#orangeGradient)"/>
+          <text x="28" y="34" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">L</text>
+          <text x="112" y="28" text-anchor="middle" font-size="16" font-weight="700" fill="#ea580c">警告并限速</text>
+          <text x="112" y="46" text-anchor="middle" font-size="11" fill="#fb923c" font-weight="500">70 – 99 (LIMITED)</text>
+        </g>
+
+        <!-- FUSED -->
+        <g id="state-fused" transform="translate(810, 472)">
+          <rect x="0" y="0" width="180" height="58" rx="14" fill="#fef2f2" stroke="#ef4444" stroke-width="2" filter="url(#stateShadow)"/>
+          <circle cx="28" cy="29" r="14" fill="url(#redGradient)"/>
+          <text x="28" y="34" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">F</text>
+          <text x="112" y="28" text-anchor="middle" font-size="16" font-weight="700" fill="#dc2626">强制熔断</text>
+          <text x="112" y="46" text-anchor="middle" font-size="11" fill="#f87171" font-weight="500">≥ 100 (FUSED)</text>
+        </g>
+
+        <!-- States Bracket -->
+        <path d="M1000,280 C1025,280 1025,300 1025,320 L1025,385 C1025,400 1040,400 1040,400 C1025,400 1025,400 1025,415 L1025,480 C1025,500 1025,520 1000,520" 
+              stroke="#0ea5e9" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <text x="1060" y="393" font-size="17" font-weight="700" fill="#0ea5e9">态势</text>
+        <text x="1060" y="414" font-size="12" font-weight="500" fill="#38bdf8">(State)</text>
+
+        <!-- ========== Actions ========== -->
+
+        <!-- WARNING Action -->
+        <g id="action-warning" transform="translate(1115, 295)">
+          <rect x="0" y="0" width="150" height="52" rx="12" fill="#fff" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="6,4" filter="url(#softShadow)"/>
+          <text x="75" y="24" text-anchor="middle" font-size="13" font-weight="600" fill="#d97706">标记 / 提示 / 上报</text>
+          <text x="75" y="42" text-anchor="middle" font-size="10" fill="#94a3b8" font-weight="500">WARNING Action</text>
+        </g>
+
+        <!-- LIMITED Action -->
+        <g id="action-limited" transform="translate(1115, 357)">
+          <rect x="0" y="0" width="150" height="52" rx="12" fill="#fff" stroke="#f97316" stroke-width="1.5" stroke-dasharray="6,4" filter="url(#softShadow)"/>
+          <text x="75" y="24" text-anchor="middle" font-size="13" font-weight="600" fill="#ea580c">限速 / 限额 / 限路径</text>
+          <text x="75" y="42" text-anchor="middle" font-size="10" fill="#94a3b8" font-weight="500">LIMITED Action</text>
+        </g>
+
+        <!-- FUSED Action -->
+        <g id="action-fused" transform="translate(1115, 419)">
+          <rect x="0" y="0" width="150" height="52" rx="12" fill="#fff" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="6,4" filter="url(#softShadow)"/>
+          <text x="75" y="24" text-anchor="middle" font-size="13" font-weight="600" fill="#dc2626">停止出款（熔断）</text>
+          <text x="75" y="42" text-anchor="middle" font-size="10" fill="#94a3b8" font-weight="500">FUSED Action</text>
+        </g>
+
+        <!-- Actions Bracket -->
+        <path d="M1275,308 C1300,308 1300,328 1300,348 L1300,378 C1300,393 1315,393 1315,393 C1300,393 1300,393 1300,408 L1300,438 C1300,458 1300,478 1275,478" 
+              stroke="#06b6d4" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <text x="1335" y="386" font-size="15" font-weight="700" fill="#06b6d4">处置动作</text>
+        <text x="1335" y="405" font-size="11" font-weight="500" fill="#22d3ee">(Action)</text>
+
+        <!-- Dashed arrows: States → Actions -->
+        <path d="M995,365 L1035,365 Q1055,365 1055,340 L1055,321 L1110,321" stroke="#cbd5e1" stroke-width="1.5" fill="none" marker-end="url(#arrow-light)" stroke-dasharray="5,3"/>
+        <path d="M995,433 L1035,433 Q1060,433 1060,405 L1060,383 L1110,383" stroke="#cbd5e1" stroke-width="1.5" fill="none" marker-end="url(#arrow-light)" stroke-dasharray="5,3"/>
+        <path d="M995,501 L1035,501 Q1065,501 1065,465 L1065,445 L1110,445" stroke="#cbd5e1" stroke-width="1.5" fill="none" marker-end="url(#arrow-light)" stroke-dasharray="5,3"/>
+
+        <!-- State ≠ Action Note -->
+        <g transform="translate(1015, 540)">
+          <rect x="0" y="0" width="200" height="40" rx="10" fill="#f0f9ff" stroke="#bae6fd" stroke-width="1.5"/>
+          <text x="100" y="26" text-anchor="middle" font-size="13" font-weight="600" fill="#0369a1">态势(State) ≠ 动作(Action)</text>
+        </g>
+
+        <!-- ========== Result Logging ========== -->
+
+        <path d="M900,535 L900,600" stroke="#0ea5e9" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+
+        <g id="node-log" transform="translate(740, 612)">
+          <rect x="0" y="0" width="320" height="88" rx="14" fill="#fff" stroke="#e2e8f0" stroke-width="1.5" filter="url(#softShadow)"/>
+          <rect x="0" y="0" width="320" height="5" rx="2.5" fill="url(#primaryGradient)"/>
+          <text x="160" y="34" text-anchor="middle" font-size="16" font-weight="700" fill="#1e293b">结果落库</text>
+          <text x="160" y="56" text-anchor="middle" font-size="12" fill="#64748b">风险记录 · 命中规则 · 分数快照</text>
+          <text x="160" y="76" text-anchor="middle" font-size="12" fill="#64748b">状态(State) · 动作(Action)</text>
+        </g>
+
+        <!-- ========== Step Numbers ========== -->
+        <g fill="#94a3b8" font-size="12" font-weight="600">
+          <text x="72" y="138">①</text>
+          <text x="225" y="152">②</text>
+          <text x="383" y="147">③</text>
+          <text x="575" y="250">④</text>
+          <text x="790" y="165">⑤</text>
+          <text x="966" y="182">⑥</text>
+          <text x="785" y="400">⑦</text>
+          <text x="1100" y="383">⑧</text>
+          <text x="715" y="656">⑨</text>
+        </g>
+
+        <!-- ========== Section Labels ========== -->
+        <g transform="translate(25, 280)">
+          <rect x="0" y="0" width="130" height="48" rx="10" fill="#f0f9ff" stroke="#bae6fd" stroke-width="1.5"/>
+          <text x="65" y="22" text-anchor="middle" font-size="13" font-weight="600" fill="#0369a1">四态判定</text>
+          <text x="65" y="38" text-anchor="middle" font-size="10" fill="#38bdf8" font-weight="500">Four State Determination</text>
+        </g>
+
+        <g transform="translate(25, 340)">
+          <rect x="0" y="0" width="130" height="48" rx="10" fill="#fff7ed" stroke="#fed7aa" stroke-width="1.5"/>
+          <text x="65" y="22" text-anchor="middle" font-size="13" font-weight="600" fill="#ea580c">动作层</text>
+          <text x="65" y="38" text-anchor="middle" font-size="10" fill="#fb923c" font-weight="500">Action Layer</text>
+        </g>
+
+        <!-- Connector lines -->
+        <path d="M160,304 L210,304 L210,260 L800,260" stroke="#e2e8f0" stroke-width="1.5" fill="none" stroke-dasharray="6,4" opacity="0.7"/>
+        <path d="M160,364 L240,364 L240,400 L800,400" stroke="#e2e8f0" stroke-width="1.5" fill="none" stroke-dasharray="6,4" opacity="0.7"/>
+
+      </svg>
+    </div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item">
+        <div class="legend-color primary"></div>
+        <span>关键节点 / 流程</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color gray"></div>
+        <span>普通流程节点</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color green"></div>
+        <span>正常 (NORMAL)</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color amber"></div>
+        <span>警告 (WARNING / LIMITED)</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color red"></div>
+        <span>熔断 (FUSED)</span>
+      </div>
+      <span class="legend-note">注：仅金额规则计分，笔数/频率规则不参与风险评分</span>
+    </div>
+
+  </div>
+</body>
+</html>

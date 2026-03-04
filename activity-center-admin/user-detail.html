@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户详情 - 活动中心管理后台</title>
+    <link rel="stylesheet" href="css/style.css?v=1.1.1">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="user-detail-page">
+    <!-- 顶部通知栏 -->
+    <div class="notification-bar" id="notificationBar">
+        <div class="notification-content">
+            <span class="notification-dot"></span>
+            <span>全新的活动主题上线，全新的活动Banner，供您查看</span>
+        </div>
+        <button class="notification-close" onclick="closeNotification()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <div class="app-container">
+        <!-- 侧边栏 -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <rect x="3" y="3" width="7" height="7" rx="2" fill="#fff"/>
+                            <rect x="14" y="3" width="7" height="7" rx="2" fill="#fff" opacity="0.7"/>
+                            <rect x="3" y="14" width="7" height="7" rx="2" fill="#fff" opacity="0.7"/>
+                            <rect x="14" y="14" width="7" height="7" rx="2" fill="#fff" opacity="0.5"/>
+                        </svg>
+                    </div>
+                    <div class="logo-text">
+                        <span class="logo-title">活动中心</span>
+                        <span class="logo-subtitle">CAMPAIGN CENTER</span>
+                    </div>
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <a href="dashboard.html" class="nav-item">
+                        <i class="fas fa-chart-pie"></i>
+                        <span>仪表板</span>
+                    </a>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">业务</div>
+                    <a href="index.html" class="nav-item">
+                        <i class="fas fa-layer-group"></i>
+                        <span>平台列表</span>
+                    </a>
+                    <a href="merchant-list.html" class="nav-item">
+                        <i class="fas fa-store"></i>
+                        <span>商户列表</span>
+                    </a>
+                    <a href="activity-list.html" class="nav-item">
+                        <i class="fas fa-list-alt"></i>
+                        <span>活动列表</span>
+                    </a>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">日志</div>
+                    <a href="mining-flow.html" class="nav-item">
+                        <i class="fas fa-coins"></i>
+                        <span>挖矿流水</span>
+                    </a>
+                    <a href="item-receipt.html" class="nav-item">
+                        <i class="fas fa-gift"></i>
+                        <span>物品领取</span>
+                    </a>
+                    <a href="platform-log.html" class="nav-item">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>平台日志</span>
+                    </a>
+                    <a href="audit-log.html" class="nav-item">
+                        <i class="fas fa-clipboard-check"></i>
+                        <span>审核日志</span>
+                    </a>
+                    <a href="operation-log.html" class="nav-item">
+                        <i class="fas fa-history"></i>
+                        <span>操作日志</span>
+                    </a>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">平台数据</div>
+                    <a href="claim-data.html" class="nav-item">
+                        <i class="fas fa-download"></i>
+                        <span>领取数据</span>
+                    </a>
+                    <a href="user-behavior.html" class="nav-item">
+                        <i class="fas fa-chart-line"></i>
+                        <span>用户行为</span>
+                    </a>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">用户列表</div>
+                    <a href="user-data.html" class="nav-item">
+                        <i class="fas fa-id-card"></i>
+                        <span>用户数据</span>
+                    </a>
+                    <a href="user-detail.html" class="nav-item active">
+                        <i class="fas fa-user-circle"></i>
+                        <span>用户详情</span>
+                    </a>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">系统</div>
+                    <a href="account-management.html" class="nav-item">
+                        <i class="fas fa-users"></i>
+                        <span>账号管理</span>
+                    </a>
+                    <a href="global-config.html" class="nav-item">
+                        <i class="fas fa-globe"></i>
+                        <span>全局配置</span>
+                    </a>
+                </div>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <button class="sidebar-toggle" onclick="toggleSidebar()">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+        </aside>
+
+        <!-- 主内容区 -->
+        <main class="main-content" style="padding: 0;">
+            <!-- 顶部工作区标签页 -->
+            <div class="admin-tabs">
+                <div class="admin-tab" onclick="location.href='index.html'">平台列表 <i class="fas fa-times" onclick="closeTab(this); event.stopPropagation();"></i></div>
+                <div class="admin-tab" onclick="location.href='merchant-list.html'">商户列表(Live) <i class="fas fa-times" onclick="closeTab(this); event.stopPropagation();"></i></div>
+                <div class="admin-tab" onclick="location.href='dashboard.html'">仪表板 <i class="fas fa-times" onclick="closeTab(this); event.stopPropagation();"></i></div>
+                <div class="admin-tab" onclick="location.href='user-data.html'">用户数据 <i class="fas fa-times" onclick="closeTab(this); event.stopPropagation();"></i></div>
+                <div class="admin-tab" onclick="location.href='global-config.html'">全局配置 <i class="fas fa-times" onclick="closeTab(this); event.stopPropagation();"></i></div>
+                <div class="admin-tab" onclick="location.href='audit-log.html'">审核日志 <i class="fas fa-times" onclick="closeTab(this); event.stopPropagation();"></i></div>
+                <div class="admin-tab" onclick="location.href='operation-log.html'">操作日志 <i class="fas fa-times" onclick="closeTab(this); event.stopPropagation();"></i></div>
+                <div class="admin-tab active" onclick="location.href='user-detail.html'">用户详情 <i class="fas fa-times" onclick="closeTab(this); event.stopPropagation();"></i></div>
+                <div class="admin-tab" onclick="location.href='account-management.html'">账号管理 <i class="fas fa-times" onclick="closeTab(this); event.stopPropagation();"></i></div>
+                <div class="admin-tabs-close-all" onclick="closeAllTabs()">
+                    <span>全部</span>
+                    <i class="fas fa-times"></i>
+                </div>
+            </div>
+
+            <header class="top-header">
+                <div class="header-left">
+                    <button class="menu-toggle" onclick="toggleSidebar()">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="breadcrumb">
+                        <span>用户列表</span>
+                        <i class="fas fa-chevron-right"></i>
+                        <span class="current">用户详情</span>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <div class="header-actions">
+                        <button class="action-btn theme-toggle" onclick="toggleTheme()" title="切换主题">
+                            <i class="fas fa-sun" id="themeIcon"></i>
+                        </button>
+                        <button class="action-btn" title="刷新"><i class="fas fa-sync-alt"></i></button>
+                        <button class="action-btn" title="通知"><i class="fas fa-bell"></i><span class="badge">3</span></button>
+                        <div class="lang-switcher">
+                            <button class="action-btn" onclick="toggleLangMenu()" title="切换语言">
+                                <i class="fas fa-globe"></i>
+                                <span class="lang-code">中文</span>
+                            </button>
+                            <div class="lang-dropdown" id="langDropdown">
+                                <a href="#" class="lang-option active" onclick="switchLang('zh')">中文</a>
+                                <a href="#" class="lang-option" onclick="switchLang('en')">English</a>
+                                <a href="#" class="lang-option" onclick="switchLang('vi')">Tiếng Việt</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="user-menu">
+                        <span class="user-name">peter@bt.app</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                </div>
+            </header>
+
+            <div class="page-content" style="padding: 24px;">
+                <!-- 顶部工具栏与搜索 -->
+                <div class="user-search-panel">
+                    <!-- 第一行：快速搜索 -->
+                    <div class="search-row-1">
+                        <div class="field-group">
+                            <label class="field-label">平台用户ID或令牌</label>
+                            <div class="input-with-clear">
+                                <input type="text" class="field-input" value="1254202320">
+                                <button class="clear-btn"><i class="fas fa-times"></i></button>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary"><i class="fas fa-search"></i> 搜索</button>
+                    </div>
+                    
+                    <!-- 第二行：详细过滤 -->
+                    <div class="search-row-2">
+                        <div class="field-group">
+                            <label class="field-label">平台</label>
+                            <select class="field-select">
+                                <option>Live - live-old</option>
+                            </select>
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label">商户</label>
+                            <select class="field-select">
+                                <option>推1 - tui1</option>
+                            </select>
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label">平台用户ID或令牌</label>
+                            <input type="text" class="field-input" value="1254202320">
+                        </div>
+                        <div class="action-buttons">
+                            <button class="btn btn-primary"><i class="fas fa-search"></i> 搜索</button>
+                            <button class="btn btn-primary"><i class="fas fa-sync"></i> 预览同步</button>
+                            <button class="btn btn-primary"><i class="fas fa-exchange-alt"></i> 更改频道</button>
+                            <button class="btn btn-primary"><i class="fas fa-wrench"></i> 老活动修复</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 用户基本信息区域（与活动分开） -->
+                <div class="user-basic-info-card">
+                    <div class="user-basic-header">
+                        <img src="https://ui-avatars.com/api/?name=User&background=4f46e5&color=fff" class="user-avatar">
+                        <div class="user-basic-details">
+                            <div class="user-name-line">
+                                <span class="user-display-name">勤力小侠_brjhtb</span>
+                                <span class="badge badge-vip"><i class="fas fa-crown"></i> VIP 5</span>
+                                <span class="status-badge success">正常</span>
+                            </div>
+                            <div class="user-meta-line">
+                                <span>ID: 1254202320</span>
+                                <span>商户: tu1</span>
+                                <span>注册: 2026-01-14 08:42:07</span>
+                                <span>总流水: ¥ 6,698.30</span>
+                            </div>
+                        </div>
+                        <div class="user-basic-actions">
+                            <button class="btn btn-outline btn-sm"><i class="fas fa-copy"></i> 复制令牌</button>
+                            <button class="btn btn-danger-outline btn-sm"><i class="fas fa-ban"></i> 加入黑名单</button>
+                        </div>
+                    </div>
+                    <div class="user-token-row">
+                        <span class="token-label">令牌:</span>
+                        <code class="token-code">eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0...</code>
+                        <a href="#" class="token-link">活动中心(正常入口)</a>
+                        <a href="#" class="token-link">活动中心(广告入口)</a>
+                    </div>
+                </div>
+
+                <!-- 主内容区域：左侧活动表格 + 右侧操作面板 -->
+                <div class="user-detail-main-grid">
+                    <!-- 左侧：活动数据表格 -->
+                    <div class="activity-data-table">
+                    <!-- 升级模式 -->
+                    <div class="activity-row">
+                        <div class="activity-nav-cell">
+                            <div class="activity-icons">
+                                <button class="icon-btn" title="收藏"><i class="far fa-heart"></i></button>
+                                <button class="icon-btn" title="信息"><i class="fas fa-info-circle"></i></button>
+                                <button class="icon-btn" title="复制"><i class="fas fa-clone"></i></button>
+                            </div>
+                            <div class="activity-name">升级模式</div>
+                            <div class="activity-links">
+                                <a href="#">升级模式</a> <a href="#">终身有效</a>
+                            </div>
+                            <div class="activity-links">
+                                <a href="#">广告入口</a>
+                                <a href="#">免维护入口</a>
+                            </div>
+                        </div>
+                        <div class="activity-data-cell">
+                            <div class="data-row-4col">
+                                <span class="data-label">人工等级加成</span>
+                                <span class="data-value">0</span>
+                                <span class="data-label">有效充值</span>
+                                <span class="data-value">200000 <span class="sim-tag">(模拟)</span></span>
+                            </div>
+                            <div class="data-row-4col">
+                                <span class="data-label">用户级别</span>
+                                <span class="data-value">V5 <span class="sim-tag">(模拟)</span></span>
+                                <span class="data-label">上层 (T0->T1)</span>
+                                <span class="data-value">200000</span>
+                            </div>
+                            <div class="data-row-4col">
+                                <span class="data-label">终生的外表 (T1)</span>
+                                <span class="data-value">200000</span>
+                                <span class="data-label">终身外表（当前）</span>
+                                <span class="data-value">200000</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 每日有效下注 -->
+                    <div class="activity-row">
+                        <div class="activity-nav-cell">
+                            <div class="activity-icons">
+                                <button class="icon-btn" title="收藏"><i class="far fa-heart"></i></button>
+                                <button class="icon-btn" title="信息"><i class="fas fa-info-circle"></i></button>
+                                <button class="icon-btn" title="复制"><i class="fas fa-clone"></i></button>
+                            </div>
+                            <div class="activity-name">每日有效下注</div>
+                            <div class="activity-links">
+                                <a href="#">每日投注</a> <a href="#">闯关奖大奖</a>
+                            </div>
+                            <div class="activity-links">
+                                <a href="#">广告入口</a>
+                                <a href="#">免维护入口</a>
+                            </div>
+                        </div>
+                        <div class="activity-data-cell">
+                            <div class="data-row-4col">
+                                <span class="data-label">昨天打码量</span>
+                                <span class="data-value">0 <span class="sim-tag">(模拟)</span></span>
+                                <span class="data-label">今天打码量</span>
+                                <span class="data-value">0 <span class="sim-tag">(模拟)</span></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 救援金 -->
+                    <div class="activity-row">
+                        <div class="activity-nav-cell">
+                            <div class="activity-icons">
+                                <button class="icon-btn" title="收藏"><i class="far fa-heart"></i></button>
+                                <button class="icon-btn" title="信息"><i class="fas fa-info-circle"></i></button>
+                                <button class="icon-btn" title="复制"><i class="fas fa-clone"></i></button>
+                            </div>
+                            <div class="activity-name">救援金</div>
+                            <div class="activity-links">
+                                <a href="#">彩票救援金</a> <a href="#">助你东山再起</a>
+                            </div>
+                            <div class="activity-links">
+                                <a href="#">广告入口</a>
+                                <a href="#">免维护入口</a>
+                            </div>
+                        </div>
+                        <div class="activity-data-cell">
+                            <div class="data-row-4col">
+                                <span class="data-label">昨天的损失金额</span>
+                                <span class="data-value">0</span>
+                                <span class="data-label">今天的损失金额</span>
+                                <span class="data-value">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 每日存款 -->
+                    <div class="activity-row">
+                        <div class="activity-nav-cell">
+                            <div class="activity-icons">
+                                <button class="icon-btn" title="收藏"><i class="far fa-heart"></i></button>
+                                <button class="icon-btn" title="信息"><i class="fas fa-info-circle"></i></button>
+                                <button class="icon-btn" title="复制"><i class="fas fa-clone"></i></button>
+                            </div>
+                            <div class="activity-name">每日存款</div>
+                            <div class="activity-links">
+                                <a href="#">今日存即天送</a>
+                            </div>
+                            <div class="activity-links">
+                                <a href="#">广告入口</a>
+                                <a href="#">免维护入口</a>
+                            </div>
+                        </div>
+                        <div class="activity-data-cell">
+                            <div class="data-row-4col">
+                                <span class="data-label">昨天存款</span>
+                                <span class="data-value">0 <span class="sim-tag">(模拟)</span></span>
+                                <span class="data-label">昨天打码量</span>
+                                <span class="data-value">0 <span class="sim-tag">(模拟)</span></span>
+                            </div>
+                            <div class="data-row-4col">
+                                <span class="data-label">今天存款</span>
+                                <span class="data-value">0 <span class="sim-tag">(模拟)</span></span>
+                                <span class="data-label">今天打码量</span>
+                                <span class="data-value">0 <span class="sim-tag">(模拟)</span></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 每日波币 -->
+                    <div class="activity-row">
+                        <div class="activity-nav-cell">
+                            <div class="activity-icons">
+                                <button class="icon-btn" title="收藏"><i class="far fa-heart"></i></button>
+                                <button class="icon-btn" title="信息"><i class="fas fa-info-circle"></i></button>
+                                <button class="icon-btn" title="复制"><i class="fas fa-clone"></i></button>
+                            </div>
+                            <div class="activity-name">每日波币</div>
+                            <div class="activity-links">
+                                <a href="#">存波币</a> <a href="#">送彩金</a>
+                            </div>
+                            <div class="activity-links">
+                                <a href="#">广告入口</a>
+                                <a href="#">免维护入口</a>
+                            </div>
+                        </div>
+                        <div class="activity-data-cell">
+                            <div class="data-row-4col">
+                                <span class="data-label">昨天存款</span>
+                                <span class="data-value">0 <span class="sim-tag">(模拟)</span></span>
+                                <span class="data-label">今天存款</span>
+                                <span class="data-value">0 <span class="sim-tag">(模拟)</span></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 每周充值 -->
+                    <div class="activity-row">
+                        <div class="activity-nav-cell">
+                            <div class="activity-icons">
+                                <button class="icon-btn" title="收藏"><i class="far fa-heart"></i></button>
+                                <button class="icon-btn" title="信息"><i class="fas fa-info-circle"></i></button>
+                                <button class="icon-btn" title="复制"><i class="fas fa-clone"></i></button>
+                            </div>
+                            <div class="activity-name">每周充值</div>
+                            <div class="activity-links">
+                                <a href="#">周围现金</a> <a href="#">大派送</a>
+                            </div>
+                            <div class="activity-links">
+                                <a href="#">广告入口</a>
+                                <a href="#">免维护入口</a>
+                            </div>
+                        </div>
+                        <div class="activity-data-cell">
+                            <div class="data-row-4col">
+                                <span class="data-label">上周充值</span>
+                                <span class="data-value">200000 <span class="sim-tag">(模拟)</span></span>
+                                <span class="data-label">当前一周充值</span>
+                                <span class="data-value">0 <span class="sim-tag">(模拟)</span></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 每日返水 -->
+                    <div class="activity-row">
+                        <div class="activity-nav-cell">
+                            <div class="activity-icons">
+                                <button class="icon-btn" title="信息"><i class="fas fa-info-circle"></i></button>
+                                <button class="icon-btn" title="复制"><i class="fas fa-clone"></i></button>
+                            </div>
+                            <div class="activity-name">每日返水</div>
+                            <div class="activity-links">
+                                <a href="#">天天返水再返水</a>
+                            </div>
+                            <div class="activity-links">
+                                <a href="#">广告入口</a>
+                                <a href="#">免维护入口</a>
+                            </div>
+                        </div>
+                        <div class="activity-data-cell">
+                            <div class="data-row-4col">
+                                <span class="data-label">最近30天的充值</span>
+                                <span class="data-value">6698.3 <span class="sim-tag">(模拟)</span></span>
+                                <span class="data-label">返水</span>
+                                <span class="data-value">0 <span class="sim-tag">(模拟)</span></span>
+                            </div>
+                            <div class="data-row-4col">
+                                <span class="data-label">返水状态</span>
+                                <span class="data-value">0 <span class="sim-tag">(模拟)</span></span>
+                                <span class="data-label"></span>
+                                <span class="data-value"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 首次提款 -->
+                    <div class="activity-row">
+                        <div class="activity-nav-cell">
+                            <div class="activity-icons">
+                                <button class="icon-btn" title="复制"><i class="fas fa-clone"></i></button>
+                            </div>
+                            <div class="activity-name">首次提款</div>
+                            <div class="activity-links">
+                                <a href="#">首次提款</a>
+                            </div>
+                            <div class="activity-links">
+                                <a href="#">广告入口</a>
+                                <a href="#">免维护入口</a>
+                            </div>
+                        </div>
+                        <div class="activity-data-cell">
+                            <div class="data-row-4col">
+                                <span class="data-label">首先提取金额</span>
+                                <span class="data-value">0 <span class="sim-tag">(模拟)</span></span>
+                                <span class="data-label"></span>
+                                <span class="data-value"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 满周福利 -->
+                    <div class="activity-row">
+                        <div class="activity-nav-cell">
+                            <div class="activity-icons">
+                                <button class="icon-btn" title="收藏"><i class="far fa-heart"></i></button>
+                                <button class="icon-btn" title="信息"><i class="fas fa-info-circle"></i></button>
+                                <button class="icon-btn" title="复制"><i class="fas fa-clone"></i></button>
+                            </div>
+                            <div class="activity-name">满周福利</div>
+                            <div class="activity-links">
+                                <a href="#">满周福利大放送</a>
+                            </div>
+                            <div class="activity-links">
+                                <a href="#">广告入口</a>
+                                <a href="#">免维护入口</a>
+                            </div>
+                        </div>
+                        <div class="activity-data-cell">
+                            <div class="data-row-4col">
+                                <span class="data-label">7天内存款金额</span>
+                                <span class="data-value">0 <span class="sim-tag">(模拟)</span></span>
+                                <span class="data-label">7天内有效投注</span>
+                                <span class="data-value">0 <span class="sim-tag">(模拟)</span></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 红包雨 -->
+                    <div class="activity-row">
+                        <div class="activity-nav-cell">
+                            <div class="activity-icons">
+                                <button class="icon-btn" title="收藏"><i class="far fa-heart"></i></button>
+                                <button class="icon-btn" title="信息"><i class="fas fa-info-circle"></i></button>
+                                <button class="icon-btn" title="复制"><i class="fas fa-clone"></i></button>
+                            </div>
+                            <div class="activity-name">红包雨</div>
+                            <div class="activity-links">
+                                <a href="#">百万现金红包雨</a>
+                            </div>
+                            <div class="activity-links">
+                                <a href="#">广告入口</a>
+                                <a href="#">免维护入口</a>
+                            </div>
+                        </div>
+                        <div class="activity-data-cell">
+                            <div class="data-row-4col">
+                                <span class="data-label">红包存款</span>
+                                <span class="data-value">0 <span class="sim-tag">(模拟)</span></span>
+                                <span class="data-label">剩下的红包次数</span>
+                                <span class="data-value">0/0 <span class="sim-tag">(模拟)</span></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 波币转盘 -->
+                    <div class="activity-row">
+                        <div class="activity-nav-cell">
+                            <div class="activity-icons">
+                                <button class="icon-btn" title="收藏"><i class="far fa-heart"></i></button>
+                                <button class="icon-btn" title="信息"><i class="fas fa-info-circle"></i></button>
+                                <button class="icon-btn" title="复制"><i class="fas fa-clone"></i></button>
+                            </div>
+                            <div class="activity-name">波币转盘</div>
+                            <div class="activity-links">
+                                <a href="#">波币幸运大转盘</a>
+                            </div>
+                            <div class="activity-links">
+                                <a href="#">广告入口</a>
+                                <a href="#">免维护入口</a>
+                            </div>
+                        </div>
+                        <div class="activity-data-cell">
+                            <div class="data-row-4col">
+                                <span class="data-label">昨天波币充值</span>
+                                <span class="data-value">0 <span class="sim-tag">(模拟)</span></span>
+                                <span class="data-label">今天存款</span>
+                                <span class="data-value">0 <span class="sim-tag">(模拟)</span></span>
+                            </div>
+                            <div class="data-row-4col">
+                                <span class="data-label">总共可转次数</span>
+                                <span class="data-value">0/0 <span class="sim-tag">(模拟)</span></span>
+                                <span class="data-label"></span>
+                                <span class="data-value"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 彩票闯关 -->
+                    <div class="activity-row">
+                        <div class="activity-nav-cell">
+                            <div class="activity-icons">
+                                <button class="icon-btn" title="收藏"><i class="far fa-heart"></i></button>
+                                <button class="icon-btn" title="信息"><i class="fas fa-info-circle"></i></button>
+                                <button class="icon-btn" title="复制"><i class="fas fa-clone"></i></button>
+                            </div>
+                            <div class="activity-name">彩票闯关</div>
+                            <div class="activity-links">
+                                <a href="#">彩票大闯关</a> <a href="#">天天送豪礼</a>
+                            </div>
+                            <div class="activity-links">
+                                <a href="#">广告入口</a>
+                                <a href="#">免维护入口</a>
+                            </div>
+                        </div>
+                        <div class="activity-data-cell">
+                            <div class="data-row-4col">
+                                <span class="data-label">上周投注额</span>
+                                <span class="data-value">0 <span class="sim-tag">(模拟)</span></span>
+                                <span class="data-label">本周投注额</span>
+                                <span class="data-value">0 <span class="sim-tag">(模拟)</span></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 贵宾VIP -->
+                    <div class="activity-row">
+                        <div class="activity-nav-cell">
+                            <div class="activity-icons">
+                                <button class="icon-btn" title="收藏"><i class="far fa-heart"></i></button>
+                                <button class="icon-btn" title="信息"><i class="fas fa-info-circle"></i></button>
+                                <button class="icon-btn" title="复制"><i class="fas fa-clone"></i></button>
+                            </div>
+                            <div class="activity-name">贵宾VIP</div>
+                            <div class="activity-links">
+                                <a href="#">贵宾VIP等级</a>
+                            </div>
+                            <div class="activity-links">
+                                <a href="#">广告入口</a>
+                                <a href="#">免维护入口</a>
+                            </div>
+                        </div>
+                        <div class="activity-data-cell">
+                            <div class="data-row-4col">
+                                <span class="data-label">最大每日充值</span>
+                                <span class="data-value">140000 <span class="sim-tag">(模拟)</span></span>
+                                <span class="data-label">昨天充值</span>
+                                <span class="data-value">0 <span class="sim-tag">(模拟)</span></span>
+                            </div>
+                            <div class="data-row-4col">
+                                <span class="data-label">今天充值</span>
+                                <span class="data-value">0 <span class="sim-tag">(模拟)</span></span>
+                                <span class="data-label">上个月充值</span>
+                                <span class="data-value">200000 <span class="sim-tag">(模拟)</span></span>
+                            </div>
+                            <div class="data-row-4col">
+                                <span class="data-label">本月充值</span>
+                                <span class="data-value">0 <span class="sim-tag">(模拟)</span></span>
+                                <span class="data-label">VIP级别</span>
+                                <span class="data-value">钻石 (3)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 逢6必发 -->
+                    <div class="activity-row">
+                        <div class="activity-nav-cell">
+                            <div class="activity-icons">
+                                <button class="icon-btn" title="信息"><i class="fas fa-info-circle"></i></button>
+                                <button class="icon-btn" title="复制"><i class="fas fa-clone"></i></button>
+                            </div>
+                            <div class="activity-name">逢6必发</div>
+                            <div class="activity-links">
+                                <a href="#">逢6必发</a>
+                            </div>
+                            <div class="activity-links">
+                                <a href="#">广告入口</a>
+                                <a href="#">免维护入口</a>
+                            </div>
+                        </div>
+                        <div class="activity-data-cell">
+                            <div class="data-row-4col">
+                                <span class="data-label">充值金额</span>
+                                <span class="data-value">200000 <span class="sim-tag">(模拟)</span></span>
+                                <span class="data-label">打码量</span>
+                                <span class="data-value">0 <span class="sim-tag">(模拟)</span></span>
+                            </div>
+                            <div class="data-row-4col">
+                                <span class="data-label">当前时期</span>
+                                <span class="data-value">26/01/2026 - 05/02/2026, 进行中</span>
+                                <span class="data-label">当前时期</span>
+                                <span class="data-value">16/01/2026 - 25/01/2026</span>
+                            </div>
+                            <div class="data-row-4col">
+                                <span class="data-label">下一个时期</span>
+                                <span class="data-value">06/02/2026 - 15/02/2026</span>
+                                <span class="data-label"></span>
+                                <span class="data-value"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 波币赠送 -->
+                    <div class="activity-row">
+                        <div class="activity-nav-cell">
+                            <div class="activity-icons">
+                                <button class="icon-btn" title="收藏"><i class="far fa-heart"></i></button>
+                                <button class="icon-btn" title="信息"><i class="fas fa-info-circle"></i></button>
+                                <button class="icon-btn" title="复制"><i class="fas fa-clone"></i></button>
+                            </div>
+                            <div class="activity-name">波币赠送</div>
+                            <div class="activity-links">
+                                <a href="#">波币存款取款大赠送</a>
+                            </div>
+                            <div class="activity-links">
+                                <a href="#">广告入口</a>
+                                <a href="#">免维护入口</a>
+                            </div>
+                        </div>
+                        <div class="activity-data-cell">
+                            <div class="data-row-4col">
+                                <span class="data-label">昨天Bobi奖金充值</span>
+                                <span class="data-value">0 <span class="sim-tag">(模拟)</span></span>
+                                <span class="data-label">昨天BOBI奖金提取</span>
+                                <span class="data-value">0 <span class="sim-tag">(模拟)</span></span>
+                            </div>
+                            <div class="data-row-4col">
+                                <span class="data-label">今天，Bobi奖金充值</span>
+                                <span class="data-value">0 <span class="sim-tag">(模拟)</span></span>
+                                <span class="data-label">今天Bobi奖金提取</span>
+                                <span class="data-value">0 <span class="sim-tag">(模拟)</span></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    </div>
+
+                    <!-- 右侧：管理操作面板 -->
+                    <div class="op-panel-sidebar">
+                        <div class="content-card sticky-card">
+                            <div class="card-header">
+                                <i class="fas fa-tools"></i>
+                                <span>管理操作面板</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="op-section">
+                                    <div class="op-section-title">奖项周期调整</div>
+                                    <div class="op-buttons-row">
+                                        <button class="btn btn-outline btn-sm">设为02月01日</button>
+                                        <button class="btn btn-outline btn-sm">设为01月31日</button>
+                                    </div>
+                                </div>
+                                
+                                <div class="op-divider"></div>
+                                
+                                <div class="op-section">
+                                    <div class="op-section-title">数据模拟与维护</div>
+                                    <div class="op-buttons-row" style="margin-bottom: 12px;">
+                                        <button class="btn btn-primary btn-sm" style="flex: 1;"><i class="fas fa-pen"></i> 模拟测试<br>数据</button>
+                                        <a href="#" class="op-link-danger"><i class="fas fa-eraser"></i> 移除测试数据</a>
+                                    </div>
+                                    <div class="op-grid">
+                                        <button class="btn btn-outline btn-sm">更新注册日期</button>
+                                        <button class="btn btn-outline btn-sm">设置人工等级</button>
+                                        <button class="btn btn-outline btn-sm">模拟下注</button>
+                                        <button class="btn btn-outline btn-sm">重置下注</button>
+                                    </div>
+                                </div>
+
+                                <div class="op-divider"></div>
+
+                                <div class="op-section">
+                                    <div class="op-section-title danger">风险管理</div>
+                                    <button class="btn btn-danger btn-block"><i class="fas fa-ban"></i> 加入黑名单</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <div id="toastContainer" class="toast-container"></div>
+    <script src="js/app.js"></script>
+</body>
+</html>

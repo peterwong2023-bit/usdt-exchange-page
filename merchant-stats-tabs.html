@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商户统计 - 方案2: Tab切换币种</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
+            background: #f5f7fa;
+            padding: 20px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        /* 顶部筛选栏 */
+        .filter-bar {
+            padding: 20px 20px 0 20px;
+            background: #fafbfc;
+        }
+
+        .filter-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        .filter-title {
+            font-size: 17px;
+            font-weight: 700;
+            color: #0f172a;
+            letter-spacing: 0.2px;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .date-input {
+            padding: 10px 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            color: #1e293b;
+            font-weight: 500;
+        }
+
+        .date-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .btn {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: 0.3px;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+
+        /* Tab切换 */
+        .currency-tabs {
+            display: flex;
+            gap: 8px;
+            border-bottom: 2px solid #e5e7eb;
+            padding: 0 20px;
+            background: #fafbfc;
+        }
+
+        .tab-btn {
+            padding: 14px 24px;
+            border: none;
+            background: transparent;
+            color: #64748b;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            letter-spacing: 0.3px;
+        }
+
+        .tab-btn:hover {
+            color: #3b82f6;
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        .tab-btn.active {
+            color: #1e40af;
+            border-bottom-color: #3b82f6;
+            background: white;
+            font-weight: 700;
+        }
+
+        .tab-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .tab-icon.trx {
+            background: #dc2626;
+            color: white;
+        }
+
+        .tab-icon.usdt {
+            background: #059669;
+            color: white;
+        }
+
+        .tab-icon.usdd {
+            background: #2563eb;
+            color: white;
+        }
+
+        .tab-icon.usdc {
+            background: #4f46e5;
+            color: white;
+        }
+
+        .tab-icon.eth {
+            background: #6366f1;
+            color: white;
+        }
+
+        .tab-icon.eth-usdc {
+            background: #2775ca;
+            color: white;
+        }
+
+        .tab-icon.eth-usdd {
+            background: #0ea5e9;
+            color: white;
+        }
+
+        .tab-icon.all {
+            background: #64748b;
+            color: white;
+        }
+
+        /* 表格 */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #f8fafc;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        th {
+            padding: 16px 20px;
+            text-align: left;
+            font-size: 14px;
+            font-weight: 700;
+            color: #334155;
+            white-space: nowrap;
+            letter-spacing: 0.3px;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #f1f5f9;
+            transition: background 0.2s;
+        }
+
+        tbody tr:hover {
+            background: #f8fafc;
+        }
+
+        td {
+            padding: 18px 20px;
+            font-size: 14px;
+            color: #334155;
+        }
+
+        td.merchant-id {
+            font-weight: 700;
+            color: #3b82f6;
+            font-size: 15px;
+        }
+
+        td.merchant-name {
+            font-weight: 600;
+            color: #0f172a;
+            font-size: 14px;
+        }
+
+        .value {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Mono', 'Monaco', 'Cascadia Code', 'Roboto Mono', 'Courier New', monospace;
+            font-weight: 600;
+            color: #0f172a;
+            font-size: 14px;
+            letter-spacing: 0.2px;
+        }
+
+        .value.zero {
+            color: #cbd5e1;
+            font-weight: 500;
+        }
+
+        /* 合计行 */
+        tbody tr.total-row {
+            background: #fef3c7;
+            border-top: 2px solid #fbbf24;
+            border-bottom: 2px solid #fbbf24;
+        }
+
+        tbody tr.total-row td {
+            color: #78350f;
+            font-weight: 700;
+            font-size: 15px;
+            padding: 20px;
+        }
+
+        tbody tr.total-row .value {
+            color: #78350f;
+            font-weight: 700;
+        }
+
+        tbody tr.total-row:hover {
+            background: #fef3c7;
+        }
+
+        /* 分页 */
+        .pagination {
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #e5e7eb;
+            background: #fafbfc;
+        }
+
+        .page-info {
+            font-size: 14px;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .page-controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .page-btn {
+            width: 36px;
+            height: 36px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            background: white;
+            color: #64748b;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .page-btn:hover:not(:disabled) {
+            background: #f8fafc;
+            border-color: #3b82f6;
+            color: #3b82f6;
+        }
+
+        .page-btn.active {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+
+        .page-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 筛选栏 -->
+        <div class="filter-bar">
+            <div class="filter-row">
+                <div class="filter-title">📊 方案2: Tab切换币种</div>
+                <div class="filter-group">
+                    <select class="date-input" style="width: 140px;">
+                        <option>选择账户</option>
+                        <option>全部账户</option>
+                    </select>
+                    <input type="date" class="date-input" value="2025-11-10">
+                    <span style="color: #94a3b8;">~</span>
+                    <input type="date" class="date-input" value="2025-11-10">
+                </div>
+                <button class="btn btn-primary">
+                    <i class="fas fa-search"></i>
+                    查询
+                </button>
+            </div>
+        </div>
+
+        <!-- 币种Tab切换 -->
+        <div class="currency-tabs">
+            <button class="tab-btn active" onclick="switchTab('usdt')">
+                <span class="tab-icon usdt">₮</span>
+                <span>USDT</span>
+            </button>
+            <button class="tab-btn" onclick="switchTab('trx')">
+                <span class="tab-icon trx">T</span>
+                <span>TRX</span>
+            </button>
+            <button class="tab-btn" onclick="switchTab('usdd')">
+                <span class="tab-icon usdd">D</span>
+                <span>USDD</span>
+            </button>
+            <button class="tab-btn" onclick="switchTab('usddold')">
+                <span class="tab-icon usdd" style="opacity: 0.6;">D</span>
+                <span>USDDOLD</span>
+            </button>
+            <button class="tab-btn" onclick="switchTab('eth')">
+                <span class="tab-icon eth">E</span>
+                <span>ETH</span>
+            </button>
+            <button class="tab-btn" onclick="switchTab('eth-usdc')">
+                <span class="tab-icon eth-usdc">EC</span>
+                <span>ETH-USDC</span>
+            </button>
+            <button class="tab-btn" onclick="switchTab('eth-usdd')">
+                <span class="tab-icon eth-usdd">ED</span>
+                <span>ETH-USDD</span>
+            </button>
+        </div>
+
+        <!-- USDT视图 -->
+        <div class="tab-content active" id="tab-usdt">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="padding-left: 20px;">商户 ID</th>
+                            <th>商户名称</th>
+                            <th>链包总数</th>
+                            <th>总余额</th>
+                            <th>待确认金额</th>
+                            <th>异常入金额</th>
+                            <th>入款金额</th>
+                            <th>入款笔数</th>
+                            <th>出款金额</th>
+                            <th>出款笔数</th>
+                            <th>归集金额</th>
+                            <th>归集笔数</th>
+                            <th>风险退款</th>
+                            <th>退款笔数</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="merchant-id">1001</td>
+                            <td class="merchant-name">7门店数</td>
+                            <td class="value">1</td>
+                            <td class="value zero">$0.00</td>
+                            <td class="value zero">$0.00</td>
+                            <td class="value zero">$0.00</td>
+                            <td class="value zero">$0.00</td>
+                            <td class="value zero">0</td>
+                            <td class="value zero">$0.00</td>
+                            <td class="value zero">0</td>
+                            <td class="value zero">$0.00</td>
+                            <td class="value zero">0</td>
+                            <td class="value zero">$0.00</td>
+                            <td class="value zero">0</td>
+                        </tr>
+                        <tr>
+                            <td class="merchant-id">1002</td>
+                            <td class="merchant-name">出发客户归集</td>
+                            <td class="value">3</td>
+                            <td class="value">$1,086.95</td>
+                            <td class="value zero">$0.00</td>
+                            <td class="value">$125.80</td>
+                            <td class="value">$2,532.40</td>
+                            <td class="value">78</td>
+                            <td class="value">$1,495.60</td>
+                            <td class="value">33</td>
+                            <td class="value">$730.15</td>
+                            <td class="value">15</td>
+                            <td class="value">$85.50</td>
+                            <td class="value">3</td>
+                        </tr>
+                        <tr>
+                            <td class="merchant-id">1004</td>
+                            <td class="merchant-name">711服务归集</td>
+                            <td class="value">1</td>
+                            <td class="value">$787.34</td>
+                            <td class="value zero">$0.00</td>
+                            <td class="value zero">$0.00</td>
+                            <td class="value">$1,131.05</td>
+                            <td class="value">37</td>
+                            <td class="value">$502.41</td>
+                            <td class="value">30</td>
+                            <td class="value zero">$0.00</td>
+                            <td class="value zero">0</td>
+                            <td class="value zero">$0.00</td>
+                            <td class="value zero">0</td>
+                        </tr>
+                        <tr>
+                            <td class="merchant-id">1007</td>
+                            <td class="merchant-name">711客户归集</td>
+                            <td class="value">1</td>
+                            <td class="value">$2,142.08</td>
+                            <td class="value zero">$0.00</td>
+                            <td class="value">$174.20</td>
+                            <td class="value">$4,963.20</td>
+                            <td class="value">128</td>
+                            <td class="value">$2,975.12</td>
+                            <td class="value">82</td>
+                            <td class="value">$2,741.25</td>
+                            <td class="value">27</td>
+                            <td class="value">$125.40</td>
+                            <td class="value">4</td>
+                        </tr>
+                        <tr class="total-row">
+                            <td colspan="2" style="padding-left: 20px;">合计</td>
+                            <td>13</td>
+                            <td class="value">$4,016.37</td>
+                            <td class="value zero">$0.00</td>
+                            <td class="value">$300.00</td>
+                            <td class="value">$8,626.65</td>
+                            <td class="value">243</td>
+                            <td class="value">$4,973.13</td>
+                            <td class="value">145</td>
+                            <td class="value">$3,471.40</td>
+                            <td class="value">42</td>
+                            <td class="value">$210.90</td>
+                            <td class="value">7</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TRX视图 -->
+        <div class="tab-content" id="tab-trx">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="padding-left: 20px;">商户 ID</th>
+                            <th>商户名称</th>
+                            <th>链包总数</th>
+                            <th>总余额</th>
+                            <th>待确认金额</th>
+                            <th>异常入金额</th>
+                            <th>入款金额</th>
+                            <th>入款笔数</th>
+                            <th>出款金额</th>
+                            <th>出款笔数</th>
+                            <th>归集金额</th>
+                            <th>归集笔数</th>
+                            <th>风险退款</th>
+                            <th>退款笔数</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="merchant-id">1001</td>
+                            <td class="merchant-name">7门店数</td>
+                            <td class="value">1</td>
+                            <td class="value zero">0 TRX</td>
+                            <td class="value zero">0 TRX</td>
+                            <td class="value zero">0 TRX</td>
+                            <td class="value zero">0 TRX</td>
+                            <td class="value zero">0</td>
+                            <td class="value zero">0 TRX</td>
+                            <td class="value zero">0</td>
+                            <td class="value zero">0 TRX</td>
+                            <td class="value zero">0</td>
+                            <td class="value zero">0 TRX</td>
+                            <td class="value zero">0</td>
+                        </tr>
+                        <tr>
+                            <td class="merchant-id">1002</td>
+                            <td class="merchant-name">出发客户归集</td>
+                            <td class="value">3</td>
+                            <td class="value">926.95 TRX</td>
+                            <td class="value zero">0 TRX</td>
+                            <td class="value">85.50 TRX</td>
+                            <td class="value">1680.60 TRX</td>
+                            <td class="value">50</td>
+                            <td class="value">1120.20 TRX</td>
+                            <td class="value">21</td>
+                            <td class="value">500.30 TRX</td>
+                            <td class="value">10</td>
+                            <td class="value">62.40 TRX</td>
+                            <td class="value">2</td>
+                        </tr>
+                        <tr>
+                            <td class="merchant-id">1004</td>
+                            <td class="merchant-name">711服务归集</td>
+                            <td class="value">1</td>
+                            <td class="value">628.64 TRX</td>
+                            <td class="value zero">0 TRX</td>
+                            <td class="value zero">0 TRX</td>
+                            <td class="value">850.75 TRX</td>
+                            <td class="value">19</td>
+                            <td class="value">222.11 TRX</td>
+                            <td class="value">12</td>
+                            <td class="value zero">0 TRX</td>
+                            <td class="value zero">0</td>
+                            <td class="value zero">0 TRX</td>
+                            <td class="value zero">0</td>
+                        </tr>
+                        <tr>
+                            <td class="merchant-id">1005</td>
+                            <td class="merchant-name">711服务</td>
+                            <td class="value">1</td>
+                            <td class="value">2.64 TRX</td>
+                            <td class="value zero">0 TRX</td>
+                            <td class="value zero">0 TRX</td>
+                            <td class="value">150.25 TRX</td>
+                            <td class="value">8</td>
+                            <td class="value">147.61 TRX</td>
+                            <td class="value">8</td>
+                            <td class="value zero">0 TRX</td>
+                            <td class="value zero">0</td>
+                            <td class="value zero">0 TRX</td>
+                            <td class="value zero">0</td>
+                        </tr>
+                        <tr>
+                            <td class="merchant-id">1007</td>
+                            <td class="merchant-name">711客户归集</td>
+                            <td class="value">1</td>
+                            <td class="value">1985.58 TRX</td>
+                            <td class="value zero">0 TRX</td>
+                            <td class="value">125.30 TRX</td>
+                            <td class="value">3820.80 TRX</td>
+                            <td class="value">86</td>
+                            <td class="value">1720.22 TRX</td>
+                            <td class="value">47</td>
+                            <td class="value">1840.50 TRX</td>
+                            <td class="value">19</td>
+                            <td class="value">88.75 TRX</td>
+                            <td class="value">3</td>
+                        </tr>
+                        <tr class="total-row">
+                            <td colspan="2" style="padding-left: 20px;">合计</td>
+                            <td>13</td>
+                            <td class="value">3543.81 TRX</td>
+                            <td class="value zero">0 TRX</td>
+                            <td class="value">210.80 TRX</td>
+                            <td class="value">6502.40 TRX</td>
+                            <td class="value">163</td>
+                            <td class="value">3210.14 TRX</td>
+                            <td class="value">88</td>
+                            <td class="value">2340.80 TRX</td>
+                            <td class="value">29</td>
+                            <td class="value">151.15 TRX</td>
+                            <td class="value">5</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+
+        <!-- USDD视图 -->
+        <div class="tab-content" id="tab-usdd">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="padding-left: 20px;">商户 ID</th>
+                            <th>商户名称</th>
+                            <th>链包总数</th>
+                            <th>总余额</th>
+                            <th>待确认金额</th>
+                            <th>异常入金额</th>
+                            <th>入款金额</th>
+                            <th>入款笔数</th>
+                            <th>出款金额</th>
+                            <th>出款笔数</th>
+                            <th>归集金额</th>
+                            <th>归集笔数</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="merchant-id">1001</td>
+                            <td class="merchant-name">7门店数</td>
+                            <td class="value">0</td>
+                            <td class="value zero">0 USDD</td>
+                            <td class="value zero">0 USDD</td>
+                            <td class="value zero">0 USDD</td>
+                            <td class="value zero">0 USDD</td>
+                            <td class="value zero">0</td>
+                            <td class="value zero">0 USDD</td>
+                            <td class="value zero">0</td>
+                            <td class="value zero">0 USDD</td>
+                            <td class="value zero">0</td>
+                        </tr>
+                        <tr>
+                            <td class="merchant-id">1002</td>
+                            <td class="merchant-name">出发客户归集</td>
+                            <td class="value">3</td>
+                            <td class="value">160000 USDD</td>
+                            <td class="value zero">0 USDD</td>
+                            <td class="value zero">0 USDD</td>
+                            <td class="value">180000 USDD</td>
+                            <td class="value">15</td>
+                            <td class="value">20000 USDD</td>
+                            <td class="value">3</td>
+                            <td class="value">50000 USDD</td>
+                            <td class="value">2</td>
+                        </tr>
+                        <tr>
+                            <td class="merchant-id">1004</td>
+                            <td class="merchant-name">711服务归集</td>
+                            <td class="value">1</td>
+                            <td class="value">158700 USDD</td>
+                            <td class="value zero">0 USDD</td>
+                            <td class="value zero">0 USDD</td>
+                            <td class="value">165000 USDD</td>
+                            <td class="value">12</td>
+                            <td class="value">6300 USDD</td>
+                            <td class="value">2</td>
+                            <td class="value">35000 USDD</td>
+                            <td class="value">1</td>
+                        </tr>
+                        <tr>
+                            <td class="merchant-id">1007</td>
+                            <td class="merchant-name">711客户归集</td>
+                            <td class="value">1</td>
+                            <td class="value">156000 USDD</td>
+                            <td class="value zero">0 USDD</td>
+                            <td class="value zero">0 USDD</td>
+                            <td class="value">185000 USDD</td>
+                            <td class="value">18</td>
+                            <td class="value">29000 USDD</td>
+                            <td class="value">5</td>
+                            <td class="value">65000 USDD</td>
+                            <td class="value">4</td>
+                        </tr>
+                        <tr class="total-row">
+                            <td colspan="2" style="padding-left: 20px;">合计</td>
+                            <td>13</td>
+                            <td class="value">474700 USDD</td>
+                            <td class="value zero">0 USDD</td>
+                            <td class="value zero">0 USDD</td>
+                            <td class="value">530000 USDD</td>
+                            <td class="value">45</td>
+                            <td class="value">55300 USDD</td>
+                            <td class="value">10</td>
+                            <td class="value">150000 USDD</td>
+                            <td class="value">7</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- USDDOLD视图 -->
+        <div class="tab-content" id="tab-usddold">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="padding-left: 20px;">商户 ID</th>
+                            <th>商户名称</th>
+                            <th>链包总数</th>
+                            <th>总余额</th>
+                            <th>待确认金额</th>
+                            <th>异常入金额</th>
+                            <th>入款金额</th>
+                            <th>入款笔数</th>
+                            <th>出款金额</th>
+                            <th>出款笔数</th>
+                            <th>归集金额</th>
+                            <th>归集笔数</th>
+                            <th>风险退款</th>
+                            <th>退款笔数</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="merchant-id">1001</td>
+                            <td class="merchant-name">7门店数</td>
+                            <td class="value">1</td>
+                            <td class="value zero">0 USDD</td>
+                            <td class="value zero">0 USDD</td>
+                            <td class="value zero">0 USDD</td>
+                            <td class="value zero">0 USDD</td>
+                            <td class="value zero">0</td>
+                            <td class="value zero">0 USDD</td>
+                            <td class="value zero">0</td>
+                            <td class="value zero">0 USDD</td>
+                            <td class="value zero">0</td>
+                            <td class="value zero">0 USDD</td>
+                            <td class="value zero">0</td>
+                        </tr>
+                        <tr>
+                            <td class="merchant-id">1003</td>
+                            <td class="merchant-name">旧版USDD商户</td>
+                            <td class="value">2</td>
+                            <td class="value">85000 USDD</td>
+                            <td class="value zero">0 USDD</td>
+                            <td class="value zero">0 USDD</td>
+                            <td class="value">120000 USDD</td>
+                            <td class="value">8</td>
+                            <td class="value">35000 USDD</td>
+                            <td class="value">3</td>
+                            <td class="value">25000 USDD</td>
+                            <td class="value">1</td>
+                            <td class="value zero">0 USDD</td>
+                            <td class="value zero">0</td>
+                        </tr>
+                        <tr class="total-row">
+                            <td colspan="2" style="padding-left: 20px;">合计</td>
+                            <td>13</td>
+                            <td class="value">85000 USDD</td>
+                            <td class="value zero">0 USDD</td>
+                            <td class="value zero">0 USDD</td>
+                            <td class="value">120000 USDD</td>
+                            <td class="value">8</td>
+                            <td class="value">35000 USDD</td>
+                            <td class="value">3</td>
+                            <td class="value">25000 USDD</td>
+                            <td class="value">1</td>
+                            <td class="value zero">0 USDD</td>
+                            <td class="value zero">0</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ETH视图 (预留) -->
+        <div class="tab-content" id="tab-eth">
+            <div class="table-container">
+                <div style="padding: 60px 20px; text-align: center; color: #94a3b8;">
+                    <i class="fas fa-inbox" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
+                    <div style="font-size: 15px; font-weight: 600;">暂无 USDC 相关数据</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ETH视图 -->
+        <div class="tab-content" id="tab-eth">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="padding-left: 20px;">商户 ID</th>
+                            <th>商户名称</th>
+                            <th>链包总数</th>
+                            <th>总余额</th>
+                            <th>待确认金额</th>
+                            <th>异常入金额</th>
+                            <th>入款金额</th>
+                            <th>入款笔数</th>
+                            <th>出款金额</th>
+                            <th>出款笔数</th>
+                            <th>归集金额</th>
+                            <th>归集笔数</th>
+                            <th>风险退款</th>
+                            <th>退款笔数</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="merchant-id">1008</td>
+                            <td class="merchant-name">ETH测试商户</td>
+                            <td class="value">2</td>
+                            <td class="value">15.8 ETH</td>
+                            <td class="value zero">0 ETH</td>
+                            <td class="value">0.5 ETH</td>
+                            <td class="value">28.4 ETH</td>
+                            <td class="value">12</td>
+                            <td class="value">12.6 ETH</td>
+                            <td class="value">5</td>
+                            <td class="value">8.2 ETH</td>
+                            <td class="value">3</td>
+                            <td class="value">0.3 ETH</td>
+                            <td class="value">1</td>
+                        </tr>
+                        <tr class="total-row">
+                            <td colspan="2" style="padding-left: 20px;">合计</td>
+                            <td>13</td>
+                            <td class="value">15.8 ETH</td>
+                            <td class="value zero">0 ETH</td>
+                            <td class="value">0.5 ETH</td>
+                            <td class="value">28.4 ETH</td>
+                            <td class="value">12</td>
+                            <td class="value">12.6 ETH</td>
+                            <td class="value">5</td>
+                            <td class="value">8.2 ETH</td>
+                            <td class="value">3</td>
+                            <td class="value">0.3 ETH</td>
+                            <td class="value">1</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ETH-USDC视图 -->
+        <div class="tab-content" id="tab-eth-usdc">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="padding-left: 20px;">商户 ID</th>
+                            <th>商户名称</th>
+                            <th>链包总数</th>
+                            <th>总余额</th>
+                            <th>待确认金额</th>
+                            <th>异常入金额</th>
+                            <th>入款金额</th>
+                            <th>入款笔数</th>
+                            <th>出款金额</th>
+                            <th>出款笔数</th>
+                            <th>归集金额</th>
+                            <th>归集笔数</th>
+                            <th>风险退款</th>
+                            <th>退款笔数</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="merchant-id">1009</td>
+                            <td class="merchant-name">ETH-USDC商户</td>
+                            <td class="value">1</td>
+                            <td class="value">2500 USDC</td>
+                            <td class="value zero">0 USDC</td>
+                            <td class="value">180 USDC</td>
+                            <td class="value">5600 USDC</td>
+                            <td class="value">28</td>
+                            <td class="value">3100 USDC</td>
+                            <td class="value">15</td>
+                            <td class="value">1200 USDC</td>
+                            <td class="value">6</td>
+                            <td class="value">120 USDC</td>
+                            <td class="value">2</td>
+                        </tr>
+                        <tr class="total-row">
+                            <td colspan="2" style="padding-left: 20px;">合计</td>
+                            <td>13</td>
+                            <td class="value">2500 USDC</td>
+                            <td class="value zero">0 USDC</td>
+                            <td class="value">180 USDC</td>
+                            <td class="value">5600 USDC</td>
+                            <td class="value">28</td>
+                            <td class="value">3100 USDC</td>
+                            <td class="value">15</td>
+                            <td class="value">1200 USDC</td>
+                            <td class="value">6</td>
+                            <td class="value">120 USDC</td>
+                            <td class="value">2</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ETH-USDD视图 -->
+        <div class="tab-content" id="tab-eth-usdd">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="padding-left: 20px;">商户 ID</th>
+                            <th>商户名称</th>
+                            <th>链包总数</th>
+                            <th>总余额</th>
+                            <th>待确认金额</th>
+                            <th>异常入金额</th>
+                            <th>入款金额</th>
+                            <th>入款笔数</th>
+                            <th>出款金额</th>
+                            <th>出款笔数</th>
+                            <th>归集金额</th>
+                            <th>归集笔数</th>
+                            <th>风险退款</th>
+                            <th>退款笔数</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="merchant-id">1010</td>
+                            <td class="merchant-name">ETH-USDD商户</td>
+                            <td class="value">1</td>
+                            <td class="value">8500 USDD</td>
+                            <td class="value zero">0 USDD</td>
+                            <td class="value zero">0 USDD</td>
+                            <td class="value">12000 USDD</td>
+                            <td class="value">15</td>
+                            <td class="value">3500 USDD</td>
+                            <td class="value">8</td>
+                            <td class="value">2800 USDD</td>
+                            <td class="value">4</td>
+                            <td class="value zero">0 USDD</td>
+                            <td class="value zero">0</td>
+                        </tr>
+                        <tr class="total-row">
+                            <td colspan="2" style="padding-left: 20px;">合计</td>
+                            <td>13</td>
+                            <td class="value">8500 USDD</td>
+                            <td class="value zero">0 USDD</td>
+                            <td class="value zero">0 USDD</td>
+                            <td class="value">12000 USDD</td>
+                            <td class="value">15</td>
+                            <td class="value">3500 USDD</td>
+                            <td class="value">8</td>
+                            <td class="value">2800 USDD</td>
+                            <td class="value">4</td>
+                            <td class="value zero">0 USDD</td>
+                            <td class="value zero">0</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 分页 -->
+        <div class="pagination">
+            <div class="page-info">共 215 条</div>
+            <div class="page-controls">
+                <button class="page-btn" disabled>
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="page-btn active">1</button>
+                <button class="page-btn">2</button>
+                <button class="page-btn">3</button>
+                <button class="page-btn">4</button>
+                <button class="page-btn">5</button>
+                <span style="color: #94a3b8; padding: 0 4px;">···</span>
+                <button class="page-btn">22</button>
+                <button class="page-btn">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+                <select class="date-input" style="width: 100px; margin-left: 8px;">
+                    <option>10 条/页</option>
+                    <option>20 条/页</option>
+                    <option>50 条/页</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- 说明 -->
+        <div style="padding: 20px; background: #f0f9ff; border-top: 1px solid #bae6fd; color: #0369a1; font-size: 13px;">
+            <strong>💡 Tab切换方案优势：</strong>
+            <ul style="margin: 8px 0 0 20px; line-height: 1.8;">
+                <li><strong>默认USDT：</strong>打开页面默认显示USDT数据（主流币种）</li>
+                <li><strong>支持无限币种：</strong>添加币种只需增加一个Tab，不会撑宽表格</li>
+                <li><strong>聚焦查看：</strong>可以专注查看某个币种的数据，不会眼花缭乱</li>
+                <li><strong>灵活切换：</strong>点击Tab快速切换币种，操作简单</li>
+                <li><strong>性能优化：</strong>每次只渲染一个币种的数据，加载更快</li>
+                <li><strong>打印友好：</strong>可以选择性打印某个币种的报表</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(currency) {
+            // 切换Tab按钮状态
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.closest('.tab-btn').classList.add('active');
+            
+            // 切换内容
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`tab-${currency}`).classList.add('active');
+        }
+    </script>
+</body>
+</html>
+

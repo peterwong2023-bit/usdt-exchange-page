@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>统计报表 - 现代金融版</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        :root {
+            --primary-color: #007bff;
+            --primary-hover: #0056b3;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --text-tertiary: #9ca3af;
+            --bg-body: #f3f4f6;
+            --bg-card: #ffffff;
+            --border-color: #e5e7eb;
+            --table-header-bg: #f9fafb;
+            --table-row-hover: #f3f4f6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-primary);
+            -webkit-font-smoothing: antialiased;
+            line-height: 1.5;
+            font-size: 14px;
+        }
+
+        /* 顶部导航栏 */
+        .top-nav {
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 24px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .breadcrumb i {
+            font-size: 16px;
+            color: var(--text-tertiary);
+        }
+
+        .breadcrumb-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .breadcrumb-item.active {
+            color: var(--primary-color);
+            font-weight: 600;
+            background: #eff6ff;
+            padding: 4px 12px;
+            border-radius: 6px;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            padding: 6px 12px;
+            border-radius: 20px;
+            transition: background 0.2s;
+        }
+
+        .user-profile:hover {
+            background: var(--bg-body);
+        }
+
+        .avatar {
+            width: 32px;
+            height: 32px;
+            background: #e0e7ff;
+            color: var(--primary-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        /* 主要内容区域 */
+        .main-content {
+            padding: 24px;
+            max-width: 1800px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+
+        /* 筛选区域 */
+        .filter-section {
+            padding: 24px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .page-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .page-title::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: var(--primary-color);
+            border-radius: 2px;
+        }
+
+        .filter-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .form-control {
+            padding: 10px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+            color: var(--text-primary);
+            outline: none;
+            transition: all 0.2s;
+            background: #fff;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        }
+
+        .date-range-picker {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0 12px;
+        }
+
+        .date-range-picker input {
+            border: none;
+            padding: 10px 0;
+            outline: none;
+            font-family: inherit;
+            color: var(--text-primary);
+            width: 100px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+            box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-outline {
+            background: white;
+            border-color: var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--text-secondary);
+            color: var(--text-primary);
+            background: var(--bg-body);
+        }
+
+        /* 下拉选择器 */
+        .select-wrapper {
+            position: relative;
+        }
+
+        .form-select {
+            padding: 10px 32px 10px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+            color: var(--text-primary);
+            background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8.825L1.175 4 2.238 2.938 6 6.7l3.763-3.763L10.825 4z'/%3E%3C/svg%3E") no-repeat right 12px center;
+            appearance: none;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .form-select:hover {
+            border-color: #d1d5db;
+        }
+
+        .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        }
+
+        .form-select option {
+            padding: 8px 12px;
+        }
+
+        .form-select option:disabled {
+            color: var(--text-tertiary);
+        }
+
+        /* 表格 */
+        .table-container {
+            overflow-x: auto;
+            padding-bottom: 12px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            white-space: nowrap;
+        }
+
+        th {
+            background: var(--table-header-bg);
+            padding: 16px 24px;
+            text-align: left;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border-color);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-primary);
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+
+        /* 每一行的交替背景 */
+        tbody tr:hover {
+            background: var(--table-row-hover);
+        }
+
+        /* 数字列右对齐 */
+        th.text-right, td.text-right {
+            text-align: right;
+        }
+
+        /* 货币和数字样式 */
+        .amount {
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+            font-weight: 500;
+        }
+
+        .amount.zero {
+            color: var(--text-tertiary);
+        }
+
+        .amount.positive {
+            color: var(--success-color);
+        }
+        
+        .amount.negative {
+            color: var(--danger-color);
+        }
+
+        .clickable-link {
+            color: var(--primary-color);
+            cursor: pointer;
+            font-weight: 500;
+            text-decoration: none;
+        }
+
+        .clickable-link:hover {
+            text-decoration: underline;
+        }
+
+        /* 总计行 */
+        .total-row {
+            background: #fdf6ec !important;
+            font-weight: 700;
+        }
+        
+        .total-row td {
+            border-top: 2px solid #f3d19e;
+            color: #b45309;
+        }
+
+        /* 分页 */
+        .pagination-container {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 20px 24px;
+            border-top: 1px solid var(--border-color);
+            gap: 16px;
+        }
+
+        .page-info {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .pagination {
+            display: flex;
+            gap: 8px;
+        }
+
+        .page-btn {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background: white;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .page-btn:hover:not(:disabled) {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            background: #eff6ff;
+        }
+
+        .page-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .page-btn:disabled {
+            color: var(--text-tertiary);
+            cursor: not-allowed;
+            background: #f9fafb;
+        }
+
+        select.page-size {
+            padding: 6px 24px 6px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            outline: none;
+            appearance: none;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8.825L1.175 4 2.238 2.938 6 6.7l3.763-3.763L10.825 4z'/%3E%3C/svg%3E") no-repeat right 8px center;
+            background-color: white;
+            cursor: pointer;
+        }
+
+        /* 状态徽章 */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            background: #eff6ff;
+            color: var(--primary-color);
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- 顶部导航 -->
+    <div class="top-nav">
+        <div class="breadcrumb">
+            <div class="breadcrumb-item">
+                <i class="fas fa-wallet"></i>
+                <span>钱包管理</span>
+            </div>
+            <i class="fas fa-chevron-right" style="font-size: 10px;"></i>
+            <div class="breadcrumb-item active">
+                <i class="fas fa-chart-bar"></i>
+                <span>统计报表</span>
+            </div>
+        </div>
+        <div class="user-profile">
+            <div class="avatar">L</div>
+            <span style="font-weight: 500; font-size: 14px;">laoluan</span>
+            <i class="fas fa-chevron-down" style="font-size: 12px; color: var(--text-tertiary);"></i>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="card">
+            <!-- 筛选栏 -->
+            <div class="filter-section">
+                <div class="page-title">统计报表</div>
+                
+                <!-- 筛选行 -->
+                <div class="filter-row">
+                    <!-- 商户选择 -->
+                    <div class="select-wrapper">
+                        <select class="form-select" style="width: 160px;">
+                            <option value="" disabled>选择商户</option>
+                            <option value="qinghai" selected>晴海的天</option>
+                            <option value="all">全部商户</option>
+                        </select>
+                    </div>
+
+                    <!-- 链选择 -->
+                    <div class="select-wrapper">
+                        <select class="form-select" id="chainSelect" style="width: 140px;">
+                            <option value="" disabled>选择链</option>
+                            <option value="tron" selected>波场 (TRON)</option>
+                            <option value="eth">以太坊 (ETH)</option>
+                        </select>
+                    </div>
+
+                    <!-- 币种选择 -->
+                    <div class="select-wrapper">
+                        <select class="form-select" id="currencySelect" style="width: 150px;">
+                            <option value="" disabled>选择代币</option>
+                            <option value="usdt" selected>USDT</option>
+                            <option value="trx">TRX</option>
+                            <option value="usdd">USDD</option>
+                            <option value="usddold">USDDOLD</option>
+                            <option value="usdcold">USDCOLD</option>
+                        </select>
+                    </div>
+
+                    <!-- 日期范围 -->
+                    <div class="date-range-picker">
+                        <i class="far fa-calendar-alt" style="color: var(--text-tertiary);"></i>
+                        <input type="text" value="2025-11-27" readonly>
+                        <span style="color: var(--text-tertiary);">→</span>
+                        <input type="text" value="2025-11-27" readonly>
+                    </div>
+
+                    <!-- 按钮组 -->
+                    <button class="btn btn-primary">
+                        <i class="fas fa-search"></i>
+                        查询
+                    </button>
+                    <button class="btn btn-outline">
+                        <i class="fas fa-redo-alt"></i>
+                        重置
+                    </button>
+                </div>
+            </div>
+
+            <!-- 表格 -->
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>商户 ID</th>
+                            <th>商户名称</th>
+                            <th class="text-right">钱包总数</th>
+                            <th class="text-right">总余额</th>
+                            <th class="text-right">待确认金额</th>
+                            <th class="text-right">异常入款金额</th>
+                            <th class="text-right">入款金额</th>
+                            <th class="text-right">入款笔数</th>
+                            <th class="text-right">出款金额</th>
+                            <th class="text-right">出款笔数</th>
+                            <th class="text-right">归集金额</th>
+                            <th class="text-right">归集笔数</th>
+                            <th class="text-right">风险待退款金额</th>
+                            <th class="text-right">风险退款金额</th>
+                            <th class="text-right">风险退款笔数</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="badge">1222</span></td>
+                            <td style="font-weight: 500;">晴海的天归集</td>
+                            <td class="text-right amount">2</td>
+                            <td class="text-right amount zero">0</td>
+                            <td class="text-right amount zero">$0.00</td>
+                            <td class="text-right amount zero">0</td>
+                            <td class="text-right amount zero">0</td>
+                            <td class="text-right amount zero">0</td>
+                            <td class="text-right amount negative">-4</td>
+                            <td class="text-right amount">2</td>
+                            <td class="text-right amount zero">0</td>
+                            <td class="text-right amount zero">0</td>
+                            <td class="text-right amount zero">0</td>
+                            <td class="text-right amount zero">0</td>
+                            <td class="text-right amount zero">0</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge">1223</span></td>
+                            <td style="font-weight: 500;">晴海的天</td>
+                            <td class="text-right amount">3</td>
+                            <td class="text-right amount"><a href="#" class="clickable-link">4.2</a></td>
+                            <td class="text-right amount zero">$0.00</td>
+                            <td class="text-right amount zero">0</td>
+                            <td class="text-right amount">8.2</td>
+                            <td class="text-right amount">4</td>
+                            <td class="text-right amount zero">0</td>
+                            <td class="text-right amount zero">0</td>
+                            <td class="text-right amount zero">0</td>
+                            <td class="text-right amount zero">0</td>
+                            <td class="text-right amount">2.5</td>
+                            <td class="text-right amount">4</td>
+                            <td class="text-right amount">2</td>
+                        </tr>
+                        <tr class="total-row">
+                            <td colspan="2" style="padding-left: 24px;">总计</td>
+                            <td class="text-right amount">5</td>
+                            <td class="text-right amount">4.2</td>
+                            <td class="text-right amount zero">$0.00</td>
+                            <td class="text-right amount zero">0</td>
+                            <td class="text-right amount">8.2</td>
+                            <td class="text-right amount">4</td>
+                            <td class="text-right amount negative">-4</td>
+                            <td class="text-right amount">2</td>
+                            <td class="text-right amount zero">0</td>
+                            <td class="text-right amount zero">0</td>
+                            <td class="text-right amount">2.5</td>
+                            <td class="text-right amount">4</td>
+                            <td class="text-right amount">2</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 分页 -->
+            <div class="pagination-container">
+                <div class="page-info">共 2 条</div>
+                <div class="pagination">
+                    <button class="page-btn" disabled><i class="fas fa-chevron-left" style="font-size: 12px;"></i></button>
+                    <button class="page-btn active">1</button>
+                    <button class="page-btn" disabled><i class="fas fa-chevron-right" style="font-size: 12px;"></i></button>
+                </div>
+                <select class="page-size">
+                    <option>10 条/页</option>
+                    <option>20 条/页</option>
+                    <option>50 条/页</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 各链支持的币种配置
+        const chainCurrencies = {
+            tron: [
+                { id: 'usdt', name: 'USDT' },
+                { id: 'trx', name: 'TRX' },
+                { id: 'usdd', name: 'USDD' },
+                { id: 'usddold', name: 'USDDOLD' },
+                { id: 'usdcold', name: 'USDCOLD' }
+            ],
+            eth: [
+                { id: 'eth', name: 'ETH' },
+                { id: 'usdt', name: 'USDT' },
+                { id: 'usdc', name: 'USDC' }
+            ]
+        };
+
+        const chainSelect = document.getElementById('chainSelect');
+        const currencySelect = document.getElementById('currencySelect');
+
+        // 更新币种下拉选项
+        function updateCurrencyOptions(chain) {
+            const currencies = chainCurrencies[chain];
+            currencySelect.innerHTML = '<option value="" disabled>选择代币</option>' + 
+                currencies.map((c, i) => 
+                    `<option value="${c.id}" ${i === 0 ? 'selected' : ''}>${c.name}</option>`
+                ).join('');
+        }
+
+        // 链选择变化时更新币种列表
+        chainSelect.addEventListener('change', function() {
+            updateCurrencyOptions(this.value);
+        });
+    </script>
+
+</body>
+</html>
+

@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商户管理 - 金融系统</title>
+    <link rel="stylesheet" href="withdrawal-final.html">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
+            background: #ffffff;
+            min-height: 100vh;
+            padding-bottom: 100px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            color: #1a1a1a;
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+            color: #6c757d;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .header {
+            background: #ffffff;
+            border-bottom: 1px solid #e9ecef;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .back-btn {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 0;
+            position: absolute;
+            top: 12px;
+            left: 16px;
+            z-index: 10;
+            color: #495057;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .back-btn:hover {
+            background: #e9ecef;
+            border-color: #adb5bd;
+        }
+
+        .back-btn:active {
+            background: #dee2e6;
+        }
+
+        .search-section {
+            background: #ffffff;
+            padding: 16px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .search-wrapper {
+            position: relative;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+            font-size: 16px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 14px 16px 14px 44px;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 400;
+            outline: none;
+            transition: all 0.2s ease;
+            color: #212529;
+        }
+
+        .search-input:focus {
+            border-color: #007bff;
+            background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        }
+
+        /* 标签页导航 */
+        .tab-nav {
+            background: #ffffff;
+            display: flex;
+            align-items: center;
+            padding-left: 68px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .tab-item {
+            flex: 1;
+            padding: 16px 12px;
+            text-align: center;
+            font-size: 15px;
+            font-weight: 500;
+            color: #6c757d;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .tab-item:hover {
+            color: #495057;
+            background: #f8f9fa;
+        }
+
+        .tab-item.active {
+            color: #007bff;
+            border-bottom-color: #007bff;
+            font-weight: 600;
+        }
+
+
+        /* 商户列表 */
+        .merchant-list {
+            padding: 16px;
+        }
+
+        .merchant-item {
+            background: #ffffff;
+            padding: 20px 16px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            border: 1px solid #e9ecef;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .merchant-item:hover {
+            border-color: #007bff;
+            box-shadow: 0 2px 8px rgba(0, 123, 255, 0.1);
+        }
+
+        .merchant-item:active {
+            background: #f8f9fa;
+            transform: scale(0.98);
+        }
+
+        .merchant-name {
+            font-size: 16px;
+            color: #212529;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+        .merchant-id {
+            color: #6c757d;
+            font-size: 13px;
+            font-weight: 400;
+        }
+
+        .merchant-balance {
+            font-size: 18px;
+            font-weight: 600;
+            color: #212529;
+            margin-top: 8px;
+        }
+
+        .merchant-balance.zero {
+            color: #6c757d;
+            font-weight: 500;
+        }
+
+        .merchant-balance.positive {
+            color: #28a745;
+        }
+
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+            background: #f8f9fa;
+            border-radius: 12px;
+            margin: 20px;
+            border: 1px solid #e9ecef;
+        }
+
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+            opacity: 0.7;
+        }
+
+        .content {
+            padding: 16px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .accordion-card {
+            background: #ffffff;
+            border-radius: 16px;
+            margin-bottom: 12px;
+            border: 1px solid #e9ecef;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .accordion-card.active {
+            border-color: #007bff;
+            box-shadow: 0 2px 12px rgba(0, 123, 255, 0.15);
+        }
+
+        .accordion-card.completed {
+            background: #f8f9fa;
+        }
+
+        .accordion-header {
+            padding: 20px 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .accordion-icon {
+            width: 40px;
+            height: 40px;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: all 0.3s ease;
+        }
+
+        .accordion-card.active .accordion-icon {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+
+        .accordion-card.completed .accordion-icon {
+            background: #28a745;
+            color: white;
+            border-color: #28a745;
+        }
+
+        .accordion-title {
+            flex: 1;
+        }
+
+        .accordion-title h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: #212529;
+        }
+
+        .accordion-title .subtitle {
+            font-size: 14px;
+            color: #6c757d;
+            font-weight: 400;
+        }
+
+        .accordion-toggle {
+            font-size: 18px;
+            color: #6c757d;
+            transition: transform 0.3s ease;
+        }
+
+        .accordion-card.active .accordion-toggle {
+            transform: rotate(90deg);
+            color: #007bff;
+        }
+
+        .accordion-body {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .accordion-card.active .accordion-body {
+            max-height: 1000px;
+        }
+
+        .accordion-content {
+            padding: 0 16px 20px;
+        }
+
+        .selector {
+            padding: 16px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            border: 1px solid #dee2e6;
+            transition: all 0.2s ease;
+        }
+
+        .selector:hover {
+            border-color: #007bff;
+            background: #ffffff;
+        }
+
+        .selector:active {
+            background: #e9ecef;
+        }
+
+        .sel-icon {
+            width: 36px;
+            height: 36px;
+            background: #007bff;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: white;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 14px 16px;
+            background: #ffffff;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 400;
+            outline: none;
+            margin-bottom: 12px;
+            font-family: inherit;
+            color: #212529;
+            transition: all 0.2s ease;
+        }
+
+        input:focus, textarea:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        }
+
+        input::placeholder, textarea::placeholder {
+            color: #6c757d;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 16px;
+            transition: all 0.2s ease;
+        }
+
+        .submit-btn:hover {
+            background: #0056b3;
+            box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
+        }
+
+        .submit-btn:active {
+            background: #004085;
+        }
+
+        .toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #ffffff;
+            color: #212529;
+            padding: 16px 24px;
+            border-radius: 12px;
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 2000;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            border: 1px solid #dee2e6;
+            font-weight: 500;
+            font-size: 15px;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="status-bar">
+        <span>2:01</span>
+        <div>⚫⚫⚫⚫ 4G 🔋</div>
+    </div>
+
+    <div class="header">
+        <button class="back-btn" onclick="history.back()">‹</button>
+        
+        <!-- 标签页导航 -->
+        <div class="tab-nav">
+            <div class="tab-item active" onclick="switchTab('collection')" id="tabCollection">
+                归集商户
+            </div>
+            <div class="tab-item" onclick="switchTab('normal')" id="tabNormal">
+                普通商户
+            </div>
+            <div class="tab-item" onclick="switchTab('abnormal')" id="tabAbnormal">
+                异常入款
+            </div>
+        </div>
+    </div>
+
+    <!-- 搜索栏 -->
+    <div class="search-section">
+        <div class="search-wrapper">
+            <span class="search-icon">🔍</span>
+            <input type="text" class="search-input" placeholder="搜索商户" id="searchInput" oninput="filterMerchants()">
+        </div>
+    </div>
+
+    <!-- 商户列表 -->
+    <div class="merchant-list" id="merchantList">
+        <!-- 动态生成 -->
+    </div>
+
+    <!-- 原折叠卡片内容（隐藏，可选保留） -->
+    <div class="content" style="display: none;">
+        <!-- 卡片1 -->
+        <div class="accordion-card active" id="card1">
+            <div class="accordion-header" onclick="toggleCard(1)">
+                <div class="accordion-icon">₮</div>
+                <div class="accordion-title">
+                    <h3>区块链 & 代币</h3>
+                    <div class="subtitle" id="sub1">选择区块链</div>
+                </div>
+                <div class="accordion-toggle">›</div>
+            </div>
+            <div class="accordion-body">
+                <div class="accordion-content">
+                    <div class="selector" onclick="selectBlockchain()">
+                        <div class="sel-icon">₮</div>
+                        <div style="flex: 1;">
+                            <div style="font-size: 12px; color: #64748b;">波场</div>
+                            <div style="font-weight: 700;">USDT (TRC20)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 卡片2 -->
+        <div class="accordion-card" id="card2">
+            <div class="accordion-header" onclick="toggleCard(2)">
+                <div class="accordion-icon">📦</div>
+                <div class="accordion-title">
+                    <h3>选择商户</h3>
+                    <div class="subtitle" id="sub2">点击选择</div>
+                </div>
+                <div class="accordion-toggle">›</div>
+            </div>
+            <div class="accordion-body">
+                <div class="accordion-content">
+                    <div class="selector" id="merchSel" onclick="selectMerchant()">
+                        <div style="color: #94a3b8;">点击选择商户</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 卡片3 -->
+        <div class="accordion-card" id="card3">
+            <div class="accordion-header" onclick="toggleCard(3)">
+                <div class="accordion-icon">📝</div>
+                <div class="accordion-title">
+                    <h3>交易详情</h3>
+                    <div class="subtitle" id="sub3">填写地址和金额</div>
+                </div>
+                <div class="accordion-toggle">›</div>
+            </div>
+            <div class="accordion-body">
+                <div class="accordion-content">
+                    <input type="text" placeholder="收款地址" id="address">
+                    <input type="number" placeholder="金额" id="amount">
+                    <textarea placeholder="备注（可选）"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <button class="submit-btn" onclick="submit()">✓ 发起出款请求</button>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // 商户数据
+        const merchantData = {
+            collection: [
+                { id: 1216, name: '以太王归集', balance: 0, type: 'collection' },
+                { id: 1214, name: '六本木归集', balance: 0, type: 'collection' },
+                { id: 1212, name: '新宿归集', balance: 170.1, type: 'collection' },
+                { id: 1210, name: '大阪归集', balance: 0, type: 'collection' },
+                { id: 1208, name: '神田归集', balance: 0, type: 'collection' },
+                { id: 1206, name: '马场商户归集', balance: 0, type: 'collection' },
+                { id: 1204, name: '测试商户C归集', balance: 0.5, type: 'collection' },
+                { id: 1202, name: '测试商户E归集', balance: 6.5, type: 'collection', abnormal: true },
+                { id: 1200, name: '测试商户E归集', balance: 0.5, type: 'collection' },
+                { id: 1197, name: '测试商户D归集', balance: 0, type: 'collection' },
+                { id: 1195, name: 'live归集', balance: 28.7, type: 'collection', abnormal: true }
+            ],
+            normal: [
+                { id: 2001, name: '东京商户', balance: 150.5, type: 'normal' },
+                { id: 2002, name: '京都商户', balance: 89.2, type: 'normal' },
+                { id: 2003, name: '福冈商户', balance: 0, type: 'normal' }
+            ],
+            abnormal: [
+                { id: 1202, name: '测试商户E归集', balance: 6.5, type: 'collection', abnormal: true, alertMsg: '检测到多笔小额入款，疑似异常' },
+                { id: 1195, name: 'live归集', balance: 28.7, type: 'collection', abnormal: true, alertMsg: '24小时内入款频率过高' },
+                { id: 1188, name: '池袋归集', balance: 12.3, type: 'collection', abnormal: true, alertMsg: '入款地址与白名单不符' }
+            ]
+        };
+
+        let currentTab = 'collection';
+        let searchQuery = '';
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            renderMerchants();
+        });
+
+        // 切换标签页
+        function switchTab(tab) {
+            currentTab = tab;
+            
+            // 更新标签页样式
+            document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+            document.getElementById(`tab${tab.charAt(0).toUpperCase() + tab.slice(1)}`).classList.add('active');
+            
+            // 清空搜索
+            document.getElementById('searchInput').value = '';
+            searchQuery = '';
+            
+            // 渲染列表
+            renderMerchants();
+        }
+
+        // 渲染商户列表
+        function renderMerchants() {
+            const container = document.getElementById('merchantList');
+            
+            let merchants = merchantData[currentTab] || [];
+            
+            // 搜索过滤
+            if (searchQuery) {
+                merchants = merchants.filter(m => 
+                    m.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    m.id.toString().includes(searchQuery)
+                );
+            }
+            
+            // 空状态
+            if (merchants.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📭</div>
+                        <div>${searchQuery ? '未找到匹配的商户' : '暂无商户'}</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            // 渲染列表
+            container.innerHTML = merchants.map(m => {
+                const balanceClass = m.balance === 0 ? 'zero' : 'positive';
+                
+                return `
+                    <div class="merchant-item" onclick="selectMerchant(${m.id}, '${m.name}')">
+                        <div class="merchant-name">
+                            ${m.name} <span class="merchant-id">(${m.id})</span>
+                        </div>
+                        <div class="merchant-balance ${balanceClass}">${m.balance} USDT</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 搜索过滤
+        function filterMerchants() {
+            searchQuery = document.getElementById('searchInput').value;
+            renderMerchants();
+        }
+
+        // 选择商户
+        function selectMerchant(id, name) {
+            showToast(`✓ 已选择: ${name}`);
+            setTimeout(() => {
+                // 这里可以跳转到具体的商户详情或操作页面
+                console.log('Selected merchant:', id, name);
+            }, 500);
+        }
+
+        // Toast提示
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+
+        // 保留原有功能（如需要）
+        let activeCard = 1;
+        function toggleCard(num) {
+            const card = document.getElementById(`card${num}`);
+            if (!card) return;
+            const wasActive = card.classList.contains('active');
+            document.querySelectorAll('.accordion-card').forEach(c => c.classList.remove('active'));
+            if (!wasActive) {
+                card.classList.add('active');
+                activeCard = num;
+            }
+        }
+    </script>
+</body>
+</html>
+

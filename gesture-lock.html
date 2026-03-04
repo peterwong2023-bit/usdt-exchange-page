@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Gesture Lock Interaction</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'IBM+Plex+Sans', sans-serif;
+            background-color: #0F172A;
+            color: #F8FAFC;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        /* Mobile Frame */
+        .phone-frame {
+            width: 375px;
+            height: 812px;
+            background: #1E293B;
+            border-radius: 40px;
+            position: relative;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            border: 8px solid #334155;
+            overflow: hidden;
+        }
+
+        .screen {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background: linear-gradient(180deg, #0F172A 0%, #1E293B 100%);
+        }
+
+        /* Notch */
+        .notch {
+            width: 150px;
+            height: 30px;
+            background: #334155;
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+            z-index: 100;
+        }
+
+        /* Notification */
+        .notification {
+            position: absolute;
+            top: 50px;
+            left: 12px;
+            right: 12px;
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 50;
+            cursor: pointer;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+
+        .notification.hidden {
+            transform: translateY(-100px);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Gesture Lock Grid */
+        .lock-screen {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 40;
+            padding-top: 100px;
+        }
+
+        .gesture-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 40px;
+            margin-top: 60px;
+            touch-action: none;
+        }
+
+        .dot {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+
+        .dot::after {
+            content: '';
+            width: 12px;
+            height: 12px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+
+        .dot.active {
+            border-color: #F59E0B;
+            background: rgba(245, 158, 11, 0.1);
+        }
+
+        .dot.active::after {
+            background: #F59E0B;
+            transform: scale(1.5);
+        }
+
+        .dot.error {
+            border-color: #EF4444;
+            background: rgba(239, 68, 68, 0.2);
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
+        }
+
+        .dot.error::after {
+            background: #EF4444;
+            transform: scale(1.2);
+        }
+
+        /* Canvas for lines */
+        #gesture-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 45;
+        }
+
+        /* Vibration / Shake Animation */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+            20%, 40%, 60%, 80% { transform: translateX(4px); }
+        }
+
+        .shake {
+            animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        /* Clock */
+        .clock {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .time {
+            font-size: 64px;
+            font-weight: 300;
+        }
+
+        .date {
+            font-size: 18px;
+            color: rgba(248, 250, 252, 0.6);
+        }
+
+        /* Success Message */
+        .success-screen {
+            position: absolute;
+            inset: 0;
+            background: #0F172A;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 60;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+
+        .success-screen.visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .transaction-details {
+            background: #1E293B;
+            padding: 24px;
+            border-radius: 24px;
+            width: 85%;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="phone-frame" id="phone">
+        <div class="notch"></div>
+        <div class="screen">
+            
+            <!-- Notification -->
+            <div id="notification" class="notification hidden" onclick="handleNotificationClick()">
+                <div class="w-10 h-10 bg-amber-500 rounded-full flex items-center justify-center text-slate-900">
+                    <i data-lucide="trending-up" size="20"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="flex justify-between items-center">
+                        <span class="font-semibold text-sm">USDT Transaction</span>
+                        <span class="text-[10px] text-slate-400">Just now</span>
+                    </div>
+                    <p class="text-xs text-slate-300">Incoming transfer of 1,250.00 USDT</p>
+                </div>
+            </div>
+
+            <!-- Lock Screen -->
+            <div class="lock-screen" id="lock-screen">
+                <div class="clock">
+                    <div class="time" id="current-time">14:32</div>
+                    <div class="date">Wednesday, February 11</div>
+                </div>
+
+                <p id="lock-message" class="text-slate-400 text-sm mt-8 transition-colors duration-300">Draw gesture to unlock</p>
+
+                <div class="gesture-grid" id="gesture-grid">
+                    <!-- Dots will be rendered here -->
+                    <div class="dot" data-index="0"></div>
+                    <div class="dot" data-index="1"></div>
+                    <div class="dot" data-index="2"></div>
+                    <div class="dot" data-index="3"></div>
+                    <div class="dot" data-index="4"></div>
+                    <div class="dot" data-index="5"></div>
+                    <div class="dot" data-index="6"></div>
+                    <div class="dot" data-index="7"></div>
+                    <div class="dot" data-index="8"></div>
+                </div>
+                <canvas id="gesture-canvas"></canvas>
+            </div>
+
+            <!-- Success / Home Screen -->
+            <div class="success-screen" id="success-screen">
+                <div class="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center text-green-500 mb-6">
+                    <i data-lucide="check-circle" size="48"></i>
+                </div>
+                <h2 class="text-2xl font-bold mb-8">Unlocked</h2>
+                
+                <div class="transaction-details">
+                    <h3 class="text-slate-400 text-xs uppercase tracking-widest mb-4">Transaction Details</h3>
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="text-slate-300">Amount</span>
+                        <span class="text-xl font-bold text-amber-500">1,250.00 USDT</span>
+                    </div>
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="text-slate-300">From</span>
+                        <span class="text-sm">0x71C...3E2F</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-slate-300">Status</span>
+                        <span class="px-2 py-1 bg-green-500/10 text-green-500 text-[10px] rounded uppercase">Completed</span>
+                    </div>
+                    
+                    <button class="w-full mt-8 py-3 bg-amber-500 text-slate-900 font-bold rounded-xl hover:bg-amber-400 transition-colors" onclick="resetPage()">
+                        Back to Lock
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // State
+        let isLocked = true;
+        let isNotificationActive = false;
+        let isDrawing = false;
+        let gesturePath = [];
+        const correctGesture = [0, 1, 2]; // Top row
+
+        // DOM Elements
+        const notification = document.getElementById('notification');
+        const lockScreen = document.getElementById('lock-screen');
+        const successScreen = document.getElementById('success-screen');
+        const gestureGrid = document.getElementById('gesture-grid');
+        const dots = document.querySelectorAll('.dot');
+        const canvas = document.getElementById('gesture-canvas');
+        const ctx = canvas.getContext('2d');
+        const lockMessage = document.getElementById('lock-message');
+        const phone = document.getElementById('phone');
+
+        // Resize canvas to fit screen
+        function resizeCanvas() {
+            const rect = lockScreen.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // Simulation: Receive notification after 2 seconds
+        setTimeout(() => {
+            notification.classList.remove('hidden');
+            isNotificationActive = true;
+        }, 2000);
+
+        function handleNotificationClick() {
+            if (isLocked) {
+                // Shake phone
+                phone.classList.add('shake');
+                setTimeout(() => phone.classList.remove('shake'), 400);
+                
+                // Red feedback
+                lockMessage.textContent = 'Unlock required to view details';
+                lockMessage.classList.add('text-red-500', 'font-bold');
+                
+                dots.forEach(dot => {
+                    dot.classList.add('error');
+                });
+                
+                // Reset after feedback
+                setTimeout(() => {
+                    lockMessage.textContent = 'Draw gesture to unlock';
+                    lockMessage.classList.remove('text-red-500', 'font-bold');
+                    dots.forEach(dot => dot.classList.remove('error'));
+                }, 1500);
+                
+                // Haptic feedback simulation
+                if (navigator.vibrate) {
+                    navigator.vibrate([100, 50, 100]);
+                }
+            }
+        }
+
+        // Gesture Logic
+        gestureGrid.addEventListener('mousedown', startDrawing);
+        gestureGrid.addEventListener('touchstart', (e) => { e.preventDefault(); startDrawing(e); });
+
+        window.addEventListener('mousemove', draw);
+        window.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e); });
+
+        window.addEventListener('mouseup', stopDrawing);
+        window.addEventListener('touchend', stopDrawing);
+
+        function getPointFromEvent(e) {
+            const touch = e.touches ? e.touches[0] : e;
+            return { x: touch.clientX, y: touch.clientY };
+        }
+
+        function getDotFromPoint(point) {
+            for (let dot of dots) {
+                const rect = dot.getBoundingClientRect();
+                if (point.x >= rect.left && point.x <= rect.right &&
+                    point.y >= rect.top && point.y <= rect.bottom) {
+                    return parseInt(dot.getAttribute('data-index'));
+                }
+            }
+            return null;
+        }
+
+        function startDrawing(e) {
+            if (!isLocked) return;
+            isDrawing = true;
+            gesturePath = [];
+            dots.forEach(d => d.classList.remove('active', 'error'));
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const point = getPointFromEvent(e);
+            const dotIndex = getDotFromPoint(point);
+            if (dotIndex !== null) {
+                addPointToPath(dotIndex);
+            }
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            const point = getPointFromEvent(e);
+            const dotIndex = getDotFromPoint(point);
+            
+            if (dotIndex !== null && !gesturePath.includes(dotIndex)) {
+                addPointToPath(dotIndex);
+            }
+            
+            drawLines(point);
+        }
+
+        function addPointToPath(index) {
+            gesturePath.push(index);
+            dots[index].classList.add('active');
+        }
+
+        function drawLines(currentCursor) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (gesturePath.length === 0) return;
+
+            const rect = canvas.getBoundingClientRect();
+            ctx.strokeStyle = '#F59E0B';
+            ctx.lineWidth = 4;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            ctx.beginPath();
+            gesturePath.forEach((dotIndex, i) => {
+                const dotRect = dots[dotIndex].getBoundingClientRect();
+                const x = dotRect.left + dotRect.width / 2 - rect.left;
+                const y = dotRect.top + dotRect.height / 2 - rect.top;
+                
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            });
+
+            if (currentCursor) {
+                const dotRect = dots[gesturePath[gesturePath.length - 1]].getBoundingClientRect();
+                ctx.moveTo(dotRect.left + dotRect.width / 2 - rect.left, dotRect.top + dotRect.height / 2 - rect.top);
+                ctx.lineTo(currentCursor.x - rect.left, currentCursor.y - rect.top);
+            }
+            ctx.stroke();
+        }
+
+        function stopDrawing() {
+            if (!isDrawing) return;
+            isDrawing = false;
+            
+            // Check if gesture is correct
+            const isCorrect = gesturePath.length === correctGesture.length && 
+                              gesturePath.every((val, index) => val === correctGesture[index]);
+            
+            if (isCorrect) {
+                unlock();
+            } else if (gesturePath.length > 0) {
+                // Error feedback
+                dots.forEach(d => {
+                    if (d.classList.contains('active')) {
+                        d.classList.remove('active');
+                        d.classList.add('error');
+                    }
+                });
+                
+                ctx.strokeStyle = '#EF4444';
+                drawLines();
+                
+                phone.classList.add('shake');
+                setTimeout(() => {
+                    phone.classList.remove('shake');
+                    dots.forEach(d => d.classList.remove('error'));
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                }, 500);
+            }
+        }
+
+        function unlock() {
+            isLocked = false;
+            successScreen.classList.add('visible');
+            notification.classList.add('hidden');
+        }
+
+        function resetPage() {
+            isLocked = true;
+            successScreen.classList.remove('visible');
+            notification.classList.add('hidden');
+            gesturePath = [];
+            dots.forEach(d => d.classList.remove('active', 'error'));
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            lockMessage.textContent = 'Draw gesture to unlock';
+            
+            // Re-trigger notification after a delay
+            setTimeout(() => {
+                notification.classList.remove('hidden');
+            }, 2000);
+        }
+
+        // Clock Update
+        function updateClock() {
+            const now = new Date();
+            const timeStr = now.getHours().toString().padStart(2, '0') + ':' + 
+                          now.getMinutes().toString().padStart(2, '0');
+            document.getElementById('current-time').textContent = timeStr;
+            
+            const options = { weekday: 'long', month: 'long', day: 'numeric' };
+            document.querySelector('.date').textContent = now.toLocaleDateString('en-US', options);
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,503 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    background: #f5f6fa;
+    min-height: 100vh;
+}
+
+.refund-container {
+    max-width: 640px;
+    margin: 0 auto;
+    padding-bottom: 40px;
+}
+
+/* 顶部导航 */
+.refund-header {
+    background: white;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.back-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #333;
+    cursor: pointer;
+    padding: 0;
+    width: 40px;
+}
+
+.refund-header h1 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+}
+
+/* 顶部蓝卡 - 退款金额 */
+.amount-card {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+}
+
+.amount-label {
+    font-size: 14px;
+    color: rgba(255,255,255,0.9);
+    margin-bottom: 8px;
+}
+
+.amount-value {
+    font-size: 32px;
+    font-weight: bold;
+    color: white;
+}
+
+/* 表单容器 */
+.form-container {
+    padding: 0 16px;
+}
+
+.form-card {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.form-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group:last-child {
+    margin-bottom: 0;
+}
+
+.form-group label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: #555;
+    margin-bottom: 8px;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 12px 14px;
+    background: #f8f9fb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 15px;
+    color: #333;
+    outline: none;
+    transition: all 0.3s;
+    font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    background: white;
+    border-color: #3b82f6;
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.input-hint {
+    font-size: 12px;
+    color: #999;
+    margin-top: 6px;
+}
+
+.amount-input-group {
+    position: relative;
+}
+
+.amount-input-group input {
+    padding-right: 80px;
+}
+
+.currency-badge {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #3b82f6;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+/* 说明卡片 - 黄色/橙色背景 */
+.risk-warning-card {
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
+    border: 2px solid #f59e0b;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.15);
+}
+
+.warning-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #d97706;
+    margin-bottom: 10px;
+}
+
+.warning-desc {
+    font-size: 14px;
+    color: #78350f;
+    line-height: 1.6;
+    margin-bottom: 12px;
+}
+
+.warning-info {
+    font-size: 13px;
+    color: #78350f;
+    margin-bottom: 6px;
+}
+
+.info-label {
+    font-weight: 600;
+}
+
+.info-value {
+    font-weight: normal;
+}
+
+/* 退款说明区 - 白底灰边 */
+.refund-input-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.input-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.refund-address-input {
+    width: 100%;
+    padding: 12px 14px;
+    background: #f8f9fb;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #333;
+    outline: none;
+    transition: all 0.3s;
+    font-family: 'Courier New', monospace;
+}
+
+.refund-address-input:focus {
+    background: white;
+    border-color: #3b82f6;
+}
+
+.refund-address-input::placeholder {
+    color: #9ca3af;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
+}
+
+.input-warning {
+    font-size: 12px;
+    color: #ef4444;
+    margin-top: 8px;
+}
+
+/* 提示区 - 淡黄卡 */
+.tips-card {
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 20px;
+}
+
+.tip-item {
+    font-size: 13px;
+    color: #78350f;
+    line-height: 1.6;
+    margin-bottom: 8px;
+}
+
+.tip-item:last-child {
+    margin-bottom: 0;
+}
+
+/* 操作按钮 */
+.refund-submit-btn {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(90deg, #3b82f6, #2563eb);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.refund-submit-btn:active {
+    transform: scale(0.98);
+}
+
+/* 确认弹窗 */
+.confirm-modal,
+.success-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.confirm-modal.active,
+.success-modal.active {
+    display: flex;
+}
+
+.modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+}
+
+.modal-content {
+    position: relative;
+    background: white;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 400px;
+    padding: 24px;
+    z-index: 2001;
+}
+
+.modal-content h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+.confirm-info {
+    margin-bottom: 20px;
+}
+
+.confirm-info p {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+.confirm-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 14px;
+}
+
+.confirm-item:last-child {
+    border-bottom: none;
+}
+
+.confirm-item span:first-child {
+    color: #666;
+}
+
+.confirm-item span:last-child {
+    color: #333;
+    font-weight: 600;
+}
+
+.address-text {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    word-break: break-all;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.cancel-btn,
+.confirm-submit-btn {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.cancel-btn {
+    background: #f3f4f6;
+    color: #666;
+}
+
+.confirm-submit-btn {
+    background: linear-gradient(90deg, #3b82f6, #2563eb);
+    color: white;
+}
+
+/* 成功弹窗 */
+.modal-content.success {
+    text-align: center;
+}
+
+.success-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: #10b981;
+    color: white;
+    font-size: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+}
+
+.modal-content.success p {
+    font-size: 14px;
+    color: #666;
+    margin: 12px 0;
+}
+
+.success-info {
+    background: #f8f9fb;
+    border-radius: 10px;
+    padding: 16px;
+    margin: 16px 0;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    font-size: 14px;
+}
+
+.info-row span:first-child {
+    color: #666;
+}
+
+.info-row span:last-child {
+    color: #333;
+    font-weight: 600;
+}
+
+.success-note {
+    font-size: 13px;
+    color: #999;
+    margin: 16px 0;
+}
+
+.done-btn {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(90deg, #3b82f6, #2563eb);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* Toast */
+.toast {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-100px);
+    background: #333;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 3000;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.toast.error {
+    background: #ef4444;
+}
+
+.toast.success {
+    background: #10b981;
+}
+
+/* 响应式 */
+@media (max-width: 480px) {
+    .progress-steps {
+        padding: 20px 12px;
+    }
+    
+    .step-number {
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
+    }
+    
+    .step-label {
+        font-size: 11px;
+    }
+    
+    .step-line {
+        width: 40px;
+    }
+}

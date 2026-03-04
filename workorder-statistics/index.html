@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工单处理统计 - 波币后台</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue', 'Microsoft YaHei', sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            display: flex;
+            min-height: 100vh;
+            font-size: 13px;
+        }
+
+        /* ===== Sidebar ===== */
+        .sidebar {
+            width: 160px;
+            min-height: 100vh;
+            background: #1e1e2d;
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .sidebar-logo {
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #fff;
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .sidebar-logo span { color: #5b8cff; }
+
+        .sidebar-nav { flex: 1; padding: 4px 0; }
+
+        .nav-group {
+            margin-bottom: 2px;
+        }
+
+        .nav-group-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 9px 16px;
+            color: #fff;
+            font-size: 13px;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .nav-group-header:hover { background: rgba(255,255,255,0.05); }
+
+        .nav-group-header .left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-group-header i.arrow {
+            font-size: 10px;
+            color: rgba(255,255,255,0.3);
+            transition: transform 0.2s;
+        }
+
+        .nav-group.open i.arrow { transform: rotate(90deg); }
+
+        .nav-group-items { display: none; }
+        .nav-group.open .nav-group-items { display: block; }
+
+        .nav-item {
+            display: block;
+            padding: 8px 16px 8px 36px;
+            color: rgba(255,255,255,0.55);
+            text-decoration: none;
+            font-size: 13px;
+            transition: all 0.15s;
+            cursor: pointer;
+        }
+
+        .nav-item:hover {
+            color: #fff;
+            background: rgba(255,255,255,0.05);
+        }
+
+        .nav-item.active {
+            color: #fff;
+            background: #4a7dff;
+            margin: 0 8px;
+            border-radius: 4px;
+            padding-left: 28px;
+        }
+
+        /* ===== Top Header ===== */
+        .top-header {
+            height: 44px;
+            background: #1e1e2d;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            position: fixed;
+            top: 0;
+            left: 160px;
+            right: 0;
+            z-index: 99;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .header-tabs {
+            display: flex;
+            gap: 0;
+        }
+
+        .header-tab {
+            padding: 0 16px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            color: rgba(255,255,255,0.5);
+            text-decoration: none;
+            font-size: 13px;
+            transition: 0.15s;
+        }
+
+        .header-tab:hover { color: rgba(255,255,255,0.85); }
+
+        .header-tab.active {
+            color: #fff;
+            background: rgba(255,255,255,0.08);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: rgba(255,255,255,0.6);
+            font-size: 12px;
+        }
+
+        .header-right .user { color: rgba(255,255,255,0.8); font-size: 13px; }
+
+        /* ===== Main ===== */
+        .main-wrap {
+            margin-left: 160px;
+            margin-top: 44px;
+            flex: 1;
+            min-height: calc(100vh - 44px);
+            background: #f5f5f5;
+        }
+
+        .page-body {
+            padding: 12px 16px;
+        }
+
+        /* ===== Page Tab ===== */
+        .page-tab-bar {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 12px;
+        }
+
+        .page-tab {
+            padding: 6px 14px;
+            font-size: 13px;
+            color: #666;
+            cursor: pointer;
+            border-radius: 4px 4px 0 0;
+            position: relative;
+        }
+
+        .page-tab.active {
+            color: #333;
+            background: #fff;
+        }
+
+        .page-tab .close {
+            margin-left: 8px;
+            font-size: 11px;
+            color: #999;
+            cursor: pointer;
+        }
+
+        /* ===== Content Panel ===== */
+        .panel {
+            background: #fff;
+            border-radius: 2px;
+        }
+
+        /* ===== Filter Row ===== */
+        .filter-row {
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .filter-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .filter-item label {
+            font-size: 13px;
+            color: #666;
+            white-space: nowrap;
+        }
+
+        .f-input,
+        .f-select {
+            height: 30px;
+            padding: 0 8px;
+            border: 1px solid #d9d9d9;
+            border-radius: 2px;
+            font-size: 12px;
+            color: #333;
+            background: #fff;
+            outline: none;
+            transition: border 0.2s;
+        }
+
+        .f-input:focus,
+        .f-select:focus {
+            border-color: #4a7dff;
+        }
+
+        .f-select { padding-right: 24px; cursor: pointer; }
+
+        .btn {
+            height: 30px;
+            padding: 0 14px;
+            border: 1px solid #d9d9d9;
+            border-radius: 2px;
+            font-size: 12px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: 0.15s;
+            background: #fff;
+            color: #333;
+        }
+
+        .btn:hover { border-color: #4a7dff; color: #4a7dff; }
+
+        .btn-primary {
+            background: #4a7dff;
+            color: #fff;
+            border-color: #4a7dff;
+        }
+
+        .btn-primary:hover {
+            background: #3a6ae8;
+            border-color: #3a6ae8;
+            color: #fff;
+        }
+
+        .btn-warn {
+            background: #ff6b35;
+            color: #fff;
+            border-color: #ff6b35;
+        }
+
+        .btn-warn:hover {
+            background: #e55a28;
+            border-color: #e55a28;
+            color: #fff;
+        }
+
+        .btn-text {
+            border: none;
+            background: none;
+            color: #4a7dff;
+            padding: 0 6px;
+            height: auto;
+        }
+
+        .btn-text:hover { color: #3a6ae8; }
+
+        /* ===== Stats Row ===== */
+        .stats-row {
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .stats-row .stat-val {
+            color: #4a7dff;
+            font-weight: 600;
+            margin: 0 2px;
+        }
+
+        .stats-row .stat-val.orange {
+            color: #ff6b35;
+        }
+
+        /* ===== Data Table ===== */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table thead th {
+            padding: 10px 12px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #999;
+            text-align: left;
+            background: #fafafa;
+            border-bottom: 1px solid #f0f0f0;
+            white-space: nowrap;
+        }
+
+        .data-table tbody td {
+            padding: 10px 12px;
+            font-size: 13px;
+            color: #333;
+            border-bottom: 1px solid #f5f5f5;
+        }
+
+        .data-table tbody tr:hover {
+            background: #f8f9ff;
+        }
+
+        .data-table tbody tr.summary-row {
+            background: #fafafa;
+        }
+
+        .data-table tbody tr.summary-row td {
+            font-weight: 600;
+            color: #333;
+            border-top: 1px solid #e8e8e8;
+        }
+
+        .agent-cell {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: #fff;
+            flex-shrink: 0;
+        }
+
+        .rank-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .rank-1 { background: #FFD700; color: #fff; }
+        .rank-2 { background: #C0C0C0; color: #fff; }
+        .rank-3 { background: #CD853F; color: #fff; }
+        .rank-default { background: #f0f0f0; color: #999; }
+
+        .num-blue { color: #4a7dff; font-weight: 600; }
+        .num-orange { color: #ff6b35; font-weight: 600; }
+        .num-bold { font-weight: 600; }
+
+        .progress-mini {
+            width: 80px;
+            height: 4px;
+            background: #f0f0f0;
+            border-radius: 2px;
+            overflow: hidden;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 6px;
+        }
+
+        .progress-mini .bar {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 0.5s;
+        }
+
+        .bar-green { background: #52c41a; }
+        .bar-orange { background: #faad14; }
+        .bar-red { background: #ff4d4f; }
+
+        /* ===== Pagination ===== */
+        .pagination-bar {
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 12px;
+            border-top: 1px solid #f0f0f0;
+            font-size: 12px;
+            color: #999;
+        }
+
+        .pagination-bar select {
+            height: 26px;
+            border: 1px solid #d9d9d9;
+            border-radius: 2px;
+            font-size: 12px;
+            padding: 0 4px;
+        }
+
+        /* ===== Close btn ===== */
+        .panel-close {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ccc;
+            cursor: pointer;
+            font-size: 14px;
+            border-radius: 50%;
+        }
+
+        .panel-close:hover { color: #999; background: #f5f5f5; }
+
+        /* ===== Scrollbar ===== */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #d9d9d9; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #bbb; }
+
+        .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); }
+    </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+    <div class="sidebar-logo">
+        <span>波</span>币后台
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-group">
+            <div class="nav-group-header">
+                <div class="left"><i class="fas fa-check-circle" style="font-size:12px;"></i> 审核</div>
+            </div>
+        </div>
+
+        <div class="nav-group open">
+            <div class="nav-group-header" onclick="this.parentElement.classList.toggle('open')">
+                <div class="left"><i class="fas fa-exchange-alt" style="font-size:12px;"></i> 交易管理</div>
+                <i class="fas fa-chevron-right arrow"></i>
+            </div>
+            <div class="nav-group-items">
+                <a class="nav-item" href="#">工单列表</a>
+                <a class="nav-item" href="#">订单列表</a>
+                <a class="nav-item active" href="#">工单处理统计</a>
+                <a class="nav-item" href="#">用户授权</a>
+                <a class="nav-item" href="#">用户充值</a>
+                <a class="nav-item" href="#">用户转账</a>
+                <a class="nav-item" href="#">单挂列表</a>
+                <a class="nav-item" href="#">USDT兑换</a>
+                <a class="nav-item" href="#">链路地址日志</a>
+            </div>
+        </div>
+
+        <div class="nav-group open">
+            <div class="nav-group-header" onclick="this.parentElement.classList.toggle('open')">
+                <div class="left"><i class="fas fa-shield-alt" style="font-size:12px;"></i> 交易监控</div>
+                <i class="fas fa-chevron-right arrow"></i>
+            </div>
+            <div class="nav-group-items">
+                <a class="nav-item" href="#">风险订单监控</a>
+                <a class="nav-item" href="#">风险分组配置</a>
+            </div>
+        </div>
+    </nav>
+</aside>
+
+<!-- Top Header -->
+<header class="top-header">
+    <div class="header-tabs">
+        <a class="header-tab" href="#">数据报表</a>
+        <a class="header-tab" href="#">用户管理</a>
+        <a class="header-tab" href="#">用户管理</a>
+        <a class="header-tab active" href="#">交易管理</a>
+        <a class="header-tab" href="#">日志</a>
+        <a class="header-tab" href="#">系统管理</a>
+    </div>
+    <div class="header-right">
+        <span class="user">admin</span>
+        <i class="fas fa-ellipsis-v" style="cursor:pointer;"></i>
+        <span id="headerDateTime"></span>
+    </div>
+</header>
+
+<!-- Main Content -->
+<div class="main-wrap">
+    <div class="page-body">
+
+        <!-- Page Tab -->
+        <div class="page-tab-bar">
+            <div class="page-tab active">
+                工单处理统计 <span class="close"><i class="fas fa-times"></i></span>
+            </div>
+        </div>
+
+        <!-- Panel -->
+        <div class="panel" style="position: relative;">
+
+            <!-- Filter Row -->
+            <div class="filter-row">
+                <div class="filter-item">
+                    <label>客服</label>
+                    <select class="f-select" id="agentFilter" style="width: 120px;">
+                        <option value="">全部客服</option>
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label>时间</label>
+                    <input type="date" class="f-input" id="dateFrom" style="width: 130px;">
+                    <span style="color:#999; margin: 0 2px;">~</span>
+                    <input type="date" class="f-input" id="dateTo" style="width: 130px;">
+                </div>
+                <button class="btn btn-primary" onclick="refreshData()">
+                    <i class="fas fa-search"></i> 查询
+                </button>
+                <button class="btn" onclick="resetFilters()">
+                    清空
+                </button>
+                <button class="btn" onclick="refreshData()">
+                    数据更新
+                </button>
+            </div>
+
+            <!-- Stats Row -->
+            <div class="stats-row" id="statsRow">
+                <!-- Filled by JS -->
+            </div>
+
+            <!-- Data Table -->
+            <div style="overflow-x: auto;">
+                <table class="data-table" id="mainTable">
+                    <thead>
+                        <tr>
+                            <th>排名</th>
+                            <th>客服</th>
+                            <th>已完成</th>
+                            <th>处理中</th>
+                            <th>总工单数</th>
+                            <th>完成率</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <!-- Filled by JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination-bar">
+                <select>
+                    <option>20条/页</option>
+                    <option>50条/页</option>
+                    <option>100条/页</option>
+                </select>
+                <span>共 <b id="totalCount">0</b> 条</span>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<script>
+const AGENTS = [
+    { id: 'cs_1278' },
+    { id: 'cs_2045' },
+    { id: 'cs_3391' },
+    { id: 'cs_4067' },
+    { id: 'cs_5512' },
+    { id: 'cs_6184' },
+    { id: 'cs_7730' },
+    { id: 'cs_8856' },
+];
+
+function generateDayData() {
+    return AGENTS.map(agent => {
+        const completed = Math.floor(Math.random() * 35) + 10;
+        const inProgress = Math.floor(Math.random() * 8) + 1;
+        const total = completed + inProgress;
+        const rate = ((completed / total) * 100).toFixed(1);
+        return { ...agent, completed, inProgress, total, rate };
+    }).sort((a, b) => b.completed - a.completed);
+}
+
+let currentData = generateDayData();
+
+function renderStats(data) {
+    const totalCompleted = data.reduce((s, d) => s + d.completed, 0);
+    const totalInProgress = data.reduce((s, d) => s + d.inProgress, 0);
+    const totalAll = data.reduce((s, d) => s + d.total, 0);
+
+    document.getElementById('statsRow').innerHTML =
+        `已完成: <span class="stat-val">${totalCompleted}</span> 笔` +
+        `&nbsp;&nbsp;&nbsp;处理中: <span class="stat-val orange">${totalInProgress}</span> 笔` +
+        `&nbsp;&nbsp;&nbsp;合计: <span class="stat-val">${totalAll}</span> 笔`;
+}
+
+function renderTable(data) {
+    const tbody = document.getElementById('tableBody');
+
+    tbody.innerHTML = data.map((d, i) => {
+        const rank = i + 1;
+        const rankClass = rank <= 3 ? `rank-${rank}` : 'rank-default';
+        const rateNum = parseFloat(d.rate);
+        const barClass = rateNum >= 85 ? 'bar-green' : rateNum >= 65 ? 'bar-orange' : 'bar-red';
+
+        return `<tr>
+            <td><span class="rank-num ${rankClass}">${rank}</span></td>
+            <td>${d.id}</td>
+            <td><span class="num-blue">${d.completed}</span></td>
+            <td><span class="num-orange">${d.inProgress}</span></td>
+            <td><span class="num-bold">${d.total}</span></td>
+            <td>
+                <span class="progress-mini"><span class="bar ${barClass}" style="width:${d.rate}%;"></span></span>
+                ${d.rate}%
+            </td>
+        </tr>`;
+    }).join('');
+
+    const totalCompleted = data.reduce((s, d) => s + d.completed, 0);
+    const totalInProgress = data.reduce((s, d) => s + d.inProgress, 0);
+    const totalAll = data.reduce((s, d) => s + d.total, 0);
+    const avgRate = (totalCompleted / totalAll * 100).toFixed(1);
+    const avgBarClass = parseFloat(avgRate) >= 85 ? 'bar-green' : parseFloat(avgRate) >= 65 ? 'bar-orange' : 'bar-red';
+
+    tbody.innerHTML += `
+        <tr class="summary-row">
+            <td></td>
+            <td>合计 / 平均</td>
+            <td><span class="num-blue">${totalCompleted}</span></td>
+            <td><span class="num-orange">${totalInProgress}</span></td>
+            <td><span class="num-bold">${totalAll}</span></td>
+            <td>
+                <span class="progress-mini"><span class="bar ${avgBarClass}" style="width:${avgRate}%;"></span></span>
+                ${avgRate}%
+            </td>
+        </tr>`;
+
+    document.getElementById('totalCount').textContent = data.length;
+}
+
+function populateAgentFilter() {
+    const sel = document.getElementById('agentFilter');
+    AGENTS.forEach(a => {
+        const opt = document.createElement('option');
+        opt.value = a.id;
+        opt.textContent = a.id;
+        sel.appendChild(opt);
+    });
+}
+
+function refreshData() {
+    const agentId = document.getElementById('agentFilter').value;
+    let filtered = [...currentData];
+    if (agentId) filtered = filtered.filter(d => d.id === agentId);
+    renderStats(filtered);
+    renderTable(filtered);
+}
+
+function resetFilters() {
+    const today = new Date();
+    document.getElementById('dateFrom').value = fmt(today);
+    document.getElementById('dateTo').value = fmt(today);
+    document.getElementById('agentFilter').value = '';
+    currentData = generateDayData();
+    refreshData();
+}
+
+function fmt(d) {
+    return d.toISOString().split('T')[0];
+}
+
+function updateDateTime() {
+    const n = new Date();
+    document.getElementById('headerDateTime').textContent =
+        n.getFullYear() + '-' +
+        String(n.getMonth()+1).padStart(2,'0') + '-' +
+        String(n.getDate()).padStart(2,'0') + ' ' +
+        String(n.getHours()).padStart(2,'0') + ':' +
+        String(n.getMinutes()).padStart(2,'0') + ':' +
+        String(n.getSeconds()).padStart(2,'0');
+}
+
+(function init() {
+    const today = new Date();
+    document.getElementById('dateFrom').value = fmt(today);
+    document.getElementById('dateTo').value = fmt(today);
+    populateAgentFilter();
+    refreshData();
+    updateDateTime();
+    setInterval(updateDateTime, 1000);
+})();
+</script>
+
+</body>
+</html>

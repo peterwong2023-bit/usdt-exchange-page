@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>方案5：向导模式</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .wizard-header {
+            padding: 20px;
+            color: white;
+        }
+
+        .step-indicator {
+            text-align: center;
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: white;
+            width: 25%;
+            transition: width 0.5s;
+        }
+
+        .wizard-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .wizard-card {
+            background: white;
+            border-radius: 24px;
+            padding: 40px 32px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+            animation: slideIn 0.4s;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .wizard-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin: 0 auto 24px;
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+        }
+
+        .wizard-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #0f172a;
+        }
+
+        .wizard-subtitle {
+            font-size: 15px;
+            color: #64748b;
+            margin-bottom: 32px;
+            line-height: 1.6;
+        }
+
+        .wizard-options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .option-card {
+            padding: 20px;
+            background: #f8fafc;
+            border: 3px solid transparent;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .option-card:hover {
+            background: #f1f5f9;
+        }
+
+        .option-card.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+        }
+
+        .option-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .option-text {
+            text-align: left;
+            flex: 1;
+        }
+
+        .option-title {
+            font-weight: 700;
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+
+        .option-desc {
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 18px 20px;
+            background: #f8fafc;
+            border: 3px solid transparent;
+            border-radius: 16px;
+            font-size: 16px;
+            outline: none;
+            margin-bottom: 16px;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+
+        input:focus, textarea:focus {
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea { min-height: 120px; }
+
+        .wizard-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .wizard-btn {
+            flex: 1;
+            padding: 18px;
+            border: none;
+            border-radius: 14px;
+            font-size: 17px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .wizard-btn-back {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .wizard-btn-next {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
+        }
+
+        .wizard-btn:active {
+            transform: translateY(2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="wizard-header">
+        <div class="step-indicator" id="stepIndicator">步骤 1 / 4</div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+    </div>
+
+    <div class="wizard-content" id="wizardContent">
+        <!-- 步骤内容将动态生成 -->
+    </div>
+
+    <script>
+        let currentStep = 1;
+        let formData = {};
+
+        const steps = [
+            {
+                icon: '₮',
+                title: '选择区块链',
+                subtitle: '请选择要使用的区块链网络',
+                type: 'select',
+                options: [
+                    { icon: '₮', title: 'USDT (TRC20)', desc: '波场网络 · 低手续费' }
+                ],
+                key: 'blockchain'
+            },
+            {
+                icon: '📦',
+                title: '选择商户',
+                subtitle: '请选择要出款的商户账户',
+                type: 'select',
+                options: [
+                    { icon: '📦', title: '新宿归集', desc: '余额: 170.1 USDT' },
+                    { icon: '📦', title: 'live归集', desc: '余额: 28.7 USDT' }
+                ],
+                key: 'merchant'
+            },
+            {
+                icon: '📝',
+                title: '填写详情',
+                subtitle: '请输入收款地址和金额',
+                type: 'form',
+                fields: [
+                    { type: 'text', placeholder: '收款地址', key: 'address' },
+                    { type: 'number', placeholder: '金额', key: 'amount' },
+                    { type: 'textarea', placeholder: '备注（可选）', key: 'note' }
+                ]
+            },
+            {
+                icon: '✓',
+                title: '确认提交',
+                subtitle: '请确认以下信息无误后提交',
+                type: 'confirm'
+            }
+        ];
+
+        function renderStep() {
+            const step = steps[currentStep - 1];
+            let html = `
+                <div class="wizard-card">
+                    <div class="wizard-icon">${step.icon}</div>
+                    <h2 class="wizard-title">${step.title}</h2>
+                    <p class="wizard-subtitle">${step.subtitle}</p>
+            `;
+
+            if (step.type === 'select') {
+                html += '<div class="wizard-options">';
+                step.options.forEach((opt, i) => {
+                    html += `
+                        <div class="option-card" onclick="selectOption(${i}, '${step.key}')">
+                            <div class="option-icon">${opt.icon}</div>
+                            <div class="option-text">
+                                <div class="option-title">${opt.title}</div>
+                                <div class="option-desc">${opt.desc}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+            } else if (step.type === 'form') {
+                step.fields.forEach(field => {
+                    if (field.type === 'textarea') {
+                        html += `<textarea placeholder="${field.placeholder}" id="${field.key}"></textarea>`;
+                    } else {
+                        html += `<input type="${field.type}" placeholder="${field.placeholder}" id="${field.key}">`;
+                    }
+                });
+            } else if (step.type === 'confirm') {
+                html += `
+                    <div style="background: #f8fafc; padding: 24px; border-radius: 16px; text-align: left; margin-bottom: 24px;">
+                        <div style="margin-bottom: 16px;">
+                            <div style="font-size: 12px; color: #64748b; margin-bottom: 4px;">区块链</div>
+                            <div style="font-weight: 700;">${formData.blockchain}</div>
+                        </div>
+                        <div style="margin-bottom: 16px;">
+                            <div style="font-size: 12px; color: #64748b; margin-bottom: 4px;">商户</div>
+                            <div style="font-weight: 700;">${formData.merchant}</div>
+                        </div>
+                        <div style="margin-bottom: 16px;">
+                            <div style="font-size: 12px; color: #64748b; margin-bottom: 4px;">地址</div>
+                            <div style="font-weight: 700; font-size: 13px; word-break: break-all;">${formData.address}</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 12px; color: #64748b; margin-bottom: 4px;">金额</div>
+                            <div style="font-weight: 700; color: #667eea; font-size: 24px;">${formData.amount} USDT</div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            html += `
+                    <div class="wizard-actions">
+                        ${currentStep > 1 ? '<button class="wizard-btn wizard-btn-back" onclick="prevStep()">上一步</button>' : ''}
+                        <button class="wizard-btn wizard-btn-next" onclick="nextStep()">${currentStep === 4 ? '✓ 提交' : '下一步'}</button>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('wizardContent').innerHTML = html;
+            document.getElementById('stepIndicator').textContent = `步骤 ${currentStep} / 4`;
+            document.getElementById('progressFill').style.width = (currentStep / 4 * 100) + '%';
+        }
+
+        function selectOption(index, key) {
+            const step = steps[currentStep - 1];
+            formData[key] = step.options[index].title;
+            setTimeout(() => nextStep(), 300);
+        }
+
+        function nextStep() {
+            if (currentStep === 3) {
+                formData.address = document.getElementById('address').value;
+                formData.amount = document.getElementById('amount').value;
+                formData.note = document.getElementById('note').value;
+                if (!formData.address || !formData.amount) {
+                    alert('请填写完整信息');
+                    return;
+                }
+            }
+
+            if (currentStep === 4) {
+                alert('✓ 出款请求已提交');
+                location.reload();
+                return;
+            }
+
+            currentStep++;
+            renderStep();
+        }
+
+        function prevStep() {
+            if (currentStep > 1) {
+                currentStep--;
+                renderStep();
+            }
+        }
+
+        renderStep();
+    </script>
+</body>
+</html>
+
+
+

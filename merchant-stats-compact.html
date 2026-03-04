@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商户统计 - 方案3: 紧凑多行显示</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
+            background: #f5f7fa;
+            padding: 20px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        /* 顶部筛选栏 */
+        .filter-bar {
+            padding: 20px;
+            background: #fafbfc;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .filter-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .date-input {
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 13px;
+            font-family: inherit;
+            color: #374151;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+
+        /* 表格 */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #f8fafc;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        th {
+            padding: 16px 12px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 700;
+            color: #334155;
+            white-space: nowrap;
+            vertical-align: middle;
+            border-right: 1px solid #e5e7eb;
+        }
+
+        th:last-child {
+            border-right: none;
+        }
+
+        th.merchant-col {
+            text-align: left;
+        }
+
+        /* 表头列分组颜色 */
+        th:nth-child(4),
+        th:nth-child(5) {
+            background: #fef9c3;
+            color: #854d0e;
+        }
+
+        th:nth-child(6),
+        th:nth-child(7),
+        th:nth-child(8) {
+            background: #fecaca;
+            color: #991b1b;
+        }
+
+        th:nth-child(9),
+        th:nth-child(10),
+        th:nth-child(11) {
+            background: #bfdbfe;
+            color: #1e40af;
+        }
+
+        th:nth-child(12),
+        th:nth-child(13),
+        th:nth-child(14) {
+            background: #ddd6fe;
+            color: #5b21b6;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #f1f5f9;
+            transition: background 0.2s;
+        }
+
+        tbody tr:hover {
+            background: #f8fafc;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        td {
+            padding: 14px 12px;
+            font-size: 12px;
+            text-align: center;
+            vertical-align: middle;
+            border-right: 1px solid #f1f5f9;
+        }
+
+        td:last-child {
+            border-right: none;
+        }
+
+        /* 列分组背景色 - 帮助区分不同统计类别 */
+        tbody tr:not(.total-row) td:nth-child(4),
+        tbody tr:not(.total-row) td:nth-child(5) {
+            background: #fffbeb;
+        }
+
+        tbody tr:not(.total-row) td:nth-child(6),
+        tbody tr:not(.total-row) td:nth-child(7),
+        tbody tr:not(.total-row) td:nth-child(8) {
+            background: #fef2f2;
+        }
+
+        tbody tr:not(.total-row) td:nth-child(9),
+        tbody tr:not(.total-row) td:nth-child(10),
+        tbody tr:not(.total-row) td:nth-child(11) {
+            background: #eff6ff;
+        }
+
+        tbody tr:not(.total-row) td:nth-child(12),
+        tbody tr:not(.total-row) td:nth-child(13),
+        tbody tr:not(.total-row) td:nth-child(14) {
+            background: #f5f3ff;
+        }
+
+        tbody tr:hover td {
+            filter: brightness(0.97);
+        }
+
+        td.merchant-id {
+            font-weight: 700;
+            color: #2563eb;
+            text-align: left;
+            padding-left: 20px;
+            font-size: 14px;
+            background: white !important;
+        }
+
+        td.merchant-name {
+            font-weight: 600;
+            color: #0f172a;
+            text-align: left;
+            font-size: 14px;
+            background: white !important;
+        }
+
+        td[style*="font-weight: 600"] {
+            background: white !important;
+        }
+
+        /* 紧凑币种显示 */
+        .currency-compact {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            align-items: stretch;
+            padding: 6px;
+            min-width: 140px;
+        }
+
+        .currency-line {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            font-size: 13px;
+            padding: 5px 8px;
+            border-radius: 5px;
+            transition: all 0.2s;
+        }
+
+        .currency-line:hover {
+            background: #f1f5f9;
+            transform: translateX(2px);
+        }
+
+        /* 高亮有数值的行 */
+        .currency-line.has-value {
+            background: linear-gradient(to right, #f0f9ff, transparent);
+            border-left: 2px solid #3b82f6;
+            padding-left: 6px;
+        }
+
+        .currency-line.has-value:hover {
+            background: linear-gradient(to right, #e0f2fe, transparent);
+            box-shadow: 0 1px 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .coin-tag {
+            padding: 4px 8px;
+            border-radius: 5px;
+            font-size: 11px;
+            font-weight: 700;
+            min-width: 42px;
+            text-align: center;
+            letter-spacing: 0.5px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .coin-tag.trx {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            color: white;
+        }
+
+        .coin-tag.usdt {
+            background: linear-gradient(135deg, #059669, #047857);
+            color: white;
+        }
+
+        .coin-tag.usdd {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: white;
+        }
+
+        .coin-tag.usddold {
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
+            color: white;
+        }
+
+        .coin-val {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Mono', 'Monaco', 'Cascadia Code', monospace;
+            font-weight: 600;
+            color: #0f172a;
+            font-size: 13px;
+            text-align: right;
+        }
+
+        .coin-val.zero {
+            color: #e2e8f0;
+            font-weight: 400;
+        }
+
+        /* 非零值加粗显示 */
+        .coin-val.positive {
+            color: #0369a1;
+            font-weight: 700;
+        }
+
+        /* 合计行 */
+        tbody tr.total-row {
+            background: #fef3c7;
+            border-top: 2px solid #fbbf24;
+            font-weight: 700;
+        }
+
+        tbody tr.total-row td {
+            color: #92400e;
+        }
+
+        tbody tr.total-row:hover {
+            background: #fef3c7;
+        }
+
+        /* 分页 */
+        .pagination {
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #e5e7eb;
+            background: #fafbfc;
+        }
+
+        .page-info {
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        .page-controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .page-btn {
+            width: 32px;
+            height: 32px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            background: white;
+            color: #64748b;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .page-btn:hover:not(:disabled) {
+            background: #f8fafc;
+            border-color: #3b82f6;
+            color: #3b82f6;
+        }
+
+        .page-btn.active {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+
+        .page-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 筛选栏 -->
+        <div class="filter-bar">
+            <div class="filter-title">📊 方案3: 紧凑多行显示</div>
+            <div class="filter-group">
+                <select class="date-input" style="width: 140px;">
+                    <option>选择账户</option>
+                    <option>全部账户</option>
+                </select>
+                <input type="date" class="date-input" value="2025-11-10">
+                <span style="color: #94a3b8;">~</span>
+                <input type="date" class="date-input" value="2025-11-10">
+            </div>
+            <button class="btn btn-primary">
+                <i class="fas fa-search"></i>
+                查询
+            </button>
+        </div>
+
+        <!-- 表格 -->
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="merchant-col">商户 ID</th>
+                        <th class="merchant-col">商户名称</th>
+                        <th>链包</th>
+                        <th>总余额</th>
+                        <th>待确认</th>
+                        <th>异常入</th>
+                        <th>入款金额</th>
+                        <th>入款笔数</th>
+                        <th>出款金额</th>
+                        <th>出款笔数</th>
+                        <th>归集金额</th>
+                        <th>归集笔数</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- 商户 1001 -->
+                    <tr>
+                        <td class="merchant-id">1001</td>
+                        <td class="merchant-name">7门店数</td>
+                        <td style="font-weight: 600;">1</td>
+                        <td>
+                            <div class="currency-compact">
+                                <div class="currency-line">
+                                    <span class="coin-tag usdt">USDT</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag trx">TRX</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usdd">USDD</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usddold">OLD</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="currency-compact">
+                                <div class="currency-line">
+                                    <span class="coin-tag usdt">USDT</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag trx">TRX</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usdd">USDD</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usddold">OLD</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="currency-compact">
+                                <div class="currency-line">
+                                    <span class="coin-tag usdt">USDT</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag trx">TRX</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usdd">USDD</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usddold">OLD</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="currency-compact">
+                                <div class="currency-line">
+                                    <span class="coin-tag usdt">USDT</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag trx">TRX</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usdd">USDD</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usddold">OLD</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="currency-compact">
+                                <div class="currency-line">
+                                    <span class="coin-tag usdt">USDT</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag trx">TRX</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usdd">USDD</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usddold">OLD</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="currency-compact">
+                                <div class="currency-line">
+                                    <span class="coin-tag usdt">USDT</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag trx">TRX</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usdd">USDD</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usddold">OLD</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="currency-compact">
+                                <div class="currency-line">
+                                    <span class="coin-tag usdt">USDT</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag trx">TRX</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usdd">USDD</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usddold">OLD</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="currency-compact">
+                                <div class="currency-line">
+                                    <span class="coin-tag usdt">USDT</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag trx">TRX</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usdd">USDD</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usddold">OLD</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="currency-compact">
+                                <div class="currency-line">
+                                    <span class="coin-tag usdt">USDT</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag trx">TRX</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usdd">USDD</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usddold">OLD</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- 商户 1002 - 有数据 -->
+                    <tr>
+                        <td class="merchant-id">1002</td>
+                        <td class="merchant-name">出发客户归集</td>
+                        <td style="font-weight: 600;">3</td>
+                        <td>
+                            <div class="currency-compact">
+                                <div class="currency-line">
+                                    <span class="coin-tag usdt">USDT</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag trx">TRX</span>
+                                    <span class="coin-val">926.95</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usdd">USDD</span>
+                                    <span class="coin-val">160000</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usddold">OLD</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="currency-compact">
+                                <div class="currency-line">
+                                    <span class="coin-tag usdt">USDT</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag trx">TRX</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usdd">USDD</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usddold">OLD</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="currency-compact">
+                                <div class="currency-line">
+                                    <span class="coin-tag usdt">USDT</span>
+                                    <span class="coin-val">40.30</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag trx">TRX</span>
+                                    <span class="coin-val">85.50</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usdd">USDD</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usddold">OLD</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="currency-compact">
+                                <div class="currency-line">
+                                    <span class="coin-tag usdt">USDT</span>
+                                    <span class="coin-val">425.80</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag trx">TRX</span>
+                                    <span class="coin-val">1250.60</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usdd">USDD</span>
+                                    <span class="coin-val">180000</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usddold">OLD</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="currency-compact">
+                                <div class="currency-line">
+                                    <span class="coin-tag usdt">USDT</span>
+                                    <span class="coin-val">28</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag trx">TRX</span>
+                                    <span class="coin-val">35</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usdd">USDD</span>
+                                    <span class="coin-val">15</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usddold">OLD</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="currency-compact">
+                                <div class="currency-line">
+                                    <span class="coin-tag usdt">USDT</span>
+                                    <span class="coin-val">320.50</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag trx">TRX</span>
+                                    <span class="coin-val">800.20</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usdd">USDD</span>
+                                    <span class="coin-val">20000</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usddold">OLD</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="currency-compact">
+                                <div class="currency-line">
+                                    <span class="coin-tag usdt">USDT</span>
+                                    <span class="coin-val">12</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag trx">TRX</span>
+                                    <span class="coin-val">18</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usdd">USDD</span>
+                                    <span class="coin-val">3</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usddold">OLD</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="currency-compact">
+                                <div class="currency-line">
+                                    <span class="coin-tag usdt">USDT</span>
+                                    <span class="coin-val">105.10</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag trx">TRX</span>
+                                    <span class="coin-val">450.30</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usdd">USDD</span>
+                                    <span class="coin-val">50000</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usddold">OLD</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="currency-compact">
+                                <div class="currency-line">
+                                    <span class="coin-tag usdt">USDT</span>
+                                    <span class="coin-val">5</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag trx">TRX</span>
+                                    <span class="coin-val">8</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usdd">USDD</span>
+                                    <span class="coin-val">2</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usddold">OLD</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- 商户 1007 -->
+                    <tr>
+                        <td class="merchant-id">1007</td>
+                        <td class="merchant-name">711客户归集</td>
+                        <td style="font-weight: 600;">1</td>
+                        <td>
+                            <div class="currency-compact">
+                                <div class="currency-line">
+                                    <span class="coin-tag usdt">USDT</span>
+                                    <span class="coin-val">1.5</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag trx">TRX</span>
+                                    <span class="coin-val">1985.58</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usdd">USDD</span>
+                                    <span class="coin-val">156000</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usddold">OLD</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="currency-compact">
+                                <div class="currency-line">
+                                    <span class="coin-tag usdt">USDT</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag trx">TRX</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usdd">USDD</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="currency-compact">
+                                <div class="currency-line">
+                                    <span class="coin-tag usdt">USDT</span>
+                                    <span class="coin-val">48.90</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag trx">TRX</span>
+                                    <span class="coin-val">125.30</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usdd">USDD</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usddold">OLD</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="currency-compact">
+                                <div class="currency-line">
+                                    <span class="coin-tag usdt">USDT</span>
+                                    <span class="coin-val">856.40</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag trx">TRX</span>
+                                    <span class="coin-val">3250.80</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usdd">USDD</span>
+                                    <span class="coin-val">185000</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usddold">OLD</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="currency-compact">
+                                <div class="currency-line">
+                                    <span class="coin-tag usdt">USDT</span>
+                                    <span class="coin-val">42</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag trx">TRX</span>
+                                    <span class="coin-val">68</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usdd">USDD</span>
+                                    <span class="coin-val">18</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usddold">OLD</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="currency-compact">
+                                <div class="currency-line">
+                                    <span class="coin-tag usdt">USDT</span>
+                                    <span class="coin-val">854.90</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag trx">TRX</span>
+                                    <span class="coin-val">1265.22</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usdd">USDD</span>
+                                    <span class="coin-val">29000</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usddold">OLD</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="currency-compact">
+                                <div class="currency-line">
+                                    <span class="coin-tag usdt">USDT</span>
+                                    <span class="coin-val">42</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag trx">TRX</span>
+                                    <span class="coin-val">35</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usdd">USDD</span>
+                                    <span class="coin-val">5</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usddold">OLD</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="currency-compact">
+                                <div class="currency-line">
+                                    <span class="coin-tag usdt">USDT</span>
+                                    <span class="coin-val">425.75</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag trx">TRX</span>
+                                    <span class="coin-val">1890.50</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usdd">USDD</span>
+                                    <span class="coin-val">65000</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usddold">OLD</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="currency-compact">
+                                <div class="currency-line">
+                                    <span class="coin-tag usdt">USDT</span>
+                                    <span class="coin-val">8</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag trx">TRX</span>
+                                    <span class="coin-val">15</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usdd">USDD</span>
+                                    <span class="coin-val">4</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usddold">OLD</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- 合计行 -->
+                    <tr class="total-row">
+                        <td colspan="2" style="text-align: left; padding-left: 20px;">合计</td>
+                        <td>13</td>
+                        <td>
+                            <div class="currency-compact">
+                                <div class="currency-line">
+                                    <span class="coin-tag usdt">USDT</span>
+                                    <span class="coin-val">1.5</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag trx">TRX</span>
+                                    <span class="coin-val">2912.53</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usdd">USDD</span>
+                                    <span class="coin-val">474700</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usddold">OLD</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="currency-compact">
+                                <div class="currency-line">
+                                    <span class="coin-tag usdt">USDT</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag trx">TRX</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usdd">USDD</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usddold">OLD</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="currency-compact">
+                                <div class="currency-line">
+                                    <span class="coin-tag usdt">USDT</span>
+                                    <span class="coin-val">89.20</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag trx">TRX</span>
+                                    <span class="coin-val">210.80</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usdd">USDD</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usddold">OLD</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="currency-compact">
+                                <div class="currency-line">
+                                    <span class="coin-tag usdt">USDT</span>
+                                    <span class="coin-val">1282.20</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag trx">TRX</span>
+                                    <span class="coin-val">4501.40</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usdd">USDD</span>
+                                    <span class="coin-val">545000</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usddold">OLD</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="currency-compact">
+                                <div class="currency-line">
+                                    <span class="coin-tag usdt">USDT</span>
+                                    <span class="coin-val">70</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag trx">TRX</span>
+                                    <span class="coin-val">103</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usdd">USDD</span>
+                                    <span class="coin-val">36</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usddold">OLD</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="currency-compact">
+                                <div class="currency-line">
+                                    <span class="coin-tag usdt">USDT</span>
+                                    <span class="coin-val">1175.40</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag trx">TRX</span>
+                                    <span class="coin-val">2065.42</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usdd">USDD</span>
+                                    <span class="coin-val">55300</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usddold">OLD</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="currency-compact">
+                                <div class="currency-line">
+                                    <span class="coin-tag usdt">USDT</span>
+                                    <span class="coin-val">54</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag trx">TRX</span>
+                                    <span class="coin-val">53</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usdd">USDD</span>
+                                    <span class="coin-val">8</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usddold">OLD</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="currency-compact">
+                                <div class="currency-line">
+                                    <span class="coin-tag usdt">USDT</span>
+                                    <span class="coin-val">530.85</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag trx">TRX</span>
+                                    <span class="coin-val">2340.80</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usdd">USDD</span>
+                                    <span class="coin-val">150000</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usddold">OLD</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="currency-compact">
+                                <div class="currency-line">
+                                    <span class="coin-tag usdt">USDT</span>
+                                    <span class="coin-val">13</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag trx">TRX</span>
+                                    <span class="coin-val">23</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usdd">USDD</span>
+                                    <span class="coin-val">6</span>
+                                </div>
+                                <div class="currency-line">
+                                    <span class="coin-tag usddold">OLD</span>
+                                    <span class="coin-val zero">0</span>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 分页 -->
+        <div class="pagination">
+            <div class="page-info">共 215 条</div>
+            <div class="page-controls">
+                <button class="page-btn" disabled>
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="page-btn active">1</button>
+                <button class="page-btn">2</button>
+                <button class="page-btn">3</button>
+                <span style="color: #94a3b8; padding: 0 4px;">···</span>
+                <button class="page-btn">22</button>
+                <button class="page-btn">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+                <select class="date-input" style="width: 100px; margin-left: 8px;">
+                    <option>10 条/页</option>
+                    <option>20 条/页</option>
+                    <option>50 条/页</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- 说明 -->
+        <div style="padding: 20px; background: #f0f9ff; border-top: 1px solid #bae6fd; color: #0369a1; font-size: 13px;">
+            <strong>💡 紧凑多行显示优势：</strong>
+            <ul style="margin: 8px 0 0 20px; line-height: 1.8;">
+                <li><strong>直接展示：</strong>所有币种数据直接显示，无需切换或点击</li>
+                <li><strong>一目了然：</strong>可以同时看到所有币种的数据对比</li>
+                <li><strong>紧凑布局：</strong>每个币种占一行，垂直堆叠节省空间</li>
+                <li><strong>彩色标签：</strong>4种币种用不同颜色区分（USDT、TRX、USDD、USDDOLD）</li>
+                <li><strong>统一顺序：</strong>所有列都按USDT→TRX顺序排列，方便查找</li>
+                <li><strong>支持扩展：</strong>添加新币种只需增加一行即可</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // 页面加载完成后，自动标记有数值的币种行
+        document.addEventListener('DOMContentLoaded', function() {
+            const currencyLines = document.querySelectorAll('.currency-line');
+            
+            currencyLines.forEach(line => {
+                const valueSpan = line.querySelector('.coin-val');
+                if (valueSpan && !valueSpan.classList.contains('zero')) {
+                    line.classList.add('has-value');
+                    
+                    // 给非零值添加positive类
+                    const value = parseFloat(valueSpan.textContent);
+                    if (value > 0) {
+                        valueSpan.classList.add('positive');
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+

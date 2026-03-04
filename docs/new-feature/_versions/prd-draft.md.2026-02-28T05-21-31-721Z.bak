@@ -1,0 +1,141 @@
+# Market 多币种看板 + 币种详情 K 线（原型/规格 v1.3）
+
+## 1) 目标与范围
+- 一张 Market 便签支持“多币种列表”（Watchlist）。
+- 点击任一币种进入“详情页”查看 K 线（OHLC）。
+- 尺寸限制：Market 仍为严格尺寸（S/M/L/XL），**小尺寸不展示 K 线**；用户点击时必须给出“切换到指定尺寸”的明确提示与一键跳转。
+
+[便签：风险提醒] K线改为“按需进入详情才拉 OHLC”，列表只拉 price，避免多币种场景限流与性能爆炸。
+
+---
+
+## 2) 尺寸与信息分级（严格尺寸）
+统一尺寸：
+- S：240×160
+- M：320×220（默认）
+- L：420×300
+- XL：560×380
+
+### 2.1 列表页（Watchlist）各尺寸展示
+- S：展示 2 行币种（紧凑），不画 K 线；每行可选极简迷你趋势（1 条 sparkline）
+- M：展示 4 行币种；每行：Symbol + Price + 24h%（红绿）+（可选）迷你趋势
+- L：展示 8 行币种；支持排序入口（涨幅/跌幅/自定义）
+- XL：展示 12 行币种；可显示 24h 高低的简写（可选）
+
+### 2.2 详情页（K 线）尺寸门槛
+- 只有 L/XL 才允许进入 K 线详情页（原因：可读性 + 控件容纳）。
+- 若当前为 S/M，点击币种行 → 弹出提示层：
+  - 文案：当前尺寸不支持 K 线，请切换到 L 或 XL
+  - 按钮：切换到 L 查看 / 切换到 XL 查看 / 取消
+  -（可选）勾选：下次直接切到 L（记住选择）
+
+---
+
+## 3) 页面结构（列表页 + 详情页）
+### 3.1 列表页（Watchlist）
+每行币种项（Row）包含：
+- 左：Symbol（BTC）/ Pair（USDT）可简写
+- 中：现价（主）
+- 右：24h 涨跌幅（%）（红绿）
+-（可选）行内 Mini Trend：极细 sparkline（不承诺精度，仅方向感）
+
+交互：
+- 点击 Row：进入详情（若尺寸不足先提示切换）
+- 长按/右键 Row：（可选）置顶该币 / 删除该币
+
+### 3.2 详情页（K 线）
+展示（L/XL）：
+- 顶部：Symbol + 当前价 + 24h%
+- 主体：K 线（OHLC）
+- 控件（放在图表上方或右上角）：
+  - 周期：1m / 5m / 15m / 1h（单选）
+  -（可选，建议 P1）指标：MA/RSI/MACD（开关态即可，默认全关）
+- 底部：返回列表 按钮（或左上角返回箭头）
+
+K 线交互（v1.3 原型最小集）：
+- 切周期：点击周期按钮，切换高亮并刷新图形（原型用跳 Frame 表示）
+- 十字线/悬浮提示（可选）：显示当前K线 OHLC（原型可不做）
+
+---
+
+## 4) 数据与请求策略（防多币种拖垮）
+### 4.1 列表页数据（轻量）
+- 只拉：price + change24hPct（可选 change24hAbs）
+- 多币种请求：必须批量/合并（同 Provider 一次请求带多个 symbols 或本地合并调度）
+
+### 4.2 详情页数据（重）
+- 仅进入详情页时才拉 OHLC（K 线数据）
+- 退出详情页后：
+  - 可保留最近一次 OHLC 缓存（短期复用）
+  - 不在后台持续高频拉 OHLC（除非用户停留在详情页且窗口可见）
+
+---
+
+## 5) 失败态（列表页与详情页分开处理）
+### 5.1 列表页失败态（必须“有旧数据，不空白”）
+- Offline/RateLimit：整张便签显示上次成功快照（列表仍可见）+ Footer 状态与动作（重试/切 Provider）
+- KeyMissing/KeyInvalid：列表区显示占位与引导，Footer 提供“修复 Key”
+- 部分币失败（可选）：失败的行显示 “—” 与小型错误图标，不影响其他行
+
+### 5.2 详情页失败态
+- OHLC 拉取失败：
+  - K 线区域显示“无法加载K线（原因：断网/限流/Key问题）”
+  - 提供按钮：重试 / 切 Provider / 返回列表
+- 仍保留：上次成功的 K 线缓存（若有则置灰展示）
+
+---
+
+## 6) 原型 Frame 清单（给设计直接开画）
+### 6.1 列表页（Normal）
+1. MarketList-S-Normal（2 行）
+2. MarketList-M-Normal（4 行）
+3. MarketList-L-Normal（8 行）
+4. MarketList-XL-Normal（12 行）
+
+### 6.2 小尺寸点击提示（必须）
+5. Market-Gate-SM-To-Kline（提示层：切 L/XL）
+
+### 6.3 详情页（K 线，仅 L/XL）
+6. MarketDetail-L-1m
+7. MarketDetail-L-5m
+8. MarketDetail-L-15m
+9. MarketDetail-L-1h
+
+10. MarketDetail-XL-1m
+11. MarketDetail-XL-5m
+12. MarketDetail-XL-15m
+13. MarketDetail-XL-1h
+
+（可选，若要表达指标）
+14. MarketDetail-XL-MA-On
+15. MarketDetail-XL-RSI-On
+16. MarketDetail-XL-MACD-On
+
+### 6.4 失败态
+17. MarketList-KeyMissing
+18. MarketList-KeyInvalid
+19. MarketList-Offline
+20. MarketList-RateLimit
+
+21. MarketDetail-OHLC-Fail（断网/限流通用一张即可）
+
+### 6.5 设置与 Key 向导（沿用既有结构）
+22-26. Settings 五个 Tab + Data&Key
+27-31. KeyWizard（Step1/Step2/Success/Fail）
+
+---
+
+## 7) 必须点通的连线（评审门槛）
+- 任意列表页：点“…”→ 切 S/M/L/XL（严格尺寸）
+- S/M 点击币种行 → Gate 提示层 → 点“切换到 L 查看”→ 进入 MarketDetail-L-1m
+- L/XL 点击币种行 → 直接进入详情 K 线
+- 详情页：周期按钮切换（1m/5m/15m/1h）+ 返回列表
+- 失败态：Footer 动作 → 修复 Key/重试/切 Provider → 回正常态
+
+---
+
+## 8) 需要你立刻拍板的 2 个细节（否则设计会画两套）
+1) 列表页的 Mini Trend：S/M 是否要画？（画=更活；不画=更克制更省）
+2) K 线默认周期：1m 还是 5m？（更稳建议默认 5m，减噪、减请求压力）
+
+给出两项选择，我把 Frame 命名与默认跳转链路写死，原型可以直接开工不返工。
