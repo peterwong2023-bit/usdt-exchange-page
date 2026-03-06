@@ -512,8 +512,8 @@
 .audit-drawer {
     position: fixed;
     top: 0;
-    right: -95%; /* 初始隐藏 */
-    width: 92%;
+    right: -70%;
+    width: 67%;
     height: 100%;
     background: #f1f5f9;
     z-index: 2001;
@@ -577,7 +577,15 @@
 /* 响应式适配 */
 @media (max-width: 1200px) {
     .audit-drawer {
-        width: 95%;
+        width: 85%;
+        right: -85%;
+    }
+}
+
+@media (max-width: 768px) {
+    .audit-drawer {
+        width: 100%;
+        right: -100%;
     }
 }
 

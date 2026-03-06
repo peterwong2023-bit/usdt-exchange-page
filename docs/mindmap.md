@@ -1,6 +1,6 @@
 # 开奖网 — 全平台功能性脑图
 
-> 最后更新: 2026-02-28 | 审查范围: H5 (57 files) · PC (33 files) · Admin (55 files)
+> 最后更新: 2026-02-27 | 审查范围: H5 (57 files) · PC (36 files) · Admin (43 files)
 >
 > 图例: ✅ 已实现 | ⚠️ 有组件但未注册路由 | ❌ 缺失 | 🔶 部分实现 | 🆕 本轮新增
 
@@ -35,7 +35,8 @@
 │   │   ├── 按彩种类型
 │   │   ├── 按地区
 │   │   └── 搜索
-│   ├── 英雄 Banner
+│   ├── Banner 轮播 🆕（替代原 Hero，自动5秒轮播 + 左右箭头 + 圆点指示器）
+│   ├── 跑马灯公告（Banner 底部）
 │   ├── 快捷入口（3D鼠标跟随效果）
 │   ├── 分类 Tab + 收藏 Tab
 │   ├── 开奖结果卡片网格
@@ -585,6 +586,8 @@
 ### 6.3 运营管理
 ```
 运营管理
+├── operations/banners 🆕 ✅ — 广告管理（Banner轮播+弹窗广告，广告位/展示平台/时间/排序/点击曝光CTR统计）
+├── operations/marquee 🆕 ✅ — 跑马灯公告管理（公告内容/排序/展示时间/启用关闭）
 ├── operations/articles ✅ — 文章 CRUD、规则/心得、置顶、ReactQuill
 ├── operations/notifications ✅ — 通知 CRUD、系统/活动/紧急、发布/草稿
 ├── operations/news ✅ — 新闻源管理（系统配置 Tab 内）

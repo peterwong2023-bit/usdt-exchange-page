@@ -1,0 +1,5 @@
+{
+  "rewrites": [
+    { "source": "/lottery-admin/((?!assets/).*)", "destination": "/lottery-admin/index.html" }
+  ]
+}

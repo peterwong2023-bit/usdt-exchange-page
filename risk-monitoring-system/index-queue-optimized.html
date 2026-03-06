@@ -93,8 +93,8 @@
                     </button>
                     <div class="user-profile-wrapper" style="position: relative;">
                         <div class="user-profile" onclick="app.toggleUserMenu()" style="cursor: pointer; display: flex; align-items: center; gap: 8px; padding: 6px 12px; background: rgba(255,255,255,0.1); border-radius: 10px; transition: all 0.2s;">
-                            <i class="fas fa-user-circle"></i>
-                            <span>运营员</span>
+                        <i class="fas fa-user-circle"></i>
+                        <span>运营员</span>
                             <i class="fas fa-chevron-down" style="font-size: 10px; opacity: 0.7;"></i>
                         </div>
                         <!-- 下拉菜单 -->
@@ -474,7 +474,7 @@
                     <div id="graphErrorState" class="graph-loading-overlay" style="display: none; background: #fff;">
                         <div style="width: 80px; height: 80px; border-radius: 50%; background: #fee2e2; color: #dc2626; display: flex; align-items: center; justify-content: center; font-size: 32px; margin-bottom: 16px;">
                             <i class="fas fa-exclamation-circle"></i>
-                        </div>
+                </div>
                         <div style="font-size: 16px; font-weight: 800; color: #0f172a;">图谱加载失败</div>
                         <div style="font-size: 14px; color: #64748b; margin-top: 8px;" id="graphErrorMessage">未找到关联数据</div>
                         <button class="btn-filter-compact primary" style="margin-top: 24px;" onclick="app.executeRelationshipSearch()">
@@ -563,11 +563,11 @@
                 
                 <button class="btn-filter-compact primary" id="applyUserFilters">
                     <i class="fas fa-search"></i> 查询
-                </button>
+                    </button>
                 
                 <button class="btn-filter-compact secondary" id="resetUserFilters">
-                    <i class="fas fa-redo"></i> 重置
-                </button>
+                        <i class="fas fa-redo"></i> 重置
+                    </button>
             </div>
 
             <!-- 批量操作工具栏 -->
@@ -589,9 +589,9 @@
                 <div class="queue-list-header">
                     <h3>
                         <i class="fas fa-list"></i>
-                        风险处理队列
-                        <span class="count-badge-v2" id="userTotalCount">0</span>
-                    </h3>
+                            风险处理队列
+                            <span class="count-badge-v2" id="userTotalCount">0</span>
+                        </h3>
                     <div class="header-actions">
                         <button class="btn-header-action" id="refreshUserList">
                             <i class="fas fa-sync-alt"></i> 刷新
