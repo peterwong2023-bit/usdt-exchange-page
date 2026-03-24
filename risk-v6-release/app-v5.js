@@ -57,10 +57,14 @@ class RiskMonitoringSystemBase {
     }
 
     viewUserDetail(userId) {
-        this.openAuditDrawer(userId, 'user');
+        const user = riskUsersList.find(u => u.user_id === userId);
+        if (!user) { this.openAuditDrawer(userId, 'user', ''); return; }
+        const cs = user.claim_status;
+        const isOthers = cs === 'processing' && user.claimed_by !== CURRENT_USER;
+        this.openAuditDrawer(userId, 'user', isOthers ? 'readonly' : cs);
     }
 
-    openAuditDrawer(id, type = 'user') {
+    openAuditDrawer(id, type = 'user', claimStatus = '') {
         const overlay = document.getElementById('auditDrawerOverlay');
         const drawer = document.getElementById('auditDrawer');
         const iframe = document.getElementById('auditIframe');
@@ -68,8 +72,14 @@ class RiskMonitoringSystemBase {
         
         if (overlay && drawer && iframe) {
             if (type === 'user') {
-                iframe.src = `user-detail-v6.html?user_id=${id}`;
-                if (titleEl) titleEl.innerHTML = '<i class="fas fa-user-shield"></i> 风险用户审核详情';
+                let detailUrl = `user-detail-v6.html?user_id=${id}&claim_status=${claimStatus}`;
+                const user = riskUsersList ? riskUsersList.find(u => u.user_id === id) : null;
+                if (user && user.judgment) {
+                    detailUrl += `&judgment=${user.judgment}&judged_by=${encodeURIComponent(user.judged_by||'')}&judged_at=${encodeURIComponent(user.judged_at||'')}&judgment_reason=${encodeURIComponent(user.judgment_reason||'')}`;
+                }
+                iframe.src = detailUrl;
+                const titleMap = { pending_audit: '风险用户稽查审核', audited: '风险用户详情（只读）', readonly: '风险用户详情（只读）' };
+                if (titleEl) titleEl.innerHTML = `<i class="fas fa-user-shield"></i> ${titleMap[claimStatus] || '风险用户审核详情'}`;
             } else if (type === 'syndicate') {
                 iframe.src = `group-graph.html?group_id=${id}`;
                 if (titleEl) titleEl.innerHTML = '<i class="fas fa-project-diagram"></i> 团伙关系穿透分析';
@@ -199,7 +209,7 @@ class RiskMonitoringSystemV4 extends RiskMonitoringSystemBase {
         const container = document.getElementById('userCardsList');
         if (!container) return;
 
-        if (!this.currentQueueTab) this.currentQueueTab = 'unclaimed';
+        if (!this.currentQueueTab) this.currentQueueTab = 'all';
 
         const priorityFilter = document.getElementById('filterPriority')?.value;
         const levelFilter = document.getElementById('filterRiskLevel')?.value;
@@ -235,6 +245,7 @@ class RiskMonitoringSystemV4 extends RiskMonitoringSystemBase {
         const doneList = baseFiltered.filter(u => u.claim_status === 'audited');
 
         const setCount = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+        setCount('tabAllCount', baseFiltered.length);
         setCount('tabUnclaimedCount', unclaimedList.length);
         setCount('tabMineCount', mineList.length);
         setCount('tabJudgedCount', pendingAuditList.length);
@@ -245,6 +256,20 @@ class RiskMonitoringSystemV4 extends RiskMonitoringSystemBase {
         else if (this.currentQueueTab === 'mine') filteredList = mineList;
         else if (this.currentQueueTab === 'judged') filteredList = pendingAuditList;
         else if (this.currentQueueTab === 'done') filteredList = doneList;
+
+        // "全部"Tab按优先级排序：我的工单 → 待接单 → 待稽查 → 已完结
+        if (this.currentQueueTab === 'all') {
+            const statusOrder = { processing: 0, unclaimed: 1, pending_audit: 2, audited: 3 };
+            filteredList = [...filteredList].sort((a, b) => {
+                const isMineA = a.claim_status === 'processing' && a.claimed_by === CURRENT_USER ? -1 : 0;
+                const isMineB = b.claim_status === 'processing' && b.claimed_by === CURRENT_USER ? -1 : 0;
+                if (isMineA !== isMineB) return isMineA - isMineB;
+                const oa = statusOrder[a.claim_status] ?? 9;
+                const ob = statusOrder[b.claim_status] ?? 9;
+                if (oa !== ob) return oa - ob;
+                return b.risk_score - a.risk_score;
+            });
+        }
 
         const start = (this.currentPage - 1) * this.itemsPerPage;
         const end = start + this.itemsPerPage;
@@ -260,7 +285,7 @@ class RiskMonitoringSystemV4 extends RiskMonitoringSystemBase {
             const isMine = cs === 'processing' && user.claimed_by === CURRENT_USER;
             const isOthers = cs === 'processing' && user.claimed_by !== CURRENT_USER;
             const isDone = cs === 'audited';
-            const dimClass = (isDone || isOthers) ? 'user-card-handled' : '';
+            const dimClass = isDone ? 'user-card-handled' : '';
 
             let riskBadges = (user.main_risks || []).map((tag, i) => {
                 return `<span class="risk-user-badge ${i === 0 ? 'primary' : 'secondary'}">${tag}</span>`;
@@ -269,27 +294,27 @@ class RiskMonitoringSystemV4 extends RiskMonitoringSystemBase {
             // 工单状态标签
             let statusTag = '';
             if (cs === 'processing') {
-                statusTag = `<span class="handled-status-tag" style="background:#dbeafe;color:#2563eb;"><i class="fas fa-user-cog"></i> ${user.claimed_by} 处理中</span>`;
+                statusTag = `<span class="handled-status-tag" style="background:#dbeafe;color:#2563eb;"><i class="fas fa-user-cog"></i> 受理中</span>`;
             } else if (cs === 'pending_audit') {
                 const jl = judgmentLabels[user.judgment] || '已判定';
                 statusTag = `<span class="handled-status-tag" style="background:#fff7ed;color:#ea580c;">${jl} · 待稽查</span>`;
             } else if (cs === 'audited') {
                 const jl = judgmentLabels[user.judgment] || '已判定';
-                const ar = user.audit_result === 'approved' ? '✅ 稽查通过' : '❌ 已驳回';
-                statusTag = `<span class="handled-status-tag normal" style="background:#d1fae5;color:#065f46;">${jl} · ${ar}</span>`;
+                const ar = user.audit_result === 'approved' ? '稽查通过' : '已驳回';
+                statusTag = `<span class="handled-status-tag" style="background:#f1f5f9;color:#64748b;">${jl} · ${ar}</span>`;
             }
 
-            // 操作人信息
-            let metaInfo = '';
-            if (cs === 'processing' && user.claimed_at) {
-                metaInfo = `<span class="handled-meta"><i class="fas fa-clock"></i> 接单 ${formatTime(user.claimed_at)}</span>`;
+            // 操作人
+            let operatorTag = '';
+            if (cs === 'processing' && user.claimed_by) {
+                operatorTag = `<span class="handled-meta" style="font-size:12px;"><i class="fas fa-user"></i> ${user.claimed_by} · ${formatTime(user.claimed_at)}</span>`;
             } else if (cs === 'pending_audit' && user.judged_by) {
-                metaInfo = `<span class="handled-meta"><i class="fas fa-gavel"></i> ${user.judged_by} · ${formatTime(user.judged_at)}</span>`;
+                operatorTag = `<span class="handled-meta" style="font-size:12px;"><i class="fas fa-gavel"></i> ${user.judged_by} · ${formatTime(user.judged_at)}</span>`;
             } else if (cs === 'audited' && user.audited_by) {
-                metaInfo = `<span class="handled-meta"><i class="fas fa-clipboard-check"></i> ${user.audited_by} · ${formatTime(user.audited_at)}</span>`;
+                operatorTag = `<span class="handled-meta" style="font-size:12px;"><i class="fas fa-clipboard-check"></i> ${user.audited_by} · ${formatTime(user.audited_at)}</span>`;
             }
 
-            // 操作按钮 — 流程：接单 → 审核+解单 → 判定后自动进待稽查 → 稽查
+            // 操作按钮
             let actionBtns = '';
             if (cs === 'unclaimed') {
                 actionBtns = `<button class="risk-action-btn review" style="background:#3b82f6;color:white;border-color:#3b82f6;" onclick="event.stopPropagation();app.claimUser('${user.user_id}')"><i class="fas fa-hand-paper"></i> 接单</button>`;
@@ -298,9 +323,9 @@ class RiskMonitoringSystemV4 extends RiskMonitoringSystemBase {
                     <button class="risk-action-btn review" onclick="event.stopPropagation();app.viewUserDetail('${user.user_id}')"><i class="fas fa-search"></i> 审核</button>
                     <button class="risk-action-btn" style="color:#94a3b8;border-color:#cbd5e1;" onclick="event.stopPropagation();app.releaseUser('${user.user_id}')"><i class="fas fa-undo"></i> 解单</button>`;
             } else if (isOthers) {
-                actionBtns = `<button class="risk-action-btn" disabled style="opacity:0.5;cursor:not-allowed;"><i class="fas fa-lock"></i> 处理中</button>`;
+                actionBtns = `<button class="risk-action-btn" onclick="event.stopPropagation();app.viewUserDetail('${user.user_id}')"><i class="fas fa-eye"></i> 查看</button>`;
             } else if (cs === 'pending_audit') {
-                actionBtns = `<button class="risk-action-btn review" style="background:#f59e0b;color:white;border-color:#f59e0b;" onclick="event.stopPropagation();app.showAuditModal('${user.user_id}')"><i class="fas fa-clipboard-check"></i> 稽查</button>`;
+                actionBtns = `<button class="risk-action-btn review" style="background:#f59e0b;color:white;border-color:#f59e0b;" onclick="event.stopPropagation();app.viewUserDetail('${user.user_id}')"><i class="fas fa-clipboard-check"></i> 稽查</button>`;
             } else if (cs === 'audited') {
                 actionBtns = `<button class="risk-action-btn" onclick="event.stopPropagation();app.viewUserDetail('${user.user_id}')"><i class="fas fa-eye"></i> 查看</button>`;
             }
@@ -310,13 +335,13 @@ class RiskMonitoringSystemV4 extends RiskMonitoringSystemBase {
             const time = user.last_login_at || '';
 
             return `
-                <div class="risk-item-user ${scoreClass} ${dimClass}" data-type="user" data-id="${user.user_id}">
+                <div class="risk-item-user ${scoreClass} ${dimClass}" data-type="user" data-id="${user.user_id}" ${isDone ? 'style="opacity:0.45;"' : ''}>
                     <img src="${user.avatar || '../bob.png'}" alt="${user.user_id}" class="risk-user-avatar">
                     <div class="risk-user-info">
                         <span class="risk-user-id">${user.user_id}</span>
                         ${riskBadges}
                         ${statusTag}
-                        ${metaInfo}
+                        ${operatorTag}
                         <div class="risk-user-meta">
                             <span><i class="fas fa-map-marker-alt"></i>${region}</span>
                             <span><i class="fas fa-network-wired"></i>${ip}</span>
@@ -346,27 +371,15 @@ class RiskMonitoringSystemV4 extends RiskMonitoringSystemBase {
 
     // ===== 工单操作 =====
     claimUser(userId) {
-        showWorkflowModal({
-            icon: '<i class="fas fa-hand-paper" style="color:#3b82f6;"></i>',
-            iconBg: '#dbeafe',
-            title: '确认接单',
-            subtitle: `用户 ${userId}`,
-            desc: '接单后该工单将<strong>锁定给您处理</strong>，其他运营无法操作。<br>请确认您有时间审核该用户。',
-            btnText: '<i class="fas fa-hand-paper"></i> 确认接单',
-            btnColor: '#3b82f6',
-            showReason: false,
-            onConfirm: () => {
-                const user = riskUsersList.find(u => u.user_id === userId);
-                if (user) {
-                    user.claim_status = 'processing';
-                    user.claimed_by = CURRENT_USER;
-                    user.claimed_at = new Date().toISOString().replace('T',' ').slice(0,19);
-                    this.showToast(`已成功接单 ${userId}`, 'success');
-                    this.loadRiskMonitorPanel();
-                    this.loadUsersView();
-                }
-            }
-        });
+        const user = riskUsersList.find(u => u.user_id === userId);
+        if (user) {
+            user.claim_status = 'processing';
+            user.claimed_by = CURRENT_USER;
+            user.claimed_at = new Date().toISOString().replace('T',' ').slice(0,19);
+            this.showToast(`已成功接单 ${userId}`, 'success');
+            this.loadRiskMonitorPanel();
+            this.loadUsersView();
+        }
     }
 
     releaseUser(userId) {
@@ -472,6 +485,46 @@ class RiskMonitoringSystemV4 extends RiskMonitoringSystemBase {
         document.getElementById('auditModalOverlay')?.remove();
         this.loadUsersView();
         this.loadRiskMonitorPanel();
+    }
+
+    // 从详情页发起的稽查（无弹窗）
+    submitAuditDirect(userId, result, comment) {
+        const user = riskUsersList.find(u => u.user_id === userId);
+        if (user) {
+            if (result === 'approved') {
+                user.claim_status = 'audited';
+                user.audited_by = CURRENT_USER;
+                user.audited_at = new Date().toISOString().replace('T',' ').slice(0,19);
+                user.audit_result = 'approved';
+                user.audit_comment = comment || '';
+            } else {
+                user.claim_status = 'unclaimed';
+                user.claimed_by = null;
+                user.claimed_at = null;
+                user.judgment = null;
+                user.judged_by = null;
+                user.judged_at = null;
+                user.judgment_reason = null;
+                user.audit_result = 'rejected';
+                user.audit_comment = comment || '';
+            }
+            this.loadUsersView();
+            this.loadRiskMonitorPanel();
+        }
+    }
+
+    // 详情页判定回调：更新工单状态为待稽查
+    onDetailJudgment(userId, judgment, reason) {
+        const user = riskUsersList.find(u => u.user_id === userId);
+        if (user) {
+            user.claim_status = 'pending_audit';
+            user.judgment = judgment;
+            user.judged_by = CURRENT_USER;
+            user.judged_at = new Date().toISOString().replace('T',' ').slice(0,19);
+            user.judgment_reason = reason || '';
+            this.loadUsersView();
+            this.loadRiskMonitorPanel();
+        }
     }
 
     // 切换队列 Tab
@@ -810,12 +863,18 @@ class RiskMonitoringSystemV4 extends RiskMonitoringSystemBase {
         const allItems = [];
         let userCount = 0;
 
-        // 首页显示：待接单 + 我正在处理的
+        // 首页显示：我的工单(置顶) + 待稽查 + 待接单，排除已完结
         if (typeof riskUsersList !== 'undefined') {
-            riskUsersList.filter(u => u.claim_status === 'unclaimed' || (u.claim_status === 'processing' && u.claimed_by === CURRENT_USER))
+            const statusOrder = { processing: 0, pending_audit: 1, unclaimed: 2 };
+            riskUsersList.filter(u => u.claim_status !== 'audited')
+                .filter(u => {
+                    if (u.claim_status === 'processing') return u.claimed_by === CURRENT_USER;
+                    return true;
+                })
                 .sort((a, b) => {
-                    if (a.claim_status === 'processing' && b.claim_status !== 'processing') return -1;
-                    if (b.claim_status === 'processing' && a.claim_status !== 'processing') return 1;
+                    const oa = statusOrder[a.claim_status] ?? 9;
+                    const ob = statusOrder[b.claim_status] ?? 9;
+                    if (oa !== ob) return oa - ob;
                     return b.risk_score - a.risk_score;
                 })
                 .forEach(user => {
@@ -892,11 +951,12 @@ class RiskMonitoringSystemV4 extends RiskMonitoringSystemBase {
         }
     }
     
-    // 渲染用户卡片 - 首页概览版
+    // 渲染用户卡片 - 首页概览版（支持所有工单状态）
     renderUserCard(user) {
         const scoreClass = user.risk_score >= 80 ? 'critical' : user.risk_score >= 60 ? 'high' : 'medium';
         const cs = user.claim_status || 'unclaimed';
         const isMine = cs === 'processing' && user.claimed_by === CURRENT_USER;
+        const judgmentLabels = { fraud:'⛔ 诈骗', normal:'✅ 正常', observe:'👁 观察', freeze:'🔒 冻结', block:'🚫 拉黑' };
 
         let riskBadges = '';
         if (user.main_risks && user.main_risks.length > 0) {
@@ -909,7 +969,10 @@ class RiskMonitoringSystemV4 extends RiskMonitoringSystemBase {
 
         let statusTag = '';
         if (isMine) {
-            statusTag = `<span class="handled-status-tag" style="background:#dbeafe;color:#2563eb;"><i class="fas fa-user-cog"></i> 我的工单</span>`;
+            statusTag = `<span class="handled-status-tag" style="background:#dbeafe;color:#2563eb;"><i class="fas fa-user-cog"></i> 受理中</span>`;
+        } else if (cs === 'pending_audit') {
+            const jl = judgmentLabels[user.judgment] || '已判定';
+            statusTag = `<span class="handled-status-tag" style="background:#fff7ed;color:#ea580c;">${jl} · 待稽查</span>`;
         }
 
         let actionBtns = '';
@@ -919,6 +982,8 @@ class RiskMonitoringSystemV4 extends RiskMonitoringSystemBase {
             actionBtns = `
                 <button class="risk-action-btn review" onclick="event.stopPropagation();app.viewUserDetail('${user.user_id}')"><i class="fas fa-search"></i> 审核</button>
                 <button class="risk-action-btn" style="color:#94a3b8;border-color:#cbd5e1;" onclick="event.stopPropagation();app.releaseUser('${user.user_id}')"><i class="fas fa-undo"></i> 解单</button>`;
+        } else if (cs === 'pending_audit') {
+            actionBtns = `<button class="risk-action-btn review" style="background:#f59e0b;color:white;border-color:#f59e0b;" onclick="event.stopPropagation();app.viewUserDetail('${user.user_id}')"><i class="fas fa-clipboard-check"></i> 稽查</button>`;
         }
 
         const region = user.region || user.city || user.location || '未知';

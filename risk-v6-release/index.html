@@ -721,7 +721,8 @@
                     <h3 style="display:flex; align-items:center; gap:12px;">
                         <span><i class="fas fa-list"></i> 风险处理队列</span>
                         <div class="queue-tabs" style="display:flex; gap:4px; margin-left:8px;">
-                            <button class="queue-tab active" data-tab="unclaimed" onclick="app.switchQueueTab('unclaimed')">待接单 <span class="queue-tab-count" id="tabUnclaimedCount">0</span></button>
+                            <button class="queue-tab active" data-tab="all" onclick="app.switchQueueTab('all')">全部 <span class="queue-tab-count" id="tabAllCount">0</span></button>
+                            <button class="queue-tab" data-tab="unclaimed" onclick="app.switchQueueTab('unclaimed')">待接单 <span class="queue-tab-count" id="tabUnclaimedCount">0</span></button>
                             <button class="queue-tab" data-tab="mine" onclick="app.switchQueueTab('mine')">我的工单 <span class="queue-tab-count" id="tabMineCount">0</span></button>
                             <button class="queue-tab" data-tab="judged" onclick="app.switchQueueTab('judged')">待稽查 <span class="queue-tab-count" id="tabJudgedCount">0</span></button>
                             <button class="queue-tab" data-tab="done" onclick="app.switchQueueTab('done')">已完结 <span class="queue-tab-count" id="tabDoneCount">0</span></button>
@@ -1153,9 +1154,9 @@
 
     <!-- 脚本文件 -->
     <script src="data-v2.js"></script>
-    <script src="data-v4.js"></script>
+    <script src="data-v4.js?v=202603051900"></script>
     <script src="app-v3.js?v=2"></script>
-    <script src="app-v5.js?v=202601101430"></script>
+    <script src="app-v5.js?v=202603052100"></script>
         </main>
     </div>
 
@@ -1246,6 +1247,16 @@
         });
         document.getElementById('workflowModal').addEventListener('click', e => {
             if (e.target.id === 'workflowModal') closeWorkflowModal();
+        });
+
+        // 监听 iframe 详情页的通知
+        window.addEventListener('message', function(e) {
+            if (e.data && e.data.type === 'judgment' && e.data.userId) {
+                app.onDetailJudgment(e.data.userId, e.data.judgment, e.data.reason);
+            }
+            if (e.data && e.data.type === 'audit' && e.data.userId) {
+                app.submitAuditDirect(e.data.userId, e.data.result, e.data.comment);
+            }
         });
     </script>
 </body>

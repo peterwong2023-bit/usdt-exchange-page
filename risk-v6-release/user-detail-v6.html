@@ -1208,6 +1208,21 @@
             };
             const msg = reason ? `${labels[currentAction]} 操作已提交（${reason}）` : `${labels[currentAction]} 操作已提交`;
             showToastMsg(`<i class="fas fa-check-circle"></i> ${msg}`, '#10b981');
+
+            // 通知父页面更新工单状态（判定后进入待稽查）
+            try {
+                if (window.self !== window.top) {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const userId = urlParams.get('user_id') || '9f3e_7A12345h78';
+                    const judgmentActions = ['fraud', 'normal', 'observe', 'freeze', 'block'];
+                    if (judgmentActions.includes(currentAction)) {
+                        if (window.parent.app && typeof window.parent.app.onDetailJudgment === 'function') {
+                            window.parent.app.onDetailJudgment(userId, currentAction, reason);
+                        }
+                        window.parent.postMessage({ type: 'judgment', userId, judgment: currentAction, reason }, '*');
+                    }
+                }
+            } catch(e) { console.warn('通知父页面失败:', e); }
         }
 
         // ESC 关闭弹窗
@@ -1222,8 +1237,126 @@
             if (e.target === this) closeConfirmModal();
         });
 
+        // 稽查操作（从详情页内发起）— 使用自定义弹窗
+        function submitAuditFromDetail(userId, result) {
+            const isApprove = result === 'approved';
+            const modal = document.getElementById('confirmModal');
+            document.getElementById('confirmModalIcon').innerHTML = isApprove
+                ? '<i class="fas fa-check" style="color:#10b981;"></i>'
+                : '<i class="fas fa-times" style="color:#dc2626;"></i>';
+            document.getElementById('confirmModalIcon').style.background = isApprove ? '#d1fae5' : '#fee2e2';
+            document.getElementById('confirmModalTitle').textContent = isApprove ? '确认稽查通过' : '确认稽查驳回';
+            document.getElementById('confirmModalDesc').innerHTML = isApprove
+                ? '确认同意该判定结果？工单将进入<strong style="color:#10b981;">已完结</strong>状态。'
+                : '确认驳回该判定？工单将<strong style="color:#dc2626;">退回待接单池</strong>重新处理。';
+            const warning = document.getElementById('confirmModalWarning');
+            if (!isApprove) {
+                warning.style.display = 'block';
+                warning.textContent = '⚠️ 驳回后原判定结果将被清除';
+                warning.style.background = '#fee2e2';
+                warning.style.color = '#991b1b';
+            } else {
+                warning.style.display = 'none';
+            }
+            document.getElementById('confirmReasonLabel').textContent = isApprove ? '稽查意见（可选）' : '驳回原因（必填）';
+            document.getElementById('confirmModalReason').value = '';
+            document.getElementById('confirmModalReason').style.borderColor = '#e2e8f0';
+            document.getElementById('confirmModalReason').placeholder = isApprove ? '请输入稽查意见...' : '请输入驳回原因...';
+
+            const btn = document.getElementById('confirmModalBtn');
+            btn.innerHTML = isApprove ? '<i class="fas fa-check"></i> 确认通过' : '<i class="fas fa-times"></i> 确认驳回';
+            btn.style.background = isApprove ? '#10b981' : '#dc2626';
+            btn.onclick = function() {
+                const reason = document.getElementById('confirmModalReason').value.trim();
+                if (!isApprove && !reason) {
+                    document.getElementById('confirmModalReason').style.borderColor = '#dc2626';
+                    document.getElementById('confirmModalReason').placeholder = '⚠️ 必须填写驳回原因';
+                    document.getElementById('confirmModalReason').focus();
+                    return;
+                }
+                closeConfirmModal();
+                try {
+                    if (window.parent.app && typeof window.parent.app.submitAuditDirect === 'function') {
+                        window.parent.app.submitAuditDirect(userId, result, reason);
+                    }
+                    window.parent.postMessage({ type: 'audit', userId, result, comment: reason }, '*');
+                } catch(e) {}
+                const btnGroup = document.getElementById('actionBtnGroup');
+                if (btnGroup) {
+                    btnGroup.innerHTML = `<span style="padding:7px 14px; background:${isApprove?'#d1fae5':'#fee2e2'}; border:2px solid ${isApprove?'#10b981':'#dc2626'}; border-radius:6px; color:${isApprove?'#065f46':'#991b1b'}; font-size:12px; font-weight:700;"><i class="fas ${isApprove?'fa-check-double':'fa-undo'}"></i> ${isApprove?'稽查已通过':'已驳回，退回待接单'}</span>`;
+                }
+                showToastMsg(`<i class="fas fa-check-circle"></i> 稽查${isApprove?'通过':'驳回'}已提交`, '#10b981');
+            };
+            modal.style.display = 'flex';
+        }
+
         // ===== 统一初始化 =====
         window.addEventListener('load', function() {
+            // 根据工单状态调整操作区
+            const urlParams = new URLSearchParams(window.location.search);
+            const claimStatus = urlParams.get('claim_status');
+            const userId = urlParams.get('user_id') || '9f3e_7A12345h78';
+
+            // 判定结果摘要（稽查/已完结/只读模式下显示）
+            const judgment = urlParams.get('judgment');
+            const judgedBy = urlParams.get('judged_by');
+            const judgedAt = urlParams.get('judged_at');
+            const judgmentReason = urlParams.get('judgment_reason');
+            const jLabels = { fraud:'⛔ 已标记诈骗', normal:'✅ 已标记正常', observe:'👁 继续观察', freeze:'🔒 已冻结', block:'🚫 已拉黑' };
+
+            function insertJudgmentSummary() {
+                if (!judgment) return;
+                const jl = jLabels[judgment] || '已判定';
+                const summaryHtml = `
+                    <div style="margin:-8px -18px 12px; padding:12px 18px; background:linear-gradient(135deg, #f8fafc, #f1f5f9); border-bottom:2px solid #e2e8f0; display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+                        <span style="font-size:12px; color:#64748b; font-weight:700;">判定结果</span>
+                        <span style="padding:4px 12px; background:#fee2e2; border:1.5px solid #fca5a5; border-radius:6px; font-size:13px; font-weight:800; color:#991b1b;">${jl}</span>
+                        <span style="font-size:12px; color:#64748b;">判定人: <strong style="color:#0f172a;">${decodeURIComponent(judgedBy||'')}</strong></span>
+                        <span style="font-size:12px; color:#64748b;">时间: <strong style="color:#0f172a;">${decodeURIComponent(judgedAt||'')}</strong></span>
+                        ${judgmentReason ? `<span style="font-size:12px; color:#64748b;">原因: <em style="color:#475569;">"${decodeURIComponent(judgmentReason)}"</em></span>` : ''}
+                    </div>`;
+                const dangerCard = document.querySelector('.dashboard-card[style*="border: 2px solid #fbbf24"]');
+                if (dangerCard) {
+                    const inner = dangerCard.querySelector('div[style*="padding: 14px 18px"]');
+                    if (inner) inner.insertAdjacentHTML('afterbegin', summaryHtml);
+                }
+            }
+
+            if (claimStatus === 'pending_audit') {
+                insertJudgmentSummary();
+                const btnGroup = document.getElementById('actionBtnGroup');
+                if (btnGroup) {
+                    btnGroup.innerHTML = `
+                        <span style="padding:7px 14px; background:#fff7ed; border:2px solid #f59e0b; border-radius:6px; color:#92400e; font-size:12px; font-weight:700;">
+                            <i class="fas fa-gavel"></i> 稽查模式
+                        </span>
+                        <button onclick="submitAuditFromDetail('${userId}','approved')" style="padding:7px 14px; background:#10b981; border:2px solid #10b981; border-radius:6px; color:white; font-size:12px; font-weight:700; cursor:pointer;">
+                            <i class="fas fa-check"></i> 稽查通过
+                        </button>
+                        <button onclick="submitAuditFromDetail('${userId}','rejected')" style="padding:7px 14px; background:white; border:2px solid #dc2626; border-radius:6px; color:#dc2626; font-size:12px; font-weight:700; cursor:pointer;">
+                            <i class="fas fa-times"></i> 稽查驳回
+                        </button>`;
+                }
+            } else if (claimStatus === 'audited') {
+                insertJudgmentSummary();
+                const btnGroup = document.getElementById('actionBtnGroup');
+                if (btnGroup) {
+                    btnGroup.innerHTML = `
+                        <span style="padding:7px 14px; background:#f1f5f9; border:2px solid #cbd5e1; border-radius:6px; color:#64748b; font-size:12px; font-weight:700;">
+                            <i class="fas fa-check-double"></i> 已完结（只读）
+                        </span>`;
+                }
+            } else if (claimStatus === 'readonly') {
+                insertJudgmentSummary();
+                const btnGroup = document.getElementById('actionBtnGroup');
+                if (btnGroup) {
+                    btnGroup.innerHTML = `
+                        <span style="padding:7px 14px; background:#dbeafe; border:2px solid #93c5fd; border-radius:6px; color:#1e40af; font-size:12px; font-weight:700;">
+                            <i class="fas fa-eye"></i> 只读查看
+                        </span>`;
+                }
+            }
+
             setTimeout(() => {
                 const firstRule = document.getElementById('R-ATO-1');
                 if (firstRule) toggleRule(firstRule);
