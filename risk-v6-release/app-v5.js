@@ -353,14 +353,12 @@ class RiskMonitoringSystemV4 extends RiskMonitoringSystemBase {
                 </div>`;
         }).join('');
 
-        // KPI
-        const criticalCount = unclaimedList.filter(u => u.risk_score >= 80).length;
-        const highCount = unclaimedList.filter(u => u.risk_score >= 60 && u.risk_score < 80).length;
-        const observeCount = unclaimedList.filter(u => u.risk_score < 60).length;
+        // KPI — 工单效率
+        setCount('kpiUnclaimed', unclaimedList.length);
+        setCount('kpiMine', mineList.length);
+        setCount('kpiAudit', pendingAuditList.length);
+        setCount('kpiDone', doneList.length);
         setCount('queueTotalCount', riskUsersList.length);
-        setCount('criticalCount', criticalCount);
-        setCount('highCount', highCount);
-        setCount('observeCount', observeCount);
         setCount('userTotalCount', filteredList.length);
         setCount('userStartRecord', filteredList.length > 0 ? start + 1 : 0);
         setCount('userEndRecord', Math.min(end, filteredList.length));
@@ -1821,14 +1819,14 @@ class RiskMonitoringSystemV4 extends RiskMonitoringSystemBase {
                             </div>
                         </div>
 
-                    <!-- 3. 关联对象 -->
-                    <div style="flex: 0 0 280px; display: flex; flex-direction: column; gap: 6px; border-left: 1px solid #f1f5f9; padding-left: 20px;">
+                    <!-- 3. 关联对象 + 工单状态 -->
+                    <div style="flex: 0 0 300px; display: flex; flex-direction: column; gap: 6px; border-left: 1px solid #f1f5f9; padding-left: 20px;">
                         <div style="font-size: 12px; color: #64748b;">
-                            <i class="fas fa-users" style="width: 16px;"></i> 关联用户: 
-                            ${event.user_ids.map(uid => `<span class="event-link-text" onclick="app.viewUserDetail('${uid}')">${uid}</span>`).join(', ')}
+                            <i class="fas fa-users" style="width: 16px;"></i> 关联用户:
+                            ${event.user_ids.map(uid => this.renderEventUserLink(uid)).join(' ')}
                     </div>
                         <div style="font-size: 12px; color: #64748b;">
-                            <i class="fas fa-fingerprint" style="width: 16px;"></i> 关联实体: 
+                            <i class="fas fa-fingerprint" style="width: 16px;"></i> 关联实体:
                             <span class="event-entity-tag">FP_889977</span> <span class="event-entity-tag">112.25.67.89</span>
                         </div>
                     </div>
@@ -1859,6 +1857,15 @@ class RiskMonitoringSystemV4 extends RiskMonitoringSystemBase {
         document.getElementById('criticalEventCount').textContent = realtimeAlertFeed.filter(e => e.level === 'critical').length;
         
         if (!isSilent) this.hideLoading();
+    }
+
+    renderEventUserLink(uid) {
+        const u = typeof riskUsersList !== 'undefined' ? riskUsersList.find(r => r.user_id === uid) : null;
+        const csMap = { unclaimed:'待接单', processing:'受理中', pending_audit:'待稽查', audited:'已完结' };
+        const csColor = { unclaimed:'#94a3b8', processing:'#2563eb', pending_audit:'#ea580c', audited:'#10b981' };
+        const cs = u ? u.claim_status : null;
+        const badge = cs ? '<span style="font-size:10px;padding:1px 6px;border-radius:4px;background:' + csColor[cs] + '18;color:' + csColor[cs] + ';font-weight:700;margin-left:2px;">' + csMap[cs] + '</span>' : '';
+        return '<span class="event-link-text" onclick="app.viewUserDetail(\'' + uid + '\')">' + uid + '</span>' + badge;
     }
 
     viewEventDetail(alertId) {
