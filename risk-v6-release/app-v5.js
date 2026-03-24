@@ -346,31 +346,51 @@ class RiskMonitoringSystemV4 extends RiskMonitoringSystemBase {
 
     // ===== 工单操作 =====
     claimUser(userId) {
-        if (confirm(`确认接单用户 ${userId}？\n接单后该工单将锁定给您处理。`)) {
-            const user = riskUsersList.find(u => u.user_id === userId);
-            if (user) {
-                user.claim_status = 'processing';
-                user.claimed_by = CURRENT_USER;
-                user.claimed_at = new Date().toISOString().replace('T',' ').slice(0,19);
-                this.showToast(`已成功接单 ${userId}`, 'success');
-                this.loadRiskMonitorPanel();
-                this.loadUsersView();
+        showWorkflowModal({
+            icon: '<i class="fas fa-hand-paper" style="color:#3b82f6;"></i>',
+            iconBg: '#dbeafe',
+            title: '确认接单',
+            subtitle: `用户 ${userId}`,
+            desc: '接单后该工单将<strong>锁定给您处理</strong>，其他运营无法操作。<br>请确认您有时间审核该用户。',
+            btnText: '<i class="fas fa-hand-paper"></i> 确认接单',
+            btnColor: '#3b82f6',
+            showReason: false,
+            onConfirm: () => {
+                const user = riskUsersList.find(u => u.user_id === userId);
+                if (user) {
+                    user.claim_status = 'processing';
+                    user.claimed_by = CURRENT_USER;
+                    user.claimed_at = new Date().toISOString().replace('T',' ').slice(0,19);
+                    this.showToast(`已成功接单 ${userId}`, 'success');
+                    this.loadRiskMonitorPanel();
+                    this.loadUsersView();
+                }
             }
-        }
+        });
     }
 
     releaseUser(userId) {
-        if (confirm(`确认解单用户 ${userId}？\n释放后其他运营可接单处理。`)) {
-            const user = riskUsersList.find(u => u.user_id === userId);
-            if (user) {
-                user.claim_status = 'unclaimed';
-                user.claimed_by = null;
-                user.claimed_at = null;
-                this.showToast(`已解单 ${userId}，工单已释放回待接单`, 'info');
-                this.loadRiskMonitorPanel();
-                this.loadUsersView();
+        showWorkflowModal({
+            icon: '<i class="fas fa-undo" style="color:#f59e0b;"></i>',
+            iconBg: '#fef3c7',
+            title: '确认解单',
+            subtitle: `用户 ${userId}`,
+            desc: '解单后该工单将<strong>释放回待接单池</strong>，其他运营可以接单处理。',
+            btnText: '<i class="fas fa-undo"></i> 确认解单',
+            btnColor: '#f59e0b',
+            showReason: false,
+            onConfirm: () => {
+                const user = riskUsersList.find(u => u.user_id === userId);
+                if (user) {
+                    user.claim_status = 'unclaimed';
+                    user.claimed_by = null;
+                    user.claimed_at = null;
+                    this.showToast(`已解单 ${userId}，工单已释放`, 'info');
+                    this.loadRiskMonitorPanel();
+                    this.loadUsersView();
+                }
             }
-        }
+        });
     }
 
     showAuditModal(userId) {
