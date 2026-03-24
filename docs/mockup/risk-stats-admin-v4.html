@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>风险入款统计 - VVOSS Admin</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #f0f2f5;
+    color: #333;
+    font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    font-size: 13px;
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ── Sidebar (dark, matching VVOSS exactly) ── */
+  .sidebar {
+    width: 186px; min-height: 100vh;
+    background: #0c1023;
+    display: flex; flex-direction: column;
+    flex-shrink: 0;
+    overflow-y: auto;
+  }
+  .sidebar-logo {
+    padding: 14px 16px 2px;
+    font-size: 15px; font-weight: 700; color: #fff;
+  }
+  .sidebar-logo span { color: #5b9cf6; }
+  .sidebar-logo-sub {
+    padding: 0 16px 14px;
+    font-size: 10px; color: #2e3546;
+  }
+
+  .nav-item {
+    padding: 9px 14px;
+    font-size: 13px; color: #5e6a82;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 8px;
+    transition: all .12s;
+  }
+  .nav-item:hover { color: #8b9ab4; background: rgba(255,255,255,.025); }
+  .nav-item .ico { font-size: 13px; width: 20px; text-align: center; }
+
+  .nav-section {
+    padding: 9px 14px;
+    font-size: 13px; color: #8090aa;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 8px;
+    font-weight: 500;
+  }
+  .nav-section .ico { font-size: 13px; width: 20px; text-align: center; }
+  .nav-section .arrow { margin-left: auto; font-size: 10px; color: #3e4a62; }
+
+  .nav-child {
+    padding: 8px 14px 8px 46px;
+    font-size: 12px; color: #4a5670;
+    cursor: pointer; transition: all .12s;
+  }
+  .nav-child:hover { color: #8b9ab4; }
+  .nav-child.active {
+    color: #fff;
+    background: linear-gradient(90deg, #1a3a6a 0%, transparent 100%);
+    border-left: 3px solid #3884f4;
+    padding-left: 43px;
+  }
+
+  /* ── Top Bar ── */
+  .topbar {
+    height: 48px; background: #fff;
+    border-bottom: 1px solid #e8eaed;
+    display: flex; align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+  }
+  .topbar .hamburger { font-size: 18px; color: #888; cursor: pointer; }
+  .topbar .user {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; color: #666;
+  }
+  .topbar .avatar {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: linear-gradient(135deg, #4a8af4, #7c5bf6);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; color: #fff;
+  }
+
+  /* ── Main ── */
+  .main-wrap { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .main { flex: 1; padding: 16px 20px; overflow-y: auto; }
+
+  .breadcrumb { font-size: 12px; color: #999; margin-bottom: 12px; }
+  .breadcrumb a { color: #5b9cf6; text-decoration: none; }
+  .page-title { font-size: 16px; font-weight: 600; color: #1a1a1a; margin-bottom: 16px; }
+
+  /* ── Filter ── */
+  .filter-row {
+    display: flex; align-items: flex-end; gap: 12px;
+    margin-bottom: 16px; flex-wrap: wrap;
+    background: #fff; padding: 14px 16px;
+    border-radius: 6px; border: 1px solid #e8eaed;
+  }
+  .fg { display: flex; flex-direction: column; gap: 4px; }
+  .fg label { font-size: 11px; color: #999; }
+  .fg select, .fg input[type="date"] {
+    background: #fff; border: 1px solid #d9dce3;
+    color: #333; padding: 6px 10px; border-radius: 4px;
+    font-size: 12px; outline: none; min-width: 130px;
+  }
+  .fg select:focus, .fg input:focus { border-color: #4a8af4; }
+  .presets {
+    display: flex; border: 1px solid #d9dce3;
+    border-radius: 4px; overflow: hidden;
+  }
+  .presets .p {
+    padding: 6px 14px; font-size: 12px;
+    cursor: pointer; color: #666;
+    border-right: 1px solid #d9dce3;
+    transition: all .12s;
+  }
+  .presets .p:last-child { border-right: none; }
+  .presets .p.on { background: #e8f0fe; color: #4a8af4; font-weight: 500; }
+  .presets .p:hover:not(.on) { background: #f5f6f8; }
+  .btn-q {
+    padding: 6px 18px; border-radius: 4px; font-size: 12px;
+    background: #4a8af4; color: #fff; border: none; cursor: pointer;
+  }
+  .btn-r {
+    padding: 6px 14px; border-radius: 4px; font-size: 12px;
+    background: #fff; color: #666; border: 1px solid #d9dce3; cursor: pointer;
+  }
+
+  /* ── KPI ── */
+  .kpi-row { display: flex; gap: 12px; margin-bottom: 16px; }
+  .kpi {
+    flex: 1; background: #fff;
+    border: 1px solid #e8eaed; border-radius: 6px;
+    padding: 14px 16px;
+  }
+  .kpi .kl {
+    font-size: 12px; color: #999;
+    display: flex; align-items: center; gap: 5px;
+    margin-bottom: 8px;
+  }
+  .kpi .kl .d { width: 7px; height: 7px; border-radius: 50%; }
+  .kpi .kv { font-size: 22px; font-weight: 700; }
+  .kpi .ks { font-size: 11px; color: #aaa; margin-top: 3px; }
+
+  /* ── Chart ── */
+  .card {
+    background: #fff; border: 1px solid #e8eaed;
+    border-radius: 6px; margin-bottom: 16px;
+  }
+  .card-h {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px; border-bottom: 1px solid #f0f1f3;
+  }
+  .card-h h3 { font-size: 14px; font-weight: 600; color: #333; }
+  .tabs { display: flex; border: 1px solid #d9dce3; border-radius: 4px; overflow: hidden; }
+  .tabs .t {
+    padding: 4px 14px; font-size: 11px;
+    cursor: pointer; color: #888;
+    border-right: 1px solid #d9dce3;
+  }
+  .tabs .t:last-child { border-right: none; }
+  .tabs .t.on { background: #e8f0fe; color: #4a8af4; font-weight: 500; }
+  .card-b { padding: 16px; }
+
+  /* ── Table ── */
+  .tbl { width: 100%; border-collapse: collapse; }
+  .tbl th {
+    text-align: left; padding: 9px 14px;
+    background: #fafbfc; color: #999; font-weight: 500;
+    font-size: 12px; border-bottom: 1px solid #e8eaed;
+  }
+  .tbl td {
+    padding: 9px 14px; border-bottom: 1px solid #f3f4f6;
+    font-size: 12px; color: #555;
+  }
+  .tbl tr:hover td { background: #f8f9fb; }
+  .c-g { color: #16a34a; font-weight: 500; }
+  .c-r { color: #dc2626; font-weight: 500; }
+  .c-o { color: #d97706; font-weight: 500; }
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 11px; font-weight: 500; }
+  .tg { background: #e8f8ee; color: #16a34a; }
+  .tr { background: #fde8e8; color: #dc2626; }
+  .ty { background: #f0f1f3; color: #888; }
+  .op { color: #4a8af4; cursor: pointer; font-size: 12px; }
+  .op:hover { text-decoration: underline; }
+  .btn-e {
+    padding: 5px 14px; border-radius: 4px; font-size: 12px;
+    background: #17a34a; color: #fff; border: none; cursor: pointer;
+  }
+
+  .pg-bar {
+    display: flex; align-items: center; justify-content: flex-end;
+    gap: 6px; padding: 10px 16px; font-size: 12px; color: #999;
+  }
+  .pg {
+    min-width: 28px; height: 28px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 4px; cursor: pointer;
+    background: #fff; border: 1px solid #d9dce3;
+    color: #555; font-size: 12px;
+  }
+  .pg:hover { border-color: #4a8af4; color: #4a8af4; }
+  .pg.on { background: #4a8af4; color: #fff; border-color: #4a8af4; }
+  .pg-bar select {
+    background: #fff; border: 1px solid #d9dce3;
+    color: #555; padding: 4px 8px; border-radius: 4px; font-size: 11px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ── Sidebar ── -->
+<div class="sidebar">
+  <div class="sidebar-logo"><span>VVOSS</span> Admin</div>
+  <div class="sidebar-logo-sub">GTAdmin</div>
+
+  <div class="nav-item"><span class="ico">📊</span> 平台管理</div>
+  <div class="nav-item"><span class="ico">👥</span> 商户管理</div>
+  <div class="nav-item"><span class="ico">👤</span> 客户管理</div>
+  <div class="nav-item"><span class="ico">💹</span> 清结平台</div>
+  <div class="nav-item"><span class="ico">📄</span> 结算平台</div>
+
+  <div class="nav-section"><span class="ico">💼</span> 资金与交易 <span class="arrow">▾</span></div>
+  <div class="nav-child">💳 钱包管理</div>
+  <div class="nav-child">📋 线上交易</div>
+  <div class="nav-child">📝 交款记录</div>
+
+  <div style="height:6px"></div>
+  <div class="nav-item"><span class="ico">🔗</span> TRON冻约</div>
+  <div class="nav-item"><span class="ico">⚙️</span> TRON管控</div>
+  <div class="nav-item"><span class="ico">🔍</span> TRON匹配</div>
+
+  <div style="height:6px"></div>
+  <div class="nav-item"><span class="ico">📦</span> 结算离场</div>
+  <div class="nav-item"><span class="ico">💰</span> 操作提额</div>
+  <div class="nav-item"><span class="ico">🔎</span> 链上余额跟踪</div>
+  <div class="nav-child active">📈 风险入款统计</div>
+
+  <div style="height:6px"></div>
+  <div class="nav-section"><span class="ico">📌</span> 任务与运营 <span class="arrow">▾</span></div>
+  <div class="nav-child">📨 挂收设备</div>
+  <div class="nav-child">📋 挂组任务</div>
+  <div class="nav-child">🔄 区块处理</div>
+  <div class="nav-child">📊 帐单字段状态</div>
+
+  <div style="height:6px"></div>
+  <div class="nav-section"><span class="ico">⚙️</span> 系统分管理 <span class="arrow">▾</span></div>
+  <div class="nav-child">👤 账户管理</div>
+  <div class="nav-child">🔐 商户账号</div>
+  <div class="nav-child">🎭 角色管理</div>
+  <div class="nav-child">👥 黑名单管理</div>
+  <div class="nav-child">📋 网络最新记录</div>
+  <div class="nav-child">🏢 灾控管控中心</div>
+</div>
+
+<!-- ── Main ── -->
+<div class="main-wrap">
+  <div class="topbar">
+    <div class="hamburger">☰</div>
+    <div class="user">
+      <div class="avatar">L</div>
+      <span>laoluan</span>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="breadcrumb">🔎 <a href="#">链上余额跟踪</a> &gt; 风险入款统计</div>
+    <div class="page-title">风险入款统计</div>
+
+    <!-- Filters -->
+    <div class="filter-row">
+      <div class="fg">
+        <label>商户</label>
+        <select style="min-width:160px">
+          <option>全部商户</option>
+          <option selected>再次出发 (1261)</option>
+          <option>商户B (1088)</option>
+          <option>商户C (1342)</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label>币种</label>
+        <select><option>KHR</option></select>
+      </div>
+      <div class="fg">
+        <label>时间范围</label>
+        <div class="presets">
+          <div class="p on" onclick="pickR(this,30)">30天</div>
+          <div class="p" onclick="pickR(this,90)">90天</div>
+          <div class="p" onclick="pickR(this,365)">365天</div>
+          <div class="p" onclick="pickR(this,-1)">自定义</div>
+        </div>
+      </div>
+      <div class="fg" id="dr" style="display:none">
+        <label>起止日期</label>
+        <div style="display:flex;gap:4px;align-items:center;">
+          <input type="date" value="2026-02-15">
+          <span style="color:#999">~</span>
+          <input type="date" value="2026-03-16">
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;padding-bottom:1px;">
+        <button class="btn-q">查 询</button>
+        <button class="btn-r">重置</button>
+      </div>
+    </div>
+
+    <!-- KPI -->
+    <div class="kpi-row">
+      <div class="kpi">
+        <div class="kl"><span class="d" style="background:#d97706"></span> 今日风险入款</div>
+        <div class="kv" style="color:#d97706">9.72</div>
+        <div class="ks">KHR · 4笔</div>
+      </div>
+      <div class="kpi">
+        <div class="kl"><span class="d" style="background:#16a34a"></span> 今日已退款</div>
+        <div class="kv" style="color:#16a34a">2.00</div>
+        <div class="ks">KHR · 1笔</div>
+      </div>
+      <div class="kpi">
+        <div class="kl"><span class="d" style="background:#d97706"></span> 本周风险入款</div>
+        <div class="kv" style="color:#d97706">43.60</div>
+        <div class="ks">KHR · 19笔</div>
+      </div>
+      <div class="kpi">
+        <div class="kl"><span class="d" style="background:#16a34a"></span> 本周已退款</div>
+        <div class="kv" style="color:#16a34a">9.10</div>
+        <div class="ks">KHR · 5笔</div>
+      </div>
+      <div class="kpi">
+        <div class="kl"><span class="d" style="background:#d97706"></span> 累计风险入款</div>
+        <div class="kv" style="color:#d97706">201.20</div>
+        <div class="ks">KHR · 96笔</div>
+      </div>
+      <div class="kpi">
+        <div class="kl"><span class="d" style="background:#16a34a"></span> 累计已退款</div>
+        <div class="kv" style="color:#16a34a">58.40</div>
+        <div class="ks">KHR · 29笔 · 退款率 29%</div>
+      </div>
+    </div>
+
+    <!-- Chart -->
+    <div class="card">
+      <div class="card-h">
+        <h3>风险入款 / 退款趋势</h3>
+        <div class="tabs">
+          <div class="t on">金额</div>
+          <div class="t">笔数</div>
+        </div>
+      </div>
+      <div class="card-b">
+        <div id="trendChart" style="width:100%;height:300px;"></div>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="card">
+      <div class="card-h">
+        <h3>每日明细</h3>
+        <button class="btn-e">📥 导出CSV</button>
+      </div>
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th>日期</th>
+            <th>风险入款</th>
+            <th>笔数</th>
+            <th>已退款</th>
+            <th>笔数</th>
+            <th>未退款</th>
+            <th>退款率</th>
+            <th>趋势</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="tb"></tbody>
+      </table>
+      <div class="pg-bar">
+        <span>共 30 条</span>
+        <div class="pg">&lt;</div>
+        <div class="pg on">1</div>
+        <div class="pg">2</div>
+        <div class="pg">3</div>
+        <div class="pg">&gt;</div>
+        <select><option>10 条/页</option><option>20 条/页</option></select>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function pickR(el,d){
+  document.querySelectorAll('.presets .p').forEach(p=>p.classList.remove('on'));
+  el.classList.add('on');
+  document.getElementById('dr').style.display=d===-1?'flex':'none';
+}
+
+const N=30, dates=[], ri=[], ref=[], unref=[];
+for(let i=N-1;i>=0;i--){
+  const d=new Date(2026,2,16); d.setDate(d.getDate()-i);
+  dates.push(`${d.getMonth()+1}-${String(d.getDate()).padStart(2,'0')}`);
+  const p=(N-1-i)/(N-1);
+  const r=Math.max(3,14-p*5+(Math.random()-.5)*3);
+  ri.push(+r.toFixed(2));
+  const f=Math.max(.5,r*(.25+Math.random()*.15));
+  ref.push(+f.toFixed(2));
+  unref.push(+(r-f).toFixed(2));
+}
+ri[N-1]=9.72; ref[N-1]=2.00; unref[N-1]=7.72;
+
+const c=echarts.init(document.getElementById('trendChart'));
+c.setOption({
+  tooltip:{trigger:'axis',backgroundColor:'#fff',borderColor:'#e8eaed',
+    textStyle:{color:'#333',fontSize:12},
+    extraCssText:'box-shadow:0 2px 8px rgba(0,0,0,.08)'},
+  legend:{data:['风险入款','已退款','未退款'],
+    textStyle:{color:'#999',fontSize:11},top:0,right:0,
+    itemWidth:14,itemHeight:2},
+  grid:{left:48,right:16,top:32,bottom:28},
+  xAxis:{type:'category',data:dates,boundaryGap:false,
+    axisLabel:{color:'#bbb',fontSize:11},
+    axisLine:{lineStyle:{color:'#e8eaed'}},axisTick:{show:false}},
+  yAxis:{type:'value',name:'KHR',
+    nameTextStyle:{color:'#bbb',fontSize:10},
+    axisLabel:{color:'#bbb',fontSize:11},
+    splitLine:{lineStyle:{color:'#f3f4f6'}}},
+  series:[
+    {name:'风险入款',type:'line',data:ri,smooth:true,symbol:'none',
+      lineStyle:{width:2.5,color:'#d97706'},
+      areaStyle:{color:{type:'linear',x:0,y:0,x2:0,y2:1,
+        colorStops:[{offset:0,color:'rgba(217,119,6,.1)'},{offset:1,color:'rgba(217,119,6,.01)'}]}}},
+    {name:'已退款',type:'line',data:ref,smooth:true,symbol:'none',
+      lineStyle:{width:2,color:'#16a34a'}},
+    {name:'未退款',type:'line',data:unref,smooth:true,symbol:'none',
+      lineStyle:{width:1.5,color:'#dc2626',type:'dashed'}},
+  ],
+});
+
+const tb=document.getElementById('tb');
+for(let i=N-1;i>=Math.max(0,N-10);i--){
+  const rate=((ref[i]/ri[i])*100).toFixed(0);
+  const cr=Math.max(1,Math.round(ri[i]/2.5));
+  const cf=Math.max(1,Math.round(ref[i]/1.8));
+  const pr=i<N-1?((ref[i+1]/ri[i+1])*100).toFixed(0):rate;
+  const df=rate-pr;
+  const tc=df>0?'tg':df<0?'tr':'ty';
+  const tt=df>0?`↑${df}%`:df<0?`↓${Math.abs(df)}%`:'—';
+  tb.innerHTML+=`<tr>
+    <td>${dates[i]}</td>
+    <td class="c-o">${ri[i].toFixed(2)}</td><td>${cr}</td>
+    <td class="c-g">${ref[i].toFixed(2)}</td><td>${cf}</td>
+    <td class="c-r">${unref[i].toFixed(2)}</td>
+    <td>${rate}%</td>
+    <td><span class="tag ${tc}">${tt}</span></td>
+    <td><span class="op">详情</span></td>
+  </tr>`;
+}
+window.addEventListener('resize',()=>c.resize());
+</script>
+</body>
+</html>

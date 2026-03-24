@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>风险入款/退款统计 - VVOSS Admin</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #f0f2f5;
+    color: #333;
+    font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', sans-serif;
+    font-size: 13px;
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ── Sidebar (dark, matching VVOSS) ── */
+  .sidebar {
+    width: 180px; min-height: 100vh;
+    background: #0c1023;
+    display: flex; flex-direction: column;
+    flex-shrink: 0;
+  }
+  .sidebar-logo {
+    padding: 16px 16px 2px;
+    font-size: 15px; font-weight: 700; color: #fff;
+  }
+  .sidebar-logo span { color: #5b9cf6; }
+  .sidebar-logo-sub {
+    padding: 0 16px 18px;
+    font-size: 10px; color: #3a4050;
+  }
+  .nav-item {
+    padding: 9px 16px;
+    font-size: 13px; color: #6a7185;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 8px;
+    transition: all .12s;
+    border-left: 3px solid transparent;
+  }
+  .nav-item:hover { color: #a0a8bc; background: rgba(255,255,255,.03); }
+  .nav-item.parent { color: #9aa0b4; font-weight: 500; }
+  .nav-item.expanded { color: #b0b8cc; }
+  .nav-sub {
+    padding: 7px 16px 7px 44px;
+    font-size: 12px; color: #4e5670;
+    cursor: pointer; transition: all .12s;
+  }
+  .nav-sub:hover { color: #8b95a8; }
+  .nav-sub.active {
+    color: #5b9cf6;
+    background: linear-gradient(90deg, rgba(56,132,244,.12) 0%, transparent 100%);
+    border-left: 3px solid #3884f4;
+    margin-left: -3px;
+    padding-left: 47px;
+  }
+  .nav-icon { font-size: 14px; width: 18px; text-align: center; }
+
+  /* ── Top Bar (white) ── */
+  .topbar {
+    height: 48px;
+    background: #fff;
+    border-bottom: 1px solid #e8eaed;
+    display: flex; align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+  }
+  .topbar .hamburger { font-size: 18px; color: #666; cursor: pointer; }
+  .topbar .user {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; color: #666;
+  }
+  .topbar .user-avatar {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: linear-gradient(135deg, #4a8af4, #7c5bf6);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; color: #fff;
+  }
+
+  /* ── Main ── */
+  .main-wrap { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .main { flex: 1; padding: 16px 20px; overflow-y: auto; }
+
+  .breadcrumb {
+    font-size: 12px; color: #999; margin-bottom: 12px;
+  }
+  .breadcrumb a { color: #5b9cf6; text-decoration: none; }
+  .page-title {
+    font-size: 16px; font-weight: 600; color: #1a1a1a;
+    margin-bottom: 16px;
+  }
+
+  /* ── Filter Row ── */
+  .filter-row {
+    display: flex; align-items: flex-end; gap: 12px;
+    margin-bottom: 16px; flex-wrap: wrap;
+  }
+  .filter-group { display: flex; flex-direction: column; gap: 4px; }
+  .filter-group label { font-size: 11px; color: #999; }
+  .filter-group select,
+  .filter-group input[type="date"] {
+    background: #fff; border: 1px solid #d9dce3;
+    color: #333; padding: 6px 10px; border-radius: 4px;
+    font-size: 12px; outline: none; min-width: 130px;
+  }
+  .filter-group select:focus,
+  .filter-group input:focus { border-color: #4a8af4; }
+
+  .filter-presets {
+    display: flex; gap: 0;
+    border: 1px solid #d9dce3; border-radius: 4px;
+    overflow: hidden; background: #fff;
+  }
+  .filter-presets .fp {
+    padding: 6px 14px; font-size: 12px;
+    cursor: pointer; color: #666;
+    transition: all .12s;
+    border-right: 1px solid #d9dce3;
+  }
+  .filter-presets .fp:last-child { border-right: none; }
+  .filter-presets .fp.active { background: #e8f0fe; color: #4a8af4; font-weight: 500; }
+  .filter-presets .fp:hover:not(.active) { background: #f5f6f8; }
+
+  .btn-query {
+    padding: 6px 18px; border-radius: 4px; font-size: 12px;
+    background: #4a8af4; color: #fff; border: none;
+    cursor: pointer; font-weight: 500;
+  }
+  .btn-query:hover { background: #3a7ae4; }
+  .btn-reset {
+    padding: 6px 14px; border-radius: 4px; font-size: 12px;
+    background: #fff; color: #666;
+    border: 1px solid #d9dce3; cursor: pointer;
+  }
+  .btn-reset:hover { border-color: #b0b4bc; }
+
+  /* ── KPI Cards ── */
+  .kpi-strip { display: flex; gap: 12px; margin-bottom: 16px; }
+  .kpi-item {
+    flex: 1; background: #fff;
+    border: 1px solid #e8eaed; border-radius: 6px;
+    padding: 14px 16px;
+  }
+  .kpi-item .kl {
+    font-size: 12px; color: #999;
+    display: flex; align-items: center; gap: 6px;
+    margin-bottom: 8px;
+  }
+  .kpi-item .kl .dot {
+    width: 7px; height: 7px; border-radius: 50%;
+  }
+  .kpi-item .kv { font-size: 22px; font-weight: 700; }
+  .kpi-item .ks { font-size: 11px; color: #aaa; margin-top: 3px; }
+
+  /* ── Chart Card ── */
+  .chart-card {
+    background: #fff; border: 1px solid #e8eaed;
+    border-radius: 6px; margin-bottom: 16px;
+  }
+  .chart-card-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px; border-bottom: 1px solid #f0f1f3;
+  }
+  .chart-card-header h3 { font-size: 14px; font-weight: 600; color: #333; }
+  .chart-toggle {
+    display: flex; border: 1px solid #d9dce3;
+    border-radius: 4px; overflow: hidden;
+  }
+  .chart-toggle .ct {
+    padding: 4px 14px; font-size: 11px;
+    cursor: pointer; color: #888; transition: all .12s;
+    border-right: 1px solid #d9dce3;
+  }
+  .chart-toggle .ct:last-child { border-right: none; }
+  .chart-toggle .ct.active { background: #e8f0fe; color: #4a8af4; font-weight: 500; }
+  .chart-body { padding: 16px; }
+
+  /* ── Table ── */
+  .table-card {
+    background: #fff; border: 1px solid #e8eaed;
+    border-radius: 6px; overflow: hidden;
+  }
+  .table-card-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px; border-bottom: 1px solid #f0f1f3;
+  }
+  .table-card-header h3 { font-size: 14px; font-weight: 600; color: #333; }
+  .btn-export {
+    padding: 5px 14px; border-radius: 4px; font-size: 12px;
+    background: #17a34a; color: #fff; border: none; cursor: pointer;
+  }
+  .btn-export:hover { background: #149140; }
+
+  .data-table { width: 100%; border-collapse: collapse; }
+  .data-table th {
+    text-align: left; padding: 9px 14px;
+    background: #fafbfc; color: #888; font-weight: 500;
+    font-size: 12px; border-bottom: 1px solid #e8eaed;
+  }
+  .data-table td {
+    padding: 9px 14px; border-bottom: 1px solid #f3f4f6;
+    font-size: 12px; color: #555;
+  }
+  .data-table tr:hover td { background: #f8f9fb; }
+  .amt-green { color: #16a34a; font-weight: 500; }
+  .amt-red { color: #dc2626; font-weight: 500; }
+  .amt-orange { color: #d97706; font-weight: 500; }
+  .tag {
+    display: inline-block; padding: 2px 8px; border-radius: 3px;
+    font-size: 11px; font-weight: 500;
+  }
+  .tag-green { background: #e8f8ee; color: #16a34a; }
+  .tag-red { background: #fde8e8; color: #dc2626; }
+  .tag-gray { background: #f0f1f3; color: #888; }
+  .op-link { color: #4a8af4; cursor: pointer; font-size: 12px; }
+  .op-link:hover { text-decoration: underline; }
+
+  .pagination {
+    display: flex; align-items: center; justify-content: flex-end;
+    gap: 6px; padding: 10px 16px;
+    font-size: 12px; color: #999;
+  }
+  .pagination .pg {
+    min-width: 28px; height: 28px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 4px; cursor: pointer;
+    background: #fff; border: 1px solid #d9dce3;
+    color: #555; font-size: 12px;
+  }
+  .pagination .pg:hover { border-color: #4a8af4; color: #4a8af4; }
+  .pagination .pg.active { background: #4a8af4; color: #fff; border-color: #4a8af4; }
+  .pagination select {
+    background: #fff; border: 1px solid #d9dce3;
+    color: #555; padding: 4px 8px; border-radius: 4px; font-size: 11px;
+  }
+</style>
+</head>
+<body>
+
+<!-- Sidebar (dark) -->
+<div class="sidebar">
+  <div class="sidebar-logo"><span>VVOSS</span> Admin</div>
+  <div class="sidebar-logo-sub">by loadrush</div>
+
+  <div class="nav-item"><span class="nav-icon">📊</span> 平台管理</div>
+  <div class="nav-item"><span class="nav-icon">👥</span> 商户管理</div>
+  <div class="nav-item"><span class="nav-icon">👤</span> 商户管理</div>
+  <div class="nav-item"><span class="nav-icon">💹</span> 清算平台</div>
+  <div class="nav-item"><span class="nav-icon">📄</span> 帐单平台</div>
+
+  <div class="nav-item expanded"><span class="nav-icon">💼</span> 钱包与交易</div>
+  <div class="nav-sub">💳 钱包管理</div>
+  <div class="nav-sub">📋 线上交易</div>
+  <div class="nav-sub">📝 交易记录</div>
+
+  <div class="nav-item expanded"><span class="nav-icon">🛡️</span> 风控管理</div>
+  <div class="nav-sub active">📈 风险统计</div>
+  <div class="nav-sub">🔒 KUN冻结</div>
+  <div class="nav-sub">⚙️ KUN管控</div>
+
+  <div class="nav-item"><span class="nav-icon">🔍</span> KUN匹配</div>
+  <div class="nav-item"><span class="nav-icon">📦</span> 结算离场</div>
+  <div class="nav-item"><span class="nav-icon">💰</span> 操作提额</div>
+
+  <div class="nav-item expanded"><span class="nav-icon">📌</span> 任务与运营</div>
+  <div class="nav-sub">📨 挂售任务</div>
+  <div class="nav-sub">📋 挂组任务</div>
+  <div class="nav-sub">🔄 区块处理</div>
+  <div class="nav-sub">📊 帐单字段状态</div>
+
+  <div class="nav-item expanded"><span class="nav-icon">⚙️</span> 系统分管理</div>
+  <div class="nav-sub">👤 账户管理</div>
+  <div class="nav-sub">🔐 商户账号</div>
+  <div class="nav-sub">🎭 角色管理</div>
+  <div class="nav-sub">👥 等级管理</div>
+</div>
+
+<!-- Main -->
+<div class="main-wrap">
+  <div class="topbar">
+    <div class="hamburger">☰</div>
+    <div class="user">
+      <div class="user-avatar">L</div>
+      <span>loadrun</span>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="breadcrumb">🛡️ <a href="#">风控管理</a> &gt; 风险统计</div>
+    <div class="page-title">风险入款/退款统计</div>
+
+    <!-- Filters -->
+    <div class="filter-row">
+      <div class="filter-group">
+        <label>商户</label>
+        <select style="min-width:160px">
+          <option>全部商户</option>
+          <option selected>再次出发 (1261)</option>
+          <option>商户B (1088)</option>
+          <option>商户C (1342)</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>币种</label>
+        <select><option>KHR</option></select>
+      </div>
+      <div class="filter-group">
+        <label>时间范围</label>
+        <div class="filter-presets">
+          <div class="fp active" onclick="pickRange(this,30)">30天</div>
+          <div class="fp" onclick="pickRange(this,90)">90天</div>
+          <div class="fp" onclick="pickRange(this,365)">365天</div>
+          <div class="fp" onclick="pickRange(this,-1)">自定义</div>
+        </div>
+      </div>
+      <div class="filter-group" id="dateRange" style="display:none;">
+        <label>起止日期</label>
+        <div style="display:flex;gap:4px;align-items:center;">
+          <input type="date" value="2026-02-15">
+          <span style="color:#999">~</span>
+          <input type="date" value="2026-03-16">
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;padding-bottom:1px;">
+        <button class="btn-query">查 询</button>
+        <button class="btn-reset">重置</button>
+      </div>
+    </div>
+
+    <!-- KPI -->
+    <div class="kpi-strip">
+      <div class="kpi-item">
+        <div class="kl"><span class="dot" style="background:#d97706"></span> 今日风险入款</div>
+        <div class="kv" style="color:#d97706">9.72</div>
+        <div class="ks">KHR · 4笔</div>
+      </div>
+      <div class="kpi-item">
+        <div class="kl"><span class="dot" style="background:#16a34a"></span> 今日已退款</div>
+        <div class="kv" style="color:#16a34a">2.00</div>
+        <div class="ks">KHR · 1笔</div>
+      </div>
+      <div class="kpi-item">
+        <div class="kl"><span class="dot" style="background:#d97706"></span> 本周风险入款</div>
+        <div class="kv" style="color:#d97706">43.60</div>
+        <div class="ks">KHR · 19笔</div>
+      </div>
+      <div class="kpi-item">
+        <div class="kl"><span class="dot" style="background:#16a34a"></span> 本周已退款</div>
+        <div class="kv" style="color:#16a34a">9.10</div>
+        <div class="ks">KHR · 5笔</div>
+      </div>
+      <div class="kpi-item">
+        <div class="kl"><span class="dot" style="background:#d97706"></span> 累计风险入款</div>
+        <div class="kv" style="color:#d97706">201.20</div>
+        <div class="ks">KHR · 96笔</div>
+      </div>
+      <div class="kpi-item">
+        <div class="kl"><span class="dot" style="background:#16a34a"></span> 累计已退款</div>
+        <div class="kv" style="color:#16a34a">58.40</div>
+        <div class="ks">KHR · 29笔 · 退款率 29%</div>
+      </div>
+    </div>
+
+    <!-- Chart -->
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <h3>风险入款 / 退款趋势</h3>
+        <div class="chart-toggle">
+          <div class="ct active">金额</div>
+          <div class="ct">笔数</div>
+        </div>
+      </div>
+      <div class="chart-body">
+        <div id="trendChart" style="width:100%;height:300px;"></div>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-card">
+      <div class="table-card-header">
+        <h3>每日明细</h3>
+        <button class="btn-export">📥 导出CSV</button>
+      </div>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>日期</th>
+            <th>风险入款</th>
+            <th>笔数</th>
+            <th>已退款</th>
+            <th>笔数</th>
+            <th>未退款</th>
+            <th>退款率</th>
+            <th>趋势</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+      <div class="pagination">
+        <span>共 30 条</span>
+        <div class="pg">&lt;</div>
+        <div class="pg active">1</div>
+        <div class="pg">2</div>
+        <div class="pg">3</div>
+        <div class="pg">&gt;</div>
+        <select><option>10 条/页</option><option>20 条/页</option></select>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function pickRange(el, d) {
+  document.querySelectorAll('.fp').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('dateRange').style.display = d === -1 ? 'flex' : 'none';
+}
+
+const days = 30;
+const dates = [], riskIn = [], refAmt = [], unrefAmt = [];
+for (let i = days - 1; i >= 0; i--) {
+  const d = new Date(2026, 2, 16); d.setDate(d.getDate() - i);
+  dates.push(`${d.getMonth()+1}-${String(d.getDate()).padStart(2,'0')}`);
+  const progress = (days - 1 - i) / (days - 1);
+  const ri = Math.max(3, 14 - progress * 5 + (Math.random() - 0.5) * 3);
+  riskIn.push(+ri.toFixed(2));
+  const ref = Math.max(0.5, ri * (0.25 + Math.random() * 0.15));
+  refAmt.push(+ref.toFixed(2));
+  unrefAmt.push(+(ri - ref).toFixed(2));
+}
+riskIn[days-1]=9.72; refAmt[days-1]=2.00; unrefAmt[days-1]=7.72;
+
+const chart = echarts.init(document.getElementById('trendChart'));
+chart.setOption({
+  tooltip: { trigger:'axis', backgroundColor:'#fff', borderColor:'#e8eaed',
+    textStyle:{color:'#333',fontSize:12},
+    extraCssText:'box-shadow:0 2px 8px rgba(0,0,0,.1)'
+  },
+  legend: {
+    data:['风险入款','已退款','未退款'],
+    textStyle:{color:'#888',fontSize:11}, top:0, right:0,
+    itemWidth:14, itemHeight:2,
+  },
+  grid:{ left:48, right:16, top:32, bottom:28 },
+  xAxis:{
+    type:'category', data:dates, boundaryGap:false,
+    axisLabel:{color:'#aaa',fontSize:11},
+    axisLine:{lineStyle:{color:'#e8eaed'}}, axisTick:{show:false},
+  },
+  yAxis:{
+    type:'value', name:'KHR',
+    nameTextStyle:{color:'#aaa',fontSize:10},
+    axisLabel:{color:'#aaa',fontSize:11},
+    splitLine:{lineStyle:{color:'#f3f4f6'}},
+  },
+  series:[
+    { name:'风险入款', type:'line', data:riskIn,
+      smooth:true, symbol:'none', lineStyle:{width:2.5,color:'#d97706'},
+      areaStyle:{color:{type:'linear',x:0,y:0,x2:0,y2:1,
+        colorStops:[{offset:0,color:'rgba(217,119,6,.12)'},{offset:1,color:'rgba(217,119,6,.01)'}]
+      }},
+    },
+    { name:'已退款', type:'line', data:refAmt,
+      smooth:true, symbol:'none', lineStyle:{width:2,color:'#16a34a'},
+    },
+    { name:'未退款', type:'line', data:unrefAmt,
+      smooth:true, symbol:'none',
+      lineStyle:{width:1.5,color:'#dc2626',type:'dashed'},
+    },
+  ],
+});
+
+const tbody = document.getElementById('tableBody');
+for (let i = days-1; i >= Math.max(0,days-10); i--) {
+  const rate = ((refAmt[i]/riskIn[i])*100).toFixed(0);
+  const cnt_ri = Math.max(1,Math.round(riskIn[i]/2.5));
+  const cnt_ref = Math.max(1,Math.round(refAmt[i]/1.8));
+  const prevRate = i<days-1 ? ((refAmt[i+1]/riskIn[i+1])*100).toFixed(0) : rate;
+  const diff = rate - prevRate;
+  const tCls = diff>0?'tag-green':diff<0?'tag-red':'tag-gray';
+  const tTxt = diff>0?`↑${diff}%`:diff<0?`↓${Math.abs(diff)}%`:'—';
+  tbody.innerHTML += `<tr>
+    <td>${dates[i]}</td>
+    <td class="amt-orange">${riskIn[i].toFixed(2)}</td><td>${cnt_ri}</td>
+    <td class="amt-green">${refAmt[i].toFixed(2)}</td><td>${cnt_ref}</td>
+    <td class="amt-red">${unrefAmt[i].toFixed(2)}</td>
+    <td>${rate}%</td>
+    <td><span class="tag ${tCls}">${tTxt}</span></td>
+    <td><span class="op-link">详情</span></td>
+  </tr>`;
+}
+window.addEventListener('resize',()=>chart.resize());
+</script>
+</body>
+</html>

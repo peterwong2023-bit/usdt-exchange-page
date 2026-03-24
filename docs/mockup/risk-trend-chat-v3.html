@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>风险退款趋势 - 方案B v3</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0e0e10; color: #e4e4e7;
+    font-family: -apple-system, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+    padding: 32px 40px;
+  }
+  h1 { font-size: 22px; font-weight: 600; color: #fff; margin-bottom: 4px; }
+  .page-sub { font-size: 13px; color: #71717a; margin-bottom: 32px; }
+
+  .chat-mockup {
+    max-width: 500px;
+    background: #1a1a2e;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,.4);
+  }
+  .chat-bar {
+    background: #16213e;
+    padding: 10px 14px;
+    display: flex; align-items: center; gap: 10px;
+    font-size: 13px; font-weight: 600; color: #e2e8f0;
+  }
+  .chat-bar .avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; color: #fff;
+  }
+  .chat-bubble {
+    margin: 12px;
+    background: #0f3460;
+    border-radius: 0 12px 12px 12px;
+    padding: 12px 14px;
+    font-size: 12.5px; line-height: 1.75;
+    color: #cbd5e1;
+    white-space: pre-line;
+  }
+  .chat-bubble b { color: #fff; }
+  .chat-bubble .divider {
+    border: none; border-top: 1px solid rgba(255,255,255,.08);
+    margin: 8px 0;
+  }
+  .chat-bubble .green { color: #4ade80; }
+  .chat-bubble .red { color: #f87171; }
+  .chat-bubble .dim { color: #64748b; font-size: 11.5px; }
+  .chat-chart {
+    margin: 8px 0 4px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #0a1929;
+    border: 1px solid rgba(255,255,255,.06);
+  }
+  .chat-time {
+    text-align: right; font-size: 11px; color: #475569;
+    padding: 2px 14px 10px;
+  }
+
+  .note {
+    max-width: 500px;
+    margin-top: 20px;
+    background: #1f1f23;
+    border: 1px solid #27272a;
+    border-radius: 12px;
+    padding: 16px;
+    font-size: 13px;
+    color: #a1a1aa;
+    line-height: 1.7;
+  }
+  .note b { color: #e4e4e7; }
+  .note .hl { color: #60a5fa; }
+</style>
+</head>
+<body>
+
+<h1>方案 B v3 — 30天趋势图 + 三维度汇总</h1>
+<p class="page-sub">数据维度：今日 / 本周 / 累计 · 图表：30天每日折线</p>
+
+<div class="chat-mockup">
+  <div class="chat-bar"><div class="avatar">R</div><span>风控日报 Bot</span></div>
+  <div class="chat-bubble">
+<b>🏢 再次出发 03-16 日报</b>
+💰 业务1个/2.50 KHR/40.00KHRX
+🔄 归集2个/4.20 KHR/82.00KHRX
+<hr class="divider">
+🏦 <b>KHR交易统计</b>
+⬆️ 入款: 8.20 KHR/3笔
+⬇️ 出款: 6.50 KHR/2笔
+✅ 净入: 1.70 KHR
+🔒 归集: 8.20 KHR/1笔
+⚠️ 可疑: 2.50 KHR
+🔐 风险已归集/未归集: 2.00/0.00 KHR
+🔴 风险已退/未退: 2.00/7.72 KHR
+<hr class="divider">
+📊 <b>风险退款统计 (KHR)</b>
+
+<span class="dim">           已退        未退</span>
+📅 今日   <span class="green">2.00</span>/1笔    <span class="red">7.72</span>/3笔
+📆 本周   <span class="green">9.10</span>/5笔    <span class="red">34.50</span>/14笔
+📋 累计   <span class="green">58.40</span>/29笔  <span class="red">142.80</span>/67笔
+<hr class="divider">
+📈 <b>风险退款趋势 (30天 KHR)</b>
+<div class="chat-chart" id="trendChart" style="width:100%;height:200px;"></div>
+<span class="dim">🟢已退金额  🔴未退金额  (每日 · KHR)</span>
+  </div>
+  <div class="chat-time">16:02</div>
+</div>
+
+<div class="note">
+  <b>最终方案</b>
+  <br>• 文字汇总三层：<span class="hl">今日</span> / <span class="hl">本周</span> / <span class="hl">累计</span>，各带金额+笔数
+  <br>• 趋势图为 <span class="hl">30天每日折线图</span>，绿色已退、红色未退
+  <br>• 面积填充辅助感知趋势走向，下降趋势一目了然
+  <br>• 实际推送时图表由 Puppeteer 截图为 PNG 发送到聊天
+</div>
+
+<div style="height:40px"></div>
+
+<script>
+const days = 30;
+const dates = [], refunded = [], unrefunded = [];
+
+for (let i = days - 1; i >= 0; i--) {
+  const d = new Date(2026, 2, 16);
+  d.setDate(d.getDate() - i);
+  dates.push(`${d.getMonth()+1}-${String(d.getDate()).padStart(2,'0')}`);
+
+  const progress = (days - 1 - i) / (days - 1);
+  const r = Math.max(0.5, 4.2 - progress * 2.5 + (Math.random() - 0.5) * 1.0);
+  refunded.push(+r.toFixed(2));
+
+  const u = Math.max(2, 10.5 - progress * 3.5 + (Math.random() - 0.5) * 1.8);
+  unrefunded.push(+u.toFixed(2));
+}
+refunded[days-1] = 2.00;
+unrefunded[days-1] = 7.72;
+
+const dom = document.getElementById('trendChart');
+const chart = echarts.init(dom);
+
+chart.setOption({
+  tooltip: {
+    trigger: 'axis',
+    backgroundColor: '#1e293b', borderColor: '#334155',
+    textStyle: { color: '#e2e8f0', fontSize: 11 },
+  },
+  grid: { left: 38, right: 12, top: 14, bottom: 24 },
+  xAxis: {
+    type: 'category', data: dates,
+    axisLabel: { fontSize: 9, color: '#475569', interval: 6 },
+    axisLine: { lineStyle: { color: '#1e293b' } },
+    axisTick: { show: false },
+  },
+  yAxis: {
+    type: 'value',
+    axisLabel: { fontSize: 9, color: '#475569' },
+    splitLine: { lineStyle: { color: '#1e293b' } },
+  },
+  series: [
+    {
+      name: '已退', type: 'line', data: refunded,
+      smooth: true, symbol: 'none', lineStyle: { width: 2, color: '#22c55e' },
+      areaStyle: { color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
+        colorStops: [
+          { offset: 0, color: 'rgba(34,197,94,.25)' },
+          { offset: 1, color: 'rgba(34,197,94,.02)' }
+        ]
+      }},
+    },
+    {
+      name: '未退', type: 'line', data: unrefunded,
+      smooth: true, symbol: 'none', lineStyle: { width: 2, color: '#ef4444' },
+      areaStyle: { color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
+        colorStops: [
+          { offset: 0, color: 'rgba(239,68,68,.15)' },
+          { offset: 1, color: 'rgba(239,68,68,.02)' }
+        ]
+      }},
+    },
+  ],
+});
+
+window.addEventListener('resize', () => chart.resize());
+</script>
+</body>
+</html>

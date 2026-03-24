@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>资金监控中心（TRON-USDT）- VVOSS Admin v3</title>
+<link href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #f0f2f5; color: #333; font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif; font-size: 13px; display: flex; min-height: 100vh; }
+
+  .sb { width: 200px; min-height: 100vh; background: #0d1120; flex-shrink: 0; overflow-y: auto; padding-bottom: 20px; }
+  .sb-logo { padding: 20px 20px 2px; font-size: 16px; font-weight: 700; color: #fff; text-align: center; }
+  .sb-ver { text-align: center; padding: 2px 0 20px; font-size: 10px; color: #2e3a52; }
+  .n { padding: 10px 20px; font-size: 13px; color: #5a6a88; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: all .15s; }
+  .n:hover { color: #8a9abc; background: rgba(255,255,255,.03); }
+  .n i { font-size: 16px; width: 20px; text-align: center; color: #4a5a78; }
+  .sec { padding: 10px 20px; font-size: 13px; color: #7888a8; cursor: pointer; display: flex; align-items: center; gap: 10px; font-weight: 500; }
+  .sec i { font-size: 16px; width: 20px; text-align: center; color: #5a6a88; }
+  .sec .arr { margin-left: auto; font-size: 12px; color: #3a4a68; }
+  .nc { padding: 9px 20px 9px 50px; font-size: 13px; color: #4a5a78; cursor: pointer; transition: all .15s; display: flex; align-items: center; gap: 10px; }
+  .nc:hover { color: #8a9abc; }
+  .nc i { font-size: 15px; width: 18px; text-align: center; color: #3e5080; }
+  .nc.act { margin: 3px 12px; padding: 9px 16px 9px 38px; background: linear-gradient(135deg, #1a3566 0%, #162d55 100%); border-radius: 8px; color: #5b9cf6; font-weight: 500; }
+  .nc.act i { color: #5b9cf6; }
+
+  .topbar { height: 48px; background: #fff; border-bottom: 1px solid #e8eaed; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
+  .topbar .hb { font-size: 20px; color: #888; cursor: pointer; }
+  .topbar .usr { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #666; }
+  .topbar .av { width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg,#4a8af4,#7c5bf6); display: flex; align-items: center; justify-content: center; font-size: 12px; color: #fff; }
+
+  .mw { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .mn { flex: 1; padding: 16px 20px; overflow-y: auto; }
+  .bc { font-size: 12px; color: #999; margin-bottom: 12px; display: flex; align-items: center; gap: 4px; }
+  .bc a { color: #5b9cf6; text-decoration: none; }
+  .pt { font-size: 16px; font-weight: 600; color: #1a1a1a; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; }
+  .pt .upd { font-size: 11px; color: #bbb; font-weight: 400; }
+
+  .frow { display: flex; align-items: flex-end; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; background: #fff; padding: 14px 16px; border-radius: 6px; border: 1px solid #e8eaed; }
+  .fg { display: flex; flex-direction: column; gap: 4px; }
+  .fg label { font-size: 11px; color: #999; }
+  .fg select, .fg input[type="date"] { background: #fff; border: 1px solid #d9dce3; color: #333; padding: 6px 10px; border-radius: 4px; font-size: 12px; outline: none; min-width: 130px; }
+  .fg select:focus, .fg input:focus { border-color: #4a8af4; }
+  .prs { display: flex; border: 1px solid #d9dce3; border-radius: 4px; overflow: hidden; }
+  .prs .p { padding: 6px 14px; font-size: 12px; cursor: pointer; color: #666; border-right: 1px solid #d9dce3; transition: all .12s; }
+  .prs .p:last-child { border-right: none; }
+  .prs .p.on { background: #e8f0fe; color: #4a8af4; font-weight: 500; }
+  .prs .p:hover:not(.on) { background: #f5f6f8; }
+  .bq { padding: 6px 18px; border-radius: 4px; font-size: 12px; background: #4a8af4; color: #fff; border: none; cursor: pointer; font-weight: 500; }
+  .bq:hover { background: #3b7de8; }
+  .brr { padding: 6px 14px; border-radius: 4px; font-size: 12px; background: #fff; color: #666; border: 1px solid #d9dce3; cursor: pointer; }
+  .brr:hover { border-color: #4a8af4; color: #4a8af4; }
+  .legend-row { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
+  .legend-row label { display: flex; align-items: center; gap: 4px; font-size: 12px; color: #666; cursor: pointer; user-select: none; position: relative; }
+  .legend-row input[type="checkbox"] { accent-color: #4a8af4; width: 13px; height: 13px; }
+  .legend-tip { display: none; position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); background: #1a1a1a; color: #fff; padding: 10px 14px; border-radius: 8px; font-size: 11px; line-height: 1.7; white-space: nowrap; z-index: 100; box-shadow: 0 4px 16px rgba(0,0,0,.25); pointer-events: none; }
+  .legend-tip::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 6px solid transparent; border-top-color: #1a1a1a; }
+  .legend-tip b { color: #fff; font-size: 12px; display: block; margin-bottom: 3px; }
+  .legend-tip .lt-dim { color: #aaa; }
+  .legend-row label:hover .legend-tip { display: block; }
+
+  .kr { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+  @media (max-width: 1000px) { .kr { grid-template-columns: repeat(2, 1fr); } }
+  .k { background: #fff; border: 1px solid #e8eaed; border-radius: 6px; padding: 14px 16px; transition: box-shadow .15s; }
+  .k:hover { box-shadow: 0 2px 8px rgba(0,0,0,.04); }
+  .k .kl { font-size: 12px; color: #999; display: flex; align-items: center; gap: 5px; margin-bottom: 8px; }
+  .k .kl .d { width: 7px; height: 7px; border-radius: 50%; }
+  .k .kv { font-size: 22px; font-weight: 700; line-height: 1.2; }
+  .k .ks { font-size: 11px; color: #aaa; margin-top: 4px; line-height: 1.5; }
+  .k .ks .up { color: #16a34a; font-weight: 500; }
+  .k .ks .dn { color: #dc2626; font-weight: 500; }
+
+  .wl-card { background: #fff; border: 1px solid #e8eaed; border-radius: 6px; margin-bottom: 16px; padding: 16px; }
+  .wl-title { font-size: 13px; font-weight: 600; color: #333; margin-bottom: 14px; display: flex; align-items: center; gap: 6px; }
+  .wl-bar-wrap { position: relative; height: 36px; background: #f5f6f8; border-radius: 4px; margin-bottom: 12px; overflow: visible; }
+  .wl-zone { position: absolute; top: 0; height: 100%; }
+  .wl-zone-danger { background: rgba(220,38,38,.08); border-radius: 4px 0 0 4px; }
+  .wl-zone-warning { background: rgba(217,119,6,.06); }
+  .wl-zone-normal { background: rgba(22,163,74,.06); }
+  .wl-zone-over { background: rgba(220,38,38,.06); border-radius: 0 4px 4px 0; }
+  .wl-marker { position: absolute; top: -6px; width: 2px; height: 48px; z-index: 2; }
+  .wl-marker-label { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 10px; white-space: nowrap; padding: 1px 5px; border-radius: 3px; }
+  .wl-marker-val { position: absolute; bottom: -18px; left: 50%; transform: translateX(-50%); font-size: 10px; color: #999; white-space: nowrap; }
+  .wl-current { position: absolute; top: 6px; width: 24px; height: 24px; border-radius: 50%; z-index: 5; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #fff; font-weight: 600; transform: translateX(-50%); box-shadow: 0 2px 8px rgba(0,0,0,.2); cursor: pointer; }
+  .wl-current::before { content: ''; position: absolute; inset: -4px; border-radius: 50%; border: 2px solid currentColor; opacity: 0.4; animation: wlPulse 2s ease-in-out infinite; }
+  .wl-current::after { content: ''; position: absolute; top: -8px; left: 50%; transform: translateX(-50%); border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 6px solid currentColor; }
+  .wl-current-tip { position: absolute; bottom: calc(100% + 12px); left: 50%; transform: translateX(-50%); background: #1a1a2e; color: #fff; padding: 5px 10px; border-radius: 5px; font-size: 11px; font-family: 'SF Mono','Cascadia Code','Consolas',monospace; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity .15s; box-shadow: 0 3px 12px rgba(0,0,0,.2); }
+  .wl-current-tip::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 5px solid #1a1a2e; }
+  .wl-current:hover .wl-current-tip { opacity: 1; }
+  @keyframes wlPulse { 0%,100%{opacity:.4;transform:scale(1)} 50%{opacity:.15;transform:scale(1.3)} }
+  /* 智能状态条 */
+  .wl-status { border-radius: 6px; padding: 12px 16px; }
+  .wl-status.st-normal { background: #f6fbf6; border: 1px solid #c4e1c5; }
+  .wl-status.st-wait-batch { background: #fffcf5; border: 1px solid #fde2b3; }
+  .wl-status.st-wait-window { background: #fef9e7; border: 1px solid #fde2b3; }
+  .wl-status.st-ready { background: #e8f8ee; border: 1px solid #a7d5a9; }
+  .wl-status.st-force { background: #fde8e8; border: 1px solid #fca5a5; }
+  .wl-status.st-low { background: #fde8e8; border: 1px solid #fca5a5; }
+  .wl-status-r1 { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+  .wl-status-tag { font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 5px; white-space: nowrap; }
+  .wl-status-num { font-size: 18px; font-weight: 700; font-family: 'SF Mono','Cascadia Code','Consolas',monospace; flex-shrink: 0; }
+  .wl-status-pills { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+  .wl-pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 4px; font-size: 11px; font-weight: 500; white-space: nowrap; }
+  .wl-pill.unmet { background: #fde8e8; color: #dc2626; }
+  .wl-pill.wait { background: #fef3cd; color: #92400e; }
+  .wl-pill.met { background: #e8f5e9; color: #2e7d32; }
+  .wl-pill .wl-pill-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+  .wl-pill.unmet .wl-pill-dot { background: #dc2626; }
+  .wl-pill.wait .wl-pill-dot { background: #d97706; }
+  .wl-pill.met .wl-pill-dot { background: #16a34a; }
+  .wl-status-hint { font-size: 11px; color: #999; margin-top: 6px; }
+
+  .wl-rec-marker { position: absolute; top: -6px; width: 0; height: 48px; z-index: 1; border-left: 2px dashed; opacity: 0.4; }
+  .wl-rec-marker-label { position: absolute; bottom: -30px; left: 50%; transform: translateX(-50%); font-size: 9px; white-space: nowrap; font-style: italic; }
+  .wl-rec-row { display: flex; align-items: center; gap: 8px; padding: 8px 12px; margin-bottom: 10px; background: #f8faff; border: 1px dashed #c5d5f0; border-radius: 5px; font-size: 12px; color: #666; cursor: pointer; user-select: none; transition: background .15s; }
+  .wl-rec-row:hover { background: #eef3fc; }
+  .wl-rec-icon { color: #4a8af4; font-size: 14px; flex-shrink: 0; }
+  .wl-rec-vals { font-weight: 500; color: #333; }
+  .wl-rec-diff { font-size: 11px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .wl-rec-toggle { margin-left: auto; color: #4a8af4; font-size: 12px; display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
+  .wl-rec-toggle i { font-size: 14px; transition: transform .2s; }
+  .wl-rec-detail { display: none; background: #fafbfd; border: 1px solid #e8edf5; border-radius: 6px; padding: 14px 16px; margin-bottom: 10px; font-size: 12px; }
+  .wl-rec-detail.open { display: block; }
+  .wl-rec-formula { margin-bottom: 12px; }
+  .wl-rec-formula-title { font-size: 11px; font-weight: 600; color: #555; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+  .wl-rec-formula-calc { font-family: 'SF Mono','Cascadia Code','Consolas',monospace; font-size: 11px; color: #666; margin-bottom: 2px; padding-left: 20px; }
+  .wl-rec-formula-compare { font-size: 11px; color: #999; padding-left: 20px; }
+  .wl-rec-data-hint { font-size: 11px; color: #bbb; margin-top: 8px; border-top: 1px solid #eef1f5; padding-top: 8px; display: flex; align-items: center; gap: 4px; }
+
+  .cd { background: #fff; border: 1px solid #e8eaed; border-radius: 6px; margin-bottom: 16px; }
+  .ch { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid #f0f1f3; }
+  .ch h3 { font-size: 14px; font-weight: 600; color: #333; }
+  .cb { padding: 16px; }
+
+  .tbl { width: 100%; border-collapse: collapse; }
+  .tbl th { text-align: left; padding: 9px 12px; background: #fafbfc; color: #999; font-weight: 500; font-size: 12px; border-bottom: 1px solid #e8eaed; white-space: nowrap; }
+  .tbl td { padding: 9px 12px; border-bottom: 1px solid #f3f4f6; font-size: 12px; color: #555; white-space: nowrap; }
+  .tbl tr:hover td { background: #f8f9fb; }
+  .cg { color: #16a34a; font-weight: 500; }
+  .cr { color: #dc2626; font-weight: 500; }
+  .net-cell { display: inline-flex; align-items: center; gap: 4px; }
+  .net-tag { display: inline-block; padding: 1px 5px; border-radius: 3px; font-size: 10px; font-weight: 600; line-height: 16px; }
+  .net-tag.in { background: #e8f8ee; color: #16a34a; }
+  .net-tag.out { background: #fde8e8; color: #dc2626; }
+  .net-warn { color: #d97706; font-size: 13px; cursor: help; margin-left: 2px; }
+  .th-tip { color: #bbb; font-size: 12px; cursor: help; margin-left: 3px; vertical-align: middle; }
+  .co { color: #d97706; font-weight: 500; }
+  .cb2 { color: #4a8af4; font-weight: 500; }
+  .cv { color: #8b5cf6; font-weight: 500; }
+  .mono { font-family: 'SF Mono','Cascadia Code','Consolas', monospace; font-size: 12px; }
+  .dim { color: #ccc; }
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 11px; font-weight: 500; }
+  .tag-g { background: #e8f8ee; color: #16a34a; }
+  .tag-r { background: #fde8e8; color: #dc2626; }
+  .tag-y { background: #fef9e7; color: #d97706; }
+  .tag-b { background: #e8f0fe; color: #4a8af4; }
+  .tag-gray { background: #f0f1f3; color: #888; }
+  .tag-v { background: #f3e8ff; color: #8b5cf6; }
+  .ol { color: #4a8af4; cursor: pointer; font-size: 12px; }
+  .ol:hover { text-decoration: underline; }
+  .pgb { display: flex; align-items: center; justify-content: flex-end; gap: 6px; padding: 10px 16px; font-size: 12px; color: #999; }
+  .pg { min-width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 4px; cursor: pointer; background: #fff; border: 1px solid #d9dce3; color: #555; font-size: 12px; }
+  .pg:hover { border-color: #4a8af4; color: #4a8af4; }
+  .pg.on { background: #4a8af4; color: #fff; border-color: #4a8af4; }
+
+  .panel { background: #fff; border: 1px solid #e8eaed; border-radius: 6px; margin-bottom: 16px; }
+  .panel-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; cursor: pointer; user-select: none; }
+  .panel-head h3 { font-size: 14px; font-weight: 600; color: #333; display: flex; align-items: center; gap: 8px; }
+  .panel-head .panel-toggle { font-size: 16px; color: #bbb; transition: transform .2s; }
+  .panel-head:hover { background: #fafbfc; }
+  .panel-body { border-top: 1px solid #f0f1f3; }
+  .panel.collapsed .panel-body { display: none; }
+  .panel.collapsed .panel-toggle { transform: rotate(-90deg); }
+
+  .be { padding: 5px 14px; border-radius: 4px; font-size: 12px; background: #4a8af4; color: #fff; border: none; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+  .be:hover { background: #3b7de8; }
+  .btn-retry { padding: 2px 10px; border-radius: 3px; font-size: 11px; background: #fff; color: #d97706; border: 1px solid #fde2b3; cursor: pointer; }
+  .btn-retry:hover { background: #fef9e7; border-color: #d97706; }
+
+  .drawer-mask { position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 100; opacity: 0; pointer-events: none; transition: opacity .25s; }
+  .drawer-mask.open { opacity: 1; pointer-events: auto; }
+  .drawer { position: fixed; top: 0; right: -580px; width: 580px; height: 100vh; background: #fff; z-index: 101; transition: right .25s; box-shadow: -4px 0 20px rgba(0,0,0,.08); display: flex; flex-direction: column; }
+  .drawer.open { right: 0; }
+  .drawer-header { padding: 16px 20px; border-bottom: 1px solid #e8eaed; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+  .drawer-header h3 { font-size: 15px; font-weight: 600; color: #1a1a1a; }
+  .drawer-close { font-size: 20px; color: #999; cursor: pointer; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 4px; }
+  .drawer-close:hover { background: #f0f1f3; color: #333; }
+  .drawer-tabs { display: flex; border-bottom: 1px solid #e8eaed; padding: 0 20px; flex-shrink: 0; }
+  .drawer-body { flex: 1; overflow-y: auto; padding: 16px 20px; }
+  .fund-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .fund-item { background: #fafbfc; border: 1px solid #f0f1f3; border-radius: 6px; padding: 12px 14px; }
+  .fund-item-label { font-size: 11px; color: #999; margin-bottom: 4px; display: flex; align-items: center; gap: 3px; }
+  .fund-item-label .fi-tip { color: #ccc; font-size: 12px; cursor: help; }
+  .fund-item-label .fi-tip:hover { color: #999; }
+  .fund-item-val { font-size: 18px; font-weight: 700; font-family: 'SF Mono','Cascadia Code','Consolas',monospace; color: #333; }
+  .fund-item-val.positive { color: #16a34a; }
+  .fund-item-val.negative { color: #dc2626; }
+  .fund-item.span2 { grid-column: span 2; }
+  .drawer-summary { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; font-size: 12px; color: #888; }
+  .drawer-summary b { color: #333; font-weight: 600; }
+
+  .truncate { max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block; vertical-align: middle; }
+  @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+</style>
+</head>
+<body>
+
+<div class="sb">
+  <div class="sb-logo">VVOSS Admin</div>
+  <div class="sb-ver">670e65b</div>
+  <div class="n"><i class="ri-flashlight-line"></i> 激活平台</div>
+  <div class="n"><i class="ri-battery-charge-line"></i> 能量平台</div>
+  <div class="sec"><i class="ri-wallet-3-line"></i> 资金与交易 <i class="ri-arrow-up-s-line arr"></i></div>
+  <div class="nc"><i class="ri-wallet-line"></i> 钱包管理</div>
+  <div class="nc"><i class="ri-link"></i> 链上交易</div>
+  <div class="nc"><i class="ri-file-list-3-line"></i> 出款记录</div>
+  <div class="nc"><i class="ri-triangle-line"></i> TRON委托</div>
+  <div class="nc"><i class="ri-lock-line"></i> TRON质押</div>
+  <div class="nc"><i class="ri-share-forward-line"></i> TRON投票</div>
+  <div class="nc"><i class="ri-exchange-dollar-line"></i> 转账费用</div>
+  <div class="nc"><i class="ri-bar-chart-2-line"></i> 统计报表</div>
+  <div class="nc"><i class="ri-search-line"></i> 链上余额查询</div>
+  <div class="nc"><i class="ri-line-chart-line"></i> 风险入款统计</div>
+  <div class="nc act"><i class="ri-funds-line"></i> 资金监控中心</div>
+  <div class="sec"><i class="ri-task-line"></i> 任务与监控 <i class="ri-arrow-up-s-line arr"></i></div>
+  <div class="nc"><i class="ri-smartphone-line"></i> 移动设备</div>
+  <div class="nc"><i class="ri-list-check-2"></i> 移动任务</div>
+  <div class="nc"><i class="ri-scan-line"></i> 区块扫描</div>
+  <div class="nc"><i class="ri-links-line"></i> 链网同步状态</div>
+  <div class="sec"><i class="ri-settings-3-line"></i> 系统与权限 <i class="ri-arrow-up-s-line arr"></i></div>
+  <div class="nc"><i class="ri-user-settings-line"></i> 账户管理</div>
+  <div class="nc"><i class="ri-store-2-line"></i> 商户账号</div>
+  <div class="nc"><i class="ri-shield-user-line"></i> 角色管理</div>
+  <div class="nc"><i class="ri-error-warning-line"></i> 黑名单管理</div>
+</div>
+
+<div class="mw">
+  <div class="topbar">
+    <div class="hb"><i class="ri-menu-line"></i></div>
+    <div class="usr"><div class="av">L</div><span>laoluan</span></div>
+  </div>
+  <div class="mn">
+    <div class="bc"><i class="ri-wallet-3-line" style="font-size:12px"></i> <a href="#">资金与交易</a> &gt; 资金监控中心</div>
+    <div class="pt">资金监控中心（TRON-USDT）<span class="upd">数据更新时间：2026-03-20 14:32:05</span></div>
+
+    <!-- ═══ 1. 全局筛选区（商户+时间+粒度） ═══ -->
+    <div class="frow">
+      <div class="fg">
+        <label>商户</label>
+        <select style="min-width:180px"><option selected>再次出发（1261）</option><option>星辰支付（1088）</option><option>鲸鱼商户（1342）</option></select>
+      </div>
+      <div class="fg">
+        <label>时间范围</label>
+        <div style="display:flex;gap:4px;align-items:center;"><input type="date" value="2026-02-19"><span style="color:#999">~</span><input type="date" value="2026-03-20"></div>
+      </div>
+      <div class="fg">
+        <label>粒度</label>
+        <div class="prs" id="granPrs">
+          <div class="p on" onclick="switchGran(this)">日</div>
+          <div class="p" onclick="switchGran(this)">周</div>
+          <div class="p" onclick="switchGran(this)">月</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;padding-bottom:1px;">
+        <button class="bq" onclick="doQuery()"><i class="ri-search-line" style="font-size:12px;margin-right:2px"></i>查 询</button>
+        <button class="brr" onclick="doReset()">重置</button>
+      </div>
+      <div style="width:100%;font-size:11px;color:#bbb;margin-top:2px"><i class="ri-information-line" style="font-size:11px;vertical-align:-1px;margin-right:2px"></i>时间范围与粒度仅影响资金趋势和周期明细；KPI、水位线、回储任务为实时数据</div>
+    </div>
+
+    <!-- ═══ 2. KPI 卡片（决策驱动） ═══ -->
+    <div class="kr">
+      <div class="k">
+        <div class="kl"><span class="d" style="background:#4a8af4"></span> 热池余额</div>
+        <div class="kv mono" style="color:#333" id="kpiBalance">185,320.00</div>
+        <div class="ks">USDT · 目标线 175,000</div>
+      </div>
+      <div class="k">
+        <div class="kl"><span class="d" style="background:#d97706"></span> 距目标线</div>
+        <div class="kv mono" id="kpiGap" style="color:#d97706">超出 10,320.00</div>
+        <div class="ks" id="kpiGapHint">最低回储 50,000 · 还差 39,680</div>
+      </div>
+      <div class="k">
+        <div class="kl"><span class="d" style="background:#8b5cf6"></span> 下次回储</div>
+        <div class="kv" id="kpiNextStore" style="color:#d97706;font-size:16px;font-weight:600">未触发</div>
+        <div class="ks" id="kpiNextStoreHint">差 39,680 USDT 达到最低回储金额</div>
+      </div>
+      <div class="k">
+        <div class="kl"><span class="d" style="background:#64748b"></span> 今日净流入/净流出</div>
+        <div class="kv mono" style="color:#dc2626"><span class="net-tag out" style="font-size:11px;vertical-align:middle;margin-right:4px">净流出</span>-4,230.50</div>
+        <div class="ks">入热池 38,450.00 − 出款 42,680.50</div>
+      </div>
+    </div>
+
+    <!-- ═══ 3. 水位条（结论 + 三条件，纵向排列） ═══ -->
+    <div class="wl-card">
+      <div class="wl-title"><i class="ri-drop-line" style="color:#4a8af4"></i> 热池水位线（TRON-USDT）</div>
+      <div style="padding:8px 0 46px;"><div class="wl-bar-wrap" id="wlBar"></div></div>
+
+      <!-- 推荐值提示 -->
+      <div id="wlRec"></div>
+
+      <!-- 智能状态条 -->
+      <div class="wl-status st-wait-batch" id="wlStatus">
+        <div class="wl-status-r1">
+          <span class="wl-status-tag" style="color:#d97706" id="wlTag"><i class="ri-hourglass-line" style="font-size:15px"></i> 未触发新回储</span>
+          <span class="wl-status-num" style="color:#dc2626" id="wlNum">还差 39,680.00 USDT</span>
+        </div>
+        <div class="wl-status-pills" id="wlPills">
+          <span class="wl-pill unmet"><span class="wl-pill-dot"></span>金额 差39,680</span>
+          <span class="wl-pill wait"><span class="wl-pill-dot"></span>能量 差1笔</span>
+        </div>
+        <div class="wl-status-hint" id="wlHint">达到最低回储金额后系统将自动创建并执行新任务</div>
+      </div>
+    </div>
+
+    <!-- ═══ 4. 回储任务列表（紧接水位线，运营高频关注） ═══ -->
+    <div class="panel" id="storagePanel">
+      <div class="panel-head" onclick="togglePanel('storagePanel')">
+        <h3><i class="ri-safe-2-line" style="font-size:16px;color:#8b5cf6"></i> 回储任务列表 <span class="tag tag-b" style="margin-left:6px" id="storageActiveTag">3 条活跃</span></h3>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:11px;color:#bbb" id="storageScanTime">上次扫描：14:32:05</span>
+          <button class="be" id="scanBtn" onclick="event.stopPropagation();confirmScan()"><i class="ri-refresh-line" style="font-size:13px"></i>手动触发扫描</button>
+          <i class="ri-arrow-up-s-line panel-toggle"></i>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div style="display:flex;align-items:center;gap:8px;padding:8px 14px;margin-bottom:10px;background:#fafbfc;border:1px solid #f0f1f3;border-radius:4px;font-size:12px;color:#888;" id="qAlert"></div>
+        <div style="overflow-x:auto;">
+          <table class="tbl">
+            <thead><tr>
+              <th>单号</th><th>金额（USDT）</th><th>状态</th><th>备注</th><th>交易哈希</th><th>创建时间</th><th>完成时间</th>
+            </tr></thead>
+            <tbody id="storageTbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ 5. 趋势图（仅流量模式 + 金额） ═══ -->
+    <div class="cd">
+      <div class="ch" style="flex-wrap:wrap;gap:8px;">
+        <h3>资金趋势</h3>
+        <div class="legend-row">
+          <label><input type="checkbox" checked data-series="out_total" onchange="toggleSeries(this)"><span style="width:12px;height:3px;background:#4a8af4;display:inline-block;border-radius:2px;margin:0 2px"></span>出款总额<div class="legend-tip"><b>出款总额</b>本期所有出款订单金额合计<br><span class="lt-dim">越高说明出款压力越大</span></div></label>
+          <label><input type="checkbox" checked data-series="to_hot" onchange="toggleSeries(this)"><span style="width:12px;height:3px;background:#06b6d4;display:inline-block;border-radius:2px;margin:0 2px"></span>入热池<div class="legend-tip"><b>入热池</b>商户入款归集到热池的金额<br><span class="lt-dim">越高说明资金回流越充足</span></div></label>
+          <label><input type="checkbox" checked data-series="to_cold" onchange="toggleSeries(this)"><span style="width:12px;height:3px;background:#8b5cf6;display:inline-block;border-radius:2px;margin:0 2px"></span>回储冷钱包<div class="legend-tip"><b>回储冷钱包</b>从热池回储至冷钱包的金额<br><span class="lt-dim">有值说明当期触发了回储</span></div></label>
+          <label><input type="checkbox" data-series="net" onchange="toggleSeries(this)"><span style="width:12px;height:3px;background:#64748b;display:inline-block;border-radius:2px;margin:0 2px;border-top:1px dashed #64748b"></span>净流入/净流出<div class="legend-tip"><b>净流入/净流出</b>计算：入热池 − 出款（不含回储）<br>正值 = 净流入（热池在增加）<br>负值 = 净流出（热池在减少）</div></label>
+        </div>
+      </div>
+      <div class="cb"><div id="trendChart" style="width:100%;height:340px;"></div></div>
+    </div>
+
+    <!-- ═══ 6. 周期明细（精简列） ═══ -->
+    <div class="cd">
+      <div class="ch"><h3>周期明细</h3></div>
+      <div style="overflow-x:auto;">
+        <table class="tbl">
+          <thead><tr>
+            <th>周期</th><th>出款总额（USDT）</th><th>入热池（USDT）</th><th>回储冷钱包（USDT）</th><th>净流入/净流出（USDT）<i class="ri-information-line th-tip" title="净变化 = 入热池 − 出款（不含回储）"></i></th><th>操作</th>
+          </tr></thead>
+          <tbody id="periodTbody"></tbody>
+        </table>
+      </div>
+      <div class="pgb">
+        <span>共 30 条</span>
+        <div class="pg">&lt;</div><div class="pg on">1</div><div class="pg">2</div><div class="pg">3</div><div class="pg">&gt;</div>
+        <select><option>10 条/页</option><option>20 条/页</option><option>50 条/页</option></select>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Drawer -->
+<div class="drawer-mask" id="drawerMask" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-header"><h3 id="drawerTitle">周期详情</h3><div class="drawer-close" onclick="closeDrawer()"><i class="ri-close-line"></i></div></div>
+  <div class="drawer-body" id="drawerBody"></div>
+</div>
+
+<script>
+const CFG = {
+  HOT_MIN:50000, HOT_TARGET:175000, HOT_MAX:300000, HOT_BALANCE:185320,
+  BATCH_MIN:50000, ENERGY_THRESHOLD:65000,
+  CURRENT_ENERGY:52800,
+  ENERGY_PER_TX:32000, ENERGY_SAFETY:1.2,
+  PEAK_OUT_P95:7000, SURVIVE_HOURS:6, SURVIVE_HOURS_MAX:24, SAFETY_FACTOR:1.2,
+};
+const N = 30, dates = [], outTotal = [], toCold = [], toHot = [], netChange = [];
+for (let i = N-1; i >= 0; i--) {
+  const d = new Date(2026,2,20); d.setDate(d.getDate()-i);
+  dates.push(`${d.getMonth()+1}-${String(d.getDate()).padStart(2,'0')}`);
+  const base = 40000+Math.random()*20000;
+  outTotal.push(+base.toFixed(2));
+  const hot = 30000+Math.random()*20000;
+  const cold = Math.random()>0.7 ? 20000+Math.random()*30000 : 0;
+  toHot.push(+hot.toFixed(2)); toCold.push(+cold.toFixed(2));
+  netChange.push(+(hot-base).toFixed(2));
+}
+
+function fmt(n) { return n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function fmtVal(v, cls) { return v===0 ? '<td class="dim">—</td>' : `<td class="mono ${cls}">${fmt(v)}</td>`; }
+
+function switchGran(el) { el.parentElement.querySelectorAll('.p').forEach(p=>p.classList.remove('on')); el.classList.add('on'); }
+function doQuery() { renderChart(); renderTable(); }
+function doReset() { location.reload(); }
+
+let seriesVisibility = { out_total:true, to_hot:true, to_cold:true, net:false };
+function toggleSeries(cb) { seriesVisibility[cb.dataset.series]=cb.checked; renderChart(); }
+
+let chart;
+function renderChart() {
+  if (!chart) chart = echarts.init(document.getElementById('trendChart'));
+  const all = [
+    { key:'out_total', name:'出款总额', data:outTotal, color:'#4a8af4', w:2.5, t:'solid' },
+    { key:'to_hot', name:'入热池', data:toHot, color:'#06b6d4', w:2, t:'solid' },
+    { key:'to_cold', name:'回储冷钱包', data:toCold, color:'#8b5cf6', w:2, t:'solid' },
+    { key:'net', name:'净流入/净流出', data:netChange, color:'#64748b', w:1.5, t:'dashed' },
+  ];
+  const series = all.filter(s=>seriesVisibility[s.key]).map(s=>({
+    name:s.name, type:'line', data:s.data, smooth:true, symbol:'none',
+    lineStyle:{width:s.w,color:s.color,type:s.t}, itemStyle:{color:s.color},
+  }));
+  chart.setOption({
+    tooltip:{trigger:'axis',backgroundColor:'#fff',borderColor:'#e8eaed',textStyle:{color:'#333',fontSize:12},extraCssText:'box-shadow:0 2px 8px rgba(0,0,0,.08);cursor:pointer'},
+    legend:{show:false},
+    grid:{left:60,right:20,top:20,bottom:32},
+    xAxis:{type:'category',data:dates,boundaryGap:false,axisLabel:{color:'#bbb',fontSize:11},axisLine:{lineStyle:{color:'#e8eaed'}},axisTick:{show:false},triggerEvent:true},
+    yAxis:{type:'value',name:'USDT',nameTextStyle:{color:'#bbb',fontSize:10},axisLabel:{color:'#bbb',fontSize:11,formatter:v=>v>=1000?(v/1000).toFixed(0)+'k':v},splitLine:{lineStyle:{color:'#f3f4f6'}}},
+    series,
+  }, true);
+  chart.off('click');
+  chart.on('click', function(params) {
+    const idx = params.dataIndex;
+    const date = params.name || dates[idx];
+    if (date) openDrawer(date, idx);
+  });
+}
+
+function netAvg7(idx) {
+  const start = Math.max(0, idx - 6);
+  let sum = 0, cnt = 0;
+  for (let j = start; j <= idx; j++) { sum += Math.abs(netChange[j]); cnt++; }
+  return cnt ? sum / cnt : 0;
+}
+function fmtNet(v, idx) {
+  if (v === 0) return '<td class="dim">—</td>';
+  const isIn = v > 0;
+  const tagCls = isIn ? 'in' : 'out';
+  const label = isIn ? '净流入' : '净流出';
+  const sign = isIn ? '+' : '';
+  const color = isIn ? 'cg' : 'cr';
+  const avg = netAvg7(idx);
+  const warn = avg > 0 && Math.abs(v) > avg * 2
+    ? ' <i class="ri-alert-line net-warn" title="偏离近7日均值2倍以上"></i>' : '';
+  return `<td class="mono"><span class="net-cell"><span class="net-tag ${tagCls}">${label}</span><span class="${color}">${sign}${fmt(Math.abs(v))}</span>${warn}</span></td>`;
+}
+function renderTable() {
+  const tb = document.getElementById('periodTbody'); tb.innerHTML = '';
+  for (let i=N-1; i>=Math.max(0,N-10); i--) {
+    tb.innerHTML += `<tr>
+      <td>${dates[i]}</td>
+      <td class="mono">${fmt(outTotal[i])}</td>
+      ${fmtVal(toHot[i],'cb2')}
+      ${fmtVal(toCold[i],'cv')}
+      ${fmtNet(netChange[i], i)}
+      <td><span class="ol" onclick="openDrawer('${dates[i]}',${i})">详情</span></td>
+    </tr>`;
+  }
+}
+
+const STORAGE_ROWS = [
+  {id:'ST-20260320-01',amt:62000,status:'WAIT_ENERGY',block:'能量等待（可转 1 笔 / 需 2 笔）',txid:'—',ctime:'2026-03-20 13:45',etime:'—'},
+  {id:'ST-20260320-02',amt:51300,status:'WAIT_ENERGY',block:'能量等待（可转 1 笔 / 需 2 笔）',txid:'—',ctime:'2026-03-20 10:22',etime:'—'},
+  {id:'ST-20260319-01',amt:58000,status:'READY',block:'—',txid:'—',ctime:'2026-03-19 18:30',etime:'—',addrCount:5},
+  {id:'ST-20260318-01',amt:73500,status:'DONE',block:'—',txid:'a8f3...7d2e',ctime:'2026-03-18 14:15',etime:'2026-03-18 14:32'},
+  {id:'ST-20260317-01',amt:55200,status:'DONE',block:'—',txid:'c4b1...9e3f',ctime:'2026-03-17 09:40',etime:'2026-03-17 09:58'},
+  {id:'ST-20260316-01',amt:68000,status:'DONE',block:'—',txid:'7e2a...b4c8',ctime:'2026-03-16 16:00',etime:'2026-03-16 16:18'},
+  {id:'ST-20260315-01',amt:91000,status:'DONE',block:'—',txid:'f1d9...3a6b',ctime:'2026-03-15 11:20',etime:'2026-03-15 11:45'},
+  {id:'ST-20260314-01',amt:54800,status:'DONE',block:'—',txid:'5c8e...d2f7',ctime:'2026-03-14 08:50',etime:'2026-03-14 09:12'},
+];
+function getBlockedTaskCount() {
+  return STORAGE_ROWS.filter(r => r.status === 'WAIT_ENERGY').length;
+}
+function renderStorageOrders() {
+  const rows = STORAGE_ROWS;
+  const stMap = {WAIT_ENERGY:['tag-y','等待能量'],READY:['tag-b','回储中'],DONE:['tag-gray','已完成'],FAILED:['tag-r','失败']};
+  const active = rows.filter(r => r.status !== 'DONE');
+  const done = rows.filter(r => r.status === 'DONE');
+  const counts = {};
+  active.forEach(r => { const st = stMap[r.status][1]; counts[st] = (counts[st]||0)+1; });
+  const totalAmt = rows.reduce((s,r) => s+r.amt, 0);
+
+  const alertEl = document.getElementById('qAlert');
+  const tagColorMap = {'等待能量':'tag-y','回储中':'tag-b','失败':'tag-r','已完成':'tag-gray'};
+  const allCounts = {};
+  rows.forEach(r => { const st = stMap[r.status][1]; allCounts[st] = (allCounts[st]||0)+1; });
+  const tagParts = ['等待能量','回储中','失败','已完成'].filter(s => allCounts[s]).map(s => `<span class="tag ${tagColorMap[s]}" style="font-size:10px;padding:1px 5px">${s} ×${allCounts[s]}</span>`);
+  const waitCount = allCounts['等待能量'] || 0;
+  const blockReason = waitCount > 0 ? `<span style="color:#d97706;font-size:11px;margin-left:4px">· ${waitCount}条因能量不足等待中</span>` : '';
+  alertEl.innerHTML = `<i class="ri-stack-line" style="font-size:13px;color:#8b5cf6"></i>
+    <span>共 <b style="color:#333">${rows.length}</b> 条</span>${tagParts.join('')}${blockReason}
+    <span style="margin-left:auto;color:#bbb">合计 <b style="color:#333">${fmt(totalAmt)}</b> USDT</span>`;
+  document.getElementById('storageActiveTag').textContent = active.length > 0 ? `${active.length} 条活跃` : `${rows.length} 条`;
+
+  const sorted = [...active, ...done];
+  const tb = document.getElementById('storageTbody'); tb.innerHTML = '';
+  sorted.forEach(r => {
+    const [stCls,stTxt] = stMap[r.status];
+    let blockCell;
+    if (r.status === 'READY') {
+      blockCell = `<span style="font-size:11px;color:#16a34a"><i class="ri-route-line" style="font-size:12px;vertical-align:-1px;margin-right:2px"></i>拼单回储 · ${r.addrCount||3}个地址 · 已轮换优先</span>`;
+    } else if (r.status === 'DONE') {
+      blockCell = '<span class="dim">—</span>';
+    } else if (r.block === '—') {
+      blockCell = '<span class="dim">—</span>';
+    } else {
+      blockCell = `<span style="font-size:11px;color:#d97706">${r.block}</span>${r.status==='FAILED'?' <button class="btn-retry" style="margin-left:6px">重试</button>':''}`;
+    }
+    tb.innerHTML += `<tr>
+      <td class="mono">${r.id}</td>
+      <td class="mono">${fmt(r.amt)}</td>
+      <td><span class="tag ${stCls}">${stTxt}</span></td>
+      <td>${blockCell}</td>
+      <td class="mono">${r.txid==='—'?'<span class="dim">—</span>':r.txid}</td>
+      <td>${r.ctime}</td>
+      <td>${r.etime==='—'?'<span class="dim">—</span>':r.etime}</td>
+    </tr>`;
+  });
+  if (!sorted.length) tb.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#ccc;padding:24px">暂无任务</td></tr>';
+}
+
+function togglePanel(id) { document.getElementById(id).classList.toggle('collapsed'); }
+
+function openDrawer(date, idx) {
+  document.getElementById('drawerTitle').textContent=`周期详情 — ${date}`;
+  document.getElementById('drawerMask').classList.add('open');
+  document.getElementById('drawer').classList.add('open');
+  const body = document.getElementById('drawerBody');
+  const outAmt = idx!=null ? outTotal[idx] : 42680.50;
+  const hotIn = idx!=null ? toHot[idx] : 38450.00;
+  const coldOut = idx!=null ? toCold[idx] : 0;
+  const netVal = idx!=null ? netChange[idx] : (hotIn - outAmt);
+  const netAbs = Math.abs(netVal);
+  const netLabel = netVal > 0 ? '净流入' : netVal < 0 ? '净流出' : '—';
+  const netCls = netVal > 0 ? 'positive' : netVal < 0 ? 'negative' : '';
+  const netTagCls = netVal > 0 ? 'in' : 'out';
+  const netSign = netVal > 0 ? '+' : netVal < 0 ? '-' : '';
+  const netDisplay = netVal === 0 ? '—' : `<span class="net-tag ${netTagCls}" style="font-size:10px;vertical-align:middle;margin-right:4px">${netLabel}</span>${netSign}${fmt(netAbs)}`;
+  const summaryItems = [
+    {label:'出款总额',val:fmt(outAmt),tip:'热池 → 外部用户地址（不含热→冷回储）'},
+    {label:'入热池',val:fmt(hotIn),tip:'入款地址 / 子钱包 → 热池（归集）'},
+    {label:'回储冷钱包',val:coldOut===0?'<span style="color:#ccc">—</span>':fmt(coldOut),tip:'热池 → 冷钱包（回储操作）'},
+  ];
+  const hasCold = coldOut > 0;
+  const stTag = { '等待能量':'tag-y', '回储中':'tag-b', '已完成':'tag-gray', '失败':'tag-r' };
+  let taskHtml = '';
+  if (hasCold) {
+    const tasks = [
+      { id:`ST-${date.replace('-','')}-01`, amt:Math.round(coldOut*0.6), status:'已完成', block:'—', txid:`a${Math.random().toString(36).slice(2,5)}...${Math.random().toString(36).slice(2,6)}`, ctime:`2026-${date} 10:30`, etime:`2026-${date} 10:48` },
+      { id:`ST-${date.replace('-','')}-02`, amt:Math.round(coldOut*0.4), status:'已完成', block:'—', txid:`b${Math.random().toString(36).slice(2,5)}...${Math.random().toString(36).slice(2,6)}`, ctime:`2026-${date} 14:15`, etime:`2026-${date} 14:32` },
+    ];
+    const counts = {};
+    tasks.forEach(t => { counts[t.status] = (counts[t.status]||0) + 1; });
+    const summaryParts = ['等待能量','回储中','已完成','失败'].filter(s => counts[s]).map(s => `${s} <b>${counts[s]}</b>`);
+    taskHtml = `
+      <div style="font-size:13px;font-weight:600;color:#333;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between">
+        <span><i class="ri-safe-2-line" style="font-size:14px;color:#8b5cf6;margin-right:4px"></i>回储任务</span>
+        <span style="font-size:11px;font-weight:400;color:#bbb">共 ${tasks.length} 条</span>
+      </div>
+      <div class="drawer-summary">${summaryParts.join('<span style="color:#e0e0e0;margin:0 2px">·</span>')}</div>
+      <table class="tbl"><thead><tr>
+        <th>回储单号</th><th>金额（USDT）</th><th>状态</th><th>备注</th><th>交易哈希</th><th>创建时间</th><th>完成时间</th>
+      </tr></thead><tbody>
+      ${tasks.map(t => `<tr>
+        <td class="mono">${t.id}</td>
+        <td class="mono">${fmt(t.amt)}</td>
+        <td><span class="tag ${stTag[t.status]||'tag-gray'}">${t.status}</span></td>
+        <td style="font-size:11px;color:#999">${(t.status==='等待能量'||t.status==='失败') ? t.block : '—'}</td>
+        <td class="mono">${t.txid}</td>
+        <td>${t.ctime}</td>
+        <td>${t.etime}</td>
+      </tr>`).join('')}
+      </tbody></table>`;
+  } else {
+    taskHtml = `
+      <div style="font-size:13px;font-weight:600;color:#333;margin-bottom:8px;display:flex;align-items:center;gap:4px">
+        <i class="ri-safe-2-line" style="font-size:14px;color:#8b5cf6"></i>回储任务
+      </div>
+      <div style="text-align:center;padding:32px 0;color:#ccc;font-size:13px">
+        <i class="ri-inbox-line" style="font-size:28px;display:block;margin-bottom:8px"></i>本期无回储任务
+      </div>`;
+  }
+  body.innerHTML = `
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px;padding:10px 14px;background:#fafbfc;border:1px solid #f0f1f3;border-radius:6px;flex-wrap:wrap">
+      ${summaryItems.map(s=>`<div style="display:flex;flex-direction:column;gap:2px;min-width:100px">
+        <span style="font-size:10px;color:#999">${s.label} <i class="ri-information-line" style="font-size:10px;color:#ccc;cursor:help" title="${s.tip}"></i></span>
+        <span class="mono" style="font-size:14px;font-weight:600;color:#333">${s.val}</span>
+      </div>`).join('<div style="width:1px;height:28px;background:#e8eaed"></div>')}
+      <div style="width:1px;height:28px;background:#e8eaed"></div>
+      <div style="display:flex;flex-direction:column;gap:2px;min-width:100px">
+        <span style="font-size:10px;color:#999">净流入/净流出 <i class="ri-information-line" style="font-size:10px;color:#ccc;cursor:help" title="净变化 = 入热池 − 出款（不含回储）"></i></span>
+        <span class="mono ${netCls}" style="font-size:14px;font-weight:600">${netDisplay}</span>
+      </div>
+    </div>
+    ${taskHtml}`;
+}
+function closeDrawer() { document.getElementById('drawerMask').classList.remove('open'); document.getElementById('drawer').classList.remove('open'); }
+
+function renderWaterLevel() {
+  const bar=document.getElementById('wlBar'),{HOT_MIN:mn,HOT_TARGET:tg,HOT_MAX:mx,HOT_BALANCE:cur}=CFG,sc=350000;
+  const mp=(mn/sc)*100,tp=(tg/sc)*100,xp=(mx/sc)*100,cp=(cur/sc)*100;
+  const recMin=CFG.PEAK_OUT_P95*CFG.SURVIVE_HOURS*CFG.SAFETY_FACTOR;
+  const recMax=CFG.PEAK_OUT_P95*CFG.SURVIVE_HOURS_MAX*CFG.SAFETY_FACTOR;
+  const recTgt=(recMin+recMax)/2;
+  const rmp=(recMin/sc)*100,rtp=(recTgt/sc)*100,rxp=(recMax/sc)*100;
+  let recHtml='';
+  if(Math.abs(recMin-mn)/mn>0.05) recHtml+=`<div class="wl-rec-marker" style="left:${rmp}%;border-color:#dc2626"><div class="wl-rec-marker-label" style="color:#dc2626">推荐最低 ${fmt(recMin)}</div></div>`;
+  if(Math.abs(recTgt-tg)/tg>0.05) recHtml+=`<div class="wl-rec-marker" style="left:${rtp}%;border-color:#16a34a"><div class="wl-rec-marker-label" style="color:#16a34a">推荐目标 ${fmt(recTgt)}</div></div>`;
+  if(Math.abs(recMax-mx)/mx>0.05) recHtml+=`<div class="wl-rec-marker" style="left:${rxp}%;border-color:#d97706"><div class="wl-rec-marker-label" style="color:#d97706">推荐最高 ${fmt(recMax)}</div></div>`;
+  bar.innerHTML=`
+    <div class="wl-zone wl-zone-danger" style="left:0;width:${mp}%"></div>
+    <div class="wl-zone wl-zone-normal" style="left:${mp}%;width:${tp-mp}%"></div>
+    <div class="wl-zone wl-zone-warning" style="left:${tp}%;width:${xp-tp}%"></div>
+    <div class="wl-zone wl-zone-over" style="left:${xp}%;width:${100-xp}%"></div>
+    ${recHtml}
+    <div class="wl-marker" style="left:${mp}%;background:#dc2626"><div class="wl-marker-label" style="background:#fde8e8;color:#dc2626">最低线</div><div class="wl-marker-val">${fmt(mn)}</div></div>
+    <div class="wl-marker" style="left:${tp}%;background:#16a34a"><div class="wl-marker-label" style="background:#e8f8ee;color:#16a34a">目标线</div><div class="wl-marker-val">${fmt(tg)}</div></div>
+    <div class="wl-marker" style="left:${xp}%;background:#d97706"><div class="wl-marker-label" style="background:#fef9e7;color:#d97706">最高线</div><div class="wl-marker-val">${fmt(mx)}</div></div>
+    <div class="wl-current" style="left:${cp}%;background:#d97706;color:#d97706;border:2px solid #fff;"><div class="wl-current-tip">当前余额 ${fmt(cur)} USDT</div></div>`;
+}
+
+function renderWaterLevelPanel() {
+  const c = CFG;
+  const canStore = c.HOT_BALANCE - c.HOT_TARGET;
+  const batchNeed = Math.max(0, c.BATCH_MIN - canStore);
+  const effectivePerTx = c.ENERGY_PER_TX * c.ENERGY_SAFETY;
+  const txCap = Math.floor(c.CURRENT_ENERGY / effectivePerTx);
+  const txNeed = Math.ceil(c.ENERGY_THRESHOLD / effectivePerTx);
+  const batchMet = canStore >= c.BATCH_MIN;
+  const energyMet = txCap >= txNeed;
+  const overMax = c.HOT_BALANCE > c.HOT_MAX;
+  const belowMin = c.HOT_BALANCE < c.HOT_MIN;
+
+  const activeCount = STORAGE_ROWS.filter(r => r.status !== 'DONE').length;
+  const activeNote = activeCount > 0 ? `（已有 ${activeCount} 条任务不受影响）` : '';
+  let status, stCls, numText, hint;
+  if (belowMin) {
+    status = '余额不足'; stCls = 'st-low';
+    numText = `低于最低线 ${fmt(c.HOT_MIN - c.HOT_BALANCE)} USDT`;
+    hint = '请尽快从冷钱包补给，避免影响出款';
+  } else if (c.HOT_BALANCE <= c.HOT_TARGET) {
+    status = '无需回储'; stCls = 'st-normal'; numText = ''; hint = '热池水位正常，不会创建新的回储任务';
+  } else if (overMax) {
+    status = '超出上限'; stCls = 'st-force';
+    numText = `超上限 ${fmt(c.HOT_BALANCE - c.HOT_MAX)} USDT`;
+    hint = '超过最高线，系统已自动触发回储';
+  } else if (!batchMet) {
+    status = '未触发新回储'; stCls = 'st-wait-batch';
+    numText = `还差 ${fmt(batchNeed)} USDT`;
+    hint = `达到最低回储金额后系统将自动创建并执行新任务${activeNote}`;
+  } else if (!energyMet) {
+    status = '新回储待执行'; stCls = 'st-wait-window';
+    numText = '等待能量满足';
+    hint = `金额已达标，条件满足后将立即执行${activeNote}`;
+  } else {
+    status = '新回储已触发'; stCls = 'st-ready';
+    numText = '条件满足，已自动执行';
+    hint = '系统已从归集地址拼单回储至冷钱包';
+  }
+
+  const stColors = { 'st-low':'#dc2626','st-normal':'#16a34a','st-wait-batch':'#d97706','st-wait-window':'#d97706','st-ready':'#16a34a','st-force':'#dc2626' };
+  const stIcons = { 'st-low':'ri-alarm-warning-line','st-normal':'ri-shield-check-line','st-wait-batch':'ri-hourglass-line','st-wait-window':'ri-time-line','st-ready':'ri-checkbox-circle-line','st-force':'ri-alarm-warning-line' };
+  const numColors = { 'st-low':'#dc2626','st-normal':'#16a34a','st-wait-batch':'#dc2626','st-wait-window':'#d97706','st-ready':'#16a34a','st-force':'#dc2626' };
+  const color = stColors[stCls], icon = stIcons[stCls];
+
+  const box = document.getElementById('wlStatus');
+  box.className = `wl-status ${stCls}`;
+  const tagEl = document.getElementById('wlTag');
+  tagEl.style.color = color;
+  tagEl.innerHTML = `<i class="${icon}" style="font-size:15px"></i> ${status}`;
+  const numEl = document.getElementById('wlNum');
+  numEl.textContent = numText;
+  numEl.style.color = numColors[stCls];
+  numEl.style.display = numText ? '' : 'none';
+
+  const pills = [];
+  const txGap = txNeed - txCap;
+  const blockedTaskCount = getBlockedTaskCount();
+  if (stCls !== 'st-normal' && stCls !== 'st-low') {
+    pills.push({ cls: batchMet ? 'met' : 'unmet', text: batchMet ? `金额 ${fmt(canStore)}/${fmt(c.BATCH_MIN)} ✓` : `金额 差${fmt(batchNeed)}` });
+    const energyText = energyMet ? `能量 可转${txCap}笔 ✓` : `能量 差${txGap}笔`;
+    const taskHint = !energyMet && blockedTaskCount > 0 ? ` → 阻塞${blockedTaskCount}条任务` : '';
+    pills.push({ cls: energyMet ? 'met' : 'wait', text: energyText + taskHint });
+  }
+  const pillsEl = document.getElementById('wlPills');
+  pillsEl.innerHTML = pills.map(p => `<span class="wl-pill ${p.cls}"><span class="wl-pill-dot"></span>${p.text}</span>`).join('');
+  pillsEl.style.display = pills.length ? '' : 'none';
+
+  const hintEl = document.getElementById('wlHint');
+  hintEl.textContent = hint;
+  hintEl.style.display = hint ? '' : 'none';
+}
+
+let scanCooldown = false;
+function confirmScan() {
+  if (scanCooldown) return;
+  if (!confirm('确认手动触发回储扫描？\n本次扫描将检查是否需要创建新的回储任务。')) return;
+  const btn = document.getElementById('scanBtn');
+  scanCooldown = true;
+  btn.disabled = true;
+  btn.innerHTML = '<i class="ri-loader-4-line" style="font-size:13px;animation:spin .8s linear infinite"></i>扫描中…';
+  btn.style.opacity = '0.6';
+  setTimeout(() => {
+    btn.innerHTML = '<i class="ri-check-line" style="font-size:13px"></i>扫描完成';
+    btn.style.background = '#16a34a';
+    btn.style.opacity = '1';
+    document.getElementById('storageScanTime').textContent = `上次扫描：${new Date().toLocaleTimeString('zh-CN',{hour12:false})}`;
+    setTimeout(() => {
+      btn.disabled = false;
+      scanCooldown = false;
+      btn.innerHTML = '<i class="ri-refresh-line" style="font-size:13px"></i>手动触发扫描';
+      btn.style.background = '#4a8af4';
+    }, 10000);
+  }, 1500);
+}
+
+function renderRecommendation() {
+  const c=CFG;
+  const recMin=c.PEAK_OUT_P95*c.SURVIVE_HOURS*c.SAFETY_FACTOR;
+  const recMax=c.PEAK_OUT_P95*c.SURVIVE_HOURS_MAX*c.SAFETY_FACTOR;
+  const recTgt=(recMin+recMax)/2;
+  const diffMin=c.HOT_MIN-recMin, diffMax=c.HOT_MAX-recMax;
+  const pctMin=Math.abs(diffMin/recMin), pctMax=Math.abs(diffMax/recMax);
+  function diffTag(diff,pct,label){
+    if(pct<0.05) return `<span style="color:#16a34a">${label} 已匹配 ✓</span>`;
+    if(diff<0) return `<span style="color:#d97706">${label}偏低 ${fmt(Math.abs(diff))}</span>`;
+    return `<span style="color:#888">${label}偏高 ${fmt(diff)}</span>`;
+  }
+  function cmpLine(cur,rec,pct,diff){
+    if(pct<0.05) return `当前配置：${fmt(cur)} <span style="color:#16a34a">✓ 已匹配</span>`;
+    const dir=diff<0?`<span style="color:#d97706">偏低 ${(pct*100).toFixed(1)}%</span>`:`<span style="color:#888">偏高 ${(pct*100).toFixed(1)}%</span>`;
+    return `当前配置：${fmt(cur)} · 偏差 ${diff>0?'+':''}${fmt(diff)} (${dir})`;
+  }
+  const el=document.getElementById('wlRec');
+  el.innerHTML=`
+    <div class="wl-rec-row" onclick="toggleRecDetail()">
+      <i class="ri-lightbulb-flash-line wl-rec-icon"></i>
+      <span>系统推荐</span>
+      <span class="wl-rec-vals">最低线 ${fmt(recMin)} · 最高线 ${fmt(recMax)}</span>
+      <span class="wl-rec-diff">${diffTag(diffMin,pctMin,'最低线')} · ${diffTag(diffMax,pctMax,'最高线')}</span>
+      <span class="wl-rec-toggle"><span id="recToggleText">查看依据</span><i class="ri-arrow-down-s-line" id="recArrow"></i></span>
+    </div>
+    <div class="wl-rec-detail" id="recDetail">
+      <div class="wl-rec-formula">
+        <div class="wl-rec-formula-title"><i class="ri-shield-line" style="color:#dc2626;font-size:13px"></i> 推荐最低线 (HOT_MIN)</div>
+        <div class="wl-rec-formula-calc">公式：出款峰值(P95/h) × 最小扛住时长 × 保险系数</div>
+        <div class="wl-rec-formula-calc" style="color:#333;font-weight:500">${fmt(c.PEAK_OUT_P95)} × ${c.SURVIVE_HOURS}h × ${c.SAFETY_FACTOR} = <b>${fmt(recMin)}</b> USDT</div>
+        <div class="wl-rec-formula-compare">${cmpLine(c.HOT_MIN,recMin,pctMin,diffMin)}</div>
+      </div>
+      <div class="wl-rec-formula">
+        <div class="wl-rec-formula-title"><i class="ri-alarm-warning-line" style="color:#d97706;font-size:13px"></i> 推荐最高线 (HOT_MAX)</div>
+        <div class="wl-rec-formula-calc">公式：出款峰值(P95/h) × 最大扛住时长 × 保险系数</div>
+        <div class="wl-rec-formula-calc" style="color:#333;font-weight:500">${fmt(c.PEAK_OUT_P95)} × ${c.SURVIVE_HOURS_MAX}h × ${c.SAFETY_FACTOR} = <b>${fmt(recMax)}</b> USDT</div>
+        <div class="wl-rec-formula-compare">${cmpLine(c.HOT_MAX,recMax,pctMax,diffMax)}</div>
+      </div>
+      <div class="wl-rec-formula" style="margin-bottom:0">
+        <div class="wl-rec-formula-title"><i class="ri-focus-2-line" style="color:#16a34a;font-size:13px"></i> 推荐目标线 (HOT_TARGET)</div>
+        <div class="wl-rec-formula-calc" style="color:#333;font-weight:500">(${fmt(recMin)} + ${fmt(recMax)}) / 2 = <b>${fmt(recTgt)}</b> USDT</div>
+        <div class="wl-rec-formula-compare">当前配置：${fmt(c.HOT_TARGET)}</div>
+      </div>
+      <div class="wl-rec-data-hint">
+        <i class="ri-bar-chart-line" style="font-size:12px"></i>
+        数据窗口：近14天 · 出款峰值(P95)：${fmt(c.PEAK_OUT_P95)} USDT/h · 最低线扛住时长：${c.SURVIVE_HOURS}h · 最高线扛住时长：${c.SURVIVE_HOURS_MAX}h · 保险系数：${c.SAFETY_FACTOR}
+      </div>
+    </div>`;
+}
+function toggleRecDetail(){
+  const d=document.getElementById('recDetail'),a=document.getElementById('recArrow'),t=document.getElementById('recToggleText');
+  const open=d.classList.toggle('open');
+  a.style.transform=open?'rotate(180deg)':'';
+  t.textContent=open?'收起':'查看依据';
+}
+
+function renderKpiCards() {
+  const c = CFG;
+  const gap = c.HOT_BALANCE - c.HOT_TARGET;
+  const belowMin = c.HOT_BALANCE < c.HOT_MIN;
+  const gapEl = document.getElementById('kpiGap');
+  const gapHintEl = document.getElementById('kpiGapHint');
+  const balanceEl = document.getElementById('kpiBalance');
+  const balanceCard = balanceEl.closest('.k');
+  const balanceHint = balanceCard.querySelector('.ks');
+  const batchGap = c.BATCH_MIN - Math.max(0, gap);
+
+  if (belowMin) {
+    balanceEl.style.color = '#dc2626';
+    balanceHint.innerHTML = `<span class="dn">低于最低线，请尽快从冷钱包补给</span>`;
+  } else {
+    balanceEl.style.color = '#333';
+    balanceHint.textContent = `USDT · 目标线 ${fmt(c.HOT_TARGET)}`;
+  }
+
+  if (belowMin) {
+    gapEl.textContent = `低于 ${fmt(Math.abs(gap))}`;
+    gapEl.style.color = '#dc2626';
+    gapHintEl.innerHTML = '<span style="color:#dc2626;font-weight:500">低于最低线，请尽快从冷钱包补给</span>';
+  } else if (gap > 0 && batchGap <= 0) {
+    gapEl.textContent = `超出 ${fmt(gap)}`;
+    gapEl.style.color = '#d97706';
+    gapHintEl.textContent = `已达最低回储金额（${fmt(c.BATCH_MIN)}）`;
+  } else if (gap > 0) {
+    gapEl.textContent = `超出 ${fmt(gap)}`;
+    gapEl.style.color = '#d97706';
+    gapHintEl.textContent = `最低回储 ${fmt(c.BATCH_MIN)} · 还差 ${fmt(batchGap)}`;
+  } else if (gap === 0) {
+    gapEl.textContent = '正好在目标线';
+    gapEl.style.color = '#16a34a';
+    gapHintEl.textContent = '水位正常，无需操作';
+  } else {
+    gapEl.textContent = `低于 ${fmt(Math.abs(gap))}`;
+    gapEl.style.color = '#dc2626';
+    gapHintEl.textContent = '低于目标线，注意补充';
+  }
+
+  const canStore = c.HOT_BALANCE - c.HOT_TARGET;
+  const batchMet = canStore >= c.BATCH_MIN;
+  const effectivePerTx = c.ENERGY_PER_TX * c.ENERGY_SAFETY;
+  const txCap = Math.floor(c.CURRENT_ENERGY / effectivePerTx);
+  const txNeed = Math.ceil(c.ENERGY_THRESHOLD / effectivePerTx);
+  const energyMet = txCap >= txNeed;
+  const nextEl = document.getElementById('kpiNextStore');
+  const nextHint = document.getElementById('kpiNextStoreHint');
+
+  if (c.HOT_BALANCE <= c.HOT_TARGET) {
+    nextEl.textContent = '无需回储';
+    nextEl.style.color = '#16a34a';
+    nextHint.textContent = '热池水位正常';
+  } else if (!batchMet) {
+    nextEl.textContent = '未触发';
+    nextEl.style.color = '#d97706';
+    nextHint.textContent = `差 ${fmt(c.BATCH_MIN - canStore)} USDT 达到最低回储金额`;
+  } else if (!energyMet) {
+    nextEl.textContent = '待执行';
+    nextEl.style.color = '#8b5cf6';
+    nextHint.textContent = `金额达标 · 差 ${txNeed - txCap} 笔能量`;
+  } else {
+    nextEl.textContent = '已触发';
+    nextEl.style.color = '#16a34a';
+    nextHint.textContent = '条件满足，已自动执行';
+  }
+}
+
+renderChart(); renderTable(); renderStorageOrders(); renderWaterLevel(); renderWaterLevelPanel(); renderKpiCards(); renderRecommendation();
+window.addEventListener('resize',()=>chart&&chart.resize());
+</script>
+</body>
+</html>

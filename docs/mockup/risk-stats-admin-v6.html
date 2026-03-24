@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>风险入款统计 - VVOSS Admin</title>
+<link href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #f0f2f5; color: #333;
+    font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    font-size: 13px; display: flex; min-height: 100vh;
+  }
+
+  /* ═══ Sidebar ═══ */
+  .sb {
+    width: 200px; min-height: 100vh;
+    background: #0d1120;
+    flex-shrink: 0; overflow-y: auto;
+    padding-bottom: 20px;
+  }
+  .sb-logo {
+    padding: 20px 20px 2px;
+    font-size: 16px; font-weight: 700; color: #fff;
+    text-align: center;
+  }
+  .sb-ver {
+    text-align: center;
+    padding: 2px 0 20px;
+    font-size: 10px; color: #2e3a52;
+  }
+
+  .n {
+    padding: 10px 20px; font-size: 13px; color: #5a6a88;
+    cursor: pointer; display: flex; align-items: center; gap: 10px;
+    transition: all .15s;
+  }
+  .n:hover { color: #8a9abc; background: rgba(255,255,255,.03); }
+  .n i { font-size: 16px; width: 20px; text-align: center; color: #4a5a78; }
+
+  .sec {
+    padding: 10px 20px; font-size: 13px; color: #7888a8;
+    cursor: pointer; display: flex; align-items: center; gap: 10px;
+    font-weight: 500;
+  }
+  .sec i { font-size: 16px; width: 20px; text-align: center; color: #5a6a88; }
+  .sec .arr { margin-left: auto; font-size: 12px; color: #3a4a68; transition: transform .2s; }
+
+  .nc {
+    padding: 9px 20px 9px 50px;
+    font-size: 13px; color: #4a5a78;
+    cursor: pointer; transition: all .15s;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .nc:hover { color: #8a9abc; }
+  .nc i { font-size: 15px; width: 18px; text-align: center; color: #3e5080; }
+
+  .nc.act {
+    margin: 3px 12px;
+    padding: 9px 16px 9px 38px;
+    background: linear-gradient(135deg, #1a3566 0%, #162d55 100%);
+    border-radius: 8px;
+    color: #5b9cf6;
+    font-weight: 500;
+  }
+  .nc.act i { color: #5b9cf6; }
+
+  /* ═══ Topbar ═══ */
+  .topbar {
+    height: 48px; background: #fff;
+    border-bottom: 1px solid #e8eaed;
+    display: flex; align-items: center;
+    justify-content: space-between; padding: 0 20px;
+  }
+  .topbar .hb { font-size: 20px; color: #888; cursor: pointer; }
+  .topbar .usr {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; color: #666;
+  }
+  .topbar .av {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: linear-gradient(135deg,#4a8af4,#7c5bf6);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; color: #fff;
+  }
+
+  /* ═══ Main ═══ */
+  .mw { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .mn { flex: 1; padding: 16px 20px; overflow-y: auto; }
+  .bc { font-size: 12px; color: #999; margin-bottom: 12px; }
+  .bc a { color: #5b9cf6; text-decoration: none; }
+  .pt { font-size: 16px; font-weight: 600; color: #1a1a1a; margin-bottom: 16px; }
+
+  /* ═══ Filters ═══ */
+  .frow {
+    display: flex; align-items: flex-end; gap: 12px;
+    margin-bottom: 16px; flex-wrap: wrap;
+    background: #fff; padding: 14px 16px;
+    border-radius: 6px; border: 1px solid #e8eaed;
+  }
+  .fg { display: flex; flex-direction: column; gap: 4px; }
+  .fg label { font-size: 11px; color: #999; }
+  .fg select, .fg input[type="date"] {
+    background: #fff; border: 1px solid #d9dce3;
+    color: #333; padding: 6px 10px; border-radius: 4px;
+    font-size: 12px; outline: none; min-width: 130px;
+  }
+  .fg select:focus, .fg input:focus { border-color: #4a8af4; }
+  .prs {
+    display: flex; border: 1px solid #d9dce3;
+    border-radius: 4px; overflow: hidden;
+  }
+  .prs .p {
+    padding: 6px 14px; font-size: 12px;
+    cursor: pointer; color: #666;
+    border-right: 1px solid #d9dce3;
+  }
+  .prs .p:last-child { border-right: none; }
+  .prs .p.on { background: #e8f0fe; color: #4a8af4; font-weight: 500; }
+  .prs .p:hover:not(.on) { background: #f5f6f8; }
+  .bq { padding: 6px 18px; border-radius: 4px; font-size: 12px; background: #4a8af4; color: #fff; border: none; cursor: pointer; }
+  .brr { padding: 6px 14px; border-radius: 4px; font-size: 12px; background: #fff; color: #666; border: 1px solid #d9dce3; cursor: pointer; }
+
+  /* ═══ KPI ═══ */
+  .kr { display: flex; gap: 12px; margin-bottom: 16px; }
+  .k { flex: 1; background: #fff; border: 1px solid #e8eaed; border-radius: 6px; padding: 14px 16px; }
+  .k .kl { font-size: 12px; color: #999; display: flex; align-items: center; gap: 5px; margin-bottom: 8px; }
+  .k .kl .d { width: 7px; height: 7px; border-radius: 50%; }
+  .k .kv { font-size: 22px; font-weight: 700; }
+  .k .ks { font-size: 11px; color: #aaa; margin-top: 3px; }
+
+  /* ═══ Card ═══ */
+  .cd { background: #fff; border: 1px solid #e8eaed; border-radius: 6px; margin-bottom: 16px; }
+  .ch { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid #f0f1f3; }
+  .ch h3 { font-size: 14px; font-weight: 600; color: #333; }
+  .tbs { display: flex; border: 1px solid #d9dce3; border-radius: 4px; overflow: hidden; }
+  .tbs .t { padding: 4px 14px; font-size: 11px; cursor: pointer; color: #888; border-right: 1px solid #d9dce3; }
+  .tbs .t:last-child { border-right: none; }
+  .tbs .t.on { background: #e8f0fe; color: #4a8af4; font-weight: 500; }
+  .cb { padding: 16px; }
+
+  /* ═══ Table ═══ */
+  .tbl { width: 100%; border-collapse: collapse; }
+  .tbl th { text-align: left; padding: 9px 14px; background: #fafbfc; color: #999; font-weight: 500; font-size: 12px; border-bottom: 1px solid #e8eaed; }
+  .tbl td { padding: 9px 14px; border-bottom: 1px solid #f3f4f6; font-size: 12px; color: #555; }
+  .tbl tr:hover td { background: #f8f9fb; }
+  .cg { color: #16a34a; font-weight: 500; }
+  .cr { color: #dc2626; font-weight: 500; }
+  .co { color: #d97706; font-weight: 500; }
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 11px; font-weight: 500; }
+  .tag-g { background: #e8f8ee; color: #16a34a; }
+  .tag-r { background: #fde8e8; color: #dc2626; }
+  .tag-y { background: #f0f1f3; color: #888; }
+  .ol { color: #4a8af4; cursor: pointer; font-size: 12px; }
+  .ol:hover { text-decoration: underline; }
+  .be { padding: 5px 14px; border-radius: 4px; font-size: 12px; background: #17a34a; color: #fff; border: none; cursor: pointer; }
+  .pgb { display: flex; align-items: center; justify-content: flex-end; gap: 6px; padding: 10px 16px; font-size: 12px; color: #999; }
+  .pg { min-width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 4px; cursor: pointer; background: #fff; border: 1px solid #d9dce3; color: #555; font-size: 12px; }
+  .pg:hover { border-color: #4a8af4; color: #4a8af4; }
+  .pg.on { background: #4a8af4; color: #fff; border-color: #4a8af4; }
+  .pgb select { background: #fff; border: 1px solid #d9dce3; color: #555; padding: 4px 8px; border-radius: 4px; font-size: 11px; }
+</style>
+</head>
+<body>
+
+<!-- ═══ Sidebar (exact match from screenshot) ═══ -->
+<div class="sb">
+  <div class="sb-logo">VVOSS Admin</div>
+  <div class="sb-ver">670e65b</div>
+
+  <div class="n"><i class="ri-flashlight-line"></i> 激活平台</div>
+  <div class="n"><i class="ri-battery-charge-line"></i> 能量平台</div>
+
+  <div class="sec"><i class="ri-wallet-3-line"></i> 资金与交易 <i class="ri-arrow-up-s-line arr"></i></div>
+  <div class="nc act"><i class="ri-wallet-line"></i> 钱包管理</div>
+  <div class="nc"><i class="ri-link"></i> 链上交易</div>
+  <div class="nc"><i class="ri-file-list-3-line"></i> 出款记录</div>
+  <div class="nc"><i class="ri-triangle-line"></i> TRON委托</div>
+  <div class="nc"><i class="ri-lock-line"></i> TRON质押</div>
+  <div class="nc"><i class="ri-share-forward-line"></i> TRON投票</div>
+  <div class="nc"><i class="ri-exchange-dollar-line"></i> 转账费用</div>
+  <div class="nc"><i class="ri-bar-chart-2-line"></i> 统计报表</div>
+  <div class="nc"><i class="ri-search-line"></i> 链上余额查询</div>
+  <div class="nc" style="color:#5b9cf6;font-weight:500;"><i class="ri-line-chart-line" style="color:#5b9cf6;"></i> 风险入款统计</div>
+
+  <div class="sec"><i class="ri-task-line"></i> 任务与监控 <i class="ri-arrow-up-s-line arr"></i></div>
+  <div class="nc"><i class="ri-smartphone-line"></i> 移动设备</div>
+  <div class="nc"><i class="ri-list-check-2"></i> 移动任务</div>
+  <div class="nc"><i class="ri-scan-line"></i> 区块扫描</div>
+  <div class="nc"><i class="ri-links-line"></i> 链网同步状态</div>
+
+  <div class="sec"><i class="ri-settings-3-line"></i> 系统与权限 <i class="ri-arrow-up-s-line arr"></i></div>
+  <div class="nc"><i class="ri-user-settings-line"></i> 账户管理</div>
+  <div class="nc"><i class="ri-store-2-line"></i> 商户账号</div>
+  <div class="nc"><i class="ri-shield-user-line"></i> 角色管理</div>
+  <div class="nc"><i class="ri-error-warning-line"></i> 黑名单管理</div>
+  <div class="nc"><i class="ri-alarm-warning-line"></i> 风险检测记录</div>
+  <div class="nc"><i class="ri-shield-check-line"></i> 风控监控中心</div>
+  <div class="nc"><i class="ri-bug-line"></i> 内部风险扫描</div>
+  <div class="nc"><i class="ri-file-text-line"></i> 操作日志</div>
+  <div class="nc"><i class="ri-notification-3-line"></i> 推送配置管理</div>
+  <div class="nc"><i class="ri-git-branch-line"></i> 区块链配置</div>
+</div>
+
+<!-- ═══ Main ═══ -->
+<div class="mw">
+  <div class="topbar">
+    <div class="hb"><i class="ri-menu-line"></i></div>
+    <div class="usr"><div class="av">L</div><span>laoluan</span></div>
+  </div>
+  <div class="mn">
+    <div class="bc"><i class="ri-wallet-3-line" style="font-size:12px"></i> <a href="#">资金与交易</a> &gt; 风险入款统计</div>
+    <div class="pt">风险入款统计</div>
+
+    <div class="frow">
+      <div class="fg">
+        <label>商户</label>
+        <select style="min-width:160px">
+          <option>全部商户</option>
+          <option selected>再次出发 (1261)</option>
+          <option>商户B (1088)</option>
+          <option>商户C (1342)</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label>币种</label>
+        <select><option>KHR</option></select>
+      </div>
+      <div class="fg">
+        <label>时间范围</label>
+        <div class="prs">
+          <div class="p on" onclick="pk(this,30)">30天</div>
+          <div class="p" onclick="pk(this,90)">90天</div>
+          <div class="p" onclick="pk(this,365)">365天</div>
+          <div class="p" onclick="pk(this,-1)">自定义</div>
+        </div>
+      </div>
+      <div class="fg" id="dr" style="display:none">
+        <label>起止日期</label>
+        <div style="display:flex;gap:4px;align-items:center;">
+          <input type="date" value="2026-02-15"><span style="color:#999">~</span><input type="date" value="2026-03-16">
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;padding-bottom:1px;">
+        <button class="bq">查 询</button>
+        <button class="brr">重置</button>
+      </div>
+    </div>
+
+    <div class="kr">
+      <div class="k"><div class="kl"><span class="d" style="background:#d97706"></span> 今日风险入款</div><div class="kv" style="color:#d97706">9.72</div><div class="ks">KHR · 4笔</div></div>
+      <div class="k"><div class="kl"><span class="d" style="background:#16a34a"></span> 今日已退款</div><div class="kv" style="color:#16a34a">2.00</div><div class="ks">KHR · 1笔</div></div>
+      <div class="k"><div class="kl"><span class="d" style="background:#d97706"></span> 本周风险入款</div><div class="kv" style="color:#d97706">43.60</div><div class="ks">KHR · 19笔</div></div>
+      <div class="k"><div class="kl"><span class="d" style="background:#16a34a"></span> 本周已退款</div><div class="kv" style="color:#16a34a">9.10</div><div class="ks">KHR · 5笔</div></div>
+      <div class="k"><div class="kl"><span class="d" style="background:#d97706"></span> 累计风险入款</div><div class="kv" style="color:#d97706">201.20</div><div class="ks">KHR · 96笔</div></div>
+      <div class="k"><div class="kl"><span class="d" style="background:#16a34a"></span> 累计已退款</div><div class="kv" style="color:#16a34a">58.40</div><div class="ks">KHR · 29笔 · 退款率 29%</div></div>
+    </div>
+
+    <div class="cd">
+      <div class="ch"><h3>风险入款 / 退款趋势</h3><div class="tbs"><div class="t on">金额</div><div class="t">笔数</div></div></div>
+      <div class="cb"><div id="tc" style="width:100%;height:300px;"></div></div>
+    </div>
+
+    <div class="cd">
+      <div class="ch"><h3>每日明细</h3></div>
+      <table class="tbl">
+        <thead><tr><th>日期</th><th>风险入款</th><th>笔数</th><th>已退款</th><th>笔数</th><th>未退款</th><th>退款率</th><th>趋势</th><th>操作</th></tr></thead>
+        <tbody id="tbd"></tbody>
+      </table>
+      <div class="pgb">
+        <span>共 30 条</span>
+        <div class="pg">&lt;</div><div class="pg on">1</div><div class="pg">2</div><div class="pg">3</div><div class="pg">&gt;</div>
+        <select><option>10 条/页</option><option>20 条/页</option></select>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function pk(e,d){document.querySelectorAll('.prs .p').forEach(p=>p.classList.remove('on'));e.classList.add('on');document.getElementById('dr').style.display=d===-1?'flex':'none';}
+const N=30,ds=[],ri=[],rf=[],ur=[];
+for(let i=N-1;i>=0;i--){const d=new Date(2026,2,16);d.setDate(d.getDate()-i);ds.push(`${d.getMonth()+1}-${String(d.getDate()).padStart(2,'0')}`);const p=(N-1-i)/(N-1),r=Math.max(3,14-p*5+(Math.random()-.5)*3);ri.push(+r.toFixed(2));const f=Math.max(.5,r*(.25+Math.random()*.15));rf.push(+f.toFixed(2));ur.push(+(r-f).toFixed(2));}
+ri[N-1]=9.72;rf[N-1]=2.00;ur[N-1]=7.72;
+const c=echarts.init(document.getElementById('tc'));
+c.setOption({tooltip:{trigger:'axis',backgroundColor:'#fff',borderColor:'#e8eaed',textStyle:{color:'#333',fontSize:12},extraCssText:'box-shadow:0 2px 8px rgba(0,0,0,.08)'},legend:{data:['风险入款','已退款','未退款'],textStyle:{color:'#999',fontSize:11},top:0,right:0,itemWidth:14,itemHeight:2},grid:{left:48,right:16,top:32,bottom:28},xAxis:{type:'category',data:ds,boundaryGap:false,axisLabel:{color:'#bbb',fontSize:11},axisLine:{lineStyle:{color:'#e8eaed'}},axisTick:{show:false}},yAxis:{type:'value',name:'KHR',nameTextStyle:{color:'#bbb',fontSize:10},axisLabel:{color:'#bbb',fontSize:11},splitLine:{lineStyle:{color:'#f3f4f6'}}},series:[{name:'风险入款',type:'line',data:ri,smooth:true,symbol:'none',lineStyle:{width:2.5,color:'#d97706'},areaStyle:{color:{type:'linear',x:0,y:0,x2:0,y2:1,colorStops:[{offset:0,color:'rgba(217,119,6,.1)'},{offset:1,color:'rgba(217,119,6,.01)'}]}}},{name:'已退款',type:'line',data:rf,smooth:true,symbol:'none',lineStyle:{width:2,color:'#16a34a'}},{name:'未退款',type:'line',data:ur,smooth:true,symbol:'none',lineStyle:{width:1.5,color:'#dc2626',type:'dashed'}}]});
+const tb=document.getElementById('tbd');
+for(let i=N-1;i>=Math.max(0,N-10);i--){const rate=((rf[i]/ri[i])*100).toFixed(0),cr=Math.max(1,Math.round(ri[i]/2.5)),cf=Math.max(1,Math.round(rf[i]/1.8)),pr=i<N-1?((rf[i+1]/ri[i+1])*100).toFixed(0):rate,df=rate-pr,tc2=df>0?'tag-g':df<0?'tag-r':'tag-y',tt=df>0?`↑${df}%`:df<0?`↓${Math.abs(df)}%`:'—';tb.innerHTML+=`<tr><td>${ds[i]}</td><td class="co">${ri[i].toFixed(2)}</td><td>${cr}</td><td class="cg">${rf[i].toFixed(2)}</td><td>${cf}</td><td class="cr">${ur[i].toFixed(2)}</td><td>${rate}%</td><td><span class="tag ${tc2}">${tt}</span></td><td><span class="ol">详情</span></td></tr>`;}
+window.addEventListener('resize',()=>c.resize());
+</script>
+</body>
+</html>

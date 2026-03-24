@@ -133,6 +133,7 @@ class RiskMonitoringSystemV4 extends RiskMonitoringSystemBase {
         this.initV4Features();
         // 预加载用户列表数据
         setTimeout(() => {
+            this.initTimeRange();
             this.loadUsersView();
         }, 500);
     }
@@ -193,131 +194,276 @@ class RiskMonitoringSystemV4 extends RiskMonitoringSystemBase {
         }
     }
 
-    // 加载用户风险列表视图 - 卡片式布局
+    // 加载用户风险列表视图 - 工单模式
     loadUsersView() {
         const container = document.getElementById('userCardsList');
         if (!container) return;
 
-        // 获取过滤条件
+        if (!this.currentQueueTab) this.currentQueueTab = 'unclaimed';
+
         const priorityFilter = document.getElementById('filterPriority')?.value;
         const levelFilter = document.getElementById('filterRiskLevel')?.value;
         const typeFilter = document.getElementById('filterRiskType')?.value;
         const searchFilter = document.getElementById('filterUserSearch')?.value.toLowerCase();
 
-        // 执行过滤逻辑
-        let filteredList = riskUsersList.filter(user => {
-            // 1. 优先级过滤
+        let baseFiltered = riskUsersList.filter(user => {
             if (priorityFilter === 'urgent' && user.risk_score < 85) return false;
             if (priorityFilter === 'normal' && user.risk_score >= 85) return false;
-
-            // 2. 风险等级过滤
             if (levelFilter === 'high' && user.risk_score < 80) return false;
             if (levelFilter === 'medium' && (user.risk_score < 60 || user.risk_score >= 80)) return false;
             if (levelFilter === 'low' && user.risk_score >= 60) return false;
-
-            // 3. 风险类型过滤
             if (typeFilter) {
-                const typeMap = {
-                    'security': ['安全', '设备', 'IP', '登录'],
-                    'trade': ['交易', '买单', '卖单', '取消'],
-                    'syndicate': ['团伙', '关联', '共享'],
-                    'payment': ['支付', '收款', 'QR', '卡'],
-                    'dispute': ['投诉', '举报', '纠纷']
-                };
+                const typeMap = { 'security': ['安全','设备','IP','登录'], 'trade': ['交易','买单','卖单','取消'], 'syndicate': ['团伙','关联','共享'], 'payment': ['支付','收款','QR','卡'], 'dispute': ['投诉','举报','纠纷'] };
                 const keywords = typeMap[typeFilter] || [];
                 if (!user.main_risks.some(risk => keywords.some(k => risk.includes(k)))) return false;
             }
-
-            // 4. 统一搜索
             if (searchFilter) {
-                const searchFields = [user.user_id.toLowerCase().replace("#", ""), user.last_ip.toLowerCase()];
+                const searchFields = [user.user_id.toLowerCase(), (user.last_ip||'').toLowerCase()];
                 if (!searchFields.some(f => f.includes(searchFilter))) return false;
             }
-
+            const dateStart = document.getElementById('filterDateStart')?.value;
+            const dateEnd = document.getElementById('filterDateEnd')?.value;
+            if (dateStart && user.last_login_at && user.last_login_at.split(' ')[0] < dateStart) return false;
+            if (dateEnd && user.last_login_at && user.last_login_at.split(' ')[0] > dateEnd) return false;
             return true;
         });
 
-        // 根据分页逻辑显示数据
+        // Tab 分组
+        const unclaimedList = baseFiltered.filter(u => u.claim_status === 'unclaimed');
+        const mineList = baseFiltered.filter(u => u.claim_status === 'processing' && u.claimed_by === CURRENT_USER);
+        const pendingAuditList = baseFiltered.filter(u => u.claim_status === 'pending_audit');
+        const doneList = baseFiltered.filter(u => u.claim_status === 'audited');
+
+        const setCount = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+        setCount('tabUnclaimedCount', unclaimedList.length);
+        setCount('tabMineCount', mineList.length);
+        setCount('tabJudgedCount', pendingAuditList.length);
+        setCount('tabDoneCount', doneList.length);
+
+        let filteredList = baseFiltered;
+        if (this.currentQueueTab === 'unclaimed') filteredList = unclaimedList;
+        else if (this.currentQueueTab === 'mine') filteredList = mineList;
+        else if (this.currentQueueTab === 'judged') filteredList = pendingAuditList;
+        else if (this.currentQueueTab === 'done') filteredList = doneList;
+
         const start = (this.currentPage - 1) * this.itemsPerPage;
         const end = start + this.itemsPerPage;
         const displayList = filteredList.slice(start, end);
 
+        const judgmentLabels = {
+            fraud: '⛔ 诈骗', normal: '✅ 正常', observe: '👁 观察', freeze: '🔒 冻结', block: '🚫 拉黑'
+        };
+
         container.innerHTML = displayList.map(user => {
             const scoreClass = user.risk_score >= 80 ? 'critical' : user.risk_score >= 60 ? 'high' : 'medium';
-            
-            // 风险标签
-            let riskBadges = '';
-            if (user.main_risks && user.main_risks.length > 0) {
-                riskBadges = user.main_risks.map((tag, index) => {
-                    const badgeClass = index === 0 ? 'risk-user-badge primary' : 'risk-user-badge secondary';
-                    return `<span class="${badgeClass}">${tag}</span>`;
-                }).join('');
+            const cs = user.claim_status || 'unclaimed';
+            const isMine = cs === 'processing' && user.claimed_by === CURRENT_USER;
+            const isOthers = cs === 'processing' && user.claimed_by !== CURRENT_USER;
+            const isDone = cs === 'audited';
+            const dimClass = (isDone || isOthers) ? 'user-card-handled' : '';
+
+            let riskBadges = (user.main_risks || []).map((tag, i) => {
+                return `<span class="risk-user-badge ${i === 0 ? 'primary' : 'secondary'}">${tag}</span>`;
+            }).join('');
+
+            // 工单状态标签
+            let statusTag = '';
+            if (cs === 'processing') {
+                statusTag = `<span class="handled-status-tag" style="background:#dbeafe;color:#2563eb;"><i class="fas fa-user-cog"></i> ${user.claimed_by} 处理中</span>`;
+            } else if (cs === 'pending_audit') {
+                const jl = judgmentLabels[user.judgment] || '已判定';
+                statusTag = `<span class="handled-status-tag" style="background:#fff7ed;color:#ea580c;">${jl} · 待稽查</span>`;
+            } else if (cs === 'audited') {
+                const jl = judgmentLabels[user.judgment] || '已判定';
+                const ar = user.audit_result === 'approved' ? '✅ 稽查通过' : '❌ 已驳回';
+                statusTag = `<span class="handled-status-tag normal" style="background:#d1fae5;color:#065f46;">${jl} · ${ar}</span>`;
             }
-            
+
+            // 操作人信息
+            let metaInfo = '';
+            if (cs === 'processing' && user.claimed_at) {
+                metaInfo = `<span class="handled-meta"><i class="fas fa-clock"></i> 接单 ${formatTime(user.claimed_at)}</span>`;
+            } else if (cs === 'pending_audit' && user.judged_by) {
+                metaInfo = `<span class="handled-meta"><i class="fas fa-gavel"></i> ${user.judged_by} · ${formatTime(user.judged_at)}</span>`;
+            } else if (cs === 'audited' && user.audited_by) {
+                metaInfo = `<span class="handled-meta"><i class="fas fa-clipboard-check"></i> ${user.audited_by} · ${formatTime(user.audited_at)}</span>`;
+            }
+
+            // 操作按钮 — 流程：接单 → 审核+解单 → 判定后自动进待稽查 → 稽查
+            let actionBtns = '';
+            if (cs === 'unclaimed') {
+                actionBtns = `<button class="risk-action-btn review" style="background:#3b82f6;color:white;border-color:#3b82f6;" onclick="event.stopPropagation();app.claimUser('${user.user_id}')"><i class="fas fa-hand-paper"></i> 接单</button>`;
+            } else if (isMine) {
+                actionBtns = `
+                    <button class="risk-action-btn review" onclick="event.stopPropagation();app.viewUserDetail('${user.user_id}')"><i class="fas fa-search"></i> 审核</button>
+                    <button class="risk-action-btn" style="color:#94a3b8;border-color:#cbd5e1;" onclick="event.stopPropagation();app.releaseUser('${user.user_id}')"><i class="fas fa-undo"></i> 解单</button>`;
+            } else if (isOthers) {
+                actionBtns = `<button class="risk-action-btn" disabled style="opacity:0.5;cursor:not-allowed;"><i class="fas fa-lock"></i> 处理中</button>`;
+            } else if (cs === 'pending_audit') {
+                actionBtns = `<button class="risk-action-btn review" style="background:#f59e0b;color:white;border-color:#f59e0b;" onclick="event.stopPropagation();app.showAuditModal('${user.user_id}')"><i class="fas fa-clipboard-check"></i> 稽查</button>`;
+            } else if (cs === 'audited') {
+                actionBtns = `<button class="risk-action-btn" onclick="event.stopPropagation();app.viewUserDetail('${user.user_id}')"><i class="fas fa-eye"></i> 查看</button>`;
+            }
+
             const region = user.city || '未知';
             const ip = user.last_ip || '未知';
             const time = user.last_login_at || '';
-            
+
             return `
-                <div class="risk-item-user ${scoreClass}" data-type="user" data-id="${user.user_id}" >
+                <div class="risk-item-user ${scoreClass} ${dimClass}" data-type="user" data-id="${user.user_id}">
                     <img src="${user.avatar || '../bob.png'}" alt="${user.user_id}" class="risk-user-avatar">
-                    
                     <div class="risk-user-info">
                         <span class="risk-user-id">${user.user_id}</span>
                         ${riskBadges}
+                        ${statusTag}
+                        ${metaInfo}
                         <div class="risk-user-meta">
                             <span><i class="fas fa-map-marker-alt"></i>${region}</span>
                             <span><i class="fas fa-network-wired"></i>${ip}</span>
                             <span><i class="fas fa-clock"></i>${formatTime(time)}</span>
                         </div>
                     </div>
-                    
-                    <div class="risk-user-score ${scoreClass}">
-                        ${user.risk_score}
-                    </div>
-                    
-                    <div class="risk-user-actions">
-                        <button class="risk-action-btn review" onclick="app.viewUserDetail('${user.user_id}')">
-                            <i class="fas fa-search"></i> 审核
-                        </button>
-                        
-                    </div>
-                </div>
-            `;
+                    <div class="risk-user-score ${scoreClass}">${user.risk_score}</div>
+                    <div class="risk-user-actions">${actionBtns}</div>
+                </div>`;
         }).join('');
 
-        // 更新统计信息
-        const totalPending = filteredList.length;
-        const criticalCount = filteredList.filter(u => u.risk_score >= 85).length;
-        const highCount = filteredList.filter(u => u.risk_score >= 75 && u.risk_score < 85).length;
-        const observeCount = filteredList.filter(u => u.risk_score < 75).length;
-        
-        const queueTotalCountEl = document.getElementById('queueTotalCount');
-        if (queueTotalCountEl) queueTotalCountEl.textContent = riskUsersList.length; // 保持总数不变
-        
-        const criticalCountEl = document.getElementById('criticalCount');
-        if (criticalCountEl) criticalCountEl.textContent = criticalCount;
-        
-        const highCountEl = document.getElementById('highCount');
-        if (highCountEl) highCountEl.textContent = highCount;
-        
-        const observeCountEl = document.getElementById('observeCount');
-        if (observeCountEl) observeCountEl.textContent = observeCount;
-        
-        const userTotalCountEl = document.getElementById('userTotalCount');
-        if (userTotalCountEl) userTotalCountEl.textContent = filteredList.length;
-        
-        const userStartRecordEl = document.getElementById('userStartRecord');
-        if (userStartRecordEl) userStartRecordEl.textContent = filteredList.length > 0 ? start + 1 : 0;
-        
-        const userEndRecordEl = document.getElementById('userEndRecord');
-        if (userEndRecordEl) userEndRecordEl.textContent = Math.min(end, filteredList.length);
-        
-        const userTotalRecordsEl = document.getElementById('userTotalRecords');
-        if (userTotalRecordsEl) userTotalRecordsEl.textContent = filteredList.length;
-
+        // KPI
+        const criticalCount = unclaimedList.filter(u => u.risk_score >= 80).length;
+        const highCount = unclaimedList.filter(u => u.risk_score >= 60 && u.risk_score < 80).length;
+        const observeCount = unclaimedList.filter(u => u.risk_score < 60).length;
+        setCount('queueTotalCount', riskUsersList.length);
+        setCount('criticalCount', criticalCount);
+        setCount('highCount', highCount);
+        setCount('observeCount', observeCount);
+        setCount('userTotalCount', filteredList.length);
+        setCount('userStartRecord', filteredList.length > 0 ? start + 1 : 0);
+        setCount('userEndRecord', Math.min(end, filteredList.length));
+        setCount('userTotalRecords', filteredList.length);
         const userCurrentPageEl = document.getElementById('userCurrentPage');
         if (userCurrentPageEl) userCurrentPageEl.textContent = this.currentPage;
+    }
+
+    // ===== 工单操作 =====
+    claimUser(userId) {
+        if (confirm(`确认接单用户 ${userId}？\n接单后该工单将锁定给您处理。`)) {
+            const user = riskUsersList.find(u => u.user_id === userId);
+            if (user) {
+                user.claim_status = 'processing';
+                user.claimed_by = CURRENT_USER;
+                user.claimed_at = new Date().toISOString().replace('T',' ').slice(0,19);
+                this.showToast(`已成功接单 ${userId}`, 'success');
+                this.loadRiskMonitorPanel();
+                this.loadUsersView();
+            }
+        }
+    }
+
+    releaseUser(userId) {
+        if (confirm(`确认解单用户 ${userId}？\n释放后其他运营可接单处理。`)) {
+            const user = riskUsersList.find(u => u.user_id === userId);
+            if (user) {
+                user.claim_status = 'unclaimed';
+                user.claimed_by = null;
+                user.claimed_at = null;
+                this.showToast(`已解单 ${userId}，工单已释放回待接单`, 'info');
+                this.loadRiskMonitorPanel();
+                this.loadUsersView();
+            }
+        }
+    }
+
+    showAuditModal(userId) {
+        const user = riskUsersList.find(u => u.user_id === userId);
+        if (!user) return;
+
+        const judgmentLabels = { fraud:'⛔ 已标记诈骗', normal:'✅ 已标记正常', observe:'👁 观察中', freeze:'🔒 已冻结', block:'🚫 已拉黑' };
+        const jl = judgmentLabels[user.judgment] || '未知';
+
+        let existing = document.getElementById('auditModalOverlay');
+        if (existing) existing.remove();
+
+        const overlay = document.createElement('div');
+        overlay.id = 'auditModalOverlay';
+        overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:10000;display:flex;justify-content:center;align-items:center;backdrop-filter:blur(4px);';
+        overlay.innerHTML = `
+            <div style="background:white;border-radius:16px;width:460px;max-width:90%;box-shadow:0 25px 50px rgba(0,0,0,0.25);overflow:hidden;animation:modalSlideIn 0.25s ease-out;">
+                <div style="padding:20px 24px 16px;border-bottom:1px solid #f1f5f9;">
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <div style="width:42px;height:42px;border-radius:12px;background:#fef3c7;display:flex;align-items:center;justify-content:center;font-size:18px;"><i class="fas fa-clipboard-check" style="color:#f59e0b;"></i></div>
+                        <div>
+                            <div style="font-size:17px;font-weight:800;color:#0f172a;">稽查审核</div>
+                            <div style="font-size:12px;color:#94a3b8;margin-top:2px;">用户 ${user.user_id}</div>
+                        </div>
+                    </div>
+                </div>
+                <div style="padding:16px 24px;">
+                    <div style="padding:14px;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0;margin-bottom:16px;">
+                        <div style="font-size:12px;color:#64748b;font-weight:700;margin-bottom:8px;">判定结果</div>
+                        <div style="font-size:16px;font-weight:800;color:#0f172a;margin-bottom:6px;">${jl}</div>
+                        <div style="font-size:13px;color:#64748b;">判定人：<strong>${user.judged_by}</strong> · ${formatTime(user.judged_at)}</div>
+                        <div style="font-size:13px;color:#475569;margin-top:6px;padding:8px;background:white;border-radius:6px;border:1px solid #e2e8f0;">"${user.judgment_reason || '无'}"</div>
+                    </div>
+                    <div style="margin-bottom:16px;">
+                        <label style="font-size:12px;font-weight:700;color:#64748b;display:block;margin-bottom:6px;">稽查意见</label>
+                        <textarea id="auditComment" placeholder="请输入稽查意见..." style="width:100%;height:68px;border:1.5px solid #e2e8f0;border-radius:8px;padding:10px 12px;font-size:13px;color:#334155;resize:none;outline:none;font-family:inherit;box-sizing:border-box;"></textarea>
+                    </div>
+                </div>
+                <div style="padding:12px 24px 20px;display:flex;justify-content:flex-end;gap:10px;">
+                    <button onclick="document.getElementById('auditModalOverlay').remove()" style="padding:9px 20px;background:#f1f5f9;border:1.5px solid #e2e8f0;border-radius:8px;color:#64748b;font-size:13px;font-weight:700;cursor:pointer;">取消</button>
+                    <button onclick="app.submitAudit('${user.user_id}','rejected')" style="padding:9px 20px;background:white;border:2px solid #dc2626;border-radius:8px;color:#dc2626;font-size:13px;font-weight:700;cursor:pointer;"><i class="fas fa-times"></i> 驳回</button>
+                    <button onclick="app.submitAudit('${user.user_id}','approved')" style="padding:9px 20px;background:#10b981;border:none;border-radius:8px;color:white;font-size:13px;font-weight:700;cursor:pointer;"><i class="fas fa-check"></i> 通过</button>
+                </div>
+            </div>`;
+        overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+        document.body.appendChild(overlay);
+    }
+
+    submitAudit(userId, result) {
+        const comment = document.getElementById('auditComment')?.value.trim();
+        if (!comment) {
+            document.getElementById('auditComment').style.borderColor = '#dc2626';
+            document.getElementById('auditComment').placeholder = '⚠️ 必须填写稽查意见';
+            document.getElementById('auditComment').focus();
+            return;
+        }
+        const user = riskUsersList.find(u => u.user_id === userId);
+        if (user) {
+            if (result === 'approved') {
+                user.claim_status = 'audited';
+                user.audited_by = CURRENT_USER;
+                user.audited_at = new Date().toISOString().replace('T',' ').slice(0,19);
+                user.audit_result = 'approved';
+                user.audit_comment = comment;
+                this.showToast(`稽查通过 ${userId}`, 'success');
+            } else {
+                user.claim_status = 'unclaimed';
+                user.claimed_by = null;
+                user.claimed_at = null;
+                user.judgment = null;
+                user.judged_by = null;
+                user.judged_at = null;
+                user.judgment_reason = null;
+                user.audit_result = 'rejected';
+                user.audit_comment = comment;
+                this.showToast(`稽查驳回 ${userId}，已退回待接单`, 'warning');
+            }
+        }
+        document.getElementById('auditModalOverlay')?.remove();
+        this.loadUsersView();
+        this.loadRiskMonitorPanel();
+    }
+
+    // 切换队列 Tab
+    switchQueueTab(tab) {
+        this.currentQueueTab = tab;
+        this.currentPage = 1;
+
+        document.querySelectorAll('.queue-tab').forEach(t => {
+            t.classList.toggle('active', t.dataset.tab === tab);
+        });
+
+        this.loadUsersView();
     }
 
     handleItemsPerPageChange(value) {
@@ -471,6 +617,7 @@ class RiskMonitoringSystemV4 extends RiskMonitoringSystemBase {
     }
 
     resetUserFilters() {
+        this.initTimeRange();
         const prioritySelect = document.getElementById('filterPriority');
         const levelSelect = document.getElementById('filterRiskLevel');
         const typeSelect = document.getElementById('filterRiskType');
@@ -638,65 +785,53 @@ class RiskMonitoringSystemV4 extends RiskMonitoringSystemBase {
     // ==================== 风险监控面板（合并版）====================
     loadRiskMonitorPanel() {
         const container = document.getElementById('riskMonitorList');
-        if (!container) {
-            console.log('风险监控面板容器未找到');
-            return;
-        }
+        if (!container) return;
 
         const allItems = [];
-        
-        // 加载用户数据 (首页显示前 10 条待审核用户)
         let userCount = 0;
-        if (typeof pendingReviewUsers !== 'undefined') {
-            // 不再硬过滤 80 分，确保首页能显示满 10 条待审核任务，按分数排序
-            pendingReviewUsers.sort((a, b) => b.risk_score - a.risk_score).forEach(user => {
-                allItems.push({
-                    type: 'user',
-                    data: user,
-                    score: user.risk_score,
-                    timestamp: user.created_at
+
+        // 首页显示：待接单 + 我正在处理的
+        if (typeof riskUsersList !== 'undefined') {
+            riskUsersList.filter(u => u.claim_status === 'unclaimed' || (u.claim_status === 'processing' && u.claimed_by === CURRENT_USER))
+                .sort((a, b) => {
+                    if (a.claim_status === 'processing' && b.claim_status !== 'processing') return -1;
+                    if (b.claim_status === 'processing' && a.claim_status !== 'processing') return 1;
+                    return b.risk_score - a.risk_score;
+                })
+                .forEach(user => {
+                    allItems.push({ type: 'user', data: user, score: user.risk_score, timestamp: user.last_login_at });
                 });
-            });
             userCount = allItems.filter(i => i.type === 'user').length;
         }
-        
-        // 添加团伙数据
+
         let syndicateCount = 0;
         if (typeof syndicateHotspotRanking !== 'undefined') {
             syndicateHotspotRanking.forEach(group => {
-                allItems.push({
-                    type: 'syndicate',
-                    data: group,
-                    score: group.risk_score,
-                    timestamp: group.updated_at
-                });
+                allItems.push({ type: 'syndicate', data: group, score: group.risk_score, timestamp: group.updated_at });
             });
             syndicateCount = allItems.filter(i => i.type === 'syndicate').length;
         }
-        
-        // 按风险分数降序排序
+
         allItems.sort((a, b) => b.score - a.score);
-        
-        // 保存所有数据到实例变量
         this.allRiskItems = allItems;
-        this.currentDisplayLimit = 15; // 首页仅显示前 10 条最高危数据
-        
-        // 渲染HTML
+        this.currentDisplayLimit = 15;
+
         this.renderRiskItems();
-        
-        // 更新计数
+
         document.getElementById('totalCount').textContent = allItems.length;
         document.getElementById('usersCount').textContent = userCount;
         document.getElementById('syndicatesCount').textContent = syndicateCount;
-        
-        // 默认只显示用户
+
         this.filterRiskPanel('users');
-        
-        console.log('风险监控面板已加载:', {
-            总数: allItems.length,
-            用户: userCount,
-            团伙: syndicateCount
-        });
+
+        // 更新首页工单概览计数
+        if (typeof riskUsersList !== 'undefined') {
+            const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+            setEl('overviewUnclaimed', riskUsersList.filter(u => u.claim_status === 'unclaimed').length);
+            setEl('overviewMine', riskUsersList.filter(u => u.claim_status === 'processing' && u.claimed_by === CURRENT_USER).length);
+            setEl('overviewJudged', riskUsersList.filter(u => u.claim_status === 'pending_audit').length);
+            setEl('overviewDone', riskUsersList.filter(u => u.claim_status === 'audited').length);
+        }
     }
     
     // 渲染风险项目（支持分页）
@@ -737,56 +872,55 @@ class RiskMonitoringSystemV4 extends RiskMonitoringSystemBase {
         }
     }
     
-    // 渲染用户卡片 - 紧凑版
+    // 渲染用户卡片 - 首页概览版
     renderUserCard(user) {
         const scoreClass = user.risk_score >= 80 ? 'critical' : user.risk_score >= 60 ? 'high' : 'medium';
-        
-        // 获取风险标签（显示多个标签）
+        const cs = user.claim_status || 'unclaimed';
+        const isMine = cs === 'processing' && user.claimed_by === CURRENT_USER;
+
         let riskBadges = '';
-        if (user.tags && user.tags.length > 0) {
-            // 显示所有标签
-            riskBadges = user.tags.map((tag, index) => {
-                // 第一个标签使用红色，其他使用不同颜色
-                const badgeClass = index === 0 ? 'risk-user-badge primary' : 'risk-user-badge secondary';
-                return `<span class="${badgeClass}">${tag}</span>`;
-            }).join('');
+        if (user.main_risks && user.main_risks.length > 0) {
+            riskBadges = user.main_risks.map((tag, i) => `<span class="risk-user-badge ${i === 0 ? 'primary' : 'secondary'}">${tag}</span>`).join('');
+        } else if (user.tags && user.tags.length > 0) {
+            riskBadges = user.tags.map((tag, i) => `<span class="risk-user-badge ${i === 0 ? 'primary' : 'secondary'}">${tag}</span>`).join('');
         } else if (user.reason) {
             riskBadges = `<span class="risk-user-badge primary">${user.reason}</span>`;
-        } else {
-            riskBadges = `<span class="risk-user-badge primary">待审核</span>`;
         }
-        
-        // 获取地区和IP信息
+
+        let statusTag = '';
+        if (isMine) {
+            statusTag = `<span class="handled-status-tag" style="background:#dbeafe;color:#2563eb;"><i class="fas fa-user-cog"></i> 我的工单</span>`;
+        }
+
+        let actionBtns = '';
+        if (cs === 'unclaimed') {
+            actionBtns = `<button class="risk-action-btn review" style="background:#3b82f6;color:white;border-color:#3b82f6;" onclick="event.stopPropagation();app.claimUser('${user.user_id}')"><i class="fas fa-hand-paper"></i> 接单</button>`;
+        } else if (isMine) {
+            actionBtns = `
+                <button class="risk-action-btn review" onclick="event.stopPropagation();app.viewUserDetail('${user.user_id}')"><i class="fas fa-search"></i> 审核</button>
+                <button class="risk-action-btn" style="color:#94a3b8;border-color:#cbd5e1;" onclick="event.stopPropagation();app.releaseUser('${user.user_id}')"><i class="fas fa-undo"></i> 解单</button>`;
+        }
+
         const region = user.region || user.city || user.location || '未知';
         const ip = user.ip || user.last_ip || user.login_ip || '未知';
-        const time = user.created_at || user.last_login_at || new Date().toISOString();
-        
+        const time = user.created_at || user.last_login_at || '';
+
         return `
             <div class="risk-item-user ${scoreClass}" data-type="user" data-id="${user.user_id}">
                 <img src="${user.avatar || '../bob.png'}" alt="${user.user_id}" class="risk-user-avatar">
-                
                 <div class="risk-user-info">
                     <span class="risk-user-id">${user.user_id}</span>
                     ${riskBadges}
+                    ${statusTag}
                     <div class="risk-user-meta">
                         <span><i class="fas fa-map-marker-alt"></i>${region}</span>
                         <span><i class="fas fa-network-wired"></i>${ip}</span>
                         <span><i class="fas fa-clock"></i>${formatTime(time)}</span>
                     </div>
                 </div>
-                
-                <div class="risk-user-score ${scoreClass}">
-                    ${user.risk_score}
-                </div>
-                
-                <div class="risk-user-actions">
-                    <button class="risk-action-btn review" onclick="app.reviewUser('${user.user_id}')">
-                        <i class="fas fa-search"></i> 审核
-                    </button>
-                    
-                </div>
-            </div>
-        `;
+                <div class="risk-user-score ${scoreClass}">${user.risk_score}</div>
+                <div class="risk-user-actions">${actionBtns}</div>
+            </div>`;
     }
     
     // 渲染团伙卡片 - 紧凑版
@@ -1420,6 +1554,60 @@ class RiskMonitoringSystemV4 extends RiskMonitoringSystemBase {
             
             this.showToast(`关联图谱已生成`, 'success');
         }, 1200);
+    }
+
+    // 时间筛选：快捷按钮设置日期范围
+    setTimeRange(range, btnEl) {
+        const startInput = document.getElementById('filterDateStart');
+        const endInput = document.getElementById('filterDateEnd');
+        if (!startInput || !endInput) return;
+
+        const now = new Date();
+        const end = now.toISOString().split('T')[0];
+        let start;
+
+        switch (range) {
+            case 'today':
+                start = end;
+                break;
+            case 'week': {
+                const d = new Date(now);
+                d.setDate(d.getDate() - d.getDay() + (d.getDay() === 0 ? -6 : 1));
+                start = d.toISOString().split('T')[0];
+                break;
+            }
+            case 'month':
+                start = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
+                break;
+            case 'quarter': {
+                const qMonth = Math.floor(now.getMonth() / 3) * 3;
+                start = `${now.getFullYear()}-${String(qMonth + 1).padStart(2, '0')}-01`;
+                break;
+            }
+            case 'year':
+                start = `${now.getFullYear()}-01-01`;
+                break;
+            default:
+                start = end;
+        }
+
+        startInput.value = start;
+        endInput.value = end;
+
+        document.querySelectorAll('.btn-time-shortcut').forEach(b => b.classList.remove('active'));
+        if (btnEl) btnEl.classList.add('active');
+
+        const labels = { today: '今天', week: '本周', month: '本月', quarter: '本季', year: '本年' };
+        this.showToast(`已筛选：${labels[range] || range}（${start} 至 ${end}）`, 'info');
+    }
+
+    // 初始化默认时间范围（不默认筛选，显示全部数据）
+    initTimeRange() {
+        document.querySelectorAll('.btn-time-shortcut').forEach(b => b.classList.remove('active'));
+        const startInput = document.getElementById('filterDateStart');
+        const endInput = document.getElementById('filterDateEnd');
+        if (startInput) startInput.value = '';
+        if (endInput) endInput.value = '';
     }
 
     // 一键快速筛选方法

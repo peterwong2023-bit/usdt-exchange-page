@@ -555,6 +555,10 @@ function getHealthStatusText(status) {
     return texts[status] || '未知';
 }
 
+// 当前登录用户（模拟）
+const CURRENT_USER = '审核员A';
+
+// 工单状态: unclaimed(待接单) | processing(处理中) | judged(已判定) | audited(已稽查)
 // 用户风险列表数据
 const riskUsersList = [
     {
@@ -566,7 +570,7 @@ const riskUsersList = [
         city: '深圳',
         last_ip: '112.25.67.89',
         last_login_at: '2025-11-28 14:23:15',
-        status: 'pending'
+        claim_status: 'processing', claimed_by: '审核员A', claimed_at: '2025-11-28 14:30:00'
     },
     {
         user_id: '2c7b_4E67890j23',
@@ -577,7 +581,8 @@ const riskUsersList = [
         city: '广州',
         last_ip: '58.33.142.90',
         last_login_at: '2025-11-28 13:15:42',
-        status: 'in_review'
+        claim_status: 'pending_audit', claimed_by: '审核员A', claimed_at: '2025-11-28 13:30:00',
+        judgment: 'fraud', judged_by: '审核员A', judged_at: '2025-11-28 14:02:00', judgment_reason: '多次异常交易，疑似诈骗'
     },
     {
         user_id: '5d8a_9B45678k01',
@@ -588,7 +593,7 @@ const riskUsersList = [
         city: '上海',
         last_ip: '121.77.88.156',
         last_login_at: '2025-11-28 12:32:18',
-        status: 'pending'
+        claim_status: 'processing', claimed_by: '审核员B', claimed_at: '2025-11-28 12:45:00'
     },
     {
         user_id: '8e4f_3C23456m89',
@@ -599,7 +604,7 @@ const riskUsersList = [
         city: '北京',
         last_ip: '183.45.199.123',
         last_login_at: '2025-11-28 11:47:33',
-        status: 'pending'
+        claim_status: 'unclaimed'
     },
     {
         user_id: '1a9d_6F78901n45',
@@ -610,7 +615,9 @@ const riskUsersList = [
         city: '杭州',
         last_ip: '220.167.88.45',
         last_login_at: '2025-11-28 10:28:50',
-        status: 'resolved'
+        claim_status: 'audited', claimed_by: '审核员A', claimed_at: '2025-11-28 10:35:00',
+        judgment: 'normal', judged_by: '审核员A', judged_at: '2025-11-28 11:05:00', judgment_reason: '经核实属正常用户',
+        audited_by: '稽查员X', audited_at: '2025-11-28 12:00:00', audit_result: 'approved', audit_comment: '判定合理'
     },
     {
         user_id: '7b2c_8D34567p12',
@@ -621,7 +628,7 @@ const riskUsersList = [
         city: '成都',
         last_ip: '114.88.156.78',
         last_login_at: '2025-11-28 09:15:27',
-        status: 'pending'
+        claim_status: 'unclaimed'
     },
     {
         user_id: '4f6e_2A90123q67',
@@ -632,7 +639,7 @@ const riskUsersList = [
         city: '重庆',
         last_ip: '61.55.234.90',
         last_login_at: '2025-11-28 08:42:11',
-        status: 'pending'
+        claim_status: 'unclaimed'
     },
     {
         user_id: '3d5b_5G56789r34',
@@ -643,7 +650,8 @@ const riskUsersList = [
         city: '武汉',
         last_ip: '202.178.45.123',
         last_login_at: '2025-11-28 07:20:08',
-        status: 'resolved'
+        claim_status: 'pending_audit', claimed_by: '审核员B', claimed_at: '2025-11-28 07:30:00',
+        judgment: 'observe', judged_by: '审核员B', judged_at: '2025-11-28 08:15:00', judgment_reason: '继续观察30天'
     },
     {
         user_id: '9h2k_8L34567s90',
@@ -654,7 +662,7 @@ const riskUsersList = [
         city: '长沙',
         last_ip: '119.123.45.67',
         last_login_at: '2025-11-28 06:10:33',
-        status: 'pending'
+        claim_status: 'unclaimed'
     },
     {
         user_id: '2m4n_6P90123t12',
@@ -665,9 +673,8 @@ const riskUsersList = [
         city: '郑州',
         last_ip: '61.187.56.78',
         last_login_at: '2025-11-28 05:45:12',
-        status: 'pending'
-    }
-    ,
+        claim_status: 'unclaimed'
+    },
     {
         user_id: '1b2c_3D45678e90',
         avatar: 'https://i.pravatar.cc/150?img=11',
@@ -677,7 +684,7 @@ const riskUsersList = [
         city: '深圳',
         last_ip: '113.116.45.88',
         last_login_at: '2025-11-28 15:45:12',
-        status: 'pending'
+        claim_status: 'unclaimed'
     },
     {
         user_id: '4f5g_6H78901i23',
@@ -688,7 +695,9 @@ const riskUsersList = [
         city: '广州',
         last_ip: '58.62.144.10',
         last_login_at: '2025-11-28 15:30:45',
-        status: 'in_review'
+        claim_status: 'audited', claimed_by: '审核员C', claimed_at: '2025-11-28 15:40:00',
+        judgment: 'freeze', judged_by: '审核员C', judged_at: '2025-11-28 16:10:00', judgment_reason: '多设备异常登录，暂时冻结',
+        audited_by: '稽查员Y', audited_at: '2025-11-28 17:00:00', audit_result: 'approved', audit_comment: '同意冻结处理'
     },
     {
         user_id: '7k8l_9M01234n56',
@@ -699,7 +708,7 @@ const riskUsersList = [
         city: '上海',
         last_ip: '101.226.103.12',
         last_login_at: '2025-11-28 15:15:22',
-        status: 'pending'
+        claim_status: 'unclaimed'
     },
     {
         user_id: '2p3q_4R56789s01',
@@ -710,7 +719,7 @@ const riskUsersList = [
         city: '北京',
         last_ip: '123.125.114.144',
         last_login_at: '2025-11-28 15:05:33',
-        status: 'pending'
+        claim_status: 'unclaimed'
     },
     {
         user_id: '5t6u_7V89012w34',
@@ -721,7 +730,7 @@ const riskUsersList = [
         city: '成都',
         last_ip: '118.112.58.10',
         last_login_at: '2025-11-28 14:55:10',
-        status: 'pending'
+        claim_status: 'unclaimed'
     },
     {
         user_id: '8x9y_0Z12345a67',
@@ -732,7 +741,8 @@ const riskUsersList = [
         city: '杭州',
         last_ip: '115.236.118.130',
         last_login_at: '2025-11-28 14:45:55',
-        status: 'resolved'
+        claim_status: 'pending_audit', claimed_by: '审核员A', claimed_at: '2025-11-28 14:50:00',
+        judgment: 'normal', judged_by: '审核员A', judged_at: '2025-11-28 15:20:00', judgment_reason: '交易对手已核实安全'
     },
     {
         user_id: '1b2c_3D45678e91',
@@ -743,7 +753,7 @@ const riskUsersList = [
         city: '深圳',
         last_ip: '113.116.45.89',
         last_login_at: '2025-11-28 14:35:12',
-        status: 'pending'
+        claim_status: 'unclaimed'
     },
     {
         user_id: '4f5g_6H78901i24',
@@ -754,7 +764,7 @@ const riskUsersList = [
         city: '广州',
         last_ip: '58.62.144.11',
         last_login_at: '2025-11-28 14:25:45',
-        status: 'pending'
+        claim_status: 'unclaimed'
     },
     {
         user_id: '7k8l_9M01234n57',
@@ -765,7 +775,7 @@ const riskUsersList = [
         city: '上海',
         last_ip: '101.226.103.13',
         last_login_at: '2025-11-28 14:15:22',
-        status: 'pending'
+        claim_status: 'unclaimed'
     },
     {
         user_id: '2p3q_4R56789s02',
@@ -776,9 +786,8 @@ const riskUsersList = [
         city: '北京',
         last_ip: '123.125.114.145',
         last_login_at: '2025-11-28 14:05:33',
-        status: 'pending'
-    }
-    ,
+        claim_status: 'processing', claimed_by: '审核员A', claimed_at: '2025-11-28 14:10:00'
+    },
     {
         user_id: '3m4n_5P67890q12',
         avatar: 'https://i.pravatar.cc/150?img=21',
@@ -788,7 +797,7 @@ const riskUsersList = [
         city: '武汉',
         last_ip: '202.103.24.68',
         last_login_at: '2025-11-28 16:10:00',
-        status: 'pending'
+        claim_status: 'unclaimed'
     },
     {
         user_id: '6r7s_8T90123u45',
@@ -799,7 +808,7 @@ const riskUsersList = [
         city: '长沙',
         last_ip: '119.29.156.44',
         last_login_at: '2025-11-28 16:30:00',
-        status: 'pending'
+        claim_status: 'unclaimed'
     }
 ];
 

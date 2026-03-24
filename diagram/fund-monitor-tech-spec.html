@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>资金监控中心 — 技术实现规格文档</title>
+<style>
+  @page { size: A4; margin: 20mm 18mm 20mm 18mm; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', sans-serif; font-size: 11px; color: #1a1a1a; line-height: 1.7; padding: 0 10px; }
+
+  .cover { page-break-after: always; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 90vh; text-align: center; }
+  .cover h1 { font-size: 28px; font-weight: 800; color: #0d1120; margin-bottom: 8px; letter-spacing: 1px; }
+  .cover .sub { font-size: 16px; color: #4a8af4; font-weight: 600; margin-bottom: 32px; }
+  .cover .meta { font-size: 12px; color: #888; line-height: 2; }
+  .cover .meta b { color: #333; }
+  .cover .badge { display: inline-block; padding: 4px 14px; border-radius: 4px; font-size: 11px; font-weight: 600; margin-top: 24px; }
+  .cover .badge.internal { background: #fef3cd; color: #92400e; }
+
+  h2 { font-size: 16px; font-weight: 700; color: #0d1120; border-bottom: 2px solid #4a8af4; padding-bottom: 4px; margin: 28px 0 12px; page-break-after: avoid; }
+  h3 { font-size: 13px; font-weight: 700; color: #333; margin: 16px 0 8px; page-break-after: avoid; }
+  h4 { font-size: 12px; font-weight: 600; color: #555; margin: 12px 0 6px; }
+  p, li { font-size: 11px; line-height: 1.7; }
+  ul, ol { padding-left: 18px; margin: 4px 0 8px; }
+  li { margin-bottom: 2px; }
+
+  table { width: 100%; border-collapse: collapse; margin: 6px 0 12px; font-size: 10.5px; page-break-inside: avoid; }
+  th { background: #f0f2f5; color: #333; font-weight: 600; text-align: left; padding: 6px 8px; border: 1px solid #d9dce3; white-space: nowrap; }
+  td { padding: 5px 8px; border: 1px solid #e8eaed; color: #444; vertical-align: top; }
+  tr:nth-child(even) td { background: #fafbfc; }
+
+  code { font-family: 'SF Mono', 'Cascadia Code', 'Consolas', monospace; background: #f0f2f5; padding: 1px 5px; border-radius: 3px; font-size: 10px; color: #c7254e; }
+  pre { background: #f6f8fa; border: 1px solid #e8eaed; border-radius: 4px; padding: 10px 12px; font-size: 10px; line-height: 1.6; overflow-x: auto; margin: 6px 0 12px; font-family: 'SF Mono', 'Cascadia Code', 'Consolas', monospace; page-break-inside: avoid; }
+
+  .note { background: #e8f0fe; border-left: 3px solid #4a8af4; padding: 8px 12px; margin: 8px 0 12px; font-size: 10.5px; color: #1a56db; border-radius: 0 4px 4px 0; page-break-inside: avoid; }
+  .warn { background: #fef9e7; border-left: 3px solid #d97706; padding: 8px 12px; margin: 8px 0 12px; font-size: 10.5px; color: #92400e; border-radius: 0 4px 4px 0; page-break-inside: avoid; }
+  .danger { background: #fde8e8; border-left: 3px solid #dc2626; padding: 8px 12px; margin: 8px 0 12px; font-size: 10.5px; color: #991b1b; border-radius: 0 4px 4px 0; page-break-inside: avoid; }
+
+  .tag { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 9px; font-weight: 600; vertical-align: middle; }
+  .tag-y { background: #fef9e7; color: #d97706; }
+  .tag-b { background: #e8f0fe; color: #4a8af4; }
+  .tag-g { background: #e8f8ee; color: #16a34a; }
+  .tag-r { background: #fde8e8; color: #dc2626; }
+  .tag-gray { background: #f0f1f3; color: #888; }
+
+  .flow-box { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 8px 0 12px; font-size: 10.5px; }
+  .flow-step { background: #f0f2f5; border: 1px solid #d9dce3; border-radius: 4px; padding: 4px 10px; font-weight: 500; color: #333; }
+  .flow-arrow { color: #bbb; font-size: 14px; }
+
+  .toc { page-break-after: always; }
+  .toc h2 { border-bottom-color: #333; }
+  .toc ul { list-style: none; padding: 0; }
+  .toc li { padding: 4px 0; border-bottom: 1px dotted #e8eaed; font-size: 12px; }
+  .toc li a { color: #333; text-decoration: none; }
+  .toc .sec-num { color: #4a8af4; font-weight: 700; margin-right: 8px; }
+
+  .api-field { font-family: 'SF Mono', monospace; font-size: 10px; color: #0d6efd; font-weight: 600; }
+  .enum-val { font-family: 'SF Mono', monospace; font-size: 10px; background: #f0f2f5; padding: 1px 4px; border-radius: 2px; }
+
+  .state-diagram { border: 1px solid #e8eaed; border-radius: 6px; padding: 14px; margin: 8px 0 14px; background: #fafbfc; page-break-inside: avoid; }
+
+  .section-break { page-break-before: always; }
+
+  footer { text-align: center; font-size: 9px; color: #bbb; margin-top: 40px; padding: 12px 0; border-top: 1px solid #e8eaed; }
+</style>
+</head>
+<body>
+
+<!-- ═══ 封面 ═══ -->
+<div class="cover">
+  <h1>资金监控中心</h1>
+  <div class="sub">TRON-USDT · 技术实现规格文档</div>
+  <div class="meta">
+    <b>产品</b>：VVOSS Admin v3<br>
+    <b>模块</b>：资金与交易 → 资金监控中心<br>
+    <b>版本</b>：v1.0<br>
+    <b>日期</b>：2026-03-20<br>
+    <b>读者</b>：后端开发 / 前端开发 / QA
+  </div>
+  <div class="badge internal">内部文档 · 请勿外传</div>
+</div>
+
+<!-- ═══ 目录 ═══ -->
+<div class="toc">
+  <h2>目录</h2>
+  <ul>
+    <li><span class="sec-num">1</span>页面概述与架构前提</li>
+    <li><span class="sec-num">2</span>全局筛选区</li>
+    <li><span class="sec-num">3</span>API 数据模型与配置参数</li>
+    <li><span class="sec-num">4</span>KPI 卡片（×4）— 计算逻辑与状态枚举</li>
+    <li><span class="sec-num">5</span>水位线模块 — 状态机与条件判断</li>
+    <li><span class="sec-num">6</span>回储任务 — 生命周期、状态机与执行规则</li>
+    <li><span class="sec-num">7</span>资金趋势图</li>
+    <li><span class="sec-num">8</span>周期明细表</li>
+    <li><span class="sec-num">9</span>Drawer 周期详情</li>
+    <li><span class="sec-num">10</span>告警体系</li>
+    <li><span class="sec-num">11</span>前端交互规格</li>
+    <li><span class="sec-num">12</span>推荐值算法（后续迭代）</li>
+    <li><span class="sec-num">附录A</span>已移除/简化项 & 决策记录</li>
+    <li><span class="sec-num">附录B</span>后续迭代项</li>
+  </ul>
+</div>
+
+<!-- ═══ 1. 页面概述 ═══ -->
+<h2>1. 页面概述与架构前提</h2>
+
+<table>
+  <tr><th style="width:140px">属性</th><th>说明</th></tr>
+  <tr><td>页面路由</td><td><code>/admin/fund-monitor</code>（建议）</td></tr>
+  <tr><td>浏览器标题</td><td>资金监控中心（TRON-USDT）- VVOSS Admin v3</td></tr>
+  <tr><td>面包屑</td><td>资金与交易 &gt; 资金监控中心</td></tr>
+  <tr><td>目标用户</td><td>运营 / 财务</td></tr>
+  <tr><td>核心职责</td><td>监控商户热池资金水位，管理自动回储（热池 → 冷钱包）流程</td></tr>
+  <tr><td>数据刷新</td><td>页面加载时拉取一次，无自动轮询 / WebSocket</td></tr>
+  <tr><td>链/币种</td><td>当前仅 TRON-USDT，多链后续迭代</td></tr>
+</table>
+
+<div class="danger"><b>架构约束</b>：每个商户拥有独立热池。不存在"全部商户"聚合视图，所有接口均按单个 <code>merchant_id</code> 查询。</div>
+
+<!-- ═══ 2. 全局筛选区 ═══ -->
+<h2>2. 全局筛选区</h2>
+
+<h3>2.1 商户选择器</h3>
+<table>
+  <tr><th>属性</th><th>规格</th></tr>
+  <tr><td>控件类型</td><td>单选下拉</td></tr>
+  <tr><td>数据源</td><td>当前用户有权限的商户列表（接口返回）</td></tr>
+  <tr><td>默认值</td><td>列表中第一个商户</td></tr>
+  <tr><td><code>"全部商户"</code> 选项</td><td><b>不提供</b></td></tr>
+  <tr><td>影响范围</td><td><b>全局</b> — 切换后所有模块数据刷新</td></tr>
+</table>
+
+<h3>2.2 时间范围 &amp; 粒度</h3>
+<table>
+  <tr><th>控件</th><th>类型</th><th>默认值</th><th>影响范围</th></tr>
+  <tr><td>时间范围</td><td>日期区间选择器</td><td>近 30 天</td><td rowspan="2"><b>仅</b>资金趋势 + 周期明细<br><span style="color:#999">不影响 KPI / 水位线 / 回储任务（实时数据）</span></td></tr>
+  <tr><td>粒度</td><td>单选组：日 / 周 / 月</td><td>日</td></tr>
+</table>
+
+<div class="note">筛选区底部需展示灰字提示：<i>"时间范围与粒度仅影响资金趋势和周期明细；KPI、水位线、回储任务为实时数据"</i></div>
+
+<!-- ═══ 3. 数据模型 ═══ -->
+<h2 class="section-break">3. API 数据模型与配置参数</h2>
+
+<h3>3.1 商户热池配置（<code>merchant_hot_pool_config</code>）</h3>
+<p>每个商户独立配置，在商户编辑页设置。本页面<b>只读</b>消费这些参数。</p>
+
+<table>
+  <tr><th>字段</th><th>类型</th><th>含义</th><th>示例</th></tr>
+  <tr><td class="api-field">HOT_MIN</td><td>decimal</td><td>最低线，低于此值告警需补给</td><td>50,000</td></tr>
+  <tr><td class="api-field">HOT_TARGET</td><td>decimal</td><td>目标线 = (HOT_MIN + HOT_MAX) / 2</td><td>150,000</td></tr>
+  <tr><td class="api-field">HOT_MAX</td><td>decimal</td><td>最高线，超过此值触发回储</td><td>300,000</td></tr>
+  <tr><td class="api-field">BATCH_MIN</td><td>decimal</td><td>最低回储金额（单次回储门槛）</td><td>50,000</td></tr>
+  <tr><td class="api-field">ENERGY_THRESHOLD</td><td>integer</td><td>执行回储所需最低能量</td><td>65,000</td></tr>
+  <tr><td class="api-field">ENERGY_PER_TX</td><td>integer</td><td>每笔 TRC20 Transfer 能量消耗</td><td>32,000</td></tr>
+  <tr><td class="api-field">ENERGY_SAFETY</td><td>float</td><td>能量安全系数</td><td>1.2</td></tr>
+</table>
+
+<h3>3.2 实时数据（接口需提供）</h3>
+<table>
+  <tr><th>字段</th><th>类型</th><th>含义</th></tr>
+  <tr><td class="api-field">HOT_BALANCE</td><td>decimal</td><td>当前热池链上 USDT 余额</td></tr>
+  <tr><td class="api-field">CURRENT_ENERGY</td><td>integer</td><td>当前账户可用能量</td></tr>
+  <tr><td class="api-field">today_out_total</td><td>decimal</td><td>今日出款总额</td></tr>
+  <tr><td class="api-field">today_hot_in</td><td>decimal</td><td>今日入热池总额</td></tr>
+</table>
+
+<h3>3.3 计算字段（前端推导）</h3>
+<pre>can_store    = HOT_BALANCE - HOT_TARGET           // 可回储金额
+batch_need   = max(0, BATCH_MIN - can_store)       // 距 BATCH_MIN 的缺口
+tx_cap       = floor(CURRENT_ENERGY / (ENERGY_PER_TX × ENERGY_SAFETY))   // 当前可转笔数
+tx_need      = ceil(ENERGY_THRESHOLD / (ENERGY_PER_TX × ENERGY_SAFETY))  // 所需笔数
+net_change   = today_hot_in - today_out_total      // 今日净变化（不含回储）</pre>
+
+<!-- ═══ 4. KPI 卡片 ═══ -->
+<h2>4. KPI 卡片（×4）— 计算逻辑与状态枚举</h2>
+<p>4 张卡片横排铺满（<code>grid-template-columns: repeat(4, 1fr)</code>），均为<b>实时数据</b>。</p>
+
+<h3>4.1 热池余额</h3>
+<table>
+  <tr><th>属性</th><th>规格</th></tr>
+  <tr><td>主数字</td><td><code>HOT_BALANCE</code>，格式化为千分位</td></tr>
+  <tr><td>副文案</td><td><code>USDT · 目标线 {HOT_TARGET}</code></td></tr>
+  <tr><td>告警态</td><td>当 <code>HOT_BALANCE &lt; HOT_MIN</code> 时：数字颜色 → <span style="color:#dc2626">#dc2626</span>，副文案 → <span style="color:#dc2626">"低于最低线，请尽快从冷钱包补给"</span></td></tr>
+</table>
+
+<h3>4.2 距目标线</h3>
+<table>
+  <tr><th>条件</th><th>主数字</th><th>颜色</th><th>副文案</th></tr>
+  <tr><td><code>gap &gt; 0</code> 且 <code>can_store ≥ BATCH_MIN</code></td><td>超出 {gap}</td><td style="color:#d97706">#d97706</td><td>已达最低回储金额（{BATCH_MIN}）</td></tr>
+  <tr><td><code>gap &gt; 0</code> 且 <code>can_store &lt; BATCH_MIN</code></td><td>超出 {gap}</td><td style="color:#d97706">#d97706</td><td>最低回储 {BATCH_MIN} · 还差 {batch_need}</td></tr>
+  <tr><td><code>gap = 0</code></td><td>正好在目标线</td><td style="color:#16a34a">#16a34a</td><td>水位正常，无需操作</td></tr>
+  <tr><td><code>gap &lt; 0</code> 且 <code>≥ HOT_MIN</code></td><td>低于 {|gap|}</td><td style="color:#dc2626">#dc2626</td><td>低于目标线，注意补充</td></tr>
+  <tr><td><code>balance &lt; HOT_MIN</code></td><td>低于 {|gap|}</td><td style="color:#dc2626">#dc2626</td><td><b>低于最低线，请尽快从冷钱包补给</b></td></tr>
+</table>
+<p>其中 <code>gap = HOT_BALANCE - HOT_TARGET</code></p>
+
+<h3>4.3 下次回储</h3>
+<p>描述<b>新建</b>回储任务的条件状态，不影响已有任务。</p>
+<table>
+  <tr><th>状态</th><th>条件</th><th>颜色</th><th>副文案</th></tr>
+  <tr><td>无需回储</td><td><code>HOT_BALANCE ≤ HOT_TARGET</code></td><td style="color:#16a34a">#16a34a</td><td>热池水位正常</td></tr>
+  <tr><td>未触发</td><td><code>can_store &lt; BATCH_MIN</code></td><td style="color:#d97706">#d97706</td><td>差 {X} USDT 达到最低回储金额</td></tr>
+  <tr><td>待执行</td><td><code>can_store ≥ BATCH_MIN</code> 且 <code>tx_cap &lt; tx_need</code></td><td style="color:#8b5cf6">#8b5cf6</td><td>金额达标 · 差 {N} 笔能量</td></tr>
+  <tr><td>已触发</td><td><code>can_store ≥ BATCH_MIN</code> 且 <code>tx_cap ≥ tx_need</code></td><td style="color:#16a34a">#16a34a</td><td>条件满足，已自动执行</td></tr>
+</table>
+
+<h3>4.4 今日净流入/净流出</h3>
+<table>
+  <tr><th>属性</th><th>规格</th></tr>
+  <tr><td>计算</td><td><code>net = today_hot_in - today_out_total</code>（不含回储）</td></tr>
+  <tr><td>net &gt; 0</td><td><span class="tag tag-g">净流入</span> + 绿色 <code>+X,XXX.XX</code></td></tr>
+  <tr><td>net &lt; 0</td><td><span class="tag tag-r">净流出</span> + 红色 <code>-X,XXX.XX</code></td></tr>
+  <tr><td>net = 0</td><td>显示 "—"</td></tr>
+  <tr><td>副文案</td><td><code>入热池 {today_hot_in} − 出款 {today_out_total}</code>（展示实际数字）</td></tr>
+</table>
+
+<!-- ═══ 5. 水位线 ═══ -->
+<h2 class="section-break">5. 水位线模块 — 状态机与条件判断</h2>
+
+<h3>5.1 水位条可视化</h3>
+<table>
+  <tr><th>区间</th><th>范围</th><th>颜色</th><th>CSS 类</th></tr>
+  <tr><td>危险区</td><td><code>0 ~ HOT_MIN</code></td><td style="color:#dc2626">红色</td><td><code>.wl-zone-danger</code></td></tr>
+  <tr><td>正常区</td><td><code>HOT_MIN ~ HOT_TARGET</code></td><td style="color:#16a34a">绿色</td><td><code>.wl-zone-normal</code></td></tr>
+  <tr><td>预警区</td><td><code>HOT_TARGET ~ HOT_MAX</code></td><td style="color:#d97706">橙色</td><td><code>.wl-zone-warning</code></td></tr>
+  <tr><td>超限区</td><td><code>HOT_MAX ~ ∞</code></td><td style="color:#dc2626">深红</td><td><code>.wl-zone-over</code></td></tr>
+</table>
+<p>三条标记线：最低线 / 目标线 / 最高线（各带数值标注），当前余额用圆点标记。</p>
+
+<h3>5.2 智能状态条 — 状态机（6 种）</h3>
+<p>描述的是"<b>新任务创建</b>"条件，不影响已存在的任务。</p>
+
+<table>
+  <tr><th>状态</th><th>触发条件</th><th>CSS 类</th><th>主数字</th><th>hint 文案</th></tr>
+  <tr><td><span class="tag tag-r">余额不足</span></td><td><code>balance &lt; HOT_MIN</code></td><td><code>st-low</code></td><td>低于最低线 {差额} USDT</td><td>请尽快从冷钱包补给，避免影响出款</td></tr>
+  <tr><td><span class="tag tag-g">无需回储</span></td><td><code>HOT_MIN ≤ balance ≤ HOT_TARGET</code></td><td><code>st-normal</code></td><td>（不显示）</td><td>热池水位正常，不会创建新的回储任务</td></tr>
+  <tr><td><span class="tag tag-y">未触发新回储</span></td><td><code>balance &gt; TARGET</code> 且 <code>can_store &lt; BATCH_MIN</code></td><td><code>st-wait-batch</code></td><td>还差 {缺口} USDT</td><td>达到最低回储金额后系统将自动创建并执行新任务{activeNote}</td></tr>
+  <tr><td><span class="tag tag-y">新回储待执行</span></td><td><code>can_store ≥ BATCH_MIN</code> 且 <code>tx_cap &lt; tx_need</code></td><td><code>st-wait-window</code></td><td>等待能量满足</td><td>金额已达标，条件满足后将立即执行{activeNote}</td></tr>
+  <tr><td><span class="tag tag-g">新回储已触发</span></td><td><code>can_store ≥ BATCH_MIN</code> 且 <code>tx_cap ≥ tx_need</code></td><td><code>st-ready</code></td><td>条件满足，已自动执行</td><td>系统已从归集地址拼单回储至冷钱包</td></tr>
+  <tr><td><span class="tag tag-r">超出上限</span></td><td><code>balance &gt; HOT_MAX</code></td><td><code>st-force</code></td><td>超上限 {超出额} USDT</td><td>超过最高线，系统已自动触发回储</td></tr>
+</table>
+
+<div class="note"><b>状态优先级</b>：<code>超出上限 &gt; 余额不足 &gt; 其余按条件顺序判断</code><br>
+<b>activeNote</b>：当存在活跃任务时，hint 末尾追加 <code>（已有 X 条任务不受影响）</code></div>
+
+<h3>5.3 条件 Pills（2 个，横排）</h3>
+<div class="warn"><b>注意</b>：已移除"闲置"条件。只保留<b>金额</b>和<b>能量</b>两个判断。安全性通过 <code>ENERGY_SAFETY</code> 系数保障。</div>
+
+<table>
+  <tr><th>条件</th><th>满足时</th><th>未满足时</th></tr>
+  <tr><td>金额</td><td><span class="tag tag-g">met</span> <code>金额 {can_store}/{BATCH_MIN} ✓</code></td><td><span class="tag tag-r">unmet</span> <code>金额 差{batch_need}</code></td></tr>
+  <tr><td>能量</td><td><span class="tag tag-g">met</span> <code>能量 可转{tx_cap}笔 ✓</code></td><td><span class="tag tag-y">wait</span> <code>能量 差{tx_gap}笔 → 阻塞{N}条任务</code></td></tr>
+</table>
+
+<p>仅在状态非 <code>st-normal</code> 且非 <code>st-low</code> 时显示 Pills。</p>
+
+<!-- ═══ 6. 回储任务 ═══ -->
+<h2 class="section-break">6. 回储任务 — 生命周期、状态机与执行规则</h2>
+
+<h3>6.1 任务生命周期</h3>
+<div class="flow-box">
+  <span class="flow-step">系统扫描</span><span class="flow-arrow">→</span>
+  <span class="flow-step">发现满足条件</span><span class="flow-arrow">→</span>
+  <span class="flow-step">自动创建任务</span><span class="flow-arrow">→</span>
+  <span class="flow-step">等待能量</span><span class="flow-arrow">→</span>
+  <span class="flow-step">能量满足 → 立即执行</span><span class="flow-arrow">→</span>
+  <span class="flow-step">成功 / 失败</span>
+</div>
+
+<ul>
+  <li><b>创建时机</b>：系统定时扫描发现余额超目标线且 <code>can_store ≥ BATCH_MIN</code> 时自动创建</li>
+  <li><b>执行时机</b>：条件满足后<b>立即执行</b>，不等待下次扫描</li>
+  <li><b>核心原则</b>：水位线状态只影响"新任务创建"，不影响已有任务执行</li>
+</ul>
+
+<h3>6.2 任务类型</h3>
+<div class="note"><b>统一为一种类型</b>，不再区分"普通"和"强制"。超过 HOT_MAX 时的差异仅用告警级别体现（页面红色 + Telegram 紧急通知）。<br>
+回储金额 = <code>HOT_BALANCE − HOT_TARGET</code>（余额超出目标线的部分）</div>
+
+<h3>6.3 任务状态机（4 种状态）</h3>
+<table>
+  <tr><th>状态</th><th>内部枚举</th><th>含义</th><th>tag 颜色</th><th>备注列内容</th></tr>
+  <tr><td><span class="tag tag-y">等待能量</span></td><td><code>WAIT_ENERGY</code></td><td>任务已创建，能量不足</td><td>黄色</td><td>阻塞原因，如 <i>"能量等待 可转 1 笔 / 需 2 笔"</i></td></tr>
+  <tr><td><span class="tag tag-b">回储中</span></td><td><code>READY</code></td><td>正在执行（含拼单组装 + 链上确认）</td><td>蓝色</td><td>执行策略，如 <i>"拼单回储 · 5个地址 · 已轮换优先"</i></td></tr>
+  <tr><td><span class="tag tag-gray">已完成</span></td><td><code>DONE</code></td><td>链上确认成功</td><td>灰色</td><td>—</td></tr>
+  <tr><td><span class="tag tag-r">失败</span></td><td><code>FAILED</code></td><td>执行失败</td><td>红色</td><td>失败原因 + "重试"按钮</td></tr>
+</table>
+
+<div class="state-diagram">
+<pre style="border:none;background:transparent;margin:0;text-align:center">
+          ┌───────────┐
+          │  等待能量   │  (WAIT_ENERGY)
+          └─────┬─────┘
+                │ 能量满足（立即执行）
+          ┌─────▼─────┐
+          │   回储中    │  (READY)
+          └──┬─────┬──┘
+             │     │
+      ┌──────▼┐  ┌─▼──────┐
+      │ 已完成 │  │  失败   │
+      │ (DONE) │  │(FAILED)│
+      └───────┘  └────┬───┘
+                      │ 手动重试
+                ┌─────▼─────┐
+                │   回储中    │
+                └───────────┘</pre>
+</div>
+
+<h3>6.4 失败重试机制</h3>
+<ul>
+  <li><b>不自动重试</b></li>
+  <li>失败后 Telegram 通知运营</li>
+  <li>运营在页面点"重试"按钮 → 状态：<code>FAILED → READY</code>（回储中）</li>
+  <li>失败原因在备注列展示</li>
+</ul>
+
+<h3>6.5 回储执行规则</h3>
+<table>
+  <tr><th>规则</th><th>说明</th></tr>
+  <tr><td>执行方式</td><td>拼单回储（从多个归集地址汇集到冷钱包）</td></tr>
+  <tr><td>地址优先级 1</td><td>已轮换过的归集地址优先</td></tr>
+  <tr><td>地址优先级 2</td><td>钱包余额大额优先</td></tr>
+  <tr><td>地址上限</td><td>后端配置决定，前端不关心</td></tr>
+</table>
+
+<h3>6.6 列表结构</h3>
+
+<h4>摘要行</h4>
+<p>展示：活跃任务数 + 状态分布 tags + 等待能量任务阻塞原因汇总 + 合计金额</p>
+
+<h4>活跃任务表</h4>
+<table>
+  <tr><th>列名</th><th>字段</th><th>说明</th></tr>
+  <tr><td>单号</td><td><code>id</code></td><td>回储单号</td></tr>
+  <tr><td>金额（USDT）</td><td><code>amt</code></td><td>回储金额，千分位格式</td></tr>
+  <tr><td>状态</td><td><code>status</code></td><td>等待能量 / 回储中 / 失败（tag 样式）</td></tr>
+  <tr><td>备注</td><td><code>block</code></td><td>阻塞原因 或 执行策略</td></tr>
+  <tr><td>交易哈希</td><td><code>txid</code></td><td>链上 TxID</td></tr>
+  <tr><td>创建时间</td><td><code>ctime</code></td><td></td></tr>
+  <tr><td>完成时间</td><td><code>etime</code></td><td>未完成显示 "—"</td></tr>
+</table>
+<div class="warn"><b>注意</b>：已移除"类型"列（不再区分普通/强制）。</div>
+
+<h4>已完成任务（折叠）</h4>
+<p>默认折叠，点击展开。展示条数 + 合计金额。列：单号 / 金额 / 状态 / 交易哈希 / 创建时间 / 完成时间。</p>
+
+<h3>6.7 手动触发扫描</h3>
+<table>
+  <tr><th>属性</th><th>规格</th></tr>
+  <tr><td>位置</td><td>回储任务列表标题栏右侧</td></tr>
+  <tr><td>功能</td><td>触发系统立即扫描是否需要创建新回储任务</td></tr>
+  <tr><td>交互流程</td><td>点击 → <code>confirm()</code> 二次确认 → loading → 完成反馈（绿色"扫描完成"）→ 恢复按钮</td></tr>
+  <tr><td>冷却时间</td><td><b>10 秒</b>，点击后按钮置灰 10 秒不可再次点击</td></tr>
+  <tr><td>上次扫描时间</td><td>显示在按钮左侧</td></tr>
+</table>
+
+<!-- ═══ 7. 资金趋势 ═══ -->
+<h2 class="section-break">7. 资金趋势图</h2>
+<p>受筛选区时间+粒度影响。使用 ECharts 折线图。</p>
+
+<table>
+  <tr><th>数据线</th><th>字段</th><th>颜色</th><th>线型</th><th>默认显示</th></tr>
+  <tr><td>出款总额</td><td><code>out_total</code></td><td><code>#4a8af4</code></td><td>实线 2.5px</td><td>是</td></tr>
+  <tr><td>入热池</td><td><code>to_hot</code></td><td><code>#06b6d4</code></td><td>实线 2px</td><td>是</td></tr>
+  <tr><td>回储冷钱包</td><td><code>to_cold</code></td><td><code>#8b5cf6</code></td><td>实线 2px</td><td>是</td></tr>
+  <tr><td>净流入/净流出</td><td><code>net</code></td><td><code>#64748b</code></td><td>虚线 1.5px</td><td><b>否</b></td></tr>
+</table>
+
+<h4>交互</h4>
+<ul>
+  <li>Legend checkbox 控制数据线显隐</li>
+  <li>Hover → tooltip 显示当日各项数值</li>
+  <li><b>点击数据点 → 打开该日期的周期详情 Drawer</b></li>
+</ul>
+
+<!-- ═══ 8. 周期明细 ═══ -->
+<h2>8. 周期明细表</h2>
+<p>受筛选区时间+粒度影响。</p>
+
+<h3>8.1 表格列</h3>
+<table>
+  <tr><th>列名</th><th>说明</th></tr>
+  <tr><td>周期</td><td>日期 / 周范围 / 月份（随粒度变化）</td></tr>
+  <tr><td>出款总额（USDT）</td><td>千分位格式</td></tr>
+  <tr><td>入热池（USDT）</td><td>千分位格式，0 显示 "—"</td></tr>
+  <tr><td>回储冷钱包（USDT）</td><td>千分位格式，0 显示 "—"</td></tr>
+  <tr><td>净流入/净流出（USDT）</td><td>见下方规则</td></tr>
+  <tr><td>操作</td><td>"详情"链接 → 打开 Drawer</td></tr>
+</table>
+
+<h3>8.2 净流入/净流出展示规则</h3>
+<table>
+  <tr><th>条件</th><th>展示</th></tr>
+  <tr><td><code>value &gt; 0</code></td><td><span class="tag tag-g">净流入</span> <code>+X,XXX.XX</code> （绿色）</td></tr>
+  <tr><td><code>value &lt; 0</code></td><td><span class="tag tag-r">净流出</span> <code>-X,XXX.XX</code> （红色）</td></tr>
+  <tr><td><code>value = 0</code></td><td><code>—</code></td></tr>
+  <tr><td><code>|value| &gt; avg_7d × 2</code></td><td>右侧追加 ⚠ 图标（<code>title="偏离近7日均值2倍以上"</code>）</td></tr>
+</table>
+<p>列名旁 ⓘ tooltip：<code>净变化 = 入热池 − 出款（不含回储）</code></p>
+
+<h3>8.3 分页</h3>
+<p>支持 10 / 20 / 50 条每页。</p>
+
+<!-- ═══ 9. Drawer ═══ -->
+<h2 class="section-break">9. Drawer 周期详情</h2>
+
+<table>
+  <tr><th>属性</th><th>规格</th></tr>
+  <tr><td>标题</td><td><code>周期详情 — {日期}</code></td></tr>
+  <tr><td>宽度</td><td>580px</td></tr>
+  <tr><td>Tab</td><td>2 个：出款明细（默认）/ 回储任务</td></tr>
+  <tr><td>打开方式</td><td>点击周期明细"详情" / 点击趋势图数据点</td></tr>
+</table>
+
+<h3>9.1 Tab1：出款明细</h3>
+<h4>顶部汇总条</h4>
+<p>横排展示 4 个指标，分隔符分割，每个带 ⓘ tooltip：</p>
+<table>
+  <tr><th>指标</th><th>tooltip</th></tr>
+  <tr><td>出款总额</td><td>热池 → 外部用户地址（不含热→冷回储）</td></tr>
+  <tr><td>入热池</td><td>入款地址 / 子钱包 → 热池（归集）</td></tr>
+  <tr><td>回储冷钱包</td><td>热池 → 冷钱包（回储操作），0 显示 "—"</td></tr>
+  <tr><td>净流入/净流出</td><td>净变化 = 入热池 − 出款（不含回储）</td></tr>
+</table>
+
+<h4>出款订单列表</h4>
+<p>列：订单号 / 金额 / 状态 / 时间 / 完成时间 / 交易哈希</p>
+<p>状态枚举：<span class="tag tag-g">成功</span> / <span class="tag tag-y">处理中</span> / <span class="tag tag-r">失败</span></p>
+
+<h4>异常提示条</h4>
+<p>仅当存在失败或处理中订单时显示：黄色背景 <code>出款异常：失败 X USDT · 处理中 Y USDT</code></p>
+
+<h3>9.2 Tab2：回储任务</h3>
+<p><b>摘要行</b>：<code>本期回储任务：{总数}</code> + 状态分布</p>
+<p><b>列</b>：回储单号 / 金额 / 状态 / 备注 / 交易哈希 / 创建时间 / 完成时间（已移除"类型"列）</p>
+
+<!-- ═══ 10. 告警 ═══ -->
+<h2>10. 告警体系</h2>
+
+<h3>10.1 页面内告警</h3>
+<table>
+  <tr><th>触发条件</th><th>展示位置</th><th>展示方式</th></tr>
+  <tr><td><code>balance &lt; HOT_MIN</code></td><td>KPI 热池余额 + 距目标线</td><td>红色数字 + 红色提示文案</td></tr>
+  <tr><td><code>balance &lt; HOT_MIN</code></td><td>水位线状态条</td><td>红色"余额不足"状态</td></tr>
+  <tr><td><code>balance &gt; HOT_MAX</code></td><td>水位线状态条</td><td>红色"超出上限"状态</td></tr>
+  <tr><td>有 <code>WAIT_ENERGY</code> 任务</td><td>能量 pill</td><td>橙色 + "阻塞 N 条任务"</td></tr>
+  <tr><td>有 <code>FAILED</code> 任务</td><td>回储任务列表</td><td>红色 tag + 重试按钮</td></tr>
+  <tr><td>出款有异常</td><td>Drawer 出款明细</td><td>黄色提示条</td></tr>
+</table>
+
+<h3>10.2 Telegram 告警（后续细化）</h3>
+<table>
+  <tr><th>场景</th><th>消息级别</th><th>说明</th></tr>
+  <tr><td><code>balance &lt; HOT_MIN</code></td><td>严重</td><td>通知运营从冷钱包补给</td></tr>
+  <tr><td><code>balance &gt; HOT_MAX</code></td><td>紧急</td><td>超上限通知</td></tr>
+  <tr><td>回储任务失败</td><td>严重</td><td>通知运营手动处理</td></tr>
+</table>
+<p>告警频率、恢复通知逻辑待后续细化。</p>
+
+<!-- ═══ 11. 交互规格 ═══ -->
+<h2 class="section-break">11. 前端交互规格</h2>
+
+<table>
+  <tr><th>操作</th><th>位置</th><th>行为</th></tr>
+  <tr><td>切换商户</td><td>全局筛选区</td><td>全页面数据刷新</td></tr>
+  <tr><td>修改时间/粒度</td><td>全局筛选区</td><td>仅刷新趋势图 + 周期明细</td></tr>
+  <tr><td>查询 / 重置</td><td>全局筛选区</td><td>执行查询 / 重置筛选条件（刷新页面）</td></tr>
+  <tr><td>点击趋势图数据点</td><td>资金趋势</td><td>打开该日期 Drawer</td></tr>
+  <tr><td>点击"详情"</td><td>周期明细</td><td>打开该日期 Drawer</td></tr>
+  <tr><td>切换 Drawer Tab</td><td>Drawer</td><td>切换出款明细 / 回储任务</td></tr>
+  <tr><td>展开/折叠已完成任务</td><td>回储任务列表</td><td>展开/收起已完成任务行</td></tr>
+  <tr><td>手动触发扫描</td><td>回储任务列表</td><td><code>confirm()</code> → loading → 完成（10 秒冷却）</td></tr>
+  <tr><td>重试失败任务</td><td>回储任务列表</td><td>状态：失败 → 回储中</td></tr>
+  <tr><td>展开/收起模块</td><td>各 panel 标题栏</td><td>折叠/展开模块内容</td></tr>
+  <tr><td>Legend 勾选</td><td>趋势图</td><td>显示/隐藏对应数据线</td></tr>
+  <tr><td>切换分页</td><td>周期明细</td><td>翻页（10/20/50 条每页）</td></tr>
+</table>
+
+<!-- ═══ 12. 推荐值 ═══ -->
+<h2>12. 推荐值算法（后续迭代）</h2>
+<p>本页面将提供 HOT_MIN 和 HOT_MAX 的推荐值，辅助运营在商户编辑页配置。</p>
+
+<h3>HOT_MIN 推荐值</h3>
+<pre>Hot_Min = PeakOut_per_hour × H × Safety</pre>
+<table>
+  <tr><th>参数</th><th>含义</th><th>推荐值</th></tr>
+  <tr><td><code>PeakOut_per_hour</code></td><td>过去 14~30 天每小时出款峰值（取 P95）</td><td>按实际数据</td></tr>
+  <tr><td><code>H</code></td><td>热池独立扛住的时长</td><td>6h / 12h / 24h（推荐 12h）</td></tr>
+  <tr><td><code>Safety</code></td><td>保险系数</td><td>1.1 ~ 1.3</td></tr>
+</table>
+<p>直觉：能扛住 H 小时出款尖峰的钱。</p>
+
+<h3>HOT_MAX 推荐值</h3>
+<pre>Hot_Max = Hot_Min + k × BATCH_MIN</pre>
+<table>
+  <tr><th>参数</th><th>含义</th><th>推荐值</th></tr>
+  <tr><td><code>k</code></td><td>允许累积几个"回储批次"的缓冲</td><td>2 或 3</td></tr>
+</table>
+<p>直觉：安全底线 + 2~3 次回储批次的缓冲，超过就该回储。</p>
+
+<h3>HOT_TARGET</h3>
+<pre>Hot_Target = (Hot_Min + Hot_Max) / 2</pre>
+
+<!-- ═══ 附录A ═══ -->
+<h2 class="section-break">附录 A：已移除/简化项 &amp; 决策记录</h2>
+<table>
+  <tr><th>项目</th><th>原状态</th><th>变更</th><th>决策原因</th></tr>
+  <tr><td>"全部商户"</td><td>下拉选项</td><td>删除</td><td>每个商户独立热池，聚合无意义</td></tr>
+  <tr><td>闲置条件</td><td>三条件之一</td><td>删除</td><td>本意是空闲时执行，已被 ENERGY_SAFETY 覆盖</td></tr>
+  <tr><td>强制/普通类型</td><td>两种类型</td><td>合并为一种</td><td>达到 MAX 时 can_store 必然 ≥ BATCH_MIN，无实质差异</td></tr>
+  <tr><td>READY / EXECUTING</td><td>两个状态</td><td>合并为"回储中"</td><td>运营不关心内部阶段</td></tr>
+  <tr><td>"等待执行"</td><td>原状态名</td><td>改为"等待能量"</td><td>去掉闲置后，等待的只有能量</td></tr>
+  <tr><td>"强制回储中"</td><td>水位线状态名</td><td>改为"超出上限"</td><td>去掉强制概念后语义不准</td></tr>
+  <tr><td>导出功能</td><td>有导出按钮</td><td>删除</td><td>—</td></tr>
+  <tr><td>归集健康面板</td><td>独立面板</td><td>删除</td><td>实用性低</td></tr>
+  <tr><td>口径说明 Tab</td><td>Drawer 第三个 Tab</td><td>删除</td><td>改为字段旁 tooltip</td></tr>
+  <tr><td>期初/期末余额</td><td>Drawer 汇总</td><td>删除</td><td>—</td></tr>
+</table>
+
+<!-- ═══ 附录B ═══ -->
+<h2>附录 B：后续迭代项</h2>
+<table>
+  <tr><th>功能</th><th>说明</th><th>优先级</th></tr>
+  <tr><td>推荐值</td><td>基于历史出款数据推荐 HOT_MIN / HOT_MAX</td><td>中</td></tr>
+  <tr><td>Telegram 告警细节</td><td>告警频率、恢复通知、消息模板</td><td>中</td></tr>
+  <tr><td>多链支持</td><td>支持 ETH-USDT 等其他链/币种</td><td>低</td></tr>
+  <tr><td>自动刷新</td><td>轮询或 WebSocket 实时更新</td><td>低</td></tr>
+  <tr><td>补给操作入口</td><td>低于 HOT_MIN 时快捷跳转到冷钱包转账</td><td>低</td></tr>
+  <tr><td>配置跳转</td><td>水位线模块快捷跳转到商户配置页</td><td>低</td></tr>
+</table>
+
+<footer>
+  资金监控中心 · 技术实现规格文档 v1.0 · VVOSS Admin · 2026-03-20 · 机密
+</footer>
+
+</body>
+</html>

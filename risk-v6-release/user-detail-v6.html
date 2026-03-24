@@ -28,7 +28,7 @@
                     <button class="btn btn-outline" onclick="window.history.back()">
                         <i class="fas fa-arrow-left"></i> 返回
                     </button>
-                    <button class="btn btn-primary" onclick="window.location.href='index-v4.html'">
+                    <button class="btn btn-primary" onclick="window.location.href='index.html'">
                         <i class="fas fa-home"></i> 返回首页
                     </button>
                 </div>
@@ -37,10 +37,10 @@
     </header>
 
     <!-- 主容器 -->
-    <div style="max-width: 96%; margin: 0 auto; padding: 16px 24px;">
+    <div id="mainContainer" style="max-width: 75%; margin: 0 auto; padding: 16px 24px;">
         <!-- 面包屑 -->
         <div style="display: flex; align-items: center; gap: 8px; font-size: 14px; color: #64748b; margin-bottom: 20px;">
-            <a href="index-v4.html" style="color: #3b82f6; text-decoration: none;">首页</a>
+            <a href="index.html" style="color: #3b82f6; text-decoration: none;">首页</a>
             <i class="fas fa-chevron-right" style="font-size: 10px;"></i>
             <a href="users.html" style="color: #3b82f6; text-decoration: none;">风险处理队列</a>
             <i class="fas fa-chevron-right" style="font-size: 10px;"></i>
@@ -90,40 +90,25 @@
                     <h2 style="font-size: 16px; font-weight: 900; color: #92400e; margin: 0;">
                         <i class="fas fa-exclamation-triangle"></i> 为什么是高危？（5秒速览）
                     </h2>
-                    <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; max-width: 60%;">
-                        <button style="padding: 7px 14px; background: white; border: 2px solid #dc2626; border-radius: 6px; color: #dc2626; font-size: 12px; font-weight: 700; cursor: pointer;">
-                            <i class="fas fa-times-circle"></i> 标记诈骗
-                        </button>
-                        <button style="padding: 7px 14px; background: #10b981; border: 2px solid #10b981; border-radius: 6px; color: white; font-size: 12px; font-weight: 700; cursor: pointer;">
-                            <i class="fas fa-check-circle"></i> 标记正常
-                        </button>
-                        <button style="padding: 7px 14px; background: #64748b; border: 2px solid #64748b; border-radius: 6px; color: white; font-size: 12px; font-weight: 700; cursor: pointer;">
-                            <i class="fas fa-eye"></i> 继续观察
-                        </button>
-                        <button style="padding: 7px 14px; background: #f59e0b; border: 2px solid #f59e0b; border-radius: 6px; color: white; font-size: 12px; font-weight: 700; cursor: pointer;">
-                            <i class="fas fa-lock"></i> 冻结账户
-                        </button>
-                        <button style="padding: 7px 14px; background: #1e293b; border: 2px solid #1e293b; border-radius: 6px; color: white; font-size: 12px; font-weight: 700; cursor: pointer;">
-                            <i class="fas fa-ban"></i> 拉黑账户
-                        </button>
+                    <div id="actionBtnGroup" style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; max-width: 70%; align-items: center;">
                     </div>
                 </div>
                 <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
-                    <div class="dashboard-card" style="padding: 10px 12px; border-left: 4px solid #dc2626; cursor: pointer;" onclick="scrollToRuleAndHighlight('FAST_SELL')">
+                    <div class="dashboard-card" style="padding: 10px 12px; border-left: 4px solid #dc2626; cursor: pointer;" onclick="scrollToRule('FAST_SELL')">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                             <span style="font-size: 12px; font-weight: 800; color: #0f172a;">1️⃣ 登录后立即卖单</span>
                             <span style="font-size: 14px; font-weight: 900; color: #dc2626; font-family: 'JetBrains Mono', monospace;">-18</span>
                         </div>
                         <div style="font-size: 10px; color: #64748b;">5分钟内卖单 · 2次/7天</div>
                     </div>
-                    <div class="dashboard-card" style="padding: 10px 12px; border-left: 4px solid #dc2626; cursor: pointer;" onclick="scrollToRuleAndHighlight('R-ATO-1')">
+                    <div class="dashboard-card" style="padding: 10px 12px; border-left: 4px solid #dc2626; cursor: pointer;" onclick="scrollToRule('R-ATO-1')">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                             <span style="font-size: 12px; font-weight: 800; color: #0f172a;">2️⃣ 新设备+异地登录</span>
                             <span style="font-size: 14px; font-weight: 900; color: #dc2626; font-family: 'JetBrains Mono', monospace;">-15</span>
                         </div>
                         <div style="font-size: 10px; color: #64748b;">DFP_445566 · 300km</div>
                     </div>
-                    <div class="dashboard-card" style="padding: 10px 12px; border-left: 4px solid #f59e0b; cursor: pointer;" onclick="scrollToRuleAndHighlight('CANCEL_PROBE')">
+                    <div class="dashboard-card" style="padding: 10px 12px; border-left: 4px solid #f59e0b; cursor: pointer;" onclick="scrollToRule('CANCEL_PROBE')">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                             <span style="font-size: 12px; font-weight: 800; color: #0f172a;">3️⃣ 高频取消订单</span>
                             <span style="font-size: 14px; font-weight: 900; color: #f59e0b; font-family: 'JetBrains Mono', monospace;">-15</span>
@@ -553,7 +538,7 @@
                         <i class="fas fa-history" style="color: #3b82f6;"></i> 分数贡献时间轴
                     </h3>
                     <div style="margin-top: 8px; font-size: 13px; color: #64748b;">
-                        共触发6条规则，累计扣分-91
+                        共触发6条规则，累计风险评分 91
                     </div>
                 </div>
                 <div style="padding: 16px; max-height: 800px; overflow-y: auto;">
@@ -708,13 +693,7 @@
             }
         }
 
-        // 页面加载时默认展开第一条规则
-        window.addEventListener('load', function() {
-            setTimeout(() => {
-                const firstRule = document.getElementById('R-ATO-1');
-                if (firstRule) toggleRule(firstRule);
-            }, 500);
-        });
+        // 页面加载时默认展开第一条规则（合并到统一初始化）
 
         // ===== 活跃周期交互逻辑 =====
         const activityStates = [
@@ -761,11 +740,6 @@
             currentActivityState = (currentActivityState + 1) % activityStates.length;
             renderActivityState(currentActivityState);
         }
-
-        // 初始渲染
-        window.addEventListener('load', function() {
-            renderActivityState(0);
-        });
 
         // ===== 平台资金方向交互逻辑 =====
         const fundFlowStates = [
@@ -868,10 +842,6 @@
             renderFundFlow(currentFundFlowIdx);
         }
 
-        window.addEventListener('load', function() {
-            renderFundFlow(0);
-        });
-
         // ===== 安全画像三卡片交互 =====
         const securityStyles = {
             green:  { bg: 'white', border: '#d1fae5', titleColor: '#10b981', textColor: '#64748b' },
@@ -938,11 +908,7 @@
         }
         function cycleBehaviorState() { behaviorIdx = (behaviorIdx + 1) % behaviorStates.length; renderBehavior(behaviorIdx); }
 
-        window.addEventListener('load', function() {
-            renderBlacklist(blacklistIdx);
-            renderDisposal(disposalIdx);
-            renderBehavior(behaviorIdx);
-        });
+        
 
         // 用户画像整体展开/收起
         function toggleProfileDetails() {
@@ -984,11 +950,291 @@
         // 如果在 iframe 中（作为抽屉显示），隐藏顶部导航和面包屑
         if (window.self !== window.top) {
             document.querySelector('.header').style.display = 'none';
-            document.querySelector('div[style*="max-width: 96%"]').style.paddingTop = '0';
-            // 隐藏面包屑
+            const container = document.getElementById('mainContainer');
+            if (container) {
+                container.style.maxWidth = '96%';
+                container.style.paddingTop = '0';
+            }
             const breadcrumb = document.querySelector('div[style*="display: flex; align-items: center; gap: 8px"]');
             if (breadcrumb) breadcrumb.style.display = 'none';
         }
+    </script>
+
+    <!-- 二次确认弹窗 -->
+    <div id="confirmModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:10000; justify-content:center; align-items:center; backdrop-filter:blur(4px);">
+        <div id="confirmModalContent" style="background:white; border-radius:16px; padding:0; width:420px; max-width:90%; box-shadow:0 25px 50px rgba(0,0,0,0.25); animation:modalSlideIn 0.25s ease-out; overflow:hidden;">
+            <div style="padding:20px 24px 16px; border-bottom:1px solid #f1f5f9;">
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <div id="confirmModalIcon" style="width:42px; height:42px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:18px;"></div>
+                    <div>
+                        <div id="confirmModalTitle" style="font-size:17px; font-weight:800; color:#0f172a;"></div>
+                        <div style="font-size:12px; color:#94a3b8; margin-top:2px;">用户 #9f3e_7A12345h78</div>
+                    </div>
+                </div>
+            </div>
+            <div style="padding:16px 24px;">
+                <div id="confirmModalDesc" style="font-size:14px; color:#475569; line-height:1.6; margin-bottom:16px;"></div>
+                <div id="confirmModalWarning" style="display:none; padding:10px 14px; border-radius:8px; font-size:13px; font-weight:700; margin-bottom:16px;"></div>
+                <div style="margin-bottom:8px;">
+                    <label id="confirmReasonLabel" style="font-size:12px; font-weight:700; color:#64748b; display:block; margin-bottom:6px;">备注原因（可选）</label>
+                    <textarea id="confirmModalReason" placeholder="请输入处理原因..." style="width:100%; height:68px; border:1.5px solid #e2e8f0; border-radius:8px; padding:10px 12px; font-size:13px; color:#334155; resize:none; outline:none; font-family:inherit; box-sizing:border-box; transition:border-color 0.2s;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#e2e8f0'"></textarea>
+                </div>
+            </div>
+            <div style="padding:12px 24px 20px; display:flex; justify-content:flex-end; gap:10px;">
+                <button onclick="closeConfirmModal()" style="padding:9px 20px; background:#f1f5f9; border:1.5px solid #e2e8f0; border-radius:8px; color:#64748b; font-size:13px; font-weight:700; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">取消</button>
+                <button id="confirmModalBtn" onclick="executeAction()" style="padding:9px 24px; border:none; border-radius:8px; color:white; font-size:13px; font-weight:700; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; gap:6px;"></button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        @keyframes modalSlideIn {
+            from { transform: translateY(-20px) scale(0.95); opacity: 0; }
+            to { transform: translateY(0) scale(1); opacity: 1; }
+        }
+        @keyframes modalSlideOut {
+            from { transform: translateY(0) scale(1); opacity: 1; }
+            to { transform: translateY(-10px) scale(0.97); opacity: 0; }
+        }
+    </style>
+
+    <script>
+        // ===== 操作按钮状态管理 =====
+        const btnStyle = 'padding:7px 14px; border-radius:6px; font-size:12px; font-weight:700; cursor:pointer; transition:all 0.2s;';
+
+        const actionConfig = {
+            fraud: {
+                title: '确认标记为诈骗', icon: '<i class="fas fa-times-circle" style="color:#dc2626;"></i>', iconBg: '#fee2e2',
+                desc: '该用户将被标记为<strong style="color:#dc2626;">诈骗账户</strong>，系统将自动触发以下操作：',
+                warning: '⚠️ 此操作将通知合规团队，请确认已完成审核', warningBg: '#fee2e2', warningColor: '#991b1b',
+                btnText: '<i class="fas fa-times-circle"></i> 确认标记诈骗', btnColor: '#dc2626', requiredReason: true,
+            },
+            normal: {
+                title: '确认标记为正常', icon: '<i class="fas fa-check-circle" style="color:#10b981;"></i>', iconBg: '#d1fae5',
+                desc: '该用户将被标记为<strong style="color:#10b981;">正常账户</strong>，所有风险标记将被清除。',
+                warning: '', btnText: '<i class="fas fa-check-circle"></i> 确认标记正常', btnColor: '#10b981', requiredReason: false,
+            },
+            observe: {
+                title: '确认继续观察', icon: '<i class="fas fa-eye" style="color:#64748b;"></i>', iconBg: '#f1f5f9',
+                desc: '该用户将保持当前风险等级，进入<strong>持续监控</strong>状态，系统将在下一个观察周期自动复审。',
+                warning: '', btnText: '<i class="fas fa-eye"></i> 确认继续观察', btnColor: '#64748b', requiredReason: false,
+            },
+            freeze: {
+                title: '确认冻结账户', icon: '<i class="fas fa-lock" style="color:#f59e0b;"></i>', iconBg: '#fef3c7',
+                desc: '该用户账户将被<strong style="color:#f59e0b;">立即冻结</strong>，冻结期间用户无法进行任何交易操作。',
+                warning: '⚠️ 冻结后用户将无法登录、充值、提现和交易', warningBg: '#fef3c7', warningColor: '#92400e',
+                btnText: '<i class="fas fa-lock"></i> 确认冻结', btnColor: '#f59e0b', requiredReason: true,
+            },
+            unfreeze: {
+                title: '确认解除冻结', icon: '<i class="fas fa-unlock" style="color:#3b82f6;"></i>', iconBg: '#dbeafe',
+                desc: '该用户账户将被<strong style="color:#3b82f6;">解除冻结</strong>，恢复所有交易功能。',
+                warning: '', btnText: '<i class="fas fa-unlock"></i> 确认解除冻结', btnColor: '#3b82f6', requiredReason: true,
+            },
+            block: {
+                title: '确认拉黑账户', icon: '<i class="fas fa-ban" style="color:#1e293b;"></i>', iconBg: '#e2e8f0',
+                desc: '该用户将被<strong>永久拉黑</strong>，关联设备和支付方式也将被加入黑名单。',
+                warning: '⚠️ 此操作不可逆，拉黑后该用户将永久无法使用平台服务', warningBg: '#fee2e2', warningColor: '#991b1b',
+                btnText: '<i class="fas fa-ban"></i> 确认拉黑', btnColor: '#1e293b', requiredReason: true,
+            },
+            unmark: {
+                title: '确认解除标记', icon: '<i class="fas fa-undo" style="color:#3b82f6;"></i>', iconBg: '#dbeafe',
+                desc: '将解除当前状态标记，用户恢复为<strong>待审核</strong>状态。',
+                warning: '', btnText: '<i class="fas fa-undo"></i> 确认解除', btnColor: '#3b82f6', requiredReason: false,
+            },
+        };
+
+        // 当前状态
+        let userState = {
+            mark: null,     // null | 'fraud' | 'normal' | 'observe'
+            frozen: false,
+            blocked: false,
+        };
+        let currentAction = null;
+
+        function renderActionButtons() {
+            const group = document.getElementById('actionBtnGroup');
+            let html = '';
+
+            // 状态标记组
+            if (userState.mark) {
+                const markLabels = {
+                    fraud:   { text: '已标记诈骗', bg: '#dc2626', icon: 'fa-times-circle' },
+                    normal:  { text: '已标记正常', bg: '#10b981', icon: 'fa-check-circle' },
+                    observe: { text: '观察中',     bg: '#64748b', icon: 'fa-eye' },
+                };
+                const m = markLabels[userState.mark];
+                html += `<span style="${btnStyle} background:${m.bg}; border:2px solid ${m.bg}; color:white; cursor:default; display:inline-flex; align-items:center; gap:4px;">
+                    <i class="fas ${m.icon}"></i> ${m.text}
+                </span>`;
+                html += `<button onclick="showConfirmModal('unmark')" style="${btnStyle} background:white; border:2px solid #3b82f6; color:#3b82f6;" onmouseover="this.style.background='#eff6ff'" onmouseout="this.style.background='white'">
+                    <i class="fas fa-undo"></i> 解除标记
+                </button>`;
+            } else {
+                html += `<button onclick="showConfirmModal('fraud')" style="${btnStyle} background:white; border:2px solid #dc2626; color:#dc2626;" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='white'">
+                    <i class="fas fa-times-circle"></i> 标记诈骗
+                </button>`;
+                html += `<button onclick="showConfirmModal('normal')" style="${btnStyle} background:#10b981; border:2px solid #10b981; color:white;">
+                    <i class="fas fa-check-circle"></i> 标记正常
+                </button>`;
+                html += `<button onclick="showConfirmModal('observe')" style="${btnStyle} background:#64748b; border:2px solid #64748b; color:white;">
+                    <i class="fas fa-eye"></i> 继续观察
+                </button>`;
+            }
+
+            // 分隔线
+            html += `<span style="width:1px; height:24px; background:#e2e8f0; margin:0 2px;"></span>`;
+
+            // 冻结按钮
+            if (userState.blocked) {
+                html += `<button disabled style="${btnStyle} background:#e2e8f0; border:2px solid #e2e8f0; color:#94a3b8; cursor:not-allowed;">
+                    <i class="fas fa-lock"></i> 已冻结
+                </button>`;
+            } else if (userState.frozen) {
+                html += `<button onclick="showConfirmModal('unfreeze')" style="${btnStyle} background:white; border:2px solid #3b82f6; color:#3b82f6;" onmouseover="this.style.background='#eff6ff'" onmouseout="this.style.background='white'">
+                    <i class="fas fa-unlock"></i> 解除冻结
+                </button>`;
+            } else {
+                html += `<button onclick="showConfirmModal('freeze')" style="${btnStyle} background:#f59e0b; border:2px solid #f59e0b; color:white;">
+                    <i class="fas fa-lock"></i> 冻结账户
+                </button>`;
+            }
+
+            // 拉黑按钮
+            if (userState.blocked) {
+                html += `<button disabled style="${btnStyle} background:#e2e8f0; border:2px solid #e2e8f0; color:#94a3b8; cursor:not-allowed;">
+                    <i class="fas fa-ban"></i> 已拉黑
+                </button>`;
+            } else {
+                html += `<button onclick="showConfirmModal('block')" style="${btnStyle} background:#1e293b; border:2px solid #1e293b; color:white;">
+                    <i class="fas fa-ban"></i> 拉黑账户
+                </button>`;
+            }
+
+            group.innerHTML = html;
+        }
+
+        function showConfirmModal(action) {
+            currentAction = action;
+            const cfg = actionConfig[action];
+            const modal = document.getElementById('confirmModal');
+
+            document.getElementById('confirmModalIcon').innerHTML = cfg.icon;
+            document.getElementById('confirmModalIcon').style.background = cfg.iconBg;
+            document.getElementById('confirmModalTitle').textContent = cfg.title;
+            document.getElementById('confirmModalDesc').innerHTML = cfg.desc;
+
+            const warning = document.getElementById('confirmModalWarning');
+            if (cfg.warning) {
+                warning.style.display = 'block';
+                warning.textContent = cfg.warning;
+                warning.style.background = cfg.warningBg;
+                warning.style.color = cfg.warningColor;
+            } else {
+                warning.style.display = 'none';
+            }
+
+            document.getElementById('confirmReasonLabel').textContent = cfg.requiredReason ? '备注原因（必填）' : '备注原因（可选）';
+
+            const btn = document.getElementById('confirmModalBtn');
+            btn.innerHTML = cfg.btnText;
+            btn.style.background = cfg.btnColor;
+
+            document.getElementById('confirmModalReason').value = '';
+            document.getElementById('confirmModalReason').style.borderColor = '#e2e8f0';
+            document.getElementById('confirmModalReason').placeholder = '请输入处理原因...';
+            modal.style.display = 'flex';
+        }
+
+        function closeConfirmModal() {
+            const modal = document.getElementById('confirmModal');
+            const content = document.getElementById('confirmModalContent');
+            content.style.animation = 'modalSlideOut 0.2s ease-in forwards';
+            setTimeout(() => {
+                modal.style.display = 'none';
+                content.style.animation = 'modalSlideIn 0.25s ease-out';
+            }, 200);
+        }
+
+        function showToastMsg(text, color) {
+            const toast = document.createElement('div');
+            toast.style.cssText = `position:fixed;top:20px;left:50%;transform:translateX(-50%);padding:12px 24px;background:${color};color:white;border-radius:10px;font-size:14px;font-weight:700;z-index:10001;box-shadow:0 4px 12px rgba(0,0,0,0.2);animation:modalSlideIn 0.3s ease-out;`;
+            toast.innerHTML = text;
+            document.body.appendChild(toast);
+            setTimeout(() => { toast.style.animation = 'modalSlideOut 0.3s ease-in forwards'; setTimeout(() => toast.remove(), 300); }, 3000);
+        }
+
+        function executeAction() {
+            const cfg = actionConfig[currentAction];
+            const reason = document.getElementById('confirmModalReason').value.trim();
+
+            if (cfg.requiredReason && !reason) {
+                const textarea = document.getElementById('confirmModalReason');
+                textarea.style.borderColor = '#dc2626';
+                textarea.placeholder = '⚠️ 此操作必须填写原因';
+                textarea.focus();
+                return;
+            }
+
+            closeConfirmModal();
+
+            const now = new Date().toLocaleString('zh-CN', { hour12: false });
+
+            switch (currentAction) {
+                case 'fraud':
+                case 'normal':
+                case 'observe':
+                    userState.mark = currentAction;
+                    break;
+                case 'unmark':
+                    userState.mark = null;
+                    break;
+                case 'freeze':
+                    userState.frozen = true;
+                    break;
+                case 'unfreeze':
+                    userState.frozen = false;
+                    break;
+                case 'block':
+                    userState.blocked = true;
+                    userState.frozen = true;
+                    break;
+            }
+
+            renderActionButtons();
+
+            const labels = {
+                fraud:'标记诈骗', normal:'标记正常', observe:'继续观察',
+                freeze:'冻结账户', unfreeze:'解除冻结', block:'拉黑账户', unmark:'解除标记'
+            };
+            const msg = reason ? `${labels[currentAction]} 操作已提交（${reason}）` : `${labels[currentAction]} 操作已提交`;
+            showToastMsg(`<i class="fas fa-check-circle"></i> ${msg}`, '#10b981');
+        }
+
+        // ESC 关闭弹窗
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && document.getElementById('confirmModal').style.display === 'flex') {
+                closeConfirmModal();
+            }
+        });
+
+        // 点击遮罩关闭
+        document.getElementById('confirmModal').addEventListener('click', function(e) {
+            if (e.target === this) closeConfirmModal();
+        });
+
+        // ===== 统一初始化 =====
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                const firstRule = document.getElementById('R-ATO-1');
+                if (firstRule) toggleRule(firstRule);
+            }, 500);
+            renderActivityState(0);
+            renderFundFlow(0);
+            renderBlacklist(blacklistIdx);
+            renderDisposal(disposalIdx);
+            renderBehavior(behaviorIdx);
+            renderActionButtons();
+        });
     </script>
 </body>
 </html>

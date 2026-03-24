@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>资金路由模式 — Voss 帮助中心</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root{
+            --bg:#ffffff;--bg2:#fafafa;--bg3:#f5f5f5;
+            --tx:#1a1a1a;--tx2:#404040;--tx3:#737373;--tx4:#a3a3a3;
+            --bd:#e5e5e5;--bd2:#f0f0f0;
+            --ac:#1a1a1a;--ac-l:#f5f5f5;
+            --link:#1890FF;
+            --gn:#0ECB81;--gn-l:#F0FFF5;--gn-b:#B7EB8F;
+            --yw:#B08C0B;--yw-l:#FFFBE6;--yw-b:#FFE58F;
+            --rd:#CF304A;--rd-l:#FFF1F0;--rd-b:#FFA39E;
+            --sv:#5C0011;
+            --am:#E8A90E;
+            --bk-clean:#1890FF;--bk-low:#0ECB81;--bk-mid:#F0B90B;--bk-high:#F6465D;--bk-severe:#5C0011;
+        }
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Noto Sans SC',system-ui,sans-serif;color:var(--tx);line-height:1.75;background:var(--bg);-webkit-font-smoothing:antialiased}
+
+        /* Layout */
+        .layout{display:flex;min-height:100vh}
+        .sidebar{width:220px;border-right:1px solid var(--bd);padding:20px 0;position:sticky;top:0;height:100vh;overflow-y:auto;flex-shrink:0;background:var(--bg)}
+        .sidebar .logo{padding:0 20px 16px;font-size:13px;font-weight:700;color:var(--tx);border-bottom:1px solid var(--bd);margin-bottom:12px;display:flex;align-items:center;gap:6px;letter-spacing:.02em}
+        .sidebar .logo svg{width:16px;height:16px;color:var(--tx3)}
+        .sidebar .nav-group{padding:0 12px;margin-bottom:16px}
+        .sidebar .nav-label{font-size:10px;font-weight:600;color:var(--tx4);text-transform:uppercase;letter-spacing:.08em;padding:6px 8px}
+        .sidebar .nav-item{display:block;font-size:13px;color:var(--tx3);text-decoration:none;padding:5px 10px;border-radius:4px;transition:all .12s;cursor:pointer;border-left:2px solid transparent;margin-bottom:1px}
+        .sidebar .nav-item:hover{color:var(--tx)}
+        .sidebar .nav-item.on{color:var(--tx);font-weight:600;border-left-color:var(--tx);background:var(--bg2)}
+        .sidebar .nav-item .num{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--tx4);margin-right:4px}
+
+        .main{flex:1;max-width:700px;padding:32px 48px 80px}
+
+        /* Breadcrumb */
+        .bread{font-size:12px;color:var(--tx4);margin-bottom:24px;display:flex;align-items:center;gap:4px}
+        .bread a{color:var(--tx3);text-decoration:none}
+        .bread a:hover{color:var(--link)}
+
+        /* Hero */
+        .doc-hero{margin-bottom:40px}
+        .doc-hero .badge{display:inline-block;font-size:11px;font-weight:600;color:var(--tx3);background:var(--bg2);padding:3px 10px;border-radius:3px;margin-bottom:10px;border:1px solid var(--bd)}
+        .doc-hero h1{font-size:24px;font-weight:700;margin-bottom:8px;letter-spacing:-0.02em;line-height:1.3}
+        .doc-hero .sub{font-size:14px;color:var(--tx3)}
+        .doc-hero .meta{margin-top:12px;font-size:11px;color:var(--tx4);display:flex;gap:16px}
+
+        /* Section */
+        .sec{margin-bottom:40px;scroll-margin-top:24px}
+        h2.sec-t{font-size:17px;font-weight:700;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid var(--bd);letter-spacing:-0.01em}
+        h3.sub-t{font-size:14px;font-weight:700;margin:20px 0 8px}
+        p{font-size:14px;color:var(--tx2);margin-bottom:12px}
+        p b{color:var(--tx);font-weight:600}
+
+        /* Callout */
+        .callout{padding:12px 16px;border-radius:4px;font-size:13px;margin:12px 0 16px;display:flex;gap:8px;align-items:flex-start;line-height:1.6;border-left:3px solid}
+        .callout svg{width:15px;height:15px;flex-shrink:0;margin-top:2px}
+        .callout.info{background:var(--bg2);color:var(--tx2);border-left-color:var(--tx4)}
+        .callout.warn{background:var(--yw-l);color:var(--yw);border-left-color:var(--yw)}
+        .callout.danger{background:var(--rd-l);color:var(--rd);border-left-color:var(--rd)}
+        .callout.tip{background:var(--gn-l);color:var(--gn);border-left-color:var(--gn)}
+        .callout b{font-weight:600}
+
+        /* SVG bucket diagram wrapper */
+        .diagram{background:var(--bg2);border:1px solid var(--bd);border-radius:6px;padding:16px;margin:16px 0;overflow-x:auto}
+        .diagram .caption{text-align:center;font-size:11px;color:var(--tx4);margin-top:6px}
+
+        /* Mode card */
+        .mode-section{background:var(--bg2);border:1px solid var(--bd);border-radius:6px;padding:20px;margin:16px 0 20px}
+        .mode-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+        .mode-head h3{font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px}
+        .mode-head h3 .tag{font-size:10px;font-weight:500;padding:2px 8px;border-radius:3px;background:var(--bg3);color:var(--tx3);border:1px solid var(--bd)}
+        .mode-head .bucket-mini{display:flex;gap:2px;width:120px;height:20px}
+        .mode-head .bucket-mini div{border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:600;color:#fff}
+
+        /* Scenario */
+        .scenario{border:1px solid var(--bd);border-radius:6px;margin-bottom:8px;overflow:hidden}
+        .sc-head{padding:10px 14px;font-size:13px;font-weight:600;background:var(--bg2);border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:8px}
+        .sc-num{width:20px;height:20px;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0}
+        .sc-body{padding:10px 14px;font-size:13px;color:var(--tx2);line-height:1.6}
+        .sc-body b{color:var(--tx);font-weight:600}
+        .sc-result{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:3px;font-size:11px;font-weight:500;margin-top:4px;background:var(--bg2);color:var(--tx2);border:1px solid var(--bd)}
+
+        /* Comparison */
+        .cmp-table{width:100%;border-collapse:collapse;font-size:13px;margin:12px 0}
+        .cmp-table th{text-align:left;padding:10px 12px;font-weight:600;font-size:12px;border-bottom:2px solid var(--bd);background:var(--bg2)}
+        .cmp-table td{padding:10px 12px;border-bottom:1px solid var(--bd2)}
+        .cmp-table tr:last-child td{border-bottom:none}
+        .cmp-table .label-col{font-weight:600;color:var(--tx);white-space:nowrap}
+        .cmp-table .best{color:var(--tx);font-weight:600}
+
+        /* Pros/cons inline */
+        .pc-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+        .pc-box{padding:12px 14px;border-radius:6px;font-size:12px}
+        .pc-box.pro{background:var(--bg2);border:1px solid var(--bd)}
+        .pc-box.con{background:var(--bg2);border:1px solid var(--bd)}
+        .pc-box h5{font-size:12px;font-weight:600;margin-bottom:6px}
+        .pc-box.pro h5{color:var(--gn)}
+        .pc-box.con h5{color:var(--tx3)}
+        .pc-item{padding:3px 0;color:var(--tx2);display:flex;gap:5px;line-height:1.5}
+        .pc-item::before{content:'';width:4px;height:4px;border-radius:50%;margin-top:7px;flex-shrink:0}
+        .pc-box.pro .pc-item::before{background:var(--gn)}
+        .pc-box.con .pc-item::before{background:var(--tx4)}
+
+        /* Recommend */
+        .rec-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:12px 0}
+        .rec-card{border:1px solid var(--bd);border-radius:6px;padding:16px;text-align:center}
+        .rec-card h4{font-size:14px;font-weight:700;margin-bottom:4px;color:var(--tx)}
+        .rec-card .rec-sub{font-size:11px;color:var(--tx3);margin-bottom:10px}
+        .rec-card .rec-list{text-align:left;font-size:12px;color:var(--tx2)}
+        .rec-card .rec-list div{padding:3px 0;display:flex;align-items:flex-start;gap:5px}
+        .rec-card .rec-list svg{width:14px;height:14px;flex-shrink:0;margin-top:1px;color:var(--tx3)}
+
+        /* FAQ */
+        .faq{border:1px solid var(--bd);border-radius:6px;margin-bottom:8px;overflow:hidden}
+        .faq-q{padding:12px 16px;font-size:14px;font-weight:600;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none;transition:background .1s}
+        .faq-q:hover{background:var(--bg2)}
+        .faq-q svg{width:14px;height:14px;color:var(--tx4);transition:transform .2s;flex-shrink:0}
+        .faq-q.open svg{transform:rotate(180deg)}
+        .faq-a{padding:0 16px 14px;font-size:13px;color:var(--tx2);display:none;line-height:1.7}
+        .faq-a.show{display:block}
+
+        /* Code */
+        .code-inline{font-family:'JetBrains Mono',monospace;font-size:12px;background:var(--bg2);padding:1px 5px;border-radius:3px;color:var(--tx2)}
+
+        /* Divider */
+        hr{border:none;border-top:1px solid var(--bd);margin:32px 0}
+
+        @media(max-width:768px){
+            .sidebar{display:none}
+            .main{padding:20px 16px 60px}
+        }
+    </style>
+</head>
+<body>
+<div class="layout">
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Voss 帮助中心
+        </div>
+        <div class="nav-group">
+            <div class="nav-label">资金路由</div>
+            <a class="nav-item on" href="#overview"><span class="num">01</span> 概述</a>
+            <a class="nav-item" href="#standard"><span class="num">02</span> 标准模式</a>
+            <a class="nav-item" href="#professional"><span class="num">03</span> 专业模式</a>
+            <a class="nav-item" href="#expert"><span class="num">04</span> 专家模式</a>
+            <a class="nav-item" href="#compare"><span class="num">05</span> 模式对比</a>
+            <a class="nav-item" href="#severe"><span class="num">06</span> 严重桶说明</a>
+            <a class="nav-item" href="#recommend"><span class="num">07</span> 如何选择</a>
+            <a class="nav-item" href="#faq"><span class="num">08</span> 常见问题</a>
+        </div>
+        <div class="nav-group">
+            <div class="nav-label">其他</div>
+            <a class="nav-item" href="#">KYT 风控说明</a>
+            <a class="nav-item" href="#">出款规则</a>
+            <a class="nav-item" href="#">API 文档</a>
+        </div>
+    </div>
+
+    <!-- Main content -->
+    <div class="main">
+        <div class="bread"><a href="#">帮助中心</a> / <a href="#">资金管理</a> / <span style="color:var(--tx2)">资金路由模式</span></div>
+
+        <div class="doc-hero">
+            <div class="badge">资金管理</div>
+            <h1>资金路由模式选择指南</h1>
+            <div class="sub">了解三种资金管理模式的区别，选择最适合您业务规模的方案</div>
+            <div class="meta"><span>最后更新：2026-01-23</span><span>阅读时间：约 5 分钟</span></div>
+        </div>
+
+        <!-- 01 Overview -->
+        <div class="sec" id="overview">
+            <h2 class="sec-t">概述</h2>
+            <p>当您收到一笔入款时，系统会通过风控提供商（如 Chainalysis、Bitrace）自动检测资金来源的<b>风险评分（0~100）</b>。根据评分和来源渠道，资金会被自动分配到不同的<b>"资金桶"</b>中进行隔离管理。</p>
+            <p>您可以选择三种模式来决定资金如何被分类。模式越高级，分类越精细，但管理也相对复杂。</p>
+
+            <div class="diagram">
+                <svg viewBox="0 0 620 180" width="620" height="180" style="display:block;margin:0 auto">
+                    <defs>
+                        <marker id="arr" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#94a3b8"/></marker>
+                    </defs>
+                    <rect x="20" y="50" width="100" height="50" rx="8" fill="#fff" stroke="#94a3b8" stroke-width="1.5"/>
+                    <text x="70" y="72" font-size="12" font-weight="600" fill="#0f172a" text-anchor="middle" font-family="Noto Sans SC,sans-serif">收到入款</text>
+                    <text x="70" y="88" font-size="10" fill="#94a3b8" text-anchor="middle" font-family="Noto Sans SC,sans-serif">区块链转账</text>
+
+                    <line x1="120" y1="75" x2="165" y2="75" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arr)"/>
+
+                    <rect x="170" y="45" width="120" height="60" rx="8" fill="#eff6ff" stroke="#1890FF" stroke-width="1.5"/>
+                    <text x="230" y="70" font-size="12" font-weight="600" fill="#1068B0" text-anchor="middle" font-family="Noto Sans SC,sans-serif">风控检测</text>
+                    <text x="230" y="86" font-size="10" fill="#64748b" text-anchor="middle" font-family="Noto Sans SC,sans-serif">评分 + 渠道检查</text>
+
+                    <line x1="290" y1="65" x2="340" y2="45" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <line x1="290" y1="85" x2="340" y2="130" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <text x="330" y="72" font-size="9" fill="#64748b" font-family="Noto Sans SC,sans-serif" text-anchor="end">正常</text>
+                    <text x="330" y="115" font-size="9" fill="#800020" font-family="Noto Sans SC,sans-serif" text-anchor="end">高危</text>
+
+                    <rect x="345" y="20" width="250" height="50" rx="8" fill="#f0fdf4" stroke="#0ECB81" stroke-width="1.5" stroke-dasharray="4,3"/>
+                    <text x="470" y="43" font-size="12" font-weight="600" fill="#0B9E64" text-anchor="middle" font-family="Noto Sans SC,sans-serif">普通资金桶（按模式分 1~3 个）</text>
+                    <text x="470" y="59" font-size="10" fill="#64748b" text-anchor="middle" font-family="Noto Sans SC,sans-serif">标准=1桶 / 专业=2桶 / 专家=3桶</text>
+
+                    <!-- Severe bucket cylinder -->
+                    <g transform="translate(420, 105)">
+                        <ellipse cx="40" cy="40" rx="38" ry="9" fill="#3D0010" opacity="0.2"/>
+                        <rect x="2" y="8" width="76" height="32" fill="#5C0011"/>
+                        <ellipse cx="40" cy="40" rx="38" ry="9" fill="#5C0011"/>
+                        <ellipse cx="40" cy="8" rx="38" ry="9" fill="#800020"/>
+                        <text x="40" y="28" font-size="11" font-weight="700" fill="#fff" text-anchor="middle" font-family="Noto Sans SC,sans-serif">严重桶</text>
+                    </g>
+                    <text x="460" y="160" font-size="9" fill="#800020" text-anchor="middle" font-family="Noto Sans SC,sans-serif">≥80 或命中高风险渠道 · 强制隔离</text>
+                </svg>
+                <div class="caption">资金流向总览：入款 → 风控检测 → 按模式分桶</div>
+            </div>
+
+            <div class="callout info">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                <span>所有模式都会有一个<b>严重桶</b>，用于隔离涉及制裁、暗网等高风险渠道的资金。这是平台强制要求，不可关闭。</span>
+            </div>
+        </div>
+
+        <hr>
+
+        <!-- 02 Standard -->
+        <div class="sec" id="standard">
+            <h2 class="sec-t">标准模式</h2>
+            <div class="mode-section">
+                <div class="mode-head">
+                    <h3>标准模式 <span class="tag" style="background:var(--bg3);color:var(--tx2)">默认 · 新商户推荐</span></h3>
+                    <div style="text-align:right"><div style="font-size:11px;color:var(--tx4);margin-bottom:4px">桶结构</div>
+                    <div class="bucket-mini"><div style="background:var(--ac);flex:3">干净</div><div style="background:var(--sv);flex:1">严重</div></div></div>
+                </div>
+                <p style="margin-bottom:0">所有评分低于 80 的正常资金，都放进<b>同一个"干净桶"</b>。只有涉及高风险渠道或评分 ≥80 的资金才会进入严重桶。</p>
+            </div>
+
+            <div class="diagram">
+                <svg viewBox="0 0 520 140" width="520" height="140" style="display:block;margin:0 auto">
+                    <text x="40" y="20" font-size="10" font-weight="600" fill="#64748b" font-family="Noto Sans SC,sans-serif">入款资金分配</text>
+                    <!-- Clean bucket -->
+                    <g transform="translate(60, 35)">
+                        <ellipse cx="70" cy="70" rx="65" ry="14" fill="#1068B0" opacity="0.15"/>
+                        <rect x="5" y="12" width="130" height="58" fill="#1890FF"/>
+                        <ellipse cx="70" cy="70" rx="65" ry="14" fill="#1890FF"/>
+                        <ellipse cx="70" cy="12" rx="65" ry="14" fill="#5EADFF"/>
+                        <text x="70" y="42" font-size="14" font-weight="700" fill="#fff" text-anchor="middle" font-family="Noto Sans SC,sans-serif">干净桶</text>
+                        <text x="70" y="58" font-size="10" fill="rgba(255,255,255,.8)" text-anchor="middle" font-family="Noto Sans SC,sans-serif">Low + Mid + High</text>
+                    </g>
+                    <text x="130" y="128" font-size="11" fill="#1890FF" text-anchor="middle" font-family="JetBrains Mono,monospace" font-weight="500">评分 0 ~ 79</text>
+
+                    <!-- Severe bucket -->
+                    <g transform="translate(310, 40)">
+                        <ellipse cx="55" cy="60" rx="50" ry="12" fill="#3D0010" opacity="0.2"/>
+                        <rect x="5" y="10" width="100" height="50" fill="#5C0011"/>
+                        <ellipse cx="55" cy="60" rx="50" ry="12" fill="#5C0011"/>
+                        <ellipse cx="55" cy="10" rx="50" ry="12" fill="#800020"/>
+                        <text x="55" y="36" font-size="13" font-weight="700" fill="#fff" text-anchor="middle" font-family="Noto Sans SC,sans-serif">严重</text>
+                        <text x="55" y="50" font-size="9" fill="rgba(255,255,255,.7)" text-anchor="middle" font-family="Noto Sans SC,sans-serif">冻结 + 可用</text>
+                    </g>
+                    <text x="365" y="128" font-size="11" fill="#800020" text-anchor="middle" font-family="JetBrains Mono,monospace" font-weight="500">≥80 或高风险渠道</text>
+
+                    <!-- No borrow badge -->
+                    <rect x="210" y="68" width="80" height="20" rx="10" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1"/>
+                    <text x="250" y="82" font-size="9" font-weight="600" fill="#1890FF" text-anchor="middle" font-family="Noto Sans SC,sans-serif">无需借款</text>
+                </svg>
+            </div>
+
+            <h3 class="sub-t">出款时怎么运作？</h3>
+            <p>当您发起出款时，系统会先检测目标地址的风险等级。如果是正常地址，直接从干净桶扣款。因为只有一个普通桶，<b>永远不会出现余额不足需要借款的情况</b>。</p>
+
+            <h3 class="sub-t">场景示例</h3>
+            <div class="scenario">
+                <div class="sc-head"><div class="sc-num" style="background:var(--gn)">1</div> 收到 5,000 USDT，风控评分 25</div>
+                <div class="sc-body">评分 25 低于 80 → 全额进入<b>干净桶</b>，可随时出款<div class="sc-result" style="background:var(--gn-l);color:var(--gn)">→ 干净桶 +5,000</div></div>
+            </div>
+            <div class="scenario">
+                <div class="sc-head"><div class="sc-num" style="background:var(--rd)">2</div> 收到 3,000 USDT，来源涉及混币器</div>
+                <div class="sc-body">命中高风险渠道 → 进入<b>严重桶冻结</b>，如需取出请在商户后台申请提款<div class="sc-result" style="background:var(--rd-l);color:var(--rd)">→ 严重桶（冻结）+3,000</div></div>
+            </div>
+            <div class="scenario">
+                <div class="sc-head"><div class="sc-num" style="background:var(--ac)">3</div> 出款 2,000 USDT 到正常地址</div>
+                <div class="sc-body">目标是正常地址 → 直接从<b>干净桶扣款</b>，无需借款<div class="sc-result" style="background:var(--ac-l);color:var(--ac)">干净桶 −2,000 → 出款成功</div></div>
+            </div>
+
+            <div class="pc-grid">
+                <div class="pc-box pro"><h5>适合您，如果：</h5><div class="pc-item">您不需要区分不同风险等级的资金</div><div class="pc-item">您希望管理尽可能简单</div><div class="pc-item">您的月交易量在 50 万 USDT 以下</div></div>
+                <div class="pc-box con"><h5>需要了解：</h5><div class="pc-item">无法查看资金的风险分布明细</div><div class="pc-item">评分 10 和评分 70 的资金混在同一个桶里</div></div>
+            </div>
+        </div>
+
+        <hr>
+
+        <!-- 03 Professional -->
+        <div class="sec" id="professional">
+            <h2 class="sec-t">专业模式</h2>
+            <div class="mode-section">
+                <div class="mode-head">
+                    <h3>专业模式 <span class="tag" style="background:var(--bg3);color:var(--tx2)">成长期商户推荐</span></h3>
+                    <div style="text-align:right"><div style="font-size:11px;color:var(--tx4);margin-bottom:4px">桶结构</div>
+                    <div class="bucket-mini"><div style="background:var(--gn);flex:2">低</div><div style="background:var(--rd);flex:1.5">高</div><div style="background:var(--sv);flex:1">严重</div></div></div>
+                </div>
+                <p style="margin-bottom:0">将正常资金按评分分为<b>低风险桶</b>（评分 0~49）和<b>高风险桶</b>（评分 50~79），让您清楚看到多少钱是"干净的"、多少是"有风险的"。</p>
+            </div>
+
+            <div class="diagram">
+                <svg viewBox="0 0 580 150" width="580" height="150" style="display:block;margin:0 auto">
+                    <text x="40" y="20" font-size="10" font-weight="600" fill="#64748b" font-family="Noto Sans SC,sans-serif">入款资金分配</text>
+                    <!-- Low bucket -->
+                    <g transform="translate(30, 35)">
+                        <ellipse cx="55" cy="58" rx="50" ry="12" fill="#0B9E64" opacity="0.2"/>
+                        <rect x="5" y="10" width="100" height="48" fill="#0ECB81"/>
+                        <ellipse cx="55" cy="58" rx="50" ry="12" fill="#0ECB81"/>
+                        <ellipse cx="55" cy="10" rx="50" ry="12" fill="#5AD8A6"/>
+                        <text x="55" y="34" font-size="13" font-weight="700" fill="#fff" text-anchor="middle" font-family="Noto Sans SC,sans-serif">低风险</text>
+                        <text x="55" y="48" font-size="9" fill="rgba(255,255,255,.8)" text-anchor="middle" font-family="Noto Sans SC,sans-serif">Low + Mid</text>
+                    </g>
+                    <text x="85" y="125" font-size="11" fill="var(--gn)" text-anchor="middle" font-family="JetBrains Mono,monospace" font-weight="500">0 ~ 49</text>
+
+                    <!-- Borrow arrow -->
+                    <line x1="140" y1="65" x2="195" y2="65" stroke="var(--yw)" stroke-width="1.5" stroke-dasharray="5,3"/>
+                    <text x="167" y="58" font-size="10" fill="var(--yw)" text-anchor="middle" font-family="Noto Sans SC,sans-serif" font-weight="600">⇄</text>
+                    <text x="167" y="82" font-size="8" fill="var(--tx4)" text-anchor="middle" font-family="Noto Sans SC,sans-serif">可互借</text>
+
+                    <!-- High bucket -->
+                    <g transform="translate(200, 35)">
+                        <ellipse cx="55" cy="58" rx="50" ry="12" fill="#800020" opacity="0.2"/>
+                        <rect x="5" y="10" width="100" height="48" fill="#F6465D"/>
+                        <ellipse cx="55" cy="58" rx="50" ry="12" fill="#F6465D"/>
+                        <ellipse cx="55" cy="10" rx="50" ry="12" fill="#FF7A8A"/>
+                        <text x="55" y="34" font-size="13" font-weight="700" fill="#fff" text-anchor="middle" font-family="Noto Sans SC,sans-serif">高风险</text>
+                        <text x="55" y="48" font-size="9" fill="rgba(255,255,255,.8)" text-anchor="middle" font-family="Noto Sans SC,sans-serif">High</text>
+                    </g>
+                    <text x="255" y="125" font-size="11" fill="var(--rd)" text-anchor="middle" font-family="JetBrains Mono,monospace" font-weight="500">50 ~ 79</text>
+
+                    <!-- Separator -->
+                    <line x1="340" y1="35" x2="340" y2="110" stroke="var(--bd)" stroke-width="1" stroke-dasharray="4,3"/>
+
+                    <!-- Severe bucket -->
+                    <g transform="translate(380, 38)">
+                        <ellipse cx="55" cy="56" rx="50" ry="12" fill="#3D0010" opacity="0.2"/>
+                        <rect x="5" y="10" width="100" height="46" fill="#5C0011"/>
+                        <ellipse cx="55" cy="56" rx="50" ry="12" fill="#5C0011"/>
+                        <ellipse cx="55" cy="10" rx="50" ry="12" fill="#800020"/>
+                        <text x="55" y="34" font-size="13" font-weight="700" fill="#fff" text-anchor="middle" font-family="Noto Sans SC,sans-serif">严重</text>
+                    </g>
+                    <text x="435" y="125" font-size="11" fill="#800020" text-anchor="middle" font-family="JetBrains Mono,monospace" font-weight="500">≥80 / 高风险渠道</text>
+                    <rect x="393" y="108" width="80" height="16" rx="4" fill="var(--rd-l)" stroke="var(--rd)" stroke-width=".5" stroke-dasharray="3,2"/>
+                    <text x="433" y="119" font-size="8" fill="#800020" text-anchor="middle" font-family="Noto Sans SC,sans-serif" font-weight="600">不参与借款</text>
+                </svg>
+            </div>
+
+            <h3 class="sub-t">出款时怎么运作？</h3>
+            <p>系统根据目标地址的风险等级，优先从<b>对应的桶</b>扣款。如果余额不够，会自动从另一个桶<b>借款</b>补足差额。借款是系统自动完成的，不产生费用，您不需要手动操作。</p>
+
+            <h3 class="sub-t">场景示例</h3>
+            <div class="scenario">
+                <div class="sc-head"><div class="sc-num" style="background:var(--gn)">1</div> 收到 5,000 USDT，评分 25</div>
+                <div class="sc-body">评分在 0~49 → 进入<b>低风险桶</b>，这笔资金来源相对干净<div class="sc-result" style="background:var(--gn-l);color:var(--gn)">→ 低风险桶 +5,000</div></div>
+            </div>
+            <div class="scenario">
+                <div class="sc-head"><div class="sc-num" style="background:var(--rd)">2</div> 收到 3,000 USDT，评分 65</div>
+                <div class="sc-body">评分在 50~79 → 进入<b>高风险桶</b>，有一定风险但不涉及制裁<div class="sc-result" style="background:var(--rd-l);color:var(--rd)">→ 高风险桶 +3,000</div></div>
+            </div>
+            <div class="scenario">
+                <div class="sc-head"><div class="sc-num" style="background:var(--ac)">3</div> 出款 8,000 到低风险地址，但低风险桶只有 5,000</div>
+                <div class="sc-body">低风险桶余额不足 → 系统自动从<b>高风险桶借 3,000</b> 补足<div class="sc-result" style="background:var(--ac-l);color:var(--ac)">低风险桶 −5,000 + 高风险桶借出 3,000 → 出款成功</div></div>
+            </div>
+
+            <div class="pc-grid">
+                <div class="pc-box pro"><h5>适合您，如果：</h5><div class="pc-item">您想清楚看到"干净资金"和"有风险资金"各有多少</div><div class="pc-item">您的月交易量在 50万~500万 USDT</div><div class="pc-item">您希望兼顾风险管理和出款流动性</div></div>
+                <div class="pc-box con"><h5>需要了解：</h5><div class="pc-item">出款时可能发生借款（自动的，无需操作）</div><div class="pc-item">需要偶尔关注两个桶的余额分布</div></div>
+            </div>
+        </div>
+
+        <hr>
+
+        <!-- 04 Expert -->
+        <div class="sec" id="expert">
+            <h2 class="sec-t">专家模式</h2>
+            <div class="mode-section">
+                <div class="mode-head">
+                    <h3>专家模式 <span class="tag" style="background:var(--bg3);color:var(--tx2)">大型商户</span></h3>
+                    <div style="text-align:right"><div style="font-size:11px;color:var(--tx4);margin-bottom:4px">桶结构</div>
+                    <div class="bucket-mini"><div style="background:var(--gn);flex:1">低</div><div style="background:var(--am);flex:1">中</div><div style="background:var(--rd);flex:1">高</div><div style="background:var(--sv);flex:1">严重</div></div></div>
+                </div>
+                <p style="margin-bottom:0">四级精细分类：<b>低风险</b>（0~20）、<b>中风险</b>（20~50）、<b>高风险</b>（50~80）、严重。让您精确掌握每一级风险的资金状况。</p>
+            </div>
+
+            <div class="diagram">
+                <svg viewBox="0 0 620 160" width="620" height="160" style="display:block;margin:0 auto">
+                    <text x="30" y="18" font-size="10" font-weight="600" fill="#64748b" font-family="Noto Sans SC,sans-serif">入款资金分配</text>
+                    <!-- Low -->
+                    <g transform="translate(10, 30)">
+                        <ellipse cx="45" cy="55" rx="42" ry="10" fill="#0B9E64" opacity="0.2"/>
+                        <rect x="3" y="10" width="84" height="45" fill="#0ECB81"/>
+                        <ellipse cx="45" cy="55" rx="42" ry="10" fill="#0ECB81"/>
+                        <ellipse cx="45" cy="10" rx="42" ry="10" fill="#5AD8A6"/>
+                        <text x="45" y="34" font-size="12" font-weight="700" fill="#fff" text-anchor="middle" font-family="Noto Sans SC,sans-serif">低</text>
+                    </g>
+                    <text x="55" y="115" font-size="10" fill="var(--gn)" text-anchor="middle" font-family="JetBrains Mono,monospace" font-weight="500">0~20</text>
+
+                    <line x1="100" y1="60" x2="130" y2="60" stroke="var(--yw)" stroke-width="1.5" stroke-dasharray="4,2"/>
+                    <text x="115" y="54" font-size="9" fill="var(--yw)" text-anchor="middle">⇄</text>
+
+                    <!-- Mid -->
+                    <g transform="translate(135, 30)">
+                        <ellipse cx="45" cy="55" rx="42" ry="10" fill="#9E7A0B" opacity="0.2"/>
+                        <rect x="3" y="10" width="84" height="45" fill="#E8A90E"/>
+                        <ellipse cx="45" cy="55" rx="42" ry="10" fill="#E8A90E"/>
+                        <ellipse cx="45" cy="10" rx="42" ry="10" fill="#F8D12F"/>
+                        <text x="45" y="34" font-size="12" font-weight="700" fill="#fff" text-anchor="middle" font-family="Noto Sans SC,sans-serif">中</text>
+                    </g>
+                    <text x="180" y="115" font-size="10" fill="var(--am)" text-anchor="middle" font-family="JetBrains Mono,monospace" font-weight="500">20~50</text>
+
+                    <line x1="225" y1="60" x2="255" y2="60" stroke="var(--yw)" stroke-width="1.5" stroke-dasharray="4,2"/>
+                    <text x="240" y="54" font-size="9" fill="var(--yw)" text-anchor="middle">⇄</text>
+
+                    <!-- High -->
+                    <g transform="translate(260, 30)">
+                        <ellipse cx="45" cy="55" rx="42" ry="10" fill="#800020" opacity="0.2"/>
+                        <rect x="3" y="10" width="84" height="45" fill="#F6465D"/>
+                        <ellipse cx="45" cy="55" rx="42" ry="10" fill="#F6465D"/>
+                        <ellipse cx="45" cy="10" rx="42" ry="10" fill="#FF7A8A"/>
+                        <text x="45" y="34" font-size="12" font-weight="700" fill="#fff" text-anchor="middle" font-family="Noto Sans SC,sans-serif">高</text>
+                    </g>
+                    <text x="305" y="115" font-size="10" fill="var(--rd)" text-anchor="middle" font-family="JetBrains Mono,monospace" font-weight="500">50~80</text>
+
+                    <text x="195" y="140" font-size="9" fill="var(--tx4)" text-anchor="middle" font-family="Noto Sans SC,sans-serif">低 / 中 / 高 三桶之间可逐级借款</text>
+
+                    <line x1="375" y1="30" x2="375" y2="110" stroke="var(--bd)" stroke-width="1" stroke-dasharray="4,3"/>
+
+                    <!-- Severe -->
+                    <g transform="translate(410, 32)">
+                        <ellipse cx="50" cy="55" rx="46" ry="11" fill="#3D0010" opacity="0.2"/>
+                        <rect x="4" y="10" width="92" height="45" fill="#5C0011"/>
+                        <ellipse cx="50" cy="55" rx="46" ry="11" fill="#5C0011"/>
+                        <ellipse cx="50" cy="10" rx="46" ry="11" fill="#800020"/>
+                        <text x="50" y="34" font-size="12" font-weight="700" fill="#fff" text-anchor="middle" font-family="Noto Sans SC,sans-serif">严重</text>
+                    </g>
+                    <text x="460" y="117" font-size="10" fill="#800020" text-anchor="middle" font-family="JetBrains Mono,monospace" font-weight="500">≥80 / 渠道</text>
+                    <rect x="420" y="102" width="80" height="14" rx="4" fill="var(--rd-l)" stroke="var(--rd)" stroke-width=".5" stroke-dasharray="3,2"/>
+                    <text x="460" y="112" font-size="7" fill="#800020" text-anchor="middle" font-family="Noto Sans SC,sans-serif" font-weight="600">不参与借款</text>
+                </svg>
+            </div>
+
+            <h3 class="sub-t">出款时怎么运作？</h3>
+            <p>系统精确匹配目标地址的风险等级。如果对应桶余额不足，会按<b>就近原则逐级借款</b>：</p>
+            <ul style="font-size:13px;color:var(--tx2);margin:8px 0 12px 20px">
+                <li>高风险桶不够 → 先从中风险借 → 还不够从低风险借</li>
+                <li>低风险桶不够 → 先从中风险借 → 还不够从高风险借</li>
+                <li>中风险桶不够 → 先从高风险借 → 还不够从低风险借</li>
+            </ul>
+
+            <h3 class="sub-t">场景示例</h3>
+            <div class="scenario">
+                <div class="sc-head"><div class="sc-num" style="background:var(--gn)">1</div> 收到 5,000 USDT，评分 10</div>
+                <div class="sc-body">评分 0~20 → 进入<b>低风险桶</b>，这是最干净的资金<div class="sc-result" style="background:var(--gn-l);color:var(--gn)">→ 低风险桶 +5,000</div></div>
+            </div>
+            <div class="scenario">
+                <div class="sc-head"><div class="sc-num" style="background:var(--am)">2</div> 收到 2,000 USDT，评分 35</div>
+                <div class="sc-body">评分 20~50 → 进入<b>中风险桶</b><div class="sc-result" style="background:var(--yw-l);color:var(--am)">→ 中风险桶 +2,000</div></div>
+            </div>
+            <div class="scenario">
+                <div class="sc-head"><div class="sc-num" style="background:var(--ac)">3</div> 出款 10,000 到高风险地址，但高风险桶只有 3,000</div>
+                <div class="sc-body">高桶只有 3,000，差 7,000 → 先从<b>中风险桶借</b>（假设有 2,000）→ 还差 5,000，再从<b>低风险桶借</b>→ 凑够 10,000<div class="sc-result" style="background:var(--ac-l);color:var(--ac)">高 −3,000 + 中借 2,000 + 低借 5,000 → 出款成功</div></div>
+            </div>
+
+            <div class="pc-grid">
+                <div class="pc-box pro"><h5>适合您，如果：</h5><div class="pc-item">您需要最精细的风险分类和合规报告</div><div class="pc-item">您的月交易量超过 500 万 USDT</div><div class="pc-item">您有专门的风控或合规团队</div></div>
+                <div class="pc-box con"><h5>需要了解：</h5><div class="pc-item">资金分散在 3 个桶，单桶余额可能较少</div><div class="pc-item">出款时借款链较长，需理解优先级</div><div class="pc-item">管理复杂度最高</div></div>
+            </div>
+        </div>
+
+        <hr>
+
+        <!-- 05 Compare -->
+        <div class="sec" id="compare">
+            <h2 class="sec-t">模式对比</h2>
+            <table class="cmp-table">
+                <thead><tr><th></th><th>标准模式</th><th>专业模式</th><th>专家模式</th></tr></thead>
+                <tbody>
+                    <tr><td class="label-col">普通桶数量</td><td class="best">1 个</td><td>2 个</td><td>3 个</td></tr>
+                    <tr><td class="label-col">资金可见性</td><td>不分等级</td><td>分两级</td><td class="best">四级明细</td></tr>
+                    <tr><td class="label-col">出款灵活度</td><td class="best">最高（一个桶）</td><td>高（可互借）</td><td>中等（逐级借）</td></tr>
+                    <tr><td class="label-col">合规透明度</td><td>基础</td><td>较好</td><td class="best">最优</td></tr>
+                    <tr><td class="label-col">管理复杂度</td><td class="best">最简单</td><td>适中</td><td>较高</td></tr>
+                    <tr><td class="label-col">余额不足风险</td><td class="best">无</td><td>低</td><td>中等</td></tr>
+                </tbody>
+            </table>
+            <div class="callout tip">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                <span>绿色标注表示该项的最优选择。没有"最好"的模式，只有最适合您业务的模式。</span>
+            </div>
+        </div>
+
+        <hr>
+
+        <!-- 06 Severe -->
+        <div class="sec" id="severe">
+            <h2 class="sec-t">严重桶说明</h2>
+            <div class="callout danger">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+                <span><b>所有模式都有严重桶</b>，这是平台合规要求，不可关闭或合并到其他桶。</span>
+            </div>
+            <p>严重桶用于隔离涉及高风险渠道的资金。系统会在每笔入款的风控检测中自动判断：</p>
+
+            <h3 class="sub-t">什么资金会进入严重桶？</h3>
+            <table class="cmp-table">
+                <thead><tr><th>情况</th><th>触发条件</th><th>资金状态</th></tr></thead>
+                <tbody>
+                    <tr><td class="label-col">命中高风险渠道</td><td>制裁名单、暗网市场、混币器、被盗资金、勒索软件、恐怖融资</td><td style="color:var(--rd);font-weight:600">冻结 — 仅可通过后台提款</td></tr>
+                    <tr><td class="label-col">评分 ≥ 80</td><td>风控评分很高但未涉及上述渠道</td><td style="color:var(--am);font-weight:600">可用 — 可出款给同为高风险的地址</td></tr>
+                </tbody>
+            </table>
+
+            <div class="callout warn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                <span>严重桶的资金<b>不能借给</b>其他桶使用，也不能从其他桶借入。它是完全独立的。高风险渠道名单由平台统一维护。</span>
+            </div>
+        </div>
+
+        <hr>
+
+        <!-- 07 Recommend -->
+        <div class="sec" id="recommend">
+            <h2 class="sec-t">如何选择</h2>
+            <div class="rec-grid">
+                <div class="rec-card" style="border-top:2px solid var(--bk-clean)">
+                    <h4>标准模式</h4>
+                    <div class="rec-sub">月交易量 &lt; 50万 USDT</div>
+                    <div class="rec-list">
+                        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>刚接入的新商户</div>
+                        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>不需要精细风控</div>
+                        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>希望操作简单</div>
+                    </div>
+                </div>
+                <div class="rec-card" style="border-top:2px solid var(--bk-low)">
+                    <h4>专业模式</h4>
+                    <div class="rec-sub">月交易量 50万~500万</div>
+                    <div class="rec-list">
+                        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>有一定业务规模</div>
+                        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>想看资金风险分布</div>
+                        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>兼顾安全和流动性</div>
+                    </div>
+                </div>
+                <div class="rec-card" style="border-top:2px solid var(--bk-mid)">
+                    <h4>专家模式</h4>
+                    <div class="rec-sub">月交易量 &gt; 500万</div>
+                    <div class="rec-list">
+                        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>大型/机构客户</div>
+                        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>有风控合规团队</div>
+                        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>需要完整审计追溯</div>
+                    </div>
+                </div>
+            </div>
+            <div class="callout info">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                <span>新商户默认使用标准模式。如需升级，请联系您的客户经理提交申请，审批通过后系统将自动迁移资金。</span>
+            </div>
+        </div>
+
+        <hr>
+
+        <!-- 08 FAQ -->
+        <div class="sec" id="faq">
+            <h2 class="sec-t">常见问题</h2>
+            <div class="faq"><div class="faq-q" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('show')">如何切换模式？<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div><div class="faq-a">请联系您的客户经理，提交模式切换申请。平台审批通过后，系统会自动将资金按新模式规则重新分配到对应的桶中。整个过程不影响正常的入款和出款业务。</div></div>
+            <div class="faq"><div class="faq-q" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('show')">切换模式后，原来的钱怎么办？<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div><div class="faq-a">如果您的入款已有保存的风险评分（新系统的入款都会保存），系统会按新模式的分数段自动重新分桶。如果是早期没有评分记录的老资金，未被隔离的将进入最低风险桶，已被隔离的将进入严重桶。</div></div>
+            <div class="faq"><div class="faq-q" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('show')">"借款"会产生额外费用吗？<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div><div class="faq-a">不会。借款只是系统内部在不同桶之间调配资金来完成出款，不收取任何费用。这个过程完全自动，您不需要手动操作，也不需要事后"还款"。</div></div>
+            <div class="faq"><div class="faq-q" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('show')">可以降级吗？比如从专家模式回到标准模式？<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div><div class="faq-a">可以。同样需要联系客户经理申请。降级时，多个桶的资金会自动合并。例如从专家模式降到标准模式，低/中/高三个桶的资金都会合并到"干净桶"中。</div></div>
+            <div class="faq"><div class="faq-q" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('show')">风险评分是怎么计算的？我可以修改吗？<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div><div class="faq-a">风险评分由专业的第三方风控提供商（如 Chainalysis、Bitrace）在每笔入款时自动检测。评分基于区块链地址的历史交易关联分析。评分规则和高风险渠道名单由平台统一维护，商户无法自行修改。</div></div>
+            <div class="faq"><div class="faq-q" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('show')">严重桶的钱怎么取出来？<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div><div class="faq-a">通过商户后台的"提款"功能，可以将严重桶（冻结状态）的资金提取到任意地址，无需额外审批。对于严重桶中"可用"状态的资金（仅评分高但未涉及高风险渠道），可以正常出款给同为高风险等级的目标地址。</div></div>
+        </div>
+
+        <div style="text-align:center;font-size:12px;color:var(--tx4);padding-top:24px;border-top:1px solid var(--bd)">
+            如有疑问，请联系您的客户经理 · Voss 资金路由模式选择指南 v2.0
+        </div>
+    </div>
+</div>
+<script>
+const navItems = document.querySelectorAll('.sidebar .nav-item[href^="#"]');
+const sections = [];
+navItems.forEach(a => {
+    const id = a.getAttribute('href').slice(1);
+    const el = document.getElementById(id);
+    if (el) sections.push({ id, el, link: a });
+});
+
+function updateNav() {
+    let current = sections[0]?.id;
+    for (const s of sections) {
+        if (s.el.getBoundingClientRect().top <= 80) current = s.id;
+    }
+    navItems.forEach(a => a.classList.remove('on'));
+    const active = document.querySelector(`.nav-item[href="#${current}"]`);
+    if (active) active.classList.add('on');
+}
+
+window.addEventListener('scroll', updateNav, { passive: true });
+navItems.forEach(a => {
+    a.addEventListener('click', () => {
+        navItems.forEach(n => n.classList.remove('on'));
+        a.classList.add('on');
+    });
+});
+updateNav();
+</script>
+</body>
+</html>

@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voss资金路由图 v2.0 — 商户模式</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: "PingFang SC", "Microsoft YaHei", "Segoe UI", Arial, sans-serif;
+            background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            padding: 24px 16px;
+        }
+        .page-header { text-align: center; margin-bottom: 20px; }
+        .page-header h1 { font-size: 28px; font-weight: 800; color: #0f172a; margin-bottom: 6px; }
+        .page-header p { font-size: 13px; color: #64748b; }
+
+        .tabs {
+            display: flex; justify-content: center; gap: 0; margin-bottom: 20px;
+        }
+        .tab-btn {
+            padding: 12px 32px; font-size: 14px; font-weight: 700; border: 2px solid #e2e8f0;
+            background: #fff; color: #64748b; cursor: pointer; transition: all 0.2s;
+            position: relative;
+        }
+        .tab-btn:first-child { border-radius: 10px 0 0 10px; }
+        .tab-btn:last-child { border-radius: 0 10px 10px 0; }
+        .tab-btn.active-standard { background: #1890FF; color: #fff; border-color: #1890FF; }
+        .tab-btn.active-professional { background: #9B8AFF; color: #fff; border-color: #9B8AFF; }
+        .tab-btn.active-expert { background: #13A8A8; color: #fff; border-color: #13A8A8; }
+        .tab-btn .badge {
+            font-size: 10px; padding: 2px 6px; border-radius: 8px; margin-left: 6px;
+            background: rgba(255,255,255,0.25); color: inherit;
+        }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .svg-wrap {
+            background: #fff; border-radius: 16px;
+            box-shadow: 0 8px 40px rgba(15,23,42,0.1);
+            overflow: auto; max-width: 1750px; margin: 0 auto;
+        }
+
+        .mode-desc {
+            max-width: 1750px; margin: 0 auto 16px;
+            background: #fff; border-radius: 12px; padding: 16px 24px;
+            box-shadow: 0 4px 20px rgba(15,23,42,0.06);
+            display: flex; gap: 32px; align-items: center; flex-wrap: wrap;
+        }
+        .mode-desc .tag {
+            font-size: 11px; padding: 4px 10px; border-radius: 6px; font-weight: 600;
+        }
+        .mode-desc .info { font-size: 13px; color: #475569; }
+        .mode-desc .info b { color: #1e293b; }
+    </style>
+</head>
+<body>
+
+<div class="page-header">
+    <h1>Voss资金路由图 v2.0</h1>
+    <p>商户可配模式 | 入款 → KYT（写标签+存分数）→ 商户业务池 → 分桶归集 → 风险归集池 → 出款</p>
+</div>
+
+<div class="tabs">
+    <button class="tab-btn active-standard" onclick="switchTab('standard')" id="btn-standard">标准模式<span class="badge">2桶</span></button>
+    <button class="tab-btn" onclick="switchTab('professional')" id="btn-professional">专业模式<span class="badge">3桶</span></button>
+    <button class="tab-btn" onclick="switchTab('expert')" id="btn-expert">专家模式<span class="badge">4桶</span></button>
+</div>
+
+<!-- ======================== STANDARD MODE ======================== -->
+<div class="tab-content active" id="tab-standard">
+    <div class="mode-desc">
+        <span class="tag" style="background:#dbeafe;color:#1068B0;">标准模式（默认）</span>
+        <span class="info"><b>2 个桶</b>：干净桶（0~79）+ 严重桶（≥80 或命中目录）</span>
+        <span class="info"><b>借款</b>：不需要</span>
+        <span class="info"><b>适合</b>：新商户 / 小型商户</span>
+    </div>
+    <div class="svg-wrap">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 1150" width="1500" height="1150">
+            <defs>
+                <marker id="s-arrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#94a3b8"/></marker>
+                <marker id="s-arrowG" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#0ECB81"/></marker>
+                <marker id="s-arrowR" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#F6465D"/></marker>
+                <marker id="s-arrowS" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#5C0011"/></marker>
+                <filter id="s-sh" x="-8%" y="-8%" width="120%" height="120%"><feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#1e293b" flood-opacity="0.08"/></filter>
+                <linearGradient id="s-gClean" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#1890FF"/><stop offset="100%" stop-color="#5EADFF"/></linearGradient>
+                <linearGradient id="s-gSevere" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#5C0011"/><stop offset="100%" stop-color="#800020"/></linearGradient>
+                <linearGradient id="s-tClean" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#91CAFF"/><stop offset="100%" stop-color="#1890FF"/></linearGradient>
+                <linearGradient id="s-tSevere" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#800020"/><stop offset="100%" stop-color="#5C0011"/></linearGradient>
+            </defs>
+            <rect width="1500" height="1150" fill="#fafbfc"/>
+
+            <!-- Phase labels -->
+            <g>
+                <path d="M30,20 L170,20 L185,38 L170,56 L30,56 Q20,38 30,56 Z" fill="#1890FF"/>
+                <text x="100" y="43" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">1 入款</text>
+                <path d="M185,20 L340,20 L355,38 L340,56 L185,56 L200,38 Z" fill="#9B8AFF"/>
+                <text x="265" y="43" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">2 KYT风控</text>
+                <path d="M355,20 L530,20 L545,38 L530,56 L355,56 L370,38 Z" fill="#7B61FF"/>
+                <text x="445" y="43" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">3 商户业务池</text>
+                <path d="M545,20 L760,20 L775,38 L760,56 L545,56 L560,38 Z" fill="#64748b"/>
+                <text x="655" y="43" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">4 分桶归集</text>
+                <path d="M775,20 L1120,20 L1135,38 L1120,56 L775,56 L790,38 Z" fill="#13A8A8"/>
+                <text x="950" y="43" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">5 出款</text>
+                <path d="M1135,20 L1350,20 Q1365,38 1350,56 L1135,56 L1150,38 Z" fill="#13C2C2"/>
+                <text x="1245" y="43" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">6 结算</text>
+            </g>
+
+            <!-- Row 1: A → B → C → D -->
+            <g filter="url(#s-sh)">
+                <rect x="40" y="80" width="130" height="60" rx="10" fill="#fff" stroke="#1890FF" stroke-width="2"/>
+                <text x="105" y="105" font-size="11" font-weight="700" fill="#1e293b" text-anchor="middle">A. 入款检测</text>
+                <text x="105" y="120" font-size="9" fill="#64748b" text-anchor="middle">监控区块链·检测入账</text>
+            </g>
+            <line x1="170" y1="110" x2="200" y2="110" stroke="#94a3b8" stroke-width="2" marker-end="url(#s-arrow)"/>
+
+            <g filter="url(#s-sh)">
+                <rect x="210" y="80" width="130" height="60" rx="10" fill="#fff" stroke="#1890FF" stroke-width="2"/>
+                <text x="275" y="105" font-size="11" font-weight="700" fill="#1e293b" text-anchor="middle">B. 交易确认</text>
+                <text x="275" y="120" font-size="9" fill="#64748b" text-anchor="middle">等待 N 个确认</text>
+            </g>
+            <line x1="340" y1="110" x2="370" y2="110" stroke="#94a3b8" stroke-width="2" marker-end="url(#s-arrow)"/>
+
+            <g filter="url(#s-sh)">
+                <rect x="380" y="75" width="180" height="75" rx="10" fill="#f5f3ff" stroke="#9B8AFF" stroke-width="2"/>
+                <text x="470" y="97" font-size="11" font-weight="700" fill="#6B4FE0" text-anchor="middle">C. 一次性 KYT</text>
+                <text x="470" y="113" font-size="9" fill="#64748b" text-anchor="middle">调用 KYT 接口·分数持久化</text>
+                <text x="470" y="128" font-size="8" fill="#9B8AFF" text-anchor="middle">目录检查 → 分数判定</text>
+                <text x="470" y="141" font-size="8" fill="#64748b" text-anchor="middle">输出：Low/Mid/High/Severe</text>
+            </g>
+            <line x1="560" y1="112" x2="590" y2="112" stroke="#94a3b8" stroke-width="2" marker-end="url(#s-arrow)"/>
+
+            <g filter="url(#s-sh)">
+                <rect x="600" y="80" width="180" height="65" rx="10" fill="#eef2ff" stroke="#7B61FF" stroke-width="2"/>
+                <text x="690" y="103" font-size="11" font-weight="700" fill="#5040B0" text-anchor="middle">D. 商户业务池入账</text>
+                <text x="690" y="120" font-size="9" fill="#64748b" text-anchor="middle">待归集余额·绑定风险标签</text>
+                <text x="690" y="135" font-size="8" fill="#7B61FF" text-anchor="middle">此阶段不分桶</text>
+            </g>
+
+            <!-- Biz Pool Cylinder -->
+            <g transform="translate(645, 170)">
+                <ellipse cx="45" cy="45" rx="50" ry="11" fill="#5040B0" opacity="0.2"/>
+                <rect x="-5" y="8" width="100" height="37" fill="#7B61FF"/>
+                <ellipse cx="45" cy="45" rx="50" ry="11" fill="#7B61FF"/>
+                <ellipse cx="45" cy="8" rx="50" ry="11" fill="#B0A5FF"/>
+                <text x="45" y="32" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">商户业务池</text>
+            </g>
+            <path d="M690,145 L690,170" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#s-arrow)"/>
+
+            <!-- E: 归集触发 -->
+            <path d="M690,228 L690,260" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#s-arrow)"/>
+            <g filter="url(#s-sh)">
+                <rect x="600" y="270" width="180" height="55" rx="10" fill="#fff" stroke="#64748b" stroke-width="2"/>
+                <text x="690" y="293" font-size="11" font-weight="700" fill="#1e293b" text-anchor="middle">E. 归集触发</text>
+                <text x="690" y="310" font-size="9" fill="#64748b" text-anchor="middle">阈值 / 闲置 / 手动触发</text>
+            </g>
+
+            <!-- E0: 分桶归集（标准模式：2桶） -->
+            <path d="M690,325 L690,360" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#s-arrow)"/>
+            <g filter="url(#s-sh)">
+                <rect x="570" y="370" width="240" height="65" rx="10" fill="#fefce8" stroke="#ca8a04" stroke-width="2"/>
+                <text x="690" y="393" font-size="11" font-weight="700" fill="#a16207" text-anchor="middle">E0. 分桶归集（标准模式）</text>
+                <text x="690" y="410" font-size="9" fill="#64748b" text-anchor="middle">Low + Mid + High → 干净桶</text>
+                <text x="690" y="425" font-size="9" fill="#64748b" text-anchor="middle">Severe → 严重桶</text>
+            </g>
+
+            <!-- Arrows to two buckets -->
+            <path d="M690,435 L690,460 L520,460 L520,490" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#s-arrow)"/>
+            <path d="M690,435 L690,460 L860,460 L860,490" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#s-arrow)"/>
+            <circle cx="690" cy="460" r="3" fill="#94a3b8"/>
+
+            <!-- Clean Bucket Cylinder -->
+            <text x="520" y="485" font-size="9" font-weight="700" fill="#1068B0" text-anchor="middle">干净桶</text>
+            <g transform="translate(455, 500)">
+                <ellipse cx="65" cy="55" rx="70" ry="14" fill="#1e40af" opacity="0.2"/>
+                <rect x="-5" y="10" width="140" height="45" fill="url(#s-gClean)"/>
+                <ellipse cx="65" cy="55" rx="70" ry="14" fill="url(#s-gClean)"/>
+                <ellipse cx="65" cy="10" rx="70" ry="14" fill="url(#s-tClean)"/>
+                <text x="65" y="32" font-size="12" font-weight="700" fill="#fff" text-anchor="middle">干净</text>
+                <text x="65" y="46" font-size="9" fill="rgba(255,255,255,0.8)" text-anchor="middle">L + M + H</text>
+            </g>
+            <text x="520" y="575" font-size="9" fill="#1890FF" text-anchor="middle">分数 0 ~ 79</text>
+
+            <!-- Severe Bucket Cylinder -->
+            <text x="860" y="485" font-size="9" font-weight="700" fill="#800020" text-anchor="middle">严重桶</text>
+            <g transform="translate(795, 500)">
+                <ellipse cx="65" cy="55" rx="70" ry="14" fill="#3D0010" opacity="0.2"/>
+                <rect x="-5" y="10" width="140" height="45" fill="url(#s-gSevere)"/>
+                <ellipse cx="65" cy="55" rx="70" ry="14" fill="url(#s-gSevere)"/>
+                <ellipse cx="65" cy="10" rx="70" ry="14" fill="url(#s-tSevere)"/>
+                <text x="65" y="32" font-size="12" font-weight="700" fill="#fff" text-anchor="middle">严重</text>
+                <text x="65" y="46" font-size="9" fill="rgba(255,255,255,0.8)" text-anchor="middle">冻结 + 可用</text>
+            </g>
+            <text x="860" y="575" font-size="9" fill="#800020" text-anchor="middle">≥80 或命中目录</text>
+            <rect x="800" y="580" width="120" height="18" rx="5" fill="#fef2f2" stroke="#F6465D" stroke-dasharray="3,2"/>
+            <text x="860" y="593" font-size="8" fill="#800020" text-anchor="middle" font-weight="600">不参与借款</text>
+
+            <!-- No Borrowing badge -->
+            <rect x="600" y="530" width="140" height="24" rx="8" fill="#dbeafe" stroke="#1890FF" stroke-width="1.5"/>
+            <text x="670" y="546" font-size="10" font-weight="700" fill="#1068B0" text-anchor="middle">无需借款（仅1个非严重桶）</text>
+
+            <!-- F: 归集交易 -->
+            <path d="M690,575 L690,610 L950,610 L950,640" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#s-arrow)"/>
+            <g filter="url(#s-sh)">
+                <rect x="880" y="650" width="140" height="55" rx="10" fill="#fff" stroke="#64748b" stroke-width="2"/>
+                <text x="950" y="673" font-size="11" font-weight="700" fill="#1e293b" text-anchor="middle">F. 归集交易</text>
+                <text x="950" y="690" font-size="9" fill="#64748b" text-anchor="middle">链上转账·落入对应桶</text>
+            </g>
+
+            <!-- G: 出款请求 -->
+            <path d="M950,705 L950,730 L480,730 L480,750" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#s-arrow)"/>
+            <g filter="url(#s-sh)">
+                <rect x="370" y="760" width="220" height="70" rx="10" fill="#fff" stroke="#13A8A8" stroke-width="2"/>
+                <text x="480" y="783" font-size="11" font-weight="700" fill="#1e293b" text-anchor="middle">G. 出款请求</text>
+                <text x="480" y="800" font-size="9" fill="#64748b" text-anchor="middle">常规出款：KYA 判定目标地址</text>
+                <text x="480" y="815" font-size="9" fill="#7B61FF" text-anchor="middle">商户后台提款：Severe-冻结可到任意地址</text>
+            </g>
+
+            <!-- H: KYA -->
+            <path d="M480,830 L480,860" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#s-arrow)"/>
+            <g filter="url(#s-sh)">
+                <polygon points="480,870 570,930 480,990 390,930" fill="#fff" stroke="#13A8A8" stroke-width="2"/>
+                <text x="480" y="920" font-size="10" font-weight="700" fill="#1e293b" text-anchor="middle">H. KYA</text>
+                <text x="480" y="937" font-size="8" fill="#64748b" text-anchor="middle">目标地址风险？</text>
+            </g>
+
+            <!-- KYA -> Clean path -->
+            <path d="M390,930 L310,930 L310,960" stroke="#1890FF" stroke-width="2" fill="none" marker-end="url(#s-arrowG)"/>
+            <rect x="265" y="915" width="55" height="14" rx="7" fill="#dbeafe"/>
+            <text x="292" y="925" font-size="8" fill="#1068B0" text-anchor="middle" font-weight="700">非Severe</text>
+
+            <!-- KYA -> Severe path -->
+            <path d="M570,930 L650,930 L650,960" stroke="#5C0011" stroke-width="2" fill="none" marker-end="url(#s-arrowS)"/>
+            <rect x="575" y="915" width="55" height="14" rx="7" fill="#fef2f2"/>
+            <text x="602" y="925" font-size="8" fill="#5C0011" text-anchor="middle" font-weight="700">Severe</text>
+
+            <!-- Clean route box -->
+            <g filter="url(#s-sh)">
+                <rect x="220" y="970" width="180" height="60" rx="10" fill="#eff6ff" stroke="#1890FF" stroke-width="2"/>
+                <text x="310" y="993" font-size="10" font-weight="700" fill="#1068B0" text-anchor="middle">从干净桶出款</text>
+                <text x="310" y="1010" font-size="9" fill="#64748b" text-anchor="middle">余额足→出款 / 不足→拒绝</text>
+            </g>
+
+            <!-- Severe route box -->
+            <g filter="url(#s-sh)">
+                <rect x="560" y="970" width="200" height="80" rx="10" fill="#fef2f2" stroke="#800020" stroke-width="2"/>
+                <text x="660" y="990" font-size="10" font-weight="700" fill="#800020" text-anchor="middle">从严重桶出款</text>
+                <text x="660" y="1007" font-size="8" fill="#64748b" text-anchor="middle">Severe-可用 → Severe地址 ✅</text>
+                <text x="660" y="1022" font-size="8" fill="#64748b" text-anchor="middle">Severe-可用 → 非Severe地址 ❌</text>
+                <text x="660" y="1037" font-size="8" fill="#7B61FF" text-anchor="middle">Severe-冻结 → 商户后台提款（任意地址）✅</text>
+            </g>
+
+            <!-- Both → J -->
+            <path d="M310,1030 L310,1060 L900,1060 L900,1070" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#s-arrow)"/>
+            <path d="M660,1050 L660,1060 L900,1060" stroke="#94a3b8" stroke-width="2" fill="none"/>
+            <circle cx="900" cy="1060" r="3" fill="#94a3b8"/>
+
+            <!-- J & K -->
+            <g filter="url(#s-sh)">
+                <rect x="840" y="1075" width="120" height="50" rx="10" fill="#fff" stroke="#13A8A8" stroke-width="2"/>
+                <text x="900" y="1098" font-size="11" font-weight="700" fill="#1e293b" text-anchor="middle">J. 出款交易</text>
+                <text x="900" y="1113" font-size="9" fill="#64748b" text-anchor="middle">广播链上</text>
+            </g>
+            <line x1="960" y1="1100" x2="1000" y2="1100" stroke="#94a3b8" stroke-width="2" marker-end="url(#s-arrow)"/>
+            <g filter="url(#s-sh)">
+                <rect x="1010" y="1075" width="120" height="50" rx="10" fill="#f0f9ff" stroke="#13C2C2" stroke-width="2"/>
+                <text x="1070" y="1098" font-size="11" font-weight="700" fill="#0DA5A5" text-anchor="middle">K. 账本更新</text>
+                <text x="1070" y="1113" font-size="9" fill="#64748b" text-anchor="middle">余额·审计日志</text>
+            </g>
+            <path d="M1130" y1="1100" x2="1170" y2="1100" stroke="#0ECB81" stroke-width="2" fill="none" marker-end="url(#s-arrowG)"/>
+            <rect x="1180" y="1085" width="80" height="30" rx="8" fill="#0ECB81"/>
+            <text x="1220" y="1105" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">✓ 成功</text>
+
+            <!-- Constraints box -->
+            <g>
+                <rect x="40" y="620" width="280" height="170" rx="10" fill="#fff" filter="url(#s-sh)" stroke="#e2e8f0"/>
+                <rect x="40" y="620" width="280" height="24" rx="10" fill="#1890FF"/>
+                <rect x="40" y="633" width="280" height="11" fill="#1890FF"/>
+                <text x="180" y="638" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">标准模式要点</text>
+                <text x="55" y="665" font-size="9" font-weight="700" fill="#1e293b">1. 只分两个桶：干净 + 严重</text>
+                <text x="55" y="682" font-size="9" fill="#64748b">Low/Mid/High 全部合入干净桶</text>
+                <text x="55" y="702" font-size="9" font-weight="700" fill="#1e293b">2. 无借款机制</text>
+                <text x="55" y="719" font-size="9" fill="#64748b">非严重只有一个桶，无需借款</text>
+                <text x="55" y="739" font-size="9" font-weight="700" fill="#1e293b">3. 出款路由极简</text>
+                <text x="55" y="756" font-size="9" fill="#64748b">KYA 非Severe→干净桶出</text>
+                <text x="55" y="773" font-size="9" fill="#64748b">KYA Severe→严重桶出(仅Severe-可用)</text>
+            </g>
+        </svg>
+    </div>
+</div>
+
+<!-- ======================== PROFESSIONAL MODE ======================== -->
+<div class="tab-content" id="tab-professional">
+    <div class="mode-desc">
+        <span class="tag" style="background:#ede9fe;color:#6d28d9;">专业模式</span>
+        <span class="info"><b>3 个桶</b>：低风险（0~49）+ 高风险（50~79）+ 严重（≥80 或命中目录）</span>
+        <span class="info"><b>借款</b>：低 ↔ 高 双向可借</span>
+        <span class="info"><b>适合</b>：中等规模商户</span>
+    </div>
+    <div class="svg-wrap">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 1250" width="1500" height="1250">
+            <defs>
+                <marker id="p-arrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#94a3b8"/></marker>
+                <marker id="p-arrowG" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#0ECB81"/></marker>
+                <marker id="p-arrowS" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#5C0011"/></marker>
+                <filter id="p-sh" x="-8%" y="-8%" width="120%" height="120%"><feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#1e293b" flood-opacity="0.08"/></filter>
+                <linearGradient id="p-gLow" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#0ECB81"/><stop offset="100%" stop-color="#5AD8A6"/></linearGradient>
+                <linearGradient id="p-gHigh" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#F6465D"/><stop offset="100%" stop-color="#FF7A8A"/></linearGradient>
+                <linearGradient id="p-gSev" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#5C0011"/><stop offset="100%" stop-color="#800020"/></linearGradient>
+                <linearGradient id="p-tLow" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#87E8BA"/><stop offset="100%" stop-color="#0ECB81"/></linearGradient>
+                <linearGradient id="p-tHigh" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#FFB3BD"/><stop offset="100%" stop-color="#F6465D"/></linearGradient>
+                <linearGradient id="p-tSev" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#800020"/><stop offset="100%" stop-color="#5C0011"/></linearGradient>
+            </defs>
+            <rect width="1500" height="1250" fill="#fafbfc"/>
+
+            <!-- Phase labels (same as standard) -->
+            <g>
+                <path d="M30,20 L170,20 L185,38 L170,56 L30,56 Q20,38 30,56 Z" fill="#1890FF"/>
+                <text x="100" y="43" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">1 入款</text>
+                <path d="M185,20 L340,20 L355,38 L340,56 L185,56 L200,38 Z" fill="#9B8AFF"/>
+                <text x="265" y="43" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">2 KYT风控</text>
+                <path d="M355,20 L530,20 L545,38 L530,56 L355,56 L370,38 Z" fill="#7B61FF"/>
+                <text x="445" y="43" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">3 商户业务池</text>
+                <path d="M545,20 L760,20 L775,38 L760,56 L545,56 L560,38 Z" fill="#64748b"/>
+                <text x="655" y="43" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">4 分桶归集</text>
+                <path d="M775,20 L1120,20 L1135,38 L1120,56 L775,56 L790,38 Z" fill="#13A8A8"/>
+                <text x="950" y="43" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">5 出款</text>
+                <path d="M1135,20 L1350,20 Q1365,38 1350,56 L1135,56 L1150,38 Z" fill="#13C2C2"/>
+                <text x="1245" y="43" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">6 结算</text>
+            </g>
+
+            <!-- Row 1: A → B → C → D (same) -->
+            <g filter="url(#p-sh)">
+                <rect x="40" y="80" width="130" height="60" rx="10" fill="#fff" stroke="#1890FF" stroke-width="2"/>
+                <text x="105" y="105" font-size="11" font-weight="700" fill="#1e293b" text-anchor="middle">A. 入款检测</text>
+                <text x="105" y="120" font-size="9" fill="#64748b" text-anchor="middle">监控区块链·检测入账</text>
+            </g>
+            <line x1="170" y1="110" x2="200" y2="110" stroke="#94a3b8" stroke-width="2" marker-end="url(#p-arrow)"/>
+            <g filter="url(#p-sh)">
+                <rect x="210" y="80" width="130" height="60" rx="10" fill="#fff" stroke="#1890FF" stroke-width="2"/>
+                <text x="275" y="105" font-size="11" font-weight="700" fill="#1e293b" text-anchor="middle">B. 交易确认</text>
+                <text x="275" y="120" font-size="9" fill="#64748b" text-anchor="middle">等待 N 个确认</text>
+            </g>
+            <line x1="340" y1="110" x2="370" y2="110" stroke="#94a3b8" stroke-width="2" marker-end="url(#p-arrow)"/>
+            <g filter="url(#p-sh)">
+                <rect x="380" y="75" width="180" height="75" rx="10" fill="#f5f3ff" stroke="#9B8AFF" stroke-width="2"/>
+                <text x="470" y="97" font-size="11" font-weight="700" fill="#6B4FE0" text-anchor="middle">C. 一次性 KYT</text>
+                <text x="470" y="113" font-size="9" fill="#64748b" text-anchor="middle">调用 KYT 接口·分数持久化</text>
+                <text x="470" y="128" font-size="8" fill="#9B8AFF" text-anchor="middle">目录检查 → 分数判定</text>
+                <text x="470" y="141" font-size="8" fill="#64748b" text-anchor="middle">输出：Low/Mid/High/Severe</text>
+            </g>
+            <line x1="560" y1="112" x2="590" y2="112" stroke="#94a3b8" stroke-width="2" marker-end="url(#p-arrow)"/>
+            <g filter="url(#p-sh)">
+                <rect x="600" y="80" width="180" height="65" rx="10" fill="#eef2ff" stroke="#7B61FF" stroke-width="2"/>
+                <text x="690" y="103" font-size="11" font-weight="700" fill="#5040B0" text-anchor="middle">D. 商户业务池入账</text>
+                <text x="690" y="120" font-size="9" fill="#64748b" text-anchor="middle">待归集余额·绑定风险标签</text>
+                <text x="690" y="135" font-size="8" fill="#7B61FF" text-anchor="middle">此阶段不分桶</text>
+            </g>
+
+            <!-- Biz Pool -->
+            <g transform="translate(645, 170)">
+                <ellipse cx="45" cy="45" rx="50" ry="11" fill="#5040B0" opacity="0.2"/>
+                <rect x="-5" y="8" width="100" height="37" fill="#7B61FF"/>
+                <ellipse cx="45" cy="45" rx="50" ry="11" fill="#7B61FF"/>
+                <ellipse cx="45" cy="8" rx="50" ry="11" fill="#B0A5FF"/>
+                <text x="45" y="32" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">商户业务池</text>
+            </g>
+            <path d="M690,145 L690,170" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#p-arrow)"/>
+
+            <!-- E & E0 -->
+            <path d="M690,228 L690,260" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#p-arrow)"/>
+            <g filter="url(#p-sh)">
+                <rect x="600" y="270" width="180" height="55" rx="10" fill="#fff" stroke="#64748b" stroke-width="2"/>
+                <text x="690" y="293" font-size="11" font-weight="700" fill="#1e293b" text-anchor="middle">E. 归集触发</text>
+                <text x="690" y="310" font-size="9" fill="#64748b" text-anchor="middle">阈值 / 闲置 / 手动触发</text>
+            </g>
+            <path d="M690,325 L690,360" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#p-arrow)"/>
+            <g filter="url(#p-sh)">
+                <rect x="555" y="370" width="270" height="65" rx="10" fill="#fefce8" stroke="#ca8a04" stroke-width="2"/>
+                <text x="690" y="393" font-size="11" font-weight="700" fill="#a16207" text-anchor="middle">E0. 分桶归集（专业模式）</text>
+                <text x="690" y="410" font-size="9" fill="#64748b" text-anchor="middle">Low + Mid → 低风险桶 | High → 高风险桶</text>
+                <text x="690" y="425" font-size="9" fill="#64748b" text-anchor="middle">Severe → 严重桶</text>
+            </g>
+
+            <!-- Arrows to three buckets -->
+            <path d="M690,435 L690,465 L420,465 L420,500" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#p-arrow)"/>
+            <path d="M690,435 L690,465 L690,500" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#p-arrow)"/>
+            <path d="M690,435 L690,465 L960,465 L960,500" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#p-arrow)"/>
+            <circle cx="690" cy="465" r="3" fill="#94a3b8"/>
+
+            <!-- Low Bucket -->
+            <text x="420" y="495" font-size="9" font-weight="700" fill="#0B9E64" text-anchor="middle">低风险桶</text>
+            <g transform="translate(360, 510)">
+                <ellipse cx="60" cy="50" rx="55" ry="12" fill="#0B9E64" opacity="0.2"/>
+                <rect x="5" y="10" width="110" height="40" fill="url(#p-gLow)"/>
+                <ellipse cx="60" cy="50" rx="55" ry="12" fill="url(#p-gLow)"/>
+                <ellipse cx="60" cy="10" rx="55" ry="12" fill="url(#p-tLow)"/>
+                <text x="60" y="30" font-size="12" font-weight="700" fill="#fff" text-anchor="middle">低</text>
+                <text x="60" y="44" font-size="9" fill="rgba(255,255,255,0.85)" text-anchor="middle">L + M</text>
+            </g>
+            <text x="420" y="582" font-size="9" fill="#0ECB81" text-anchor="middle">0 ~ 49</text>
+
+            <!-- High Bucket -->
+            <text x="690" y="495" font-size="9" font-weight="700" fill="#800020" text-anchor="middle">高风险桶</text>
+            <g transform="translate(630, 510)">
+                <ellipse cx="60" cy="50" rx="55" ry="12" fill="#800020" opacity="0.2"/>
+                <rect x="5" y="10" width="110" height="40" fill="url(#p-gHigh)"/>
+                <ellipse cx="60" cy="50" rx="55" ry="12" fill="url(#p-gHigh)"/>
+                <ellipse cx="60" cy="10" rx="55" ry="12" fill="url(#p-tHigh)"/>
+                <text x="60" y="30" font-size="12" font-weight="700" fill="#fff" text-anchor="middle">高</text>
+                <text x="60" y="44" font-size="9" fill="rgba(255,255,255,0.85)" text-anchor="middle">H</text>
+            </g>
+            <text x="690" y="582" font-size="9" fill="#F6465D" text-anchor="middle">50 ~ 79</text>
+
+            <!-- Borrowing arrow between Low and High -->
+            <line x1="475" y1="545" x2="635" y2="545" stroke="#F0B90B" stroke-width="2" stroke-dasharray="6,3"/>
+            <text x="555" y="540" font-size="9" font-weight="700" fill="#F0B90B" text-anchor="middle">↔ 双向可借</text>
+
+            <!-- Severe Bucket -->
+            <text x="960" y="495" font-size="9" font-weight="700" fill="#5C0011" text-anchor="middle">严重桶</text>
+            <g transform="translate(900, 510)">
+                <ellipse cx="60" cy="50" rx="55" ry="12" fill="#3D0010" opacity="0.2"/>
+                <rect x="5" y="10" width="110" height="40" fill="url(#p-gSev)"/>
+                <ellipse cx="60" cy="50" rx="55" ry="12" fill="url(#p-gSev)"/>
+                <ellipse cx="60" cy="10" rx="55" ry="12" fill="url(#p-tSev)"/>
+                <text x="60" y="30" font-size="12" font-weight="700" fill="#fff" text-anchor="middle">严重</text>
+                <text x="60" y="44" font-size="9" fill="rgba(255,255,255,0.85)" text-anchor="middle">冻结+可用</text>
+            </g>
+            <text x="960" y="582" font-size="9" fill="#5C0011" text-anchor="middle">≥80 或命中目录</text>
+            <rect x="900" y="587" width="120" height="18" rx="5" fill="#fef2f2" stroke="#F6465D" stroke-dasharray="3,2"/>
+            <text x="960" y="600" font-size="8" fill="#800020" text-anchor="middle" font-weight="600">不参与借款</text>
+
+            <!-- F -->
+            <path d="M690,590 L690,630 L1050,630 L1050,660" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#p-arrow)"/>
+            <g filter="url(#p-sh)">
+                <rect x="980" y="668" width="140" height="55" rx="10" fill="#fff" stroke="#64748b" stroke-width="2"/>
+                <text x="1050" y="691" font-size="11" font-weight="700" fill="#1e293b" text-anchor="middle">F. 归集交易</text>
+                <text x="1050" y="708" font-size="9" fill="#64748b" text-anchor="middle">链上转账·落入对应桶</text>
+            </g>
+
+            <!-- G -->
+            <path d="M1050,723 L1050,745 L480,745 L480,760" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#p-arrow)"/>
+            <g filter="url(#p-sh)">
+                <rect x="360" y="770" width="240" height="70" rx="10" fill="#fff" stroke="#13A8A8" stroke-width="2"/>
+                <text x="480" y="793" font-size="11" font-weight="700" fill="#1e293b" text-anchor="middle">G. 出款请求</text>
+                <text x="480" y="810" font-size="9" fill="#64748b" text-anchor="middle">常规出款：KYA 判定目标地址</text>
+                <text x="480" y="825" font-size="9" fill="#7B61FF" text-anchor="middle">商户后台提款：Severe-冻结可到任意地址</text>
+            </g>
+
+            <!-- H: KYA Diamond -->
+            <path d="M480,840 L480,870" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#p-arrow)"/>
+            <g filter="url(#p-sh)">
+                <polygon points="480,880 575,940 480,1000 385,940" fill="#fff" stroke="#13A8A8" stroke-width="2"/>
+                <text x="480" y="930" font-size="10" font-weight="700" fill="#1e293b" text-anchor="middle">H. KYA</text>
+                <text x="480" y="947" font-size="8" fill="#64748b" text-anchor="middle">目标地址风险？</text>
+            </g>
+
+            <!-- KYA branches -->
+            <path d="M385,940 L280,940 L280,980" stroke="#0ECB81" stroke-width="2" fill="none" marker-end="url(#p-arrowG)"/>
+            <rect x="315" y="927" width="55" height="14" rx="7" fill="#dcfce7"/>
+            <text x="342" y="937" font-size="8" fill="#0B9E64" text-anchor="middle" font-weight="700">L / M</text>
+
+            <path d="M480,1000 L480,1020" stroke="#F6465D" stroke-width="2" fill="none" marker-end="url(#p-arrow)"/>
+            <rect x="490" y="995" width="35" height="14" rx="7" fill="#fee2e2"/>
+            <text x="507" y="1005" font-size="8" fill="#800020" text-anchor="middle" font-weight="700">H</text>
+
+            <path d="M575,940 L680,940 L680,980" stroke="#5C0011" stroke-width="2" fill="none" marker-end="url(#p-arrowS)"/>
+            <rect x="590" y="927" width="55" height="14" rx="7" fill="#fef2f2"/>
+            <text x="617" y="937" font-size="8" fill="#5C0011" text-anchor="middle" font-weight="700">Severe</text>
+
+            <!-- Low route -->
+            <g filter="url(#p-sh)">
+                <rect x="190" y="990" width="180" height="65" rx="10" fill="#f0fdf4" stroke="#0ECB81" stroke-width="2"/>
+                <text x="280" y="1010" font-size="10" font-weight="700" fill="#0B9E64" text-anchor="middle">低风险桶优先出款</text>
+                <text x="280" y="1027" font-size="8" fill="#64748b" text-anchor="middle">不足→向高风险桶借款</text>
+                <text x="280" y="1042" font-size="8" fill="#F0B90B" text-anchor="middle">借款仅用于流动性</text>
+            </g>
+
+            <!-- High route -->
+            <g filter="url(#p-sh)">
+                <rect x="400" y="1030" width="180" height="65" rx="10" fill="#fef2f2" stroke="#F6465D" stroke-width="2"/>
+                <text x="490" y="1050" font-size="10" font-weight="700" fill="#800020" text-anchor="middle">高风险桶优先出款</text>
+                <text x="490" y="1067" font-size="8" fill="#64748b" text-anchor="middle">不足→向低风险桶借款</text>
+                <text x="490" y="1082" font-size="8" fill="#F0B90B" text-anchor="middle">借款仅用于流动性</text>
+            </g>
+
+            <!-- Severe route -->
+            <g filter="url(#p-sh)">
+                <rect x="600" y="990" width="200" height="80" rx="10" fill="#fef2f2" stroke="#800020" stroke-width="2"/>
+                <text x="700" y="1010" font-size="10" font-weight="700" fill="#800020" text-anchor="middle">严重桶出款</text>
+                <text x="700" y="1027" font-size="8" fill="#64748b" text-anchor="middle">Severe-可用 → Severe地址 ✅</text>
+                <text x="700" y="1042" font-size="8" fill="#64748b" text-anchor="middle">Severe-可用 → 非Severe ❌</text>
+                <text x="700" y="1057" font-size="8" fill="#7B61FF" text-anchor="middle">Severe-冻结 → 商户后台（任意地址）✅</text>
+            </g>
+
+            <!-- All → J/K -->
+            <path d="M280,1055 L280,1120 L950,1120 L950,1140" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#p-arrow)"/>
+            <path d="M490,1095 L490,1120" stroke="#94a3b8" stroke-width="2" fill="none"/>
+            <path d="M700,1070 L700,1120" stroke="#94a3b8" stroke-width="2" fill="none"/>
+            <circle cx="950" cy="1120" r="3" fill="#94a3b8"/>
+
+            <g filter="url(#p-sh)">
+                <rect x="890" y="1150" width="120" height="50" rx="10" fill="#fff" stroke="#13A8A8" stroke-width="2"/>
+                <text x="950" y="1173" font-size="11" font-weight="700" fill="#1e293b" text-anchor="middle">J. 出款交易</text>
+                <text x="950" y="1188" font-size="9" fill="#64748b" text-anchor="middle">广播链上</text>
+            </g>
+            <line x1="1010" y1="1175" x2="1050" y2="1175" stroke="#94a3b8" stroke-width="2" marker-end="url(#p-arrow)"/>
+            <g filter="url(#p-sh)">
+                <rect x="1060" y="1150" width="120" height="50" rx="10" fill="#f0f9ff" stroke="#13C2C2" stroke-width="2"/>
+                <text x="1120" y="1173" font-size="11" font-weight="700" fill="#0DA5A5" text-anchor="middle">K. 账本更新</text>
+                <text x="1120" y="1188" font-size="9" fill="#64748b" text-anchor="middle">余额·审计日志</text>
+            </g>
+            <line x1="1180" y1="1175" x2="1210" y2="1175" stroke="#0ECB81" stroke-width="2" marker-end="url(#p-arrowG)"/>
+            <rect x="1220" y="1160" width="80" height="30" rx="8" fill="#0ECB81"/>
+            <text x="1260" y="1180" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">✓ 成功</text>
+
+            <!-- Constraints box -->
+            <g>
+                <rect x="40" y="640" width="280" height="200" rx="10" fill="#fff" filter="url(#p-sh)" stroke="#e2e8f0"/>
+                <rect x="40" y="640" width="280" height="24" rx="10" fill="#9B8AFF"/>
+                <rect x="40" y="653" width="280" height="11" fill="#9B8AFF"/>
+                <text x="180" y="658" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">专业模式要点</text>
+                <text x="55" y="685" font-size="9" font-weight="700" fill="#1e293b">1. 三个桶：低 + 高 + 严重</text>
+                <text x="55" y="702" font-size="9" fill="#64748b">Low+Mid→低风险桶 | High→高风险桶</text>
+                <text x="55" y="722" font-size="9" font-weight="700" fill="#1e293b">2. 以 50 分为界</text>
+                <text x="55" y="739" font-size="9" fill="#64748b">0~49 低风险 / 50~79 高风险</text>
+                <text x="55" y="759" font-size="9" font-weight="700" fill="#F0B90B">3. 借款：低 ↔ 高 双向可借</text>
+                <text x="55" y="776" font-size="9" fill="#64748b">低不足→借高 / 高不足→借低</text>
+                <text x="55" y="796" font-size="9" font-weight="700" fill="#1e293b">4. 出款 KYA 映射</text>
+                <text x="55" y="813" font-size="9" fill="#64748b">L/M地址→低桶优先 / H地址→高桶优先</text>
+                <text x="55" y="828" font-size="9" fill="#800020">Severe→仅Severe-可用出Severe地址</text>
+            </g>
+        </svg>
+    </div>
+</div>
+
+<!-- ======================== EXPERT MODE ======================== -->
+<div class="tab-content" id="tab-expert">
+    <div class="mode-desc">
+        <span class="tag" style="background:#d1fae5;color:#065f46;">专家模式</span>
+        <span class="info"><b>4 个桶</b>：低（0~20）+ 中（20~50）+ 高（50~80）+ 严重（≥80 或命中目录）</span>
+        <span class="info"><b>借款</b>：H→M→L 逐级借款</span>
+        <span class="info"><b>适合</b>：大型商户 / 有风控团队</span>
+    </div>
+    <div class="svg-wrap">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1550 1350" width="1550" height="1350">
+            <defs>
+                <marker id="e-arrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#94a3b8"/></marker>
+                <marker id="e-arrowG" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#0ECB81"/></marker>
+                <marker id="e-arrowS" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#5C0011"/></marker>
+                <filter id="e-sh" x="-8%" y="-8%" width="120%" height="120%"><feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#1e293b" flood-opacity="0.08"/></filter>
+                <linearGradient id="e-gL" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#0ECB81"/><stop offset="100%" stop-color="#5AD8A6"/></linearGradient>
+                <linearGradient id="e-gM" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#F0B90B"/><stop offset="100%" stop-color="#F8D12F"/></linearGradient>
+                <linearGradient id="e-gH" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#F6465D"/><stop offset="100%" stop-color="#FF7A8A"/></linearGradient>
+                <linearGradient id="e-gS" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#5C0011"/><stop offset="100%" stop-color="#800020"/></linearGradient>
+                <linearGradient id="e-tL" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#87E8BA"/><stop offset="100%" stop-color="#0ECB81"/></linearGradient>
+                <linearGradient id="e-tM" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#dcc88a"/><stop offset="100%" stop-color="#F0B90B"/></linearGradient>
+                <linearGradient id="e-tH" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#FFB3BD"/><stop offset="100%" stop-color="#F6465D"/></linearGradient>
+                <linearGradient id="e-tS" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#800020"/><stop offset="100%" stop-color="#5C0011"/></linearGradient>
+            </defs>
+            <rect width="1550" height="1350" fill="#fafbfc"/>
+
+            <!-- Phase labels -->
+            <g>
+                <path d="M30,20 L170,20 L185,38 L170,56 L30,56 Q20,38 30,56 Z" fill="#1890FF"/>
+                <text x="100" y="43" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">1 入款</text>
+                <path d="M185,20 L340,20 L355,38 L340,56 L185,56 L200,38 Z" fill="#9B8AFF"/>
+                <text x="265" y="43" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">2 KYT风控</text>
+                <path d="M355,20 L530,20 L545,38 L530,56 L355,56 L370,38 Z" fill="#7B61FF"/>
+                <text x="445" y="43" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">3 商户业务池</text>
+                <path d="M545,20 L820,20 L835,38 L820,56 L545,56 L560,38 Z" fill="#64748b"/>
+                <text x="685" y="43" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">4 分桶归集</text>
+                <path d="M835,20 L1200,20 L1215,38 L1200,56 L835,56 L850,38 Z" fill="#13A8A8"/>
+                <text x="1020" y="43" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">5 出款</text>
+                <path d="M1215,20 L1430,20 Q1445,38 1430,56 L1215,56 L1230,38 Z" fill="#13C2C2"/>
+                <text x="1325" y="43" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">6 结算</text>
+            </g>
+
+            <!-- Row 1: A → B → C → D -->
+            <g filter="url(#e-sh)">
+                <rect x="40" y="80" width="130" height="60" rx="10" fill="#fff" stroke="#1890FF" stroke-width="2"/>
+                <text x="105" y="105" font-size="11" font-weight="700" fill="#1e293b" text-anchor="middle">A. 入款检测</text>
+                <text x="105" y="120" font-size="9" fill="#64748b" text-anchor="middle">监控区块链·检测入账</text>
+            </g>
+            <line x1="170" y1="110" x2="200" y2="110" stroke="#94a3b8" stroke-width="2" marker-end="url(#e-arrow)"/>
+            <g filter="url(#e-sh)">
+                <rect x="210" y="80" width="130" height="60" rx="10" fill="#fff" stroke="#1890FF" stroke-width="2"/>
+                <text x="275" y="105" font-size="11" font-weight="700" fill="#1e293b" text-anchor="middle">B. 交易确认</text>
+                <text x="275" y="120" font-size="9" fill="#64748b" text-anchor="middle">等待 N 个确认</text>
+            </g>
+            <line x1="340" y1="110" x2="370" y2="110" stroke="#94a3b8" stroke-width="2" marker-end="url(#e-arrow)"/>
+            <g filter="url(#e-sh)">
+                <rect x="380" y="75" width="180" height="75" rx="10" fill="#f5f3ff" stroke="#9B8AFF" stroke-width="2"/>
+                <text x="470" y="97" font-size="11" font-weight="700" fill="#6B4FE0" text-anchor="middle">C. 一次性 KYT</text>
+                <text x="470" y="113" font-size="9" fill="#64748b" text-anchor="middle">调用 KYT 接口·分数持久化</text>
+                <text x="470" y="128" font-size="8" fill="#9B8AFF" text-anchor="middle">目录检查 → 分数判定</text>
+                <text x="470" y="141" font-size="8" fill="#64748b" text-anchor="middle">输出：Low/Mid/High/Severe</text>
+            </g>
+            <line x1="560" y1="112" x2="590" y2="112" stroke="#94a3b8" stroke-width="2" marker-end="url(#e-arrow)"/>
+            <g filter="url(#e-sh)">
+                <rect x="600" y="80" width="180" height="65" rx="10" fill="#eef2ff" stroke="#7B61FF" stroke-width="2"/>
+                <text x="690" y="103" font-size="11" font-weight="700" fill="#5040B0" text-anchor="middle">D. 商户业务池入账</text>
+                <text x="690" y="120" font-size="9" fill="#64748b" text-anchor="middle">待归集余额·绑定风险标签</text>
+                <text x="690" y="135" font-size="8" fill="#7B61FF" text-anchor="middle">此阶段不分桶</text>
+            </g>
+
+            <!-- Biz Pool -->
+            <g transform="translate(645, 170)">
+                <ellipse cx="45" cy="45" rx="50" ry="11" fill="#5040B0" opacity="0.2"/>
+                <rect x="-5" y="8" width="100" height="37" fill="#7B61FF"/>
+                <ellipse cx="45" cy="45" rx="50" ry="11" fill="#7B61FF"/>
+                <ellipse cx="45" cy="8" rx="50" ry="11" fill="#B0A5FF"/>
+                <text x="45" y="32" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">商户业务池</text>
+            </g>
+            <path d="M690,145 L690,170" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#e-arrow)"/>
+
+            <!-- E & E0 -->
+            <path d="M690,228 L690,260" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#e-arrow)"/>
+            <g filter="url(#e-sh)">
+                <rect x="600" y="270" width="180" height="55" rx="10" fill="#fff" stroke="#64748b" stroke-width="2"/>
+                <text x="690" y="293" font-size="11" font-weight="700" fill="#1e293b" text-anchor="middle">E. 归集触发</text>
+                <text x="690" y="310" font-size="9" fill="#64748b" text-anchor="middle">阈值 / 闲置 / 手动触发</text>
+            </g>
+            <path d="M690,325 L690,360" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#e-arrow)"/>
+            <g filter="url(#e-sh)">
+                <rect x="545" y="370" width="290" height="65" rx="10" fill="#fefce8" stroke="#ca8a04" stroke-width="2"/>
+                <text x="690" y="393" font-size="11" font-weight="700" fill="#a16207" text-anchor="middle">E0. 分桶归集（专家模式）</text>
+                <text x="690" y="410" font-size="9" fill="#64748b" text-anchor="middle">Low→低 | Mid→中 | High→高 | Severe→严重</text>
+                <text x="690" y="425" font-size="9" fill="#ca8a04" text-anchor="middle">完整四桶映射</text>
+            </g>
+
+            <!-- Arrows to four buckets -->
+            <path d="M690,435 L690,465 L340,465 L340,500" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#e-arrow)"/>
+            <path d="M690,435 L690,465 L560,465 L560,500" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#e-arrow)"/>
+            <path d="M690,435 L690,465 L780,465 L780,500" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#e-arrow)"/>
+            <path d="M690,435 L690,465 L1000,465 L1000,500" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#e-arrow)"/>
+            <circle cx="690" cy="465" r="3" fill="#94a3b8"/>
+
+            <!-- Low Bucket -->
+            <text x="340" y="495" font-size="9" font-weight="700" fill="#0B9E64" text-anchor="middle">低风险桶</text>
+            <g transform="translate(290, 510)">
+                <ellipse cx="50" cy="50" rx="45" ry="11" fill="#0B9E64" opacity="0.2"/>
+                <rect x="5" y="10" width="90" height="40" fill="url(#e-gL)"/>
+                <ellipse cx="50" cy="50" rx="45" ry="11" fill="url(#e-gL)"/>
+                <ellipse cx="50" cy="10" rx="45" ry="11" fill="url(#e-tL)"/>
+                <text x="50" y="35" font-size="12" font-weight="700" fill="#fff" text-anchor="middle">低</text>
+            </g>
+            <text x="340" y="580" font-size="9" fill="#0ECB81" text-anchor="middle">0 ~ 20</text>
+
+            <!-- Mid Bucket -->
+            <text x="560" y="495" font-size="9" font-weight="700" fill="#9E7A0B" text-anchor="middle">中风险桶</text>
+            <g transform="translate(510, 510)">
+                <ellipse cx="50" cy="50" rx="45" ry="11" fill="#9E7A0B" opacity="0.2"/>
+                <rect x="5" y="10" width="90" height="40" fill="url(#e-gM)"/>
+                <ellipse cx="50" cy="50" rx="45" ry="11" fill="url(#e-gM)"/>
+                <ellipse cx="50" cy="10" rx="45" ry="11" fill="url(#e-tM)"/>
+                <text x="50" y="35" font-size="12" font-weight="700" fill="#fff" text-anchor="middle">中</text>
+            </g>
+            <text x="560" y="580" font-size="9" fill="#d97706" text-anchor="middle">20 ~ 50</text>
+
+            <!-- High Bucket -->
+            <text x="780" y="495" font-size="9" font-weight="700" fill="#800020" text-anchor="middle">高风险桶</text>
+            <g transform="translate(730, 510)">
+                <ellipse cx="50" cy="50" rx="45" ry="11" fill="#800020" opacity="0.2"/>
+                <rect x="5" y="10" width="90" height="40" fill="url(#e-gH)"/>
+                <ellipse cx="50" cy="50" rx="45" ry="11" fill="url(#e-gH)"/>
+                <ellipse cx="50" cy="10" rx="45" ry="11" fill="url(#e-tH)"/>
+                <text x="50" y="35" font-size="12" font-weight="700" fill="#fff" text-anchor="middle">高</text>
+            </g>
+            <text x="780" y="580" font-size="9" fill="#F6465D" text-anchor="middle">50 ~ 80</text>
+
+            <!-- Severe Bucket -->
+            <text x="1000" y="495" font-size="9" font-weight="700" fill="#5C0011" text-anchor="middle">严重桶</text>
+            <g transform="translate(950, 510)">
+                <ellipse cx="50" cy="50" rx="45" ry="11" fill="#3D0010" opacity="0.2"/>
+                <rect x="5" y="10" width="90" height="40" fill="url(#e-gS)"/>
+                <ellipse cx="50" cy="50" rx="45" ry="11" fill="url(#e-gS)"/>
+                <ellipse cx="50" cy="10" rx="45" ry="11" fill="url(#e-tS)"/>
+                <text x="50" y="35" font-size="12" font-weight="700" fill="#fff" text-anchor="middle">严重</text>
+            </g>
+            <text x="1000" y="580" font-size="9" fill="#5C0011" text-anchor="middle">≥80 或命中目录</text>
+            <rect x="940" y="585" width="120" height="18" rx="5" fill="#fef2f2" stroke="#F6465D" stroke-dasharray="3,2"/>
+            <text x="1000" y="598" font-size="8" fill="#800020" text-anchor="middle" font-weight="600">不参与借款</text>
+
+            <!-- Borrowing arrows L-M-H -->
+            <text x="560" y="605" font-size="9" font-weight="700" fill="#F0B90B" text-anchor="middle">借款优先级</text>
+            <g>
+                <line x1="385" y1="560" x2="515" y2="560" stroke="#F0B90B" stroke-width="1.5" stroke-dasharray="5,3"/>
+                <line x1="605" y1="560" x2="735" y2="560" stroke="#F0B90B" stroke-width="1.5" stroke-dasharray="5,3"/>
+                <text x="450" y="555" font-size="7" fill="#F0B90B" text-anchor="middle">↔</text>
+                <text x="670" y="555" font-size="7" fill="#F0B90B" text-anchor="middle">↔</text>
+            </g>
+            <text x="450" y="618" font-size="7" fill="#64748b" text-anchor="middle">H不足→M→L</text>
+            <text x="560" y="632" font-size="7" fill="#64748b" text-anchor="middle">L不足→M→H</text>
+            <text x="670" y="618" font-size="7" fill="#64748b" text-anchor="middle">M不足→H→L</text>
+
+            <!-- F -->
+            <path d="M690,600 L690,650 L1100,650 L1100,680" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#e-arrow)"/>
+            <g filter="url(#e-sh)">
+                <rect x="1030" y="688" width="140" height="55" rx="10" fill="#fff" stroke="#64748b" stroke-width="2"/>
+                <text x="1100" y="711" font-size="11" font-weight="700" fill="#1e293b" text-anchor="middle">F. 归集交易</text>
+                <text x="1100" y="728" font-size="9" fill="#64748b" text-anchor="middle">链上转账·落入对应桶</text>
+            </g>
+
+            <!-- G -->
+            <path d="M1100,743 L1100,765 L500,765 L500,780" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#e-arrow)"/>
+            <g filter="url(#e-sh)">
+                <rect x="380" y="790" width="240" height="70" rx="10" fill="#fff" stroke="#13A8A8" stroke-width="2"/>
+                <text x="500" y="813" font-size="11" font-weight="700" fill="#1e293b" text-anchor="middle">G. 出款请求</text>
+                <text x="500" y="830" font-size="9" fill="#64748b" text-anchor="middle">常规出款：KYA 判定目标地址</text>
+                <text x="500" y="845" font-size="9" fill="#7B61FF" text-anchor="middle">商户后台提款：Severe-冻结可到任意地址</text>
+            </g>
+
+            <!-- H: KYA Diamond -->
+            <path d="M500,860 L500,890" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#e-arrow)"/>
+            <g filter="url(#e-sh)">
+                <polygon points="500,900 600,965 500,1030 400,965" fill="#fff" stroke="#13A8A8" stroke-width="2"/>
+                <text x="500" y="953" font-size="10" font-weight="700" fill="#1e293b" text-anchor="middle">H. KYA</text>
+                <text x="500" y="970" font-size="8" fill="#64748b" text-anchor="middle">L / M / H / Severe</text>
+            </g>
+
+            <!-- KYA branches -->
+            <path d="M400,965 L260,965 L260,1010" stroke="#0ECB81" stroke-width="2" fill="none" marker-end="url(#e-arrowG)"/>
+            <rect x="305" y="950" width="35" height="14" rx="7" fill="#dcfce7"/>
+            <text x="322" y="960" font-size="8" fill="#0B9E64" text-anchor="middle" font-weight="700">Low</text>
+
+            <path d="M500,1030 L430,1070" stroke="#F0B90B" stroke-width="2" fill="none" marker-end="url(#e-arrow)"/>
+            <rect x="440" y="1025" width="30" height="14" rx="7" fill="#fef3c7"/>
+            <text x="455" y="1035" font-size="8" fill="#9E7A0B" text-anchor="middle" font-weight="700">Mid</text>
+
+            <path d="M500,1030 L570,1070" stroke="#F6465D" stroke-width="2" fill="none" marker-end="url(#e-arrow)"/>
+            <rect x="530" y="1025" width="35" height="14" rx="7" fill="#fee2e2"/>
+            <text x="547" y="1035" font-size="8" fill="#800020" text-anchor="middle" font-weight="700">High</text>
+
+            <path d="M600,965 L740,965 L740,1010" stroke="#5C0011" stroke-width="2" fill="none" marker-end="url(#e-arrowS)"/>
+            <rect x="640" y="950" width="55" height="14" rx="7" fill="#fef2f2"/>
+            <text x="667" y="960" font-size="8" fill="#5C0011" text-anchor="middle" font-weight="700">Severe</text>
+
+            <!-- Low route -->
+            <g filter="url(#e-sh)">
+                <rect x="175" y="1020" width="170" height="55" rx="10" fill="#f0fdf4" stroke="#0ECB81" stroke-width="2"/>
+                <text x="260" y="1040" font-size="10" font-weight="700" fill="#0B9E64" text-anchor="middle">低桶优先出款</text>
+                <text x="260" y="1057" font-size="8" fill="#64748b" text-anchor="middle">不足→借Mid→借High</text>
+            </g>
+
+            <!-- Mid route -->
+            <g filter="url(#e-sh)">
+                <rect x="355" y="1080" width="170" height="55" rx="10" fill="#fffbeb" stroke="#F0B90B" stroke-width="2"/>
+                <text x="440" y="1100" font-size="10" font-weight="700" fill="#9E7A0B" text-anchor="middle">中桶优先出款</text>
+                <text x="440" y="1117" font-size="8" fill="#64748b" text-anchor="middle">不足→借High→借Low</text>
+            </g>
+
+            <!-- High route -->
+            <g filter="url(#e-sh)">
+                <rect x="535" y="1080" width="170" height="55" rx="10" fill="#fef2f2" stroke="#F6465D" stroke-width="2"/>
+                <text x="620" y="1100" font-size="10" font-weight="700" fill="#800020" text-anchor="middle">高桶优先出款</text>
+                <text x="620" y="1117" font-size="8" fill="#64748b" text-anchor="middle">不足→借Mid→借Low</text>
+            </g>
+
+            <!-- Severe route -->
+            <g filter="url(#e-sh)">
+                <rect x="650" y="1020" width="210" height="80" rx="10" fill="#fef2f2" stroke="#800020" stroke-width="2"/>
+                <text x="755" y="1040" font-size="10" font-weight="700" fill="#800020" text-anchor="middle">严重桶出款</text>
+                <text x="755" y="1057" font-size="8" fill="#64748b" text-anchor="middle">Severe-可用 → Severe地址 ✅</text>
+                <text x="755" y="1072" font-size="8" fill="#64748b" text-anchor="middle">Severe-可用 → 非Severe ❌</text>
+                <text x="755" y="1087" font-size="8" fill="#7B61FF" text-anchor="middle">Severe-冻结 → 商户后台（任意地址）✅</text>
+            </g>
+
+            <!-- All → J/K -->
+            <path d="M260,1075 L260,1170 L1000,1170 L1000,1200" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#e-arrow)"/>
+            <path d="M440,1135 L440,1170" stroke="#94a3b8" stroke-width="2" fill="none"/>
+            <path d="M620,1135 L620,1170" stroke="#94a3b8" stroke-width="2" fill="none"/>
+            <path d="M755,1100 L755,1170" stroke="#94a3b8" stroke-width="2" fill="none"/>
+            <circle cx="1000" cy="1170" r="3" fill="#94a3b8"/>
+
+            <g filter="url(#e-sh)">
+                <rect x="940" y="1210" width="120" height="50" rx="10" fill="#fff" stroke="#13A8A8" stroke-width="2"/>
+                <text x="1000" y="1233" font-size="11" font-weight="700" fill="#1e293b" text-anchor="middle">J. 出款交易</text>
+                <text x="1000" y="1248" font-size="9" fill="#64748b" text-anchor="middle">广播链上</text>
+            </g>
+            <line x1="1060" y1="1235" x2="1100" y2="1235" stroke="#94a3b8" stroke-width="2" marker-end="url(#e-arrow)"/>
+            <g filter="url(#e-sh)">
+                <rect x="1110" y="1210" width="120" height="50" rx="10" fill="#f0f9ff" stroke="#13C2C2" stroke-width="2"/>
+                <text x="1170" y="1233" font-size="11" font-weight="700" fill="#0DA5A5" text-anchor="middle">K. 账本更新</text>
+                <text x="1170" y="1248" font-size="9" fill="#64748b" text-anchor="middle">余额·审计日志</text>
+            </g>
+            <line x1="1230" y1="1235" x2="1260" y2="1235" stroke="#0ECB81" stroke-width="2" marker-end="url(#e-arrowG)"/>
+            <rect x="1270" y="1220" width="80" height="30" rx="8" fill="#0ECB81"/>
+            <text x="1310" y="1240" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">✓ 成功</text>
+
+            <!-- Constraints box -->
+            <g>
+                <rect x="40" y="660" width="290" height="230" rx="10" fill="#fff" filter="url(#e-sh)" stroke="#e2e8f0"/>
+                <rect x="40" y="660" width="290" height="24" rx="10" fill="#13A8A8"/>
+                <rect x="40" y="673" width="290" height="11" fill="#13A8A8"/>
+                <text x="185" y="678" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">专家模式要点</text>
+                <text x="55" y="705" font-size="9" font-weight="700" fill="#1e293b">1. 四个桶：低 + 中 + 高 + 严重</text>
+                <text x="55" y="722" font-size="9" fill="#64748b">完整四级风险分类</text>
+                <text x="55" y="742" font-size="9" font-weight="700" fill="#1e293b">2. 三段分数阈值</text>
+                <text x="55" y="759" font-size="9" fill="#64748b">20 / 50 / 80 固定分界</text>
+                <text x="55" y="779" font-size="9" font-weight="700" fill="#F0B90B">3. 逐级借款策略</text>
+                <text x="55" y="796" font-size="9" fill="#64748b">H不足→M→L / L不足→M→H</text>
+                <text x="55" y="813" font-size="9" fill="#64748b">M不足→H→L / Severe不参与</text>
+                <text x="55" y="833" font-size="9" font-weight="700" fill="#1e293b">4. 出款 KYA 精确映射</text>
+                <text x="55" y="850" font-size="9" fill="#64748b">L→低桶 / M→中桶 / H→高桶</text>
+                <text x="55" y="867" font-size="9" fill="#800020">Severe→仅Severe-可用出Severe地址</text>
+            </g>
+        </svg>
+    </div>
+</div>
+
+<script>
+function switchTab(mode) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(el => {
+        el.className = 'tab-btn';
+    });
+    document.getElementById('tab-' + mode).classList.add('active');
+    const btn = document.getElementById('btn-' + mode);
+    btn.classList.add('active-' + mode);
+}
+</script>
+</body>
+</html>

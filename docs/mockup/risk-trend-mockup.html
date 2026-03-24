@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>风险退款趋势 - 方案B Mockup</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0e0e10; color: #e4e4e7; font-family: -apple-system, 'SF Pro Text', 'Helvetica Neue', sans-serif; }
+
+  .page-header {
+    padding: 32px 40px 16px;
+    border-bottom: 1px solid #1e1e24;
+  }
+  .page-header h1 { font-size: 22px; font-weight: 600; color: #fff; }
+  .page-header p { font-size: 13px; color: #71717a; margin-top: 4px; }
+
+  .section-title {
+    font-size: 15px; font-weight: 600; color: #a1a1aa;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    padding: 24px 40px 12px;
+  }
+
+  /* ── Chat Mockup ── */
+  .chat-mockup {
+    max-width: 520px;
+    margin: 20px 40px;
+    background: #1a1a2e;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,.4);
+  }
+  .chat-bar {
+    background: #16213e;
+    padding: 12px 16px;
+    display: flex; align-items: center; gap: 10px;
+    font-size: 14px; font-weight: 600; color: #e2e8f0;
+  }
+  .chat-bar .avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; color: #fff;
+  }
+  .chat-bubble {
+    margin: 16px;
+    background: #0f3460;
+    border-radius: 0 12px 12px 12px;
+    padding: 14px 16px;
+    font-size: 13px; line-height: 1.7;
+    color: #cbd5e1;
+  }
+  .chat-bubble .report-title {
+    font-weight: 700; font-size: 14px; color: #fff;
+    margin-bottom: 8px;
+  }
+  .chat-bubble .stat-line { display: flex; gap: 6px; align-items: center; }
+  .chat-bubble .stat-line .icon { font-size: 14px; }
+  .chat-bubble .divider {
+    border: none; border-top: 1px solid rgba(255,255,255,.08);
+    margin: 10px 0;
+  }
+  .chat-chart-img {
+    margin: 10px 0 4px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #0a1929;
+    border: 1px solid rgba(255,255,255,.06);
+  }
+  .chat-chart-img canvas, .chat-chart-img div { border-radius: 8px; }
+  .chat-link {
+    display: inline-block; margin-top: 8px;
+    color: #60a5fa; font-size: 12px; text-decoration: none;
+  }
+  .chat-time {
+    text-align: right; font-size: 11px; color: #475569;
+    padding: 4px 16px 12px;
+  }
+
+  /* ── Web Report ── */
+  .web-report {
+    margin: 20px 40px;
+    background: #18181b;
+    border-radius: 16px;
+    border: 1px solid #27272a;
+    overflow: hidden;
+  }
+  .report-toolbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 24px;
+    border-bottom: 1px solid #27272a;
+    flex-wrap: wrap; gap: 12px;
+  }
+  .report-toolbar .tabs {
+    display: flex; gap: 4px;
+    background: #27272a; border-radius: 8px; padding: 3px;
+  }
+  .report-toolbar .tab {
+    padding: 6px 16px; border-radius: 6px; font-size: 13px;
+    cursor: pointer; color: #a1a1aa; transition: all .2s;
+  }
+  .report-toolbar .tab.active {
+    background: #3f3f46; color: #fff; font-weight: 600;
+  }
+  .report-toolbar .merchant-select {
+    background: #27272a; border: 1px solid #3f3f46;
+    color: #e4e4e7; padding: 6px 12px; border-radius: 8px;
+    font-size: 13px;
+  }
+
+  .kpi-row {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 16px; padding: 20px 24px;
+  }
+  .kpi-card {
+    background: #1f1f23; border-radius: 12px; padding: 16px;
+    border: 1px solid #27272a;
+  }
+  .kpi-card .label { font-size: 12px; color: #71717a; margin-bottom: 6px; }
+  .kpi-card .value { font-size: 24px; font-weight: 700; color: #fff; }
+  .kpi-card .sub { font-size: 12px; color: #71717a; margin-top: 4px; }
+  .kpi-card .change { font-size: 12px; margin-top: 4px; }
+  .kpi-card .change.down { color: #22c55e; }
+  .kpi-card .change.up { color: #ef4444; }
+
+  .chart-container {
+    padding: 20px 24px;
+  }
+  .chart-box {
+    background: #1f1f23; border-radius: 12px; padding: 20px;
+    border: 1px solid #27272a; margin-bottom: 16px;
+  }
+  .chart-box h3 {
+    font-size: 14px; font-weight: 600; color: #e4e4e7; margin-bottom: 16px;
+  }
+
+  .table-section { padding: 0 24px 24px; }
+  .data-table {
+    width: 100%; border-collapse: collapse;
+    font-size: 13px;
+  }
+  .data-table th {
+    text-align: left; padding: 10px 12px;
+    background: #1f1f23; color: #a1a1aa; font-weight: 500;
+    border-bottom: 1px solid #27272a;
+  }
+  .data-table td {
+    padding: 10px 12px; border-bottom: 1px solid #27272a; color: #d4d4d8;
+  }
+  .data-table tr:hover td { background: rgba(255,255,255,.02); }
+  .badge {
+    display: inline-block; padding: 2px 8px; border-radius: 4px;
+    font-size: 11px; font-weight: 600;
+  }
+  .badge.green { background: rgba(34,197,94,.15); color: #4ade80; }
+  .badge.red { background: rgba(239,68,68,.15); color: #f87171; }
+  .badge.yellow { background: rgba(234,179,8,.15); color: #facc15; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>方案 B — 图片推送 + Web 报告</h1>
+  <p>Mockup: 聊天端推送趋势截图 & Web 端详细交互报告</p>
+</div>
+
+<!-- ═══════════ Part 1: Chat Push Mockup ═══════════ -->
+<div class="section-title">Part 1 · 聊天推送效果</div>
+
+<div class="chat-mockup">
+  <div class="chat-bar">
+    <div class="avatar">R</div>
+    <span>风控日报 Bot</span>
+  </div>
+  <div class="chat-bubble">
+    <div class="report-title">🏢 再次出发 03-16 日报</div>
+    <div class="stat-line"><span class="icon">💰</span> 业务1个/2.50 KHR/40.00KHRX</div>
+    <div class="stat-line"><span class="icon">🔄</span> 归集2个/4.20 KHR/82.00KHRX</div>
+    <hr class="divider">
+    <div class="stat-line"><span class="icon">🏦</span> KHR交易统计</div>
+    <div class="stat-line"><span class="icon">⬆️</span> 入款: 8.20 KHR/3笔</div>
+    <div class="stat-line"><span class="icon">⬇️</span> 出款: 6.50 KHR/2笔</div>
+    <div class="stat-line"><span class="icon">✅</span> 净入: 1.70 KHR</div>
+    <div class="stat-line"><span class="icon">🔒</span> 风险已退/未退: 2.00 KHR/7.72 KHR</div>
+    <hr class="divider">
+    <div style="font-weight:600;font-size:13px;color:#fff;margin-bottom:6px;">📊 风险退款趋势 (30天 KHR)</div>
+    <div class="chat-chart-img">
+      <div id="chatChart" style="width:100%;height:180px;"></div>
+    </div>
+    <a href="#web-report" class="chat-link">🔗 查看完整报告 →</a>
+  </div>
+  <div class="chat-time">16:02</div>
+</div>
+
+<!-- ═══════════ Part 2: Web Report ═══════════ -->
+<div class="section-title" id="web-report">Part 2 · Web 详细报告页</div>
+
+<div class="web-report">
+  <div class="report-toolbar">
+    <div class="tabs">
+      <div class="tab active">单商户</div>
+      <div class="tab">全平台汇总</div>
+    </div>
+    <select class="merchant-select">
+      <option>再次出发 (ID: 1261)</option>
+      <option>商户B (ID: 1088)</option>
+      <option>商户C (ID: 1342)</option>
+    </select>
+  </div>
+
+  <div class="kpi-row">
+    <div class="kpi-card">
+      <div class="label">今日已退款</div>
+      <div class="value">2.00</div>
+      <div class="sub">KHR / 1笔</div>
+      <div class="change down">↓ vs 昨日 3.50</div>
+    </div>
+    <div class="kpi-card">
+      <div class="label">今日未退款</div>
+      <div class="value">7.72</div>
+      <div class="sub">KHR / 3笔</div>
+      <div class="change up">↑ vs 昨日 5.10</div>
+    </div>
+    <div class="kpi-card">
+      <div class="label">30天累计已退</div>
+      <div class="value">58.40</div>
+      <div class="sub">KHR / 29笔</div>
+    </div>
+    <div class="kpi-card">
+      <div class="label">30天退款率</div>
+      <div class="value">43%</div>
+      <div class="sub">已退 / (已退+未退)</div>
+    </div>
+  </div>
+
+  <div class="chart-container">
+    <div class="chart-box">
+      <h3>每日风险退款趋势 (KHR · 最近30天)</h3>
+      <div id="mainChart" style="width:100%;height:320px;"></div>
+    </div>
+    <div class="chart-box">
+      <h3>每日风险退款笔数</h3>
+      <div id="countChart" style="width:100%;height:240px;"></div>
+    </div>
+  </div>
+
+  <div class="table-section">
+    <div class="chart-box">
+      <h3>每日明细</h3>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>日期</th>
+            <th>已退金额</th>
+            <th>已退笔数</th>
+            <th>未退金额</th>
+            <th>未退笔数</th>
+            <th>退款率</th>
+            <th>趋势</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div style="height:60px"></div>
+
+<script>
+const days = 30;
+const dates = [];
+const refunded = [];
+const unrefunded = [];
+const refundedCount = [];
+const unrefundedCount = [];
+
+for (let i = days - 1; i >= 0; i--) {
+  const d = new Date(2026, 2, 16);
+  d.setDate(d.getDate() - i);
+  dates.push(`${d.getMonth()+1}-${String(d.getDate()).padStart(2,'0')}`);
+
+  const base = 4.5 - (i > 15 ? 0 : (15 - i) * 0.12);
+  const r = Math.max(0.5, base + (Math.random() - 0.5) * 1.8);
+  refunded.push(+r.toFixed(2));
+
+  const uBase = 8 - (i > 10 ? 0 : (10 - i) * 0.15);
+  const u = Math.max(1, uBase + (Math.random() - 0.5) * 2.5);
+  unrefunded.push(+u.toFixed(2));
+
+  refundedCount.push(Math.max(1, Math.round(r / 1.5 + Math.random())));
+  unrefundedCount.push(Math.max(1, Math.round(u / 2 + Math.random())));
+}
+
+refunded[days-1] = 2.00;
+unrefunded[days-1] = 7.72;
+refundedCount[days-1] = 1;
+unrefundedCount[days-1] = 3;
+
+const darkTheme = {
+  textStyle: { color: '#a1a1aa' },
+  legend: { textStyle: { color: '#a1a1aa' } },
+  tooltip: { backgroundColor: '#27272a', borderColor: '#3f3f46', textStyle: { color: '#e4e4e7' } },
+};
+
+// Chat mini chart
+const chatChartDom = document.getElementById('chatChart');
+const chatChart = echarts.init(chatChartDom, null, { renderer: 'canvas' });
+chatChart.setOption({
+  ...darkTheme,
+  grid: { left: 36, right: 12, top: 16, bottom: 24 },
+  xAxis: {
+    type: 'category', data: dates,
+    axisLabel: { fontSize: 9, color: '#64748b', interval: 6 },
+    axisLine: { lineStyle: { color: '#1e293b' } },
+    axisTick: { show: false },
+  },
+  yAxis: {
+    type: 'value',
+    axisLabel: { fontSize: 9, color: '#64748b' },
+    splitLine: { lineStyle: { color: '#1e293b' } },
+  },
+  series: [
+    {
+      name: '已退', type: 'line', data: refunded,
+      smooth: true, symbol: 'none', lineStyle: { width: 2, color: '#22c55e' },
+      areaStyle: { color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
+        colorStops: [{ offset: 0, color: 'rgba(34,197,94,.25)' }, { offset: 1, color: 'rgba(34,197,94,.02)' }]
+      }},
+    },
+    {
+      name: '未退', type: 'line', data: unrefunded,
+      smooth: true, symbol: 'none', lineStyle: { width: 2, color: '#ef4444' },
+      areaStyle: { color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
+        colorStops: [{ offset: 0, color: 'rgba(239,68,68,.18)' }, { offset: 1, color: 'rgba(239,68,68,.02)' }]
+      }},
+    },
+  ],
+});
+
+// Main trend chart
+const mainChartDom = document.getElementById('mainChart');
+const mainChart = echarts.init(mainChartDom);
+mainChart.setOption({
+  ...darkTheme,
+  tooltip: { ...darkTheme.tooltip, trigger: 'axis' },
+  legend: { ...darkTheme.legend, data: ['已退金额', '未退金额'], top: 0 },
+  grid: { left: 48, right: 24, top: 40, bottom: 32 },
+  xAxis: {
+    type: 'category', data: dates, boundaryGap: false,
+    axisLabel: { color: '#71717a', fontSize: 11 },
+    axisLine: { lineStyle: { color: '#27272a' } },
+  },
+  yAxis: {
+    type: 'value', name: 'KHR',
+    nameTextStyle: { color: '#71717a' },
+    axisLabel: { color: '#71717a', fontSize: 11 },
+    splitLine: { lineStyle: { color: '#27272a' } },
+  },
+  series: [
+    {
+      name: '已退金额', type: 'line', data: refunded,
+      smooth: true, symbol: 'circle', symbolSize: 4,
+      lineStyle: { width: 2.5, color: '#22c55e' },
+      itemStyle: { color: '#22c55e' },
+      areaStyle: { color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
+        colorStops: [{ offset: 0, color: 'rgba(34,197,94,.2)' }, { offset: 1, color: 'rgba(34,197,94,.01)' }]
+      }},
+    },
+    {
+      name: '未退金额', type: 'line', data: unrefunded,
+      smooth: true, symbol: 'circle', symbolSize: 4,
+      lineStyle: { width: 2.5, color: '#ef4444' },
+      itemStyle: { color: '#ef4444' },
+      areaStyle: { color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
+        colorStops: [{ offset: 0, color: 'rgba(239,68,68,.12)' }, { offset: 1, color: 'rgba(239,68,68,.01)' }]
+      }},
+    },
+  ],
+});
+
+// Count chart
+const countChartDom = document.getElementById('countChart');
+const countChart = echarts.init(countChartDom);
+countChart.setOption({
+  ...darkTheme,
+  tooltip: { ...darkTheme.tooltip, trigger: 'axis' },
+  legend: { ...darkTheme.legend, data: ['已退笔数', '未退笔数'], top: 0 },
+  grid: { left: 48, right: 24, top: 40, bottom: 32 },
+  xAxis: {
+    type: 'category', data: dates,
+    axisLabel: { color: '#71717a', fontSize: 11 },
+    axisLine: { lineStyle: { color: '#27272a' } },
+  },
+  yAxis: {
+    type: 'value', name: '笔',
+    nameTextStyle: { color: '#71717a' },
+    axisLabel: { color: '#71717a', fontSize: 11 },
+    splitLine: { lineStyle: { color: '#27272a' } },
+    minInterval: 1,
+  },
+  series: [
+    {
+      name: '已退笔数', type: 'bar', data: refundedCount,
+      itemStyle: { color: '#22c55e', borderRadius: [3,3,0,0] }, barGap: '10%',
+    },
+    {
+      name: '未退笔数', type: 'bar', data: unrefundedCount,
+      itemStyle: { color: '#ef4444', borderRadius: [3,3,0,0] },
+    },
+  ],
+});
+
+// Table
+const tbody = document.getElementById('tableBody');
+for (let i = days - 1; i >= 0; i--) {
+  const rate = ((refunded[i] / (refunded[i] + unrefunded[i])) * 100).toFixed(0);
+  const prevRate = i < days - 1 ? ((refunded[i+1] / (refunded[i+1] + unrefunded[i+1])) * 100).toFixed(0) : rate;
+  const diff = rate - prevRate;
+  const trend = diff > 0 ? 'green' : diff < 0 ? 'red' : 'yellow';
+  const trendText = diff > 0 ? `↑${diff}%` : diff < 0 ? `↓${Math.abs(diff)}%` : '—';
+
+  tbody.innerHTML += `<tr>
+    <td>${dates[i]}</td>
+    <td>${refunded[i].toFixed(2)}</td>
+    <td>${refundedCount[i]}</td>
+    <td>${unrefunded[i].toFixed(2)}</td>
+    <td>${unrefundedCount[i]}</td>
+    <td>${rate}%</td>
+    <td><span class="badge ${trend}">${trendText}</span></td>
+  </tr>`;
+}
+
+window.addEventListener('resize', () => {
+  chatChart.resize(); mainChart.resize(); countChart.resize();
+});
+</script>
+</body>
+</html>

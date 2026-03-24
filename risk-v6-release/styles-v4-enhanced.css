@@ -1195,6 +1195,106 @@ body {
     gap: 10px;
 }
 
+/* 队列 Tab 切换 */
+.queue-tabs {
+    display: flex;
+    gap: 4px;
+}
+
+.queue-tab {
+    padding: 5px 14px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #64748b;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.queue-tab:hover {
+    border-color: #3b82f6;
+    color: #3b82f6;
+    background: #eff6ff;
+}
+
+.queue-tab.active {
+    background: #3b82f6;
+    color: white;
+    border-color: #3b82f6;
+    box-shadow: 0 2px 6px rgba(59, 130, 246, 0.25);
+}
+
+.queue-tab-count {
+    background: rgba(0,0,0,0.1);
+    padding: 1px 7px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.queue-tab.active .queue-tab-count {
+    background: rgba(255,255,255,0.25);
+}
+
+/* 已处理卡片降灰 */
+.user-card-handled {
+    opacity: 0.6;
+    position: relative;
+}
+
+.user-card-handled:hover {
+    opacity: 0.85;
+}
+
+.handled-status-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 800;
+    margin-left: 8px;
+}
+
+.handled-status-tag.fraud {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.handled-status-tag.normal {
+    background: #d1fae5;
+    color: #10b981;
+}
+
+.handled-status-tag.observe {
+    background: #f1f5f9;
+    color: #64748b;
+}
+
+.handled-status-tag.frozen {
+    background: #fef3c7;
+    color: #f59e0b;
+}
+
+.handled-status-tag.blocked {
+    background: #e2e8f0;
+    color: #1e293b;
+}
+
+.handled-meta {
+    font-size: 11px;
+    color: #94a3b8;
+    font-weight: 600;
+    margin-left: auto;
+    white-space: nowrap;
+}
+
 .header-actions {
     display: flex;
     gap: 10px;
@@ -1366,6 +1466,33 @@ body {
     color: #475569;
 }
 
+
+/* 时间快捷按钮 */
+.btn-time-shortcut {
+    padding: 5px 12px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #64748b;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.btn-time-shortcut:hover {
+    border-color: #3b82f6;
+    color: #3b82f6;
+    background: #eff6ff;
+}
+
+.btn-time-shortcut.active {
+    background: #3b82f6;
+    color: white;
+    border-color: #3b82f6;
+    box-shadow: 0 2px 6px rgba(59, 130, 246, 0.25);
+}
 
 /* ==================== 风险事件中心页面样式 ==================== */
 

@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>风险入款/退款统计 - VVOSS Admin</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0b0e18;
+    color: #c8cdd5;
+    font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', sans-serif;
+    font-size: 13px;
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ── Sidebar (matching VVOSS) ── */
+  .sidebar {
+    width: 180px; min-height: 100vh;
+    background: #0d1018;
+    border-right: 1px solid #151a28;
+    display: flex; flex-direction: column;
+    flex-shrink: 0;
+  }
+  .sidebar-logo {
+    padding: 16px 16px 4px;
+    font-size: 15px; font-weight: 700; color: #fff;
+  }
+  .sidebar-logo span { color: #5b9cf6; }
+  .sidebar-logo-sub {
+    padding: 0 16px 16px;
+    font-size: 10px; color: #3a4050;
+  }
+  .nav-section {
+    padding: 10px 0 2px 0;
+  }
+  .nav-section-title {
+    padding: 6px 16px;
+    font-size: 11px; color: #3a4558; font-weight: 500;
+  }
+  .nav-item {
+    padding: 8px 16px;
+    font-size: 13px; color: #5a6276;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 8px;
+    transition: all .12s;
+    border-left: 3px solid transparent;
+  }
+  .nav-item:hover { color: #8b95a8; background: rgba(255,255,255,.02); }
+  .nav-item.section-parent {
+    color: #8b95a8; font-weight: 500;
+  }
+  .nav-item.active {
+    color: #fff;
+    background: linear-gradient(90deg, rgba(56,132,244,.2) 0%, transparent 100%);
+    border-left-color: #3884f4;
+  }
+  .nav-item .icon { font-size: 14px; width: 18px; text-align: center; }
+  .nav-sub-item {
+    padding: 7px 16px 7px 42px;
+    font-size: 12px; color: #4a5568;
+    cursor: pointer; transition: all .12s;
+  }
+  .nav-sub-item:hover { color: #8b95a8; }
+  .nav-sub-item.active { color: #5b9cf6; }
+
+  /* ── Top Bar ── */
+  .topbar {
+    height: 48px;
+    background: #0d1018;
+    border-bottom: 1px solid #151a28;
+    display: flex; align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+  }
+  .topbar .hamburger { font-size: 18px; color: #5a6276; cursor: pointer; }
+  .topbar .user {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; color: #8b95a8;
+  }
+  .topbar .user-avatar {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: linear-gradient(135deg, #3b6dd6, #7c3aed);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; color: #fff;
+  }
+
+  /* ── Main ── */
+  .main-wrap { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .main {
+    flex: 1; padding: 16px 20px;
+    overflow-y: auto;
+    background: #0b0e18;
+  }
+
+  .breadcrumb {
+    font-size: 12px; color: #3a4558;
+    margin-bottom: 14px;
+  }
+  .breadcrumb a { color: #5b9cf6; text-decoration: none; }
+  .page-title {
+    font-size: 16px; font-weight: 600; color: #e2e6ec;
+    margin-bottom: 16px;
+  }
+
+  /* ── Filter Row (inline, matching VVOSS) ── */
+  .filter-row {
+    display: flex; align-items: flex-end; gap: 12px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .filter-group { display: flex; flex-direction: column; gap: 4px; }
+  .filter-group label { font-size: 11px; color: #3a4558; }
+  .filter-group select,
+  .filter-group input[type="date"] {
+    background: #111420;
+    border: 1px solid #1e2536;
+    color: #b0b8c8;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    outline: none;
+    min-width: 130px;
+  }
+  .filter-group select:focus,
+  .filter-group input:focus { border-color: #3884f4; }
+
+  .filter-presets {
+    display: flex; gap: 2px;
+    background: #111420;
+    border: 1px solid #1e2536;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .filter-presets .fp {
+    padding: 6px 12px; font-size: 12px;
+    cursor: pointer; color: #5a6276;
+    transition: all .12s;
+    border-right: 1px solid #1e2536;
+  }
+  .filter-presets .fp:last-child { border-right: none; }
+  .filter-presets .fp.active { background: #1a2744; color: #5b9cf6; }
+  .filter-presets .fp:hover:not(.active) { color: #8b95a8; }
+
+  .filter-actions { display: flex; gap: 8px; }
+  .btn-query {
+    padding: 6px 16px; border-radius: 4px; font-size: 12px;
+    background: #3884f4; color: #fff; border: none;
+    cursor: pointer; font-weight: 500;
+  }
+  .btn-reset {
+    padding: 6px 16px; border-radius: 4px; font-size: 12px;
+    background: transparent; color: #5a6276;
+    border: 1px solid #1e2536; cursor: pointer;
+  }
+
+  /* ── KPI Strip ── */
+  .kpi-strip {
+    display: flex; gap: 12px; margin-bottom: 16px;
+  }
+  .kpi-item {
+    flex: 1;
+    background: #111420;
+    border: 1px solid #1e2536;
+    border-radius: 6px;
+    padding: 12px 14px;
+  }
+  .kpi-item .kl {
+    font-size: 11px; color: #3a4558;
+    display: flex; align-items: center; gap: 5px;
+    margin-bottom: 6px;
+  }
+  .kpi-item .kl .dot {
+    width: 6px; height: 6px; border-radius: 50%; display: inline-block;
+  }
+  .kpi-item .kv { font-size: 20px; font-weight: 700; color: #e8ecf2; }
+  .kpi-item .ks { font-size: 11px; color: #3a4558; margin-top: 2px; }
+
+  /* ── Chart Card ── */
+  .chart-card {
+    background: #111420;
+    border: 1px solid #1e2536;
+    border-radius: 6px;
+    margin-bottom: 16px;
+  }
+  .chart-card-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid #1e2536;
+  }
+  .chart-card-header h3 {
+    font-size: 13px; font-weight: 600; color: #c8cdd5;
+  }
+  .chart-toggle {
+    display: flex; gap: 2px;
+    background: #0b0e18;
+    border-radius: 4px; overflow: hidden;
+    border: 1px solid #1e2536;
+  }
+  .chart-toggle .ct {
+    padding: 4px 12px; font-size: 11px;
+    cursor: pointer; color: #5a6276; transition: all .12s;
+  }
+  .chart-toggle .ct.active { background: #1a2744; color: #5b9cf6; }
+  .chart-body { padding: 16px; }
+
+  /* ── Data Table (matching VVOSS) ── */
+  .table-card {
+    background: #111420;
+    border: 1px solid #1e2536;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .table-card-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 16px;
+    border-bottom: 1px solid #1e2536;
+  }
+  .table-card-header h3 { font-size: 13px; font-weight: 600; color: #c8cdd5; }
+  .btn-export {
+    padding: 5px 12px; border-radius: 4px; font-size: 11px;
+    background: #17a34a; color: #fff; border: none;
+    cursor: pointer;
+  }
+  .data-table { width: 100%; border-collapse: collapse; }
+  .data-table th {
+    text-align: left; padding: 8px 14px;
+    background: #0e1120;
+    color: #3a4558; font-weight: 500; font-size: 12px;
+    border-bottom: 1px solid #1e2536;
+  }
+  .data-table td {
+    padding: 8px 14px;
+    border-bottom: 1px solid #151a28;
+    font-size: 12px; color: #8b95a8;
+  }
+  .data-table tr:hover td { background: rgba(255,255,255,.015); }
+  .amt-green { color: #34d399; }
+  .amt-red { color: #f87171; }
+  .amt-orange { color: #fbbf24; }
+  .tag {
+    display: inline-block; padding: 1px 8px; border-radius: 3px;
+    font-size: 11px; font-weight: 500;
+  }
+  .tag-green { background: rgba(34,197,94,.12); color: #4ade80; }
+  .tag-red { background: rgba(239,68,68,.12); color: #f87171; }
+  .tag-orange { background: rgba(251,191,36,.12); color: #fbbf24; }
+  .op-link { color: #5b9cf6; cursor: pointer; font-size: 12px; margin-right: 8px; }
+
+  .pagination {
+    display: flex; align-items: center; justify-content: flex-end;
+    gap: 6px; padding: 10px 16px;
+    font-size: 12px; color: #3a4558;
+  }
+  .pagination .pg {
+    min-width: 26px; height: 26px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 3px; cursor: pointer;
+    background: #111420; border: 1px solid #1e2536;
+    color: #5a6276; font-size: 12px;
+  }
+  .pagination .pg.active { background: #1a2744; color: #5b9cf6; border-color: #3884f4; }
+  .pagination select {
+    background: #111420; border: 1px solid #1e2536;
+    color: #5a6276; padding: 3px 6px; border-radius: 3px; font-size: 11px;
+  }
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar">
+  <div class="sidebar-logo"><span>VVOSS</span> Admin</div>
+  <div class="sidebar-logo-sub">by loadrush</div>
+
+  <div class="nav-section">
+    <div class="nav-item"><span class="icon">📊</span> 平台管理</div>
+    <div class="nav-item"><span class="icon">👥</span> 商户管理</div>
+    <div class="nav-item"><span class="icon">👤</span> 商户管理</div>
+    <div class="nav-item"><span class="icon">💹</span> 清算平台</div>
+    <div class="nav-item"><span class="icon">📄</span> 帐单平台</div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-item section-parent"><span class="icon">💼</span> 钱包与交易</div>
+    <div class="nav-sub-item">💳 钱包管理</div>
+    <div class="nav-sub-item">📋 线上交易</div>
+    <div class="nav-sub-item">📝 交易记录</div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-item section-parent"><span class="icon">🛡️</span> 风控管理</div>
+    <div class="nav-sub-item active">📈 风险统计</div>
+    <div class="nav-sub-item">🔒 KUN冻结</div>
+    <div class="nav-sub-item">⚙️ KUN管控</div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-item"><span class="icon">🔍</span> KUN匹配</div>
+    <div class="nav-item"><span class="icon">📦</span> 结算离场</div>
+    <div class="nav-item"><span class="icon">💰</span> 操作提额</div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-item section-parent"><span class="icon">📌</span> 任务与运营</div>
+    <div class="nav-sub-item">📨 挂售任务</div>
+    <div class="nav-sub-item">📋 挂组任务</div>
+    <div class="nav-sub-item">🔄 区块处理</div>
+    <div class="nav-sub-item">📊 帐单字段状态</div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-item section-parent"><span class="icon">⚙️</span> 系统分管理</div>
+    <div class="nav-sub-item">👤 账户管理</div>
+    <div class="nav-sub-item">🔐 商户账号</div>
+    <div class="nav-sub-item">🎭 角色管理</div>
+    <div class="nav-sub-item">👥 等级管理</div>
+  </div>
+</div>
+
+<!-- Main Wrap -->
+<div class="main-wrap">
+  <!-- Top bar -->
+  <div class="topbar">
+    <div class="hamburger">☰</div>
+    <div class="user">
+      <div class="user-avatar">L</div>
+      <span>loadrun</span>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main">
+    <div class="breadcrumb">🛡️ <a href="#">风控管理</a> &gt; 风险统计</div>
+    <div class="page-title">风险入款/退款统计</div>
+
+    <!-- Filter Row -->
+    <div class="filter-row">
+      <div class="filter-group">
+        <label>商户</label>
+        <select style="min-width:160px">
+          <option>全部商户</option>
+          <option selected>再次出发 (1261)</option>
+          <option>商户B (1088)</option>
+          <option>商户C (1342)</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>币种</label>
+        <select>
+          <option>KHR</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>时间范围</label>
+        <div class="filter-presets">
+          <div class="fp active" onclick="pickRange(this,30)">30天</div>
+          <div class="fp" onclick="pickRange(this,90)">90天</div>
+          <div class="fp" onclick="pickRange(this,365)">365天</div>
+          <div class="fp" onclick="pickRange(this,-1)">自定义</div>
+        </div>
+      </div>
+      <div class="filter-group" id="dateRange" style="display:none">
+        <label>起止日期</label>
+        <div style="display:flex;gap:4px;align-items:center;">
+          <input type="date" value="2026-02-15">
+          <span style="color:#3a4558">~</span>
+          <input type="date" value="2026-03-16">
+        </div>
+      </div>
+      <div class="filter-actions" style="padding-bottom:1px;">
+        <button class="btn-query">查 询</button>
+        <button class="btn-reset">重置</button>
+      </div>
+    </div>
+
+    <!-- KPI Strip -->
+    <div class="kpi-strip">
+      <div class="kpi-item">
+        <div class="kl"><span class="dot" style="background:#fbbf24"></span> 今日风险入款</div>
+        <div class="kv" style="color:#fbbf24">9.72</div>
+        <div class="ks">KHR · 4笔</div>
+      </div>
+      <div class="kpi-item">
+        <div class="kl"><span class="dot" style="background:#34d399"></span> 今日已退款</div>
+        <div class="kv" style="color:#34d399">2.00</div>
+        <div class="ks">KHR · 1笔</div>
+      </div>
+      <div class="kpi-item">
+        <div class="kl"><span class="dot" style="background:#fbbf24"></span> 本周风险入款</div>
+        <div class="kv" style="color:#fbbf24">43.60</div>
+        <div class="ks">KHR · 19笔</div>
+      </div>
+      <div class="kpi-item">
+        <div class="kl"><span class="dot" style="background:#34d399"></span> 本周已退款</div>
+        <div class="kv" style="color:#34d399">9.10</div>
+        <div class="ks">KHR · 5笔</div>
+      </div>
+      <div class="kpi-item">
+        <div class="kl"><span class="dot" style="background:#fbbf24"></span> 累计风险入款</div>
+        <div class="kv" style="color:#fbbf24">201.20</div>
+        <div class="ks">KHR · 96笔</div>
+      </div>
+      <div class="kpi-item">
+        <div class="kl"><span class="dot" style="background:#34d399"></span> 累计已退款</div>
+        <div class="kv" style="color:#34d399">58.40</div>
+        <div class="ks">KHR · 29笔 · 退款率 29%</div>
+      </div>
+    </div>
+
+    <!-- Chart -->
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <h3>风险入款 / 退款趋势</h3>
+        <div class="chart-toggle">
+          <div class="ct active" onclick="switchChart(this,'amount')">金额</div>
+          <div class="ct" onclick="switchChart(this,'count')">笔数</div>
+        </div>
+      </div>
+      <div class="chart-body">
+        <div id="trendChart" style="width:100%;height:300px;"></div>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-card">
+      <div class="table-card-header">
+        <h3>每日明细</h3>
+        <button class="btn-export">📥 导出CSV</button>
+      </div>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>日期</th>
+            <th>风险入款</th>
+            <th>笔数</th>
+            <th>已退款</th>
+            <th>笔数</th>
+            <th>未退款</th>
+            <th>退款率</th>
+            <th>趋势</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+      <div class="pagination">
+        <span>共 30 条</span>
+        <div class="pg" style="padding:0 6px">&lt;</div>
+        <div class="pg active">1</div>
+        <div class="pg">2</div>
+        <div class="pg">3</div>
+        <div class="pg" style="padding:0 6px">&gt;</div>
+        <select><option>10 条/页</option><option>20 条/页</option></select>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function pickRange(el, d) {
+  document.querySelectorAll('.fp').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('dateRange').style.display = d === -1 ? 'flex' : 'none';
+}
+function switchChart(el, mode) {
+  document.querySelectorAll('.ct').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+}
+
+const days = 30;
+const dates = [], riskIn = [], refAmt = [], unrefAmt = [];
+
+for (let i = days - 1; i >= 0; i--) {
+  const d = new Date(2026, 2, 16);
+  d.setDate(d.getDate() - i);
+  dates.push(`${d.getMonth()+1}-${String(d.getDate()).padStart(2,'0')}`);
+  const progress = (days - 1 - i) / (days - 1);
+  const ri = Math.max(3, 14 - progress * 5 + (Math.random() - 0.5) * 3);
+  riskIn.push(+ri.toFixed(2));
+  const ref = Math.max(0.5, ri * (0.25 + Math.random() * 0.15));
+  refAmt.push(+ref.toFixed(2));
+  unrefAmt.push(+(ri - ref).toFixed(2));
+}
+riskIn[days-1] = 9.72; refAmt[days-1] = 2.00; unrefAmt[days-1] = 7.72;
+
+const chart = echarts.init(document.getElementById('trendChart'));
+chart.setOption({
+  tooltip: {
+    trigger: 'axis',
+    backgroundColor: '#151a28', borderColor: '#1e2536',
+    textStyle: { color: '#c8cdd5', fontSize: 12 },
+  },
+  legend: {
+    data: ['风险入款', '已退款', '未退款'],
+    textStyle: { color: '#5a6276', fontSize: 11 },
+    top: 0, right: 0,
+    itemWidth: 14, itemHeight: 2,
+  },
+  grid: { left: 48, right: 16, top: 32, bottom: 28 },
+  xAxis: {
+    type: 'category', data: dates, boundaryGap: false,
+    axisLabel: { color: '#3a4558', fontSize: 11 },
+    axisLine: { lineStyle: { color: '#1e2536' } },
+    axisTick: { show: false },
+  },
+  yAxis: {
+    type: 'value', name: 'KHR',
+    nameTextStyle: { color: '#3a4558', fontSize: 10 },
+    axisLabel: { color: '#3a4558', fontSize: 11 },
+    splitLine: { lineStyle: { color: '#151a28' } },
+  },
+  series: [
+    {
+      name: '风险入款', type: 'line', data: riskIn,
+      smooth: true, symbol: 'none', lineStyle: { width: 2, color: '#f59e0b' },
+      areaStyle: { color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
+        colorStops: [{ offset: 0, color: 'rgba(245,158,11,.15)' }, { offset: 1, color: 'rgba(245,158,11,.01)' }]
+      }},
+    },
+    {
+      name: '已退款', type: 'line', data: refAmt,
+      smooth: true, symbol: 'none', lineStyle: { width: 2, color: '#34d399' },
+    },
+    {
+      name: '未退款', type: 'line', data: unrefAmt,
+      smooth: true, symbol: 'none',
+      lineStyle: { width: 1.5, color: '#ef4444', type: 'dashed' },
+    },
+  ],
+});
+
+const tbody = document.getElementById('tableBody');
+for (let i = days - 1; i >= Math.max(0, days - 10); i--) {
+  const rate = ((refAmt[i] / riskIn[i]) * 100).toFixed(0);
+  const cnt_ri = Math.max(1, Math.round(riskIn[i] / 2.5));
+  const cnt_ref = Math.max(1, Math.round(refAmt[i] / 1.8));
+  const prevRate = i < days - 1 ? ((refAmt[i+1] / riskIn[i+1]) * 100).toFixed(0) : rate;
+  const diff = rate - prevRate;
+  const trendCls = diff > 0 ? 'tag-green' : diff < 0 ? 'tag-red' : 'tag-orange';
+  const trendTxt = diff > 0 ? `↑${diff}%` : diff < 0 ? `↓${Math.abs(diff)}%` : '—';
+  tbody.innerHTML += `<tr>
+    <td>${dates[i]}</td>
+    <td class="amt-orange">${riskIn[i].toFixed(2)}</td>
+    <td>${cnt_ri}</td>
+    <td class="amt-green">${refAmt[i].toFixed(2)}</td>
+    <td>${cnt_ref}</td>
+    <td class="amt-red">${unrefAmt[i].toFixed(2)}</td>
+    <td>${rate}%</td>
+    <td><span class="tag ${trendCls}">${trendTxt}</span></td>
+    <td><span class="op-link">详情</span></td>
+  </tr>`;
+}
+
+window.addEventListener('resize', () => chart.resize());
+</script>
+</body>
+</html>
