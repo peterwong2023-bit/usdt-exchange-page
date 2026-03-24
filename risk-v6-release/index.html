@@ -358,74 +358,62 @@
                             <i class="fas fa-circle"></i> 运行正常
                         </span>
                     </div>
-                    <div class="card-body">
-                        <div class="ai-model-grid">
-                            <!-- 左侧：命中率圆形显示 -->
-                            <div class="hit-rate-circle-container">
-                                <div class="section-label">模型表现</div>
-                                <div class="hit-rate-circle">
-                                    <div class="circle-progress">
-                                        <svg width="140" height="140">
-                                            <circle cx="70" cy="70" r="60" fill="none" stroke="#e2e8f0" stroke-width="12"/>
-                                            <circle cx="70" cy="70" r="60" fill="none" stroke="#10b981" stroke-width="12"
-                                                stroke-dasharray="377" stroke-dashoffset="30" stroke-linecap="round"
-                                                transform="rotate(-90 70 70)"/>
-                                        </svg>
-                                        <div class="circle-text">
-                                            <div class="circle-value">92</div>
-                                            <div class="circle-label">命中率</div>
-                                        </div>
-                                    </div>
+                    <div class="card-body" style="padding: 16px 20px;">
+                        <div style="display: grid; grid-template-columns: auto 1fr 1fr 1fr; gap: 20px; align-items: center;">
+                            <!-- 命中率圆形 -->
+                            <div style="text-align: center;">
+                                <svg width="100" height="100">
+                                    <circle cx="50" cy="50" r="42" fill="none" stroke="#e2e8f0" stroke-width="10"/>
+                                    <circle cx="50" cy="50" r="42" fill="none" stroke="#10b981" stroke-width="10"
+                                        stroke-dasharray="264" stroke-dashoffset="21" stroke-linecap="round"
+                                        transform="rotate(-90 50 50)"/>
+                                </svg>
+                                <div style="margin-top:-68px; position:relative;">
+                                    <div style="font-size:28px; font-weight:900; color:#0f172a; font-family:'JetBrains Mono',monospace;">92</div>
+                                    <div style="font-size:10px; color:#64748b; font-weight:700;">命中率</div>
+                                </div>
+                                <div style="margin-top:26px;"></div>
+                            </div>
+                            <!-- 模型质量 -->
+                            <div style="display:flex; flex-direction:column; gap:10px;">
+                                <div style="font-size:11px; font-weight:800; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px;">模型质量</div>
+                                <div style="display:flex; justify-content:space-between; align-items:baseline;">
+                                    <span style="font-size:12px; color:#64748b; font-weight:600;">误报率</span>
+                                    <span style="font-size:16px; font-weight:800; color:#10b981; font-family:'JetBrains Mono',monospace;">3%</span>
+                                </div>
+                                <div style="display:flex; justify-content:space-between; align-items:baseline;">
+                                    <span style="font-size:12px; color:#64748b; font-weight:600;">覆盖率</span>
+                                    <span style="font-size:16px; font-weight:800; color:#f59e0b; font-family:'JetBrains Mono',monospace;">47%</span>
+                                </div>
+                                <div style="display:flex; justify-content:space-between; align-items:baseline;">
+                                    <span style="font-size:12px; color:#64748b; font-weight:600;">今日人工纠正</span>
+                                    <span style="font-size:16px; font-weight:800; color:#3b82f6; font-family:'JetBrains Mono',monospace;">47</span>
                                 </div>
                             </div>
-                            
-                            <!-- 右侧：其他指标 -->
-                            <div class="ai-metrics-right">
-                                <div class="metric-row">
-                                    <div class="metric-box">
-                                        <div class="metric-box-label">误报率</div>
-                                        <div class="metric-box-value">3%</div>
-                                        <div class="progress-bar-thin">
-                                            <div class="progress-fill-thin success" style="width: 3%"></div>
-                                        </div>
-                                    </div>
-                                    <div class="metric-box">
-                                        <div class="metric-box-label">覆盖率</div>
-                                        <div class="metric-box-value">47%</div>
-                                        <div class="progress-bar-thin">
-                                            <div class="progress-fill-thin warning" style="width: 47%"></div>
-                                        </div>
-                                    </div>
+                            <!-- 训练数据 -->
+                            <div style="display:flex; flex-direction:column; gap:10px;">
+                                <div style="font-size:11px; font-weight:800; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px;">训练数据</div>
+                                <div style="display:flex; justify-content:space-between; align-items:baseline;">
+                                    <span style="font-size:12px; color:#64748b; font-weight:600;">训练样本</span>
+                                    <span style="font-size:16px; font-weight:800; color:#0f172a; font-family:'JetBrains Mono',monospace;">2.8M</span>
                                 </div>
-                                
-                                <div class="metric-row">
-                                    <div class="metric-box">
-                                        <div class="metric-box-label">今日人工纠正</div>
-                                        <div class="metric-box-value highlight">47 <span class="unit">次</span></div>
-                                    </div>
-                                    <div class="metric-box">
-                                        <div class="metric-box-label">训练样本</div>
-                                        <div class="metric-box-value highlight">2.8M <span class="unit">条</span></div>
-                                    </div>
+                                <div style="display:flex; justify-content:space-between; align-items:baseline;">
+                                    <span style="font-size:12px; color:#64748b; font-weight:600;">本月回流</span>
+                                    <span style="font-size:16px; font-weight:800; color:#10b981; font-family:'JetBrains Mono',monospace;">328</span>
                                 </div>
-                                <div class="metric-row">
-                                    <div class="metric-box">
-                                        <div class="metric-box-label">本月审核回流</div>
-                                        <div class="metric-box-value highlight" style="color: #10b981;">328 <span class="unit">条</span></div>
-                                    </div>
-                                    <div class="metric-box">
-                                        <div class="metric-box-label">正/负样本比</div>
-                                        <div class="metric-box-value highlight">1:3.2</div>
-                                    </div>
+                                <div style="display:flex; justify-content:space-between; align-items:baseline;">
+                                    <span style="font-size:12px; color:#64748b; font-weight:600;">正/负样本比</span>
+                                    <span style="font-size:16px; font-weight:800; color:#0f172a; font-family:'JetBrains Mono',monospace;">1:3.2</span>
                                 </div>
-                                
-                                <div class="model-version-box">
-                                    <span class="version-label">当前版本:</span>
-                                    <span class="version-badge">v2.4.1</span>
-                                    <span class="status-dot"></span>
-                                    <span class="status-text">运行正常</span>
-                                    <button class="btn-update">检查更新</button>
+                            </div>
+                            <!-- 版本信息 -->
+                            <div style="display:flex; flex-direction:column; gap:10px;">
+                                <div style="font-size:11px; font-weight:800; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px;">引擎版本</div>
+                                <div style="text-align:center; padding:12px; background:#f0fdf4; border-radius:10px; border:1.5px solid #a7f3d0;">
+                                    <div style="font-size:20px; font-weight:900; color:#0f172a; font-family:'JetBrains Mono',monospace;">v2.4.1</div>
+                                    <div style="font-size:11px; color:#10b981; font-weight:700; margin-top:4px;"><i class="fas fa-circle" style="font-size:6px;"></i> 运行正常</div>
                                 </div>
+                                <button class="btn-update" style="width:100%; text-align:center; padding:6px; font-size:12px;">检查更新</button>
                             </div>
                         </div>
                     </div>
