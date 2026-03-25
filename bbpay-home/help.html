@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>帮助中心 - 波币钱包 BBpay</title>
+    <meta name="description" content="波币钱包帮助中心：常见问题、安全交易须知与客服联系方式。">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700;900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/help.css">
+</head>
+<body>
+
+<!-- 顶部导航 -->
+<header class="header" id="header">
+    <div class="header-inner">
+        <a href="index.html" class="header-logo">
+            <img src="images/logo.png" alt="波币钱包" class="logo-img">
+            <div class="logo-text">
+                <span class="logo-name">波币钱包</span>
+                <span class="logo-sub">BBpay</span>
+            </div>
+        </a>
+
+        <nav class="header-nav" id="headerNav">
+            <a href="index.html" class="nav-link">首页</a>
+            <a href="tutorial.html" class="nav-link">教程中心</a>
+            <a href="help.html" class="nav-link active">帮助中心</a>
+            <a href="about.html" class="nav-link">关于我们</a>
+            <a href="download.html" class="nav-link nav-cta">下载APP</a>
+        </nav>
+
+        <button class="menu-toggle" id="menuToggle" aria-label="菜单">
+            <span></span><span></span><span></span>
+        </button>
+    </div>
+</header>
+
+<!-- 移动端菜单 -->
+<div class="mobile-menu" id="mobileMenu">
+    <nav class="mobile-nav">
+        <a href="index.html" class="mobile-nav-link">首页</a>
+        <a href="tutorial.html" class="mobile-nav-link">教程中心</a>
+        <a href="help.html" class="mobile-nav-link active">帮助中心</a>
+        <a href="about.html" class="mobile-nav-link">关于我们</a>
+        <a href="download.html" class="mobile-nav-link highlight">下载APP</a>
+    </nav>
+</div>
+
+<!-- Hero -->
+<section class="help-hero">
+    <div class="hero-bg" aria-hidden="true">
+        <div class="hero-blur-circle hb-1"></div>
+        <div class="hero-blur-circle hb-2"></div>
+        <div class="hero-blur-circle hb-3"></div>
+        <div class="hero-noise"></div>
+    </div>
+    <div class="container help-hero-inner">
+        <h1 class="help-hero-title anim-fade-up">帮助中心</h1>
+        <p class="help-hero-sub anim-fade-up delay-1">有问题？我们随时为您解答</p>
+        <div class="help-search-wrap anim-fade-up delay-2" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input type="search" class="help-search-input" placeholder="搜索问题（演示）" tabindex="-1" readonly>
+        </div>
+    </div>
+</section>
+
+<!-- 常见问题 -->
+<section class="help-section" id="faq">
+    <div class="container">
+        <div class="help-section-header anim-fade-up">
+            <span class="section-tag">FAQ</span>
+            <h2 class="section-title">常见问题</h2>
+            <p class="section-desc">点击问题即可展开查看详细说明</p>
+        </div>
+        <div class="faq-list">
+            <div class="faq-item anim-fade-up delay-1">
+                <button type="button" class="faq-trigger" aria-expanded="false" aria-controls="faq-panel-1" id="faq-btn-1">
+                    <span class="faq-q">波币是什么？</span>
+                    <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+                </button>
+                <div class="faq-panel" id="faq-panel-1" role="region" aria-labelledby="faq-btn-1">
+                    <div class="faq-panel-inner">
+                        <p class="faq-answer">波币是一种稳定的数字货币，恒定人民币汇率，可在波币钱包中自由买卖和使用。</p>
+                    </div>
+                </div>
+            </div>
+            <div class="faq-item anim-fade-up delay-1">
+                <button type="button" class="faq-trigger" aria-expanded="false" aria-controls="faq-panel-2" id="faq-btn-2">
+                    <span class="faq-q">如何绑定实名？</span>
+                    <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+                </button>
+                <div class="faq-panel" id="faq-panel-2" role="region" aria-labelledby="faq-btn-2">
+                    <div class="faq-panel-inner">
+                        <p class="faq-answer">请前往「我的」页面，选择「实名认证」选项，输入您的姓名及身份证号后点击「确认」，即可完成实名认证。</p>
+                    </div>
+                </div>
+            </div>
+            <div class="faq-item anim-fade-up delay-2">
+                <button type="button" class="faq-trigger" aria-expanded="false" aria-controls="faq-panel-3" id="faq-btn-3">
+                    <span class="faq-q">如何绑定收付款信息？</span>
+                    <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+                </button>
+                <div class="faq-panel" id="faq-panel-3" role="region" aria-labelledby="faq-btn-3">
+                    <div class="faq-panel-inner">
+                        <p class="faq-answer">请前往「我的」，选择「收付款」选项，然后点击「添加收付款信息」。请注意，您的收付款账号需与实名信息一致，方可完成账号绑定。</p>
+                    </div>
+                </div>
+            </div>
+            <div class="faq-item anim-fade-up delay-2">
+                <button type="button" class="faq-trigger" aria-expanded="false" aria-controls="faq-panel-4" id="faq-btn-4">
+                    <span class="faq-q">如何购买波币？</span>
+                    <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+                </button>
+                <div class="faq-panel" id="faq-panel-4" role="region" aria-labelledby="faq-btn-4">
+                    <div class="faq-panel-inner">
+                        <p class="faq-answer">请先进入波币商城「买入」页面，浏览并挑选自己喜欢的用户挂单进行下单。首次购买的用户，建议您先前往「我的」-「买入教程」，学习完整的波币购买流程。</p>
+                    </div>
+                </div>
+            </div>
+            <div class="faq-item anim-fade-up delay-3">
+                <button type="button" class="faq-trigger" aria-expanded="false" aria-controls="faq-panel-5" id="faq-btn-5">
+                    <span class="faq-q">如何卖出波币？</span>
+                    <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+                </button>
+                <div class="faq-panel" id="faq-panel-5" role="region" aria-labelledby="faq-btn-5">
+                    <div class="faq-panel-inner">
+                        <p class="faq-answer">请先进入波币商城页面，并前往「我的」-「卖出教程」以学习完整的波币卖出流程。</p>
+                    </div>
+                </div>
+            </div>
+            <div class="faq-item anim-fade-up delay-3">
+                <button type="button" class="faq-trigger" aria-expanded="false" aria-controls="faq-panel-6" id="faq-btn-6">
+                    <span class="faq-q">如何设置单价？</span>
+                    <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+                </button>
+                <div class="faq-panel" id="faq-panel-6" role="region" aria-labelledby="faq-btn-6">
+                    <div class="faq-panel-inner">
+                        <p class="faq-answer">在交易市场中，波币价格可能会有一定的波动。例如，一个波币的买入/出售价格可能在0.98至1.01人民币之间。</p>
+                    </div>
+                </div>
+            </div>
+            <div class="faq-item anim-fade-up delay-4">
+                <button type="button" class="faq-trigger" aria-expanded="false" aria-controls="faq-panel-7" id="faq-btn-7">
+                    <span class="faq-q">如何充值？</span>
+                    <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+                </button>
+                <div class="faq-panel" id="faq-panel-7" role="region" aria-labelledby="faq-btn-7">
+                    <div class="faq-panel-inner">
+                        <p class="faq-answer">您只需选择要充值的数量，输入支付密码，即可完成充值操作。</p>
+                    </div>
+                </div>
+            </div>
+            <div class="faq-item anim-fade-up delay-4">
+                <button type="button" class="faq-trigger" aria-expanded="false" aria-controls="faq-panel-8" id="faq-btn-8">
+                    <span class="faq-q">如何提现到波币钱包？</span>
+                    <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+                </button>
+                <div class="faq-panel" id="faq-panel-8" role="region" aria-labelledby="faq-btn-8">
+                    <div class="faq-panel-inner">
+                        <p class="faq-answer">在进行提现操作时，请选择「提现到波币钱包」选项，输入您的波币钱包地址，然后即可将资金提现至您的波币钱包。</p>
+                    </div>
+                </div>
+            </div>
+            <div class="faq-item anim-fade-up">
+                <button type="button" class="faq-trigger" aria-expanded="false" aria-controls="faq-panel-9" id="faq-btn-9">
+                    <span class="faq-q">如何关闭挂单？</span>
+                    <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+                </button>
+                <div class="faq-panel" id="faq-panel-9" role="region" aria-labelledby="faq-btn-9">
+                    <div class="faq-panel-inner">
+                        <p class="faq-answer">如果挂单中存在正在交易的订单，您需要等待这些订单完成后才能关闭挂单。</p>
+                    </div>
+                </div>
+            </div>
+            <div class="faq-item anim-fade-up">
+                <button type="button" class="faq-trigger" aria-expanded="false" aria-controls="faq-panel-10" id="faq-btn-10">
+                    <span class="faq-q">如何修改单价及收款方式？</span>
+                    <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+                </button>
+                <div class="faq-panel" id="faq-panel-10" role="region" aria-labelledby="faq-btn-10">
+                    <div class="faq-panel-inner">
+                        <p class="faq-answer">系统不允许修改已设置的售价。如果您需要更改售价，可以先关闭当前挂单，然后重新设定价格进行挂单。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 安全交易须知 -->
+<section class="help-section" id="safety">
+    <div class="container">
+        <div class="help-section-header anim-fade-up">
+            <span class="section-tag">安全</span>
+            <h2 class="section-title">安全交易须知</h2>
+            <p class="section-desc">请仔细阅读以下提示，保护您的资产与信息安全</p>
+        </div>
+        <div class="safety-grid">
+            <article class="safety-card safety-card--blue anim-fade-up delay-1">
+                <button type="button" class="safety-trigger" aria-expanded="false" aria-controls="safety-panel-1" id="safety-btn-1">
+                    <div class="safety-icon-wrap" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    </div>
+                    <div class="safety-title-block">
+                        <div class="safety-hint">必读</div>
+                        <h3 class="safety-title">官方提示</h3>
+                    </div>
+                    <svg class="safety-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+                </button>
+                <div class="safety-panel" id="safety-panel-1" role="region" aria-labelledby="safety-btn-1">
+                    <div class="safety-panel-inner">
+                        <p class="safety-body">我司工作人员不会以任何形式主动给您打电话，发短信，并且不会给您推荐任何游戏平台。您遇到任何订单问题请认准APP的官方客服进行协助处理。我们不会以任何方式进行私下添加您的联系方式，索要隐私信息。杜绝私下交易、私下处理。若出现私下处理或交易，造成损失自行承担！若有交易款项请以银行卡实时余额到账为准！不要相信短信提醒以及语音电话的诱导延迟到账，导致被骗！</p>
+                    </div>
+                </div>
+            </article>
+            <article class="safety-card safety-card--orange anim-fade-up delay-1">
+                <button type="button" class="safety-trigger" aria-expanded="false" aria-controls="safety-panel-2" id="safety-btn-2">
+                    <div class="safety-icon-wrap" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg>
+                    </div>
+                    <div class="safety-title-block">
+                        <div class="safety-hint">重要</div>
+                        <h3 class="safety-title">交易须知</h3>
+                    </div>
+                    <svg class="safety-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+                </button>
+                <div class="safety-panel" id="safety-panel-2" role="region" aria-labelledby="safety-btn-2">
+                    <div class="safety-panel-inner">
+                        <p class="safety-body">近期有不法分子通过微信、支付宝等方式加好友欺骗用户，如打电话说延迟到账或支付宝、微信二维码风控为理由添加好友，切勿添加！任何私下交易一律为是骗子，切勿相信短信到账通知，以网银实际到账为准，交易中遭遇任何问题，请联系我们APP官方在线客服。</p>
+                    </div>
+                </div>
+            </article>
+            <article class="safety-card safety-card--red anim-fade-up delay-2">
+                <button type="button" class="safety-trigger" aria-expanded="false" aria-controls="safety-panel-3" id="safety-btn-3">
+                    <div class="safety-icon-wrap" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M18 8l5 5M23 8l-5 5"/></svg>
+                    </div>
+                    <div class="safety-title-block">
+                        <div class="safety-hint">防诈</div>
+                        <h3 class="safety-title">冒充平台官方人员诈骗</h3>
+                    </div>
+                    <svg class="safety-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+                </button>
+                <div class="safety-panel" id="safety-panel-3" role="region" aria-labelledby="safety-btn-3">
+                    <div class="safety-panel-inner">
+                        <p class="safety-body">电话诈骗：骗子冒充平台客服等官方人员，甚至以公检法名义，通过添加社交账号或用虚拟号码致电用户，以「解除账户风险」或「配合安全排查」为由，骗取用户账号信息。共享屏幕诈骗：骗子假冒平台客服，引诱用户下载会议软件，通过「共享屏幕」盗取钱包私钥信息。</p>
+                    </div>
+                </div>
+            </article>
+            <article class="safety-card safety-card--purple anim-fade-up delay-2">
+                <button type="button" class="safety-trigger" aria-expanded="false" aria-controls="safety-panel-4" id="safety-btn-4">
+                    <div class="safety-icon-wrap" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><path d="M15 3h6v6"/><path d="M10 14L21 3"/></svg>
+                    </div>
+                    <div class="safety-title-block">
+                        <div class="safety-hint">防诈</div>
+                        <h3 class="safety-title">场外交易诈骗</h3>
+                    </div>
+                    <svg class="safety-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+                </button>
+                <div class="safety-panel" id="safety-panel-4" role="region" aria-labelledby="safety-btn-4">
+                    <div class="safety-panel-inner">
+                        <p class="safety-body">所有买卖交易均在我司APP上进行实时交易，所有私下交易添加好友转账都是骗子，请勿添加！诈骗手段：借支付宝、微信收款二维码风控为由，要求添加好友进行银行转账，骗子通过手机号模仿银行短信到账，诱导用户。请务必登录网银确认到账后再进行打币！</p>
+                    </div>
+                </div>
+            </article>
+            <article class="safety-card safety-card--amber anim-fade-up delay-3">
+                <button type="button" class="safety-trigger" aria-expanded="false" aria-controls="safety-panel-5" id="safety-btn-5">
+                    <div class="safety-icon-wrap" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+                    </div>
+                    <div class="safety-title-block">
+                        <div class="safety-hint">防诈</div>
+                        <h3 class="safety-title">P图造假凭证</h3>
+                    </div>
+                    <svg class="safety-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+                </button>
+                <div class="safety-panel" id="safety-panel-5" role="region" aria-labelledby="safety-btn-5">
+                    <div class="safety-panel-inner">
+                        <p class="safety-body">行骗者假意买币，在订单页点击「已付款」，实际并没有完成支付，却要求卖家放币，并发送造假的支付凭证催促放币。提醒您：收到款项一切以银行卡/微信/支付宝收到对应实名的对应金额款项为准，凭证仅供参考。</p>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </div>
+</section>
+
+<!-- 联系我们 -->
+<section class="contact-section" id="contact">
+    <div class="container">
+        <div class="contact-card anim-fade-up">
+            <h2>联系我们</h2>
+            <p>如需协助，请通过以下方式联系官方渠道</p>
+            <div class="contact-actions">
+                <a href="#" class="contact-btn contact-btn--tg">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.12.03-1.99 1.27-5.62 3.72-.53.36-1.01.54-1.44.53-.47-.01-1.38-.27-2.06-.49-.83-.27-1.49-.42-1.43-.88.03-.24.37-.49 1.02-.74 3.98-1.73 6.63-2.87 7.95-3.43 3.79-1.58 4.57-1.85 5.08-1.86.11 0 .37.03.53.17.14.12.18.28.2.47-.01.06.01.24 0 .38z"/></svg>
+                    Telegram 联系方式
+                </a>
+                <a href="#" class="contact-btn contact-btn--service">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+                    在线客服入口
+                </a>
+            </div>
+            <div class="contact-hours">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                工作时间：7×24小时
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 页脚 -->
+<footer class="footer">
+    <div class="container">
+        <div class="footer-top">
+            <div class="footer-brand">
+                <a href="index.html" class="footer-logo">
+                    <img src="images/logo.png" alt="波币钱包" class="logo-img">
+                    <div class="logo-text">
+                        <span class="logo-name">波币钱包</span>
+                        <span class="logo-sub">BBpay</span>
+                    </div>
+                </a>
+                <p class="footer-tagline">安全可靠的数字资产交易平台</p>
+            </div>
+            <div class="footer-links">
+                <div class="footer-col">
+                    <h4>产品</h4>
+                    <ul>
+                        <li><a href="download.html">下载APP</a></li>
+                        <li><a href="about.html">产品介绍</a></li>
+                        <li><a href="tutorial.html">使用教程</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>支持</h4>
+                    <ul>
+                        <li><a href="help.html">帮助中心</a></li>
+                        <li><a href="help.html#faq">常见问题</a></li>
+                        <li><a href="help.html#safety">安全须知</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>关于</h4>
+                    <ul>
+                        <li><a href="about.html">关于我们</a></li>
+                        <li><a href="about.html#contact">商务合作</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 波币钱包 BBpay. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
+
+<!-- 悬浮客服按钮 -->
+<div class="float-actions">
+    <a href="#" class="float-btn float-service" aria-label="在线客服">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="white"/></svg>
+        <span class="service-label">在线客服</span>
+    </a>
+    <div class="float-btn float-telegram" aria-label="Telegram客服">
+        <a href="https://t.me/BBQB666" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:white;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.12.03-1.99 1.27-5.62 3.72-.53.36-1.01.54-1.44.53-.47-.01-1.38-.27-2.06-.49-.83-.27-1.49-.42-1.43-.88.03-.24.37-.49 1.02-.74 3.98-1.73 6.63-2.87 7.95-3.43 3.79-1.58 4.57-1.85 5.08-1.86.11 0 .37.03.53.17.14.12.18.28.2.47-.01.06.01.24 0 .38z"/></svg>
+        </a>
+        <div class="telegram-popover">
+            <div class="tp-title">唯一合作渠道</div>
+            <div class="tp-contact">
+                <div class="tp-contact-info">
+                    <span class="tp-label">商务对接 Telegram</span>
+                    <a href="https://t.me/BBQB666" target="_blank" rel="noopener noreferrer">@BBQB666</a> 
+                </div>
+                <div class="tp-copy" onclick="navigator.clipboard.writeText('BBQB666'); alert('已复制：BBQB666');" title="复制账号">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                </div>
+            </div>
+            <div class="tp-warning">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                无多余符号，谨防假冒
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="js/main.js"></script>
+</body>
+</html>

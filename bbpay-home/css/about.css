@@ -1,0 +1,185 @@
+/* ========================================
+   关于我们页
+   ======================================== */
+
+.about-hero {
+    position: relative;
+    overflow: hidden;
+    padding: 96px 0 40px;
+    background-color: #fcfcfd;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.about-hero-inner {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    max-width: 640px;
+    margin: 0 auto;
+}
+
+.about-hero-title {
+    font-size: clamp(26px, 5vw, 36px);
+    font-weight: 800;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+}
+
+.about-hero-sub {
+    font-size: 16px;
+    color: var(--text-tertiary);
+    line-height: 1.6;
+}
+
+.about-brand {
+    padding: 48px 0 56px;
+    background: var(--bg-primary);
+}
+
+.about-tabs-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 8px;
+    justify-content: center;
+    margin-bottom: 28px;
+    border-bottom: 1px solid var(--gray-200);
+    padding-bottom: 0;
+}
+
+.about-tab-btn {
+    font-family: var(--font-cn);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    padding: 12px 14px 14px;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -1px;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+    border-radius: 0;
+}
+
+.about-tab-btn:hover {
+    color: var(--primary);
+}
+
+.about-tab-btn.active {
+    color: var(--primary);
+    font-weight: 600;
+    border-bottom-color: var(--primary);
+}
+
+.about-tab-panels {
+    max-width: 720px;
+    margin: 0 auto;
+    background: linear-gradient(180deg, #fafbfc 0%, var(--gray-50) 100%);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: var(--radius-lg);
+    padding: 24px 22px;
+    min-height: 140px;
+    box-shadow:
+        0 8px 32px rgba(15, 23, 42, 0.06),
+        inset 0 1px 0 rgba(255, 255, 255, 0.95);
+}
+
+.about-tab-panel {
+    display: none;
+    font-size: 16px;
+    line-height: 1.85;
+    color: var(--text-secondary);
+}
+
+.about-tab-panel.active {
+    display: block;
+}
+
+.about-tab-panel p {
+    margin: 0;
+}
+
+.about-contact {
+    padding: 0 0 72px;
+    background: var(--bg-secondary);
+}
+
+.about-contact-card {
+    max-width: 640px;
+    margin: 0 auto;
+    background: #232732; /* 截图中的深色背景 */
+    border-radius: var(--radius-xl);
+    padding: 56px 28px;
+    text-align: center;
+    box-shadow: 0 12px 40px rgba(15, 23, 42, 0.08);
+}
+
+.about-contact-title {
+    font-size: 36px;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.about-contact-desc {
+    font-size: 16px;
+    color: #9ca3af;
+    margin-bottom: 32px;
+}
+
+.btn-contact-apply {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: #2563eb; /* 修改为截图中的深蓝色 */
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 500;
+    padding: 14px 40px;
+    border-radius: var(--radius-md); /* 修改为截图中的圆角而不是完全的胶囊形 */
+    transition: all 0.3s var(--ease-out);
+    margin-bottom: 40px;
+}
+
+.btn-contact-apply:hover {
+    background: #1d4ed8;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(37, 99, 235, 0.3);
+    color: #ffffff;
+}
+
+.about-contact-tg {
+    font-size: 16px;
+    color: #9ca3af;
+    margin: 0;
+}
+
+.tg-handle {
+    color: #f59e0b; /* 橙色联系方式 */
+}
+
+@media (max-width: 480px) {
+    .about-tabs-nav {
+        justify-content: flex-start;
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 2px;
+    }
+
+    .about-tab-btn {
+        flex-shrink: 0;
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    .about-tab-panels {
+        padding: 20px 16px;
+    }
+}

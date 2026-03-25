@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>波币钱包 - 安全可靠的数字资产交易平台</title>
+    <meta name="description" content="波币钱包，安全可靠的数字货币支付与C2C交易平台。支持银行卡、支付宝、微信、数字人民币，充值无痕，安全无忧。">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700;900&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/home.css">
+</head>
+<body>
+
+<!-- 顶部导航 -->
+<header class="header" id="header">
+    <div class="header-inner">
+        <a href="index.html" class="header-logo">
+            <img src="images/logo.png" alt="波币钱包" class="logo-img">
+            <div class="logo-text">
+                <span class="logo-name">波币钱包</span>
+                <span class="logo-sub">BBpay</span>
+            </div>
+        </a>
+
+        <nav class="header-nav" id="headerNav">
+            <a href="index.html" class="nav-link active">首页</a>
+            <a href="tutorial.html" class="nav-link">教程中心</a>
+            <a href="help.html" class="nav-link">帮助中心</a>
+            <a href="about.html" class="nav-link">关于我们</a>
+            <a href="download.html" class="nav-link nav-cta">下载APP</a>
+        </nav>
+
+        <button class="menu-toggle" id="menuToggle" aria-label="菜单">
+            <span></span><span></span><span></span>
+        </button>
+    </div>
+</header>
+
+<!-- 移动端菜单 -->
+<div class="mobile-menu" id="mobileMenu">
+    <nav class="mobile-nav">
+        <a href="index.html" class="mobile-nav-link active">首页</a>
+        <a href="tutorial.html" class="mobile-nav-link">教程中心</a>
+        <a href="help.html" class="mobile-nav-link">帮助中心</a>
+        <a href="about.html" class="mobile-nav-link">关于我们</a>
+        <a href="download.html" class="mobile-nav-link highlight">下载APP</a>
+    </nav>
+</div>
+
+<!-- Hero区域 (前端高定设计版) -->
+<section class="hero">
+    <div class="hero-bg">
+        <div class="hero-blur-circle hb-1"></div>
+        <div class="hero-blur-circle hb-2"></div>
+        <div class="hero-blur-circle hb-3"></div>
+        <div class="hero-noise"></div>
+    </div>
+    <div class="container hero-layout">
+        <div class="hero-content">
+            <div class="hero-badge anim-fade-up">
+                <span class="badge-dot"></span>
+                安全可靠 · 值得信赖
+                <div class="badge-glow"></div>
+            </div>
+            <h1 class="hero-title anim-fade-up delay-1">
+                充值无痕<br class="hide-mobile">
+                <span class="hero-title-accent">安全无忧</span>
+            </h1>
+            <p class="hero-desc anim-fade-up delay-2">
+                波币钱包为您提供安全、便捷的数字资产交易服务。<br class="hide-mobile">
+                不受时间及国界限制，随时随地完成交易。
+            </p>
+            <div class="hero-actions anim-fade-up delay-3">
+                <a href="download.html" class="btn-hero-primary hide-desktop">
+                    立即下载体验
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3.333 8h9.334M9.333 4.667L12.667 8l-3.334 3.333" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </a>
+                <div class="hero-qr-box hide-mobile">
+                    <div class="qr-wrapper">
+                        <img src="images/download-qr.png" alt="下载波币钱包" class="qr-img">
+                    </div>
+                    <div class="qr-text">
+                        <span class="qr-title">扫码下载波币钱包APP</span>
+                        <span class="qr-desc">支持 iOS & Android</span>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-trust hide-mobile anim-fade-up delay-4">
+                <div class="trust-item">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                    安全加密
+                </div>
+                <div class="trust-dot"></div>
+                <div class="trust-item">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    极速到账
+                </div>
+                <div class="trust-dot"></div>
+                <div class="trust-item">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                    0 手续费
+                </div>
+            </div>
+        </div>
+        <div class="hero-visual anim-fade-up delay-2">
+            <div class="phone-mockup">
+                <div class="phone-notch"></div>
+                <div class="phone-screen">
+                    <img src="images/home.png" alt="波币钱包APP界面" class="phone-screenshot">
+                    <div class="screen-glare"></div>
+                </div>
+            </div>
+            
+            <!-- 前端高定：浮动毛玻璃卡片 -->
+            <div class="floating-glass-card fc-1 hide-mobile">
+                <div class="fc-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="M9 12l2 2 4-4"></path></svg>
+                </div>
+                <div class="fc-info">
+                    <span class="fc-title">银行级加密</span>
+                    <span class="fc-sub">资产绝对安全</span>
+                </div>
+            </div>
+            
+            <div class="floating-glass-card fc-2 hide-mobile">
+                <div class="fc-icon fc-icon-blue">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                </div>
+                <div class="fc-info">
+                    <span class="fc-title">隐私保护</span>
+                    <span class="fc-sub">交易不可追踪</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 移动端底部固定下载按钮 (方案B) -->
+    <div class="mobile-sticky-cta hide-desktop">
+        <a href="download.html" class="btn-sticky-primary">
+            立即下载体验
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3.333 8h9.334M9.333 4.667L12.667 8l-3.334 3.333" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+    </div>
+</section>
+
+<!-- 核心优势 -->
+<section class="features" id="features">
+    <div class="container">
+        <div class="section-header anim-fade-up">
+            <span class="section-tag">核心优势</span>
+            <h2 class="section-title">为什么选择波币钱包</h2>
+            <p class="section-desc">行业领先的安全技术，为您的每一笔交易保驾护航</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card anim-fade-up delay-1">
+                <div class="feature-icon feature-icon-blue">
+                    <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M14 2.333L5.833 6.417v5.25c0 4.374 2.23 8.465 5.25 9.625.437.168.896.29 1.367.37a9.84 9.84 0 001.55.171c.523 0 1.043-.057 1.55-.171a8.1 8.1 0 001.367-.37c3.02-1.16 5.25-5.25 5.25-9.625v-5.25L14 2.333z" stroke="currentColor" stroke-width="1.8"/><path d="M10.5 14l2.333 2.333 4.667-4.666" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <h3>安全可靠</h3>
+                <p>采用银行级加密技术和多层安全防护，确保您的数字资产始终得到最高级别的保护</p>
+            </div>
+            <div class="feature-card anim-fade-up delay-2">
+                <div class="feature-icon feature-icon-purple">
+                    <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M14 25.667c6.443 0 11.667-5.224 11.667-11.667S20.443 2.333 14 2.333 2.333 7.557 2.333 14 7.557 25.667 14 25.667z" stroke="currentColor" stroke-width="1.8"/><path d="M9.333 14h9.334M14 9.333v9.334" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                </div>
+                <h3>隐私保护</h3>
+                <p>去中心化账本，所有交易记录加密存储，个人信息不可追踪，充分保障您的隐私安全</p>
+            </div>
+            <div class="feature-card anim-fade-up delay-3">
+                <div class="feature-icon feature-icon-green">
+                    <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M23.333 7L10.5 19.833l-5.833-5.833" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <h3>稳定便捷</h3>
+                <p>恒定人民币汇率，交易系统稳定运行。挂单、付款、打币，买卖只需三步即可完成</p>
+            </div>
+            <div class="feature-card anim-fade-up delay-4">
+                <div class="feature-icon feature-icon-amber">
+                    <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M3.5 14h3.5l3.5-8.167L14 22.167l3.5-8.167 3.5 8.167L24.5 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <h3>极速交易</h3>
+                <p>实时到账，无需等待。不受时间及国界限制，7×24小时随时完成交易，免手续费</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 支持的支付方式 -->
+<section class="payment-methods">
+    <div class="container">
+        <div class="section-header anim-fade-up">
+            <span class="section-tag">支付方式</span>
+            <h2 class="section-title">多种支付方式，灵活便捷</h2>
+            <p class="section-desc">波币钱包支持主流支付方式，满足您的不同交易需求</p>
+        </div>
+        <div class="payment-grid anim-fade-up delay-1">
+            <div class="payment-card">
+                <div class="payment-icon payment-bank">
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><rect x="4" y="14" width="24" height="14" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M4 18h24M8 22h4M20 22h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M8 14V8a2 2 0 012-2h12a2 2 0 012 2v6" stroke="currentColor" stroke-width="1.8"/></svg>
+                </div>
+                <span>银行卡</span>
+            </div>
+            <div class="payment-card">
+                <div class="payment-icon payment-alipay">
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="12" stroke="currentColor" stroke-width="1.8"/><path d="M9 16.5c2 2 4.5 3 7 3 1.5 0 3.5-.8 5-2M10 12h12M16 12v-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                </div>
+                <span>支付宝</span>
+            </div>
+            <div class="payment-card">
+                <div class="payment-icon payment-wechat">
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><path d="M12 10c-3.866 0-7 2.686-7 6 0 1.8.9 3.4 2.333 4.533L6.667 23l2.8-1.4c.8.267 1.667.4 2.533.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M20 14c-3.314 0-6 2.239-6 5s2.686 5 6 5c.75 0 1.467-.117 2.133-.333L24.667 25l-.534-2.133C25.367 21.933 26 20.533 26 19c0-2.761-2.686-5-6-5z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                </div>
+                <span>微信支付</span>
+            </div>
+            <div class="payment-card">
+                <div class="payment-icon payment-digital">
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="12" stroke="currentColor" stroke-width="1.8"/><text x="16" y="20" text-anchor="middle" font-size="11" font-weight="700" fill="currentColor">¥</text></svg>
+                </div>
+                <span>数字人民币</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 使用流程 -->
+<section class="how-it-works">
+    <div class="container">
+        <div class="section-header anim-fade-up">
+            <span class="section-tag">使用流程</span>
+            <h2 class="section-title">三步开始使用</h2>
+            <p class="section-desc">简单几步，即可开启您的数字资产交易之旅</p>
+        </div>
+        <div class="steps-grid">
+            <div class="step-card anim-fade-up delay-1">
+                <div class="step-number">01</div>
+                <div class="step-content">
+                    <h3>下载注册</h3>
+                    <p>下载波币钱包APP，完成注册和实名认证，确保账户安全</p>
+                </div>
+                <div class="step-line"></div>
+            </div>
+            <div class="step-card anim-fade-up delay-2">
+                <div class="step-number">02</div>
+                <div class="step-content">
+                    <h3>绑定支付</h3>
+                    <p>绑定银行卡、支付宝或微信等收付款方式，即可开始交易</p>
+                </div>
+                <div class="step-line"></div>
+            </div>
+            <div class="step-card anim-fade-up delay-3">
+                <div class="step-number">03</div>
+                <div class="step-content">
+                    <h3>买卖交易</h3>
+                    <p>在交易市场自由买卖波币，充值提现一步到位</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 安全保障 -->
+<section class="security-section">
+    <div class="container">
+        <div class="security-layout">
+            <div class="security-text anim-fade-up">
+                <span class="section-tag">安全保障</span>
+                <h2 class="section-title">您的资产安全<br>是我们的首要任务</h2>
+                <p class="section-desc">多重安全防护体系，全方位保障您的数字资产和个人信息安全</p>
+                <a href="help.html" class="btn-secondary">了解更多 <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.917 7h8.166M7.583 3.5L11.083 7l-3.5 3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+            </div>
+            <div class="security-cards anim-fade-up delay-2">
+                <div class="sec-card">
+                    <div class="sec-card-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="3" y="11" width="18" height="11" rx="2" stroke="#3B82F6" stroke-width="1.5"/><path d="M7 11V7a5 5 0 0110 0v4" stroke="#3B82F6" stroke-width="1.5"/><circle cx="12" cy="16" r="1.5" fill="#3B82F6"/></svg>
+                    </div>
+                    <div>
+                        <h4>端到端加密</h4>
+                        <p>所有交易数据通过高级加密传输，防止信息泄露</p>
+                    </div>
+                </div>
+                <div class="sec-card">
+                    <div class="sec-card-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="#22C55E" stroke-width="1.5"/><path d="M9 12l2 2 4-4" stroke="#22C55E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </div>
+                    <div>
+                        <h4>实名认证</h4>
+                        <p>严格的身份验证机制，确保每笔交易真实可信</p>
+                    </div>
+                </div>
+                <div class="sec-card">
+                    <div class="sec-card-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="#F59E0B" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </div>
+                    <div>
+                        <h4>风控体系</h4>
+                        <p>24小时智能风控监测，异常交易实时预警处理</p>
+                    </div>
+                </div>
+                <div class="sec-card">
+                    <div class="sec-card-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" stroke="#8B5CF6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </div>
+                    <div>
+                        <h4>专业客服</h4>
+                        <p>7×24小时在线客服团队，随时为您解决任何问题</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 教程入口 -->
+<section class="tutorial-preview">
+    <div class="container">
+        <div class="section-header anim-fade-up">
+            <span class="section-tag">新手指南</span>
+            <h2 class="section-title">快速上手教程</h2>
+            <p class="section-desc">图文与视频教程，帮助您快速掌握波币钱包的使用方法</p>
+        </div>
+        <div class="tutorial-grid">
+            <a href="tutorial.html#beginner" class="tutorial-card anim-fade-up delay-1">
+                <div class="tutorial-card-icon tc-blue">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 2L4 7v5c0 5.5 3.4 10.7 8 12 4.6-1.3 8-6.5 8-12V7l-8-5z" stroke="currentColor" stroke-width="1.5"/></svg>
+                </div>
+                <h3>新手入门</h3>
+                <p>下载安装、注册、实名认证</p>
+                <span class="tutorial-card-arrow">→</span>
+            </a>
+            <a href="tutorial.html#bindpay" class="tutorial-card anim-fade-up delay-2">
+                <div class="tutorial-card-icon tc-green">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="2" y="5" width="20" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M2 10h20" stroke="currentColor" stroke-width="1.5"/></svg>
+                </div>
+                <h3>收付款设置</h3>
+                <p>绑定银行卡、支付宝、微信</p>
+                <span class="tutorial-card-arrow">→</span>
+            </a>
+            <a href="tutorial.html#buy" class="tutorial-card anim-fade-up delay-3">
+                <div class="tutorial-card-icon tc-purple">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/><path d="M12 8v8M8 12h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </div>
+                <h3>买币教程</h3>
+                <p>如何购买波币</p>
+                <span class="tutorial-card-arrow">→</span>
+            </a>
+            <a href="tutorial.html#sell" class="tutorial-card anim-fade-up delay-4">
+                <div class="tutorial-card-icon tc-amber">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/><path d="M8 12h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </div>
+                <h3>卖币教程</h3>
+                <p>如何挂单卖出波币</p>
+                <span class="tutorial-card-arrow">→</span>
+            </a>
+            <a href="tutorial.html#recharge" class="tutorial-card anim-fade-up delay-1">
+                <div class="tutorial-card-icon tc-teal">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 2v20M2 12h20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M17 7l-5 5-5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <h3>充值提现</h3>
+                <p>充值到平台、提现到钱包</p>
+                <span class="tutorial-card-arrow">→</span>
+            </a>
+            <a href="tutorial.html" class="tutorial-card tutorial-card-cta anim-fade-up delay-2">
+                <div class="tutorial-card-icon tc-primary">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 19.5A2.5 2.5 0 016.5 17H20M4 19.5V5a2 2 0 012-2h14v14H6.5A2.5 2.5 0 004 19.5z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <h3>查看全部教程</h3>
+                <p>图文+视频，全面覆盖</p>
+                <span class="tutorial-card-arrow">→</span>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- 底部CTA -->
+<section class="bottom-cta">
+    <div class="container">
+        <div class="cta-card anim-fade-up">
+            <h2>立即下载波币钱包</h2>
+            <p>开启安全、便捷的数字资产交易体验</p>
+            <div class="cta-actions">
+                <a href="download.html" class="btn-primary btn-lg">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2.5v11.667M10 14.167l4.167-4.167M10 14.167L5.833 10M3.333 17.5h13.334" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    立即下载
+                </a>
+                <a href="help.html" class="btn-ghost">联系客服</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 页脚 -->
+<footer class="footer">
+    <div class="container">
+        <div class="footer-top">
+            <div class="footer-brand">
+                <a href="index.html" class="footer-logo">
+                    <img src="images/logo.png" alt="波币钱包" class="logo-img">
+                    <div class="logo-text">
+                        <span class="logo-name">波币钱包</span>
+                        <span class="logo-sub">BBpay</span>
+                    </div>
+                </a>
+                <p class="footer-tagline">安全可靠的数字资产交易平台</p>
+            </div>
+            <div class="footer-links">
+                <div class="footer-col">
+                    <h4>产品</h4>
+                    <ul>
+                        <li><a href="download.html">下载APP</a></li>
+                        <li><a href="about.html">产品介绍</a></li>
+                        <li><a href="tutorial.html">使用教程</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>支持</h4>
+                    <ul>
+                        <li><a href="help.html">帮助中心</a></li>
+                        <li><a href="help.html#faq">常见问题</a></li>
+                        <li><a href="help.html#safety">安全须知</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>关于</h4>
+                    <ul>
+                        <li><a href="about.html">关于我们</a></li>
+                        <li><a href="about.html#contact">商务合作</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 波币钱包 BBpay. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
+
+<!-- 悬浮客服按钮 -->
+<div class="float-actions">
+    <a href="#" class="float-btn float-service" aria-label="在线客服">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="white"/></svg>
+        <span class="service-label">在线客服</span>
+    </a>
+    <div class="float-btn float-telegram" aria-label="Telegram客服">
+        <a href="https://t.me/BBQB666" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:white;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.12.03-1.99 1.27-5.62 3.72-.53.36-1.01.54-1.44.53-.47-.01-1.38-.27-2.06-.49-.83-.27-1.49-.42-1.43-.88.03-.24.37-.49 1.02-.74 3.98-1.73 6.63-2.87 7.95-3.43 3.79-1.58 4.57-1.85 5.08-1.86.11 0 .37.03.53.17.14.12.18.28.2.47-.01.06.01.24 0 .38z"/></svg>
+        </a>
+        <div class="telegram-popover">
+            <div class="tp-title">唯一合作渠道</div>
+            <div class="tp-contact">
+                <div class="tp-contact-info">
+                    <span class="tp-label">商务对接 Telegram</span>
+                    <a href="https://t.me/BBQB666" target="_blank" rel="noopener noreferrer">@BBQB666</a> 
+                </div>
+                <div class="tp-copy" onclick="navigator.clipboard.writeText('BBQB666'); alert('已复制：BBQB666');" title="复制账号">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                </div>
+            </div>
+            <div class="tp-warning">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                无多余符号，谨防假冒
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="js/main.js"></script>
+</body>
+</html>

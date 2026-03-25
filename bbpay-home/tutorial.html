@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>教程中心 - 波币钱包 BBpay</title>
+    <meta name="description" content="波币钱包教程中心：图文与视频教程，涵盖新手入门、收付款设置、买卖币、充值提现与账户管理。">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700;900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/tutorial.css">
+</head>
+<body class="tutorial-page">
+
+<!-- 顶部导航 -->
+<header class="header" id="header">
+    <div class="header-inner">
+        <a href="index.html" class="header-logo">
+            <img src="images/logo.png" alt="波币钱包" class="logo-img">
+            <div class="logo-text">
+                <span class="logo-name">波币钱包</span>
+                <span class="logo-sub">BBpay</span>
+            </div>
+        </a>
+
+        <nav class="header-nav" id="headerNav">
+            <a href="index.html" class="nav-link">首页</a>
+            <a href="tutorial.html" class="nav-link active">教程中心</a>
+            <a href="help.html" class="nav-link">帮助中心</a>
+            <a href="about.html" class="nav-link">关于我们</a>
+            <a href="download.html" class="nav-link nav-cta">下载APP</a>
+        </nav>
+
+        <button class="menu-toggle" id="menuToggle" aria-label="菜单">
+            <span></span><span></span><span></span>
+        </button>
+    </div>
+</header>
+
+<!-- 移动端菜单 -->
+<div class="mobile-menu" id="mobileMenu">
+    <nav class="mobile-nav">
+        <a href="index.html" class="mobile-nav-link">首页</a>
+        <a href="tutorial.html" class="mobile-nav-link active">教程中心</a>
+        <a href="help.html" class="mobile-nav-link">帮助中心</a>
+        <a href="about.html" class="mobile-nav-link">关于我们</a>
+        <a href="download.html" class="mobile-nav-link highlight">下载APP</a>
+    </nav>
+</div>
+
+<!-- Hero -->
+<section class="tutorial-hero">
+    <div class="hero-bg" aria-hidden="true">
+        <div class="hero-blur-circle hb-1"></div>
+        <div class="hero-blur-circle hb-2"></div>
+        <div class="hero-blur-circle hb-3"></div>
+        <div class="hero-noise"></div>
+    </div>
+    <div class="container tutorial-hero-inner">
+        <h1 class="tutorial-hero-title anim-fade-up">教程中心</h1>
+        <p class="tutorial-hero-desc anim-fade-up delay-1">图文与视频教程，助您快速掌握波币钱包的全部功能</p>
+    </div>
+    
+    <!-- 必看教程 -->
+    <div class="container tutorial-featured anim-fade-up delay-2">
+        <div class="featured-grid">
+            <!-- 视频1 -->
+            <div class="featured-video-card-small" onclick="openTutorialModal('download')">
+                <div class="featured-video-player-small">
+                    <div class="video-placeholder-large">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="12" cy="12" r="10" fill="var(--primary)" fill-opacity="0.2"/>
+                            <path d="M15.5 11.134C16.1667 11.5189 16.1667 12.4811 15.5 12.866L10.25 15.8971C9.58333 16.282 8.75 15.8009 8.75 15.0311L8.75 8.96887C8.75 8.19907 9.58333 7.71796 10.25 8.10288L15.5 11.134Z" fill="var(--primary)"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="featured-video-info-small">
+                    <div class="featured-badge">🔥 波币介绍</div>
+                    <h2 class="featured-title-small">全面了解波币钱包</h2>
+                </div>
+            </div>
+
+            <!-- 视频2 -->
+            <div class="featured-video-card-small" onclick="openTutorialModal('buy')">
+                <div class="featured-video-player-small">
+                    <div class="video-placeholder-large">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="12" cy="12" r="10" fill="var(--primary)" fill-opacity="0.2"/>
+                            <path d="M15.5 11.134C16.1667 11.5189 16.1667 12.4811 15.5 12.866L10.25 15.8971C9.58333 16.282 8.75 15.8009 8.75 15.0311L8.75 8.96887C8.75 8.19907 9.58333 7.71796 10.25 8.10288L15.5 11.134Z" fill="var(--primary)"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="featured-video-info-small">
+                    <div class="featured-badge">💸 交易买币</div>
+                    <h2 class="featured-title-small">如何安全快捷地买币</h2>
+                </div>
+            </div>
+
+            <!-- 视频3 -->
+            <div class="featured-video-card-small" onclick="openTutorialModal('sell')">
+                <div class="featured-video-player-small">
+                    <div class="video-placeholder-large">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="12" cy="12" r="10" fill="var(--primary)" fill-opacity="0.2"/>
+                            <path d="M15.5 11.134C16.1667 11.5189 16.1667 12.4811 15.5 12.866L10.25 15.8971C9.58333 16.282 8.75 15.8009 8.75 15.0311L8.75 8.96887C8.75 8.19907 9.58333 7.71796 10.25 8.10288L15.5 11.134Z" fill="var(--primary)"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="featured-video-info-small">
+                    <div class="featured-badge">💰 交易卖币</div>
+                    <h2 class="featured-title-small">如何将数字资产变现</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 分类标签 -->
+<div class="tutorial-tabs-wrap">
+    <div class="container">
+        <div class="tutorial-tabs" id="tutorialTabs" role="tablist" aria-label="教程分类">
+            <button type="button" class="tutorial-tab active" role="tab" aria-selected="true" data-filter="all">全部教程</button>
+            <button type="button" class="tutorial-tab" role="tab" aria-selected="false" data-filter="beginner">新手入门</button>
+            <button type="button" class="tutorial-tab" role="tab" aria-selected="false" data-filter="payment">收付款设置</button>
+            <button type="button" class="tutorial-tab" role="tab" aria-selected="false" data-filter="buy">买币教程</button>
+            <button type="button" class="tutorial-tab" role="tab" aria-selected="false" data-filter="sell">卖币教程</button>
+            <button type="button" class="tutorial-tab" role="tab" aria-selected="false" data-filter="recharge">充值提现</button>
+            <button type="button" class="tutorial-tab" role="tab" aria-selected="false" data-filter="account">账户管理</button>
+        </div>
+    </div>
+</div>
+
+<!-- 教程卡片 -->
+<main class="tutorial-main">
+    <div class="container">
+        <div class="tutorial-grid" id="tutorialGrid">
+            <button type="button" class="tutorial-list-card anim-fade-up delay-1" data-category="beginner" data-tutorial="download">
+                <div class="tutorial-card-meta">
+                    <span class="tutorial-badge-cat tcat-beginner">新手入门</span>
+                    <div class="tutorial-type-badges">
+                        <span class="tutorial-type-badge">图文</span>
+                        <span class="tutorial-type-badge video">视频</span>
+                    </div>
+                </div>
+                <h2 class="tutorial-card-title">下载安装教程</h2>
+                <p class="tutorial-card-desc">从官网或应用商店获取波币钱包并完成安装。</p>
+                <div class="tutorial-card-footer">
+                    <span class="tutorial-card-arrow">查看教程 <svg viewBox="0 0 16 16" fill="none"><path d="M3.333 8h9.334M9.333 4.667L12.667 8l-3.334 3.333" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                </div>
+            </button>
+            <button type="button" class="tutorial-list-card anim-fade-up delay-2" data-category="beginner" data-tutorial="register">
+                <div class="tutorial-card-meta">
+                    <span class="tutorial-badge-cat tcat-beginner">新手入门</span>
+                    <div class="tutorial-type-badges">
+                        <span class="tutorial-type-badge">图文</span>
+                        <span class="tutorial-type-badge video">视频</span>
+                    </div>
+                </div>
+                <h2 class="tutorial-card-title">注册账号教程</h2>
+                <p class="tutorial-card-desc">使用手机号注册并设置登录密码与安全选项。</p>
+                <div class="tutorial-card-footer">
+                    <span class="tutorial-card-arrow">查看教程 <svg viewBox="0 0 16 16" fill="none"><path d="M3.333 8h9.334M9.333 4.667L12.667 8l-3.334 3.333" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                </div>
+            </button>
+            <button type="button" class="tutorial-list-card anim-fade-up delay-3" data-category="beginner" data-tutorial="kyc">
+                <div class="tutorial-card-meta">
+                    <span class="tutorial-badge-cat tcat-beginner">新手入门</span>
+                    <div class="tutorial-type-badges">
+                        <span class="tutorial-type-badge">图文</span>
+                        <span class="tutorial-type-badge video">视频</span>
+                    </div>
+                </div>
+                <h2 class="tutorial-card-title">实名认证教程</h2>
+                <p class="tutorial-card-desc">提交身份信息完成实名，解锁交易与提现功能。</p>
+                <div class="tutorial-card-footer">
+                    <span class="tutorial-card-arrow">查看教程 <svg viewBox="0 0 16 16" fill="none"><path d="M3.333 8h9.334M9.333 4.667L12.667 8l-3.334 3.333" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                </div>
+            </button>
+            <button type="button" class="tutorial-list-card anim-fade-up delay-1" data-category="payment" data-tutorial="bind-bank">
+                <div class="tutorial-card-meta">
+                    <span class="tutorial-badge-cat tcat-payment">收付款设置</span>
+                    <div class="tutorial-type-badges">
+                        <span class="tutorial-type-badge">图文</span>
+                    </div>
+                </div>
+                <h2 class="tutorial-card-title">绑定银行卡</h2>
+                <p class="tutorial-card-desc">添加本人银行卡用于收款或付款。</p>
+                <div class="tutorial-card-footer">
+                    <span class="tutorial-card-arrow">查看教程 <svg viewBox="0 0 16 16" fill="none"><path d="M3.333 8h9.334M9.333 4.667L12.667 8l-3.334 3.333" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                </div>
+            </button>
+            <button type="button" class="tutorial-list-card anim-fade-up delay-2" data-category="payment" data-tutorial="bind-alipay">
+                <div class="tutorial-card-meta">
+                    <span class="tutorial-badge-cat tcat-payment">收付款设置</span>
+                    <div class="tutorial-type-badges">
+                        <span class="tutorial-type-badge">图文</span>
+                    </div>
+                </div>
+                <h2 class="tutorial-card-title">绑定支付宝</h2>
+                <p class="tutorial-card-desc">关联支付宝账号，便于快捷收付款。</p>
+                <div class="tutorial-card-footer">
+                    <span class="tutorial-card-arrow">查看教程 <svg viewBox="0 0 16 16" fill="none"><path d="M3.333 8h9.334M9.333 4.667L12.667 8l-3.334 3.333" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                </div>
+            </button>
+            <button type="button" class="tutorial-list-card anim-fade-up delay-3" data-category="payment" data-tutorial="bind-wechat">
+                <div class="tutorial-card-meta">
+                    <span class="tutorial-badge-cat tcat-payment">收付款设置</span>
+                    <div class="tutorial-type-badges">
+                        <span class="tutorial-type-badge">图文</span>
+                    </div>
+                </div>
+                <h2 class="tutorial-card-title">绑定微信</h2>
+                <p class="tutorial-card-desc">绑定微信支付，完成收付款方式配置。</p>
+                <div class="tutorial-card-footer">
+                    <span class="tutorial-card-arrow">查看教程 <svg viewBox="0 0 16 16" fill="none"><path d="M3.333 8h9.334M9.333 4.667L12.667 8l-3.334 3.333" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                </div>
+            </button>
+            <button type="button" class="tutorial-list-card anim-fade-up delay-1" data-category="buy" data-tutorial="buy-bobi">
+                <div class="tutorial-card-meta">
+                    <span class="tutorial-badge-cat tcat-buy">买币教程</span>
+                    <div class="tutorial-type-badges">
+                        <span class="tutorial-type-badge">图文</span>
+                        <span class="tutorial-type-badge video">视频</span>
+                    </div>
+                </div>
+                <h2 class="tutorial-card-title">如何购买波币</h2>
+                <p class="tutorial-card-desc">在交易市场选择卖家并完成付款与确认。</p>
+                <div class="tutorial-card-footer">
+                    <span class="tutorial-card-arrow">查看教程 <svg viewBox="0 0 16 16" fill="none"><path d="M3.333 8h9.334M9.333 4.667L12.667 8l-3.334 3.333" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                </div>
+            </button>
+            <button type="button" class="tutorial-list-card anim-fade-up delay-2" data-category="sell" data-tutorial="sell-order">
+                <div class="tutorial-card-meta">
+                    <span class="tutorial-badge-cat tcat-sell">卖币教程</span>
+                    <div class="tutorial-type-badges">
+                        <span class="tutorial-type-badge">图文</span>
+                        <span class="tutorial-type-badge video">视频</span>
+                    </div>
+                </div>
+                <h2 class="tutorial-card-title">如何挂单卖币</h2>
+                <p class="tutorial-card-desc">发布卖单、设置数量与单价，等待买家匹配。</p>
+                <div class="tutorial-card-footer">
+                    <span class="tutorial-card-arrow">查看教程 <svg viewBox="0 0 16 16" fill="none"><path d="M3.333 8h9.334M9.333 4.667L12.667 8l-3.334 3.333" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                </div>
+            </button>
+            <button type="button" class="tutorial-list-card anim-fade-up delay-3" data-category="recharge" data-tutorial="recharge">
+                <div class="tutorial-card-meta">
+                    <span class="tutorial-badge-cat tcat-recharge">充值提现</span>
+                    <div class="tutorial-type-badges">
+                        <span class="tutorial-type-badge">图文</span>
+                        <span class="tutorial-type-badge video">视频</span>
+                    </div>
+                </div>
+                <h2 class="tutorial-card-title">如何充值到平台</h2>
+                <p class="tutorial-card-desc">将波币从外部钱包转入平台账户。</p>
+                <div class="tutorial-card-footer">
+                    <span class="tutorial-card-arrow">查看教程 <svg viewBox="0 0 16 16" fill="none"><path d="M3.333 8h9.334M9.333 4.667L12.667 8l-3.334 3.333" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                </div>
+            </button>
+            <button type="button" class="tutorial-list-card anim-fade-up delay-1" data-category="recharge" data-tutorial="withdraw">
+                <div class="tutorial-card-meta">
+                    <span class="tutorial-badge-cat tcat-recharge">充值提现</span>
+                    <div class="tutorial-type-badges">
+                        <span class="tutorial-type-badge">图文</span>
+                        <span class="tutorial-type-badge video">视频</span>
+                    </div>
+                </div>
+                <h2 class="tutorial-card-title">如何提现到钱包</h2>
+                <p class="tutorial-card-desc">填写链上地址与数量，完成提现申请与确认。</p>
+                <div class="tutorial-card-footer">
+                    <span class="tutorial-card-arrow">查看教程 <svg viewBox="0 0 16 16" fill="none"><path d="M3.333 8h9.334M9.333 4.667L12.667 8l-3.334 3.333" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                </div>
+            </button>
+            <button type="button" class="tutorial-list-card anim-fade-up delay-2" data-category="account" data-tutorial="edit-price">
+                <div class="tutorial-card-meta">
+                    <span class="tutorial-badge-cat tcat-account">账户管理</span>
+                    <div class="tutorial-type-badges">
+                        <span class="tutorial-type-badge">图文</span>
+                    </div>
+                </div>
+                <h2 class="tutorial-card-title">如何修改单价及收款方式</h2>
+                <p class="tutorial-card-desc">在挂单或设置中更新单价与默认收款方式。</p>
+                <div class="tutorial-card-footer">
+                    <span class="tutorial-card-arrow">查看教程 <svg viewBox="0 0 16 16" fill="none"><path d="M3.333 8h9.334M9.333 4.667L12.667 8l-3.334 3.333" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                </div>
+            </button>
+            <button type="button" class="tutorial-list-card anim-fade-up delay-3" data-category="account" data-tutorial="close-order">
+                <div class="tutorial-card-meta">
+                    <span class="tutorial-badge-cat tcat-account">账户管理</span>
+                    <div class="tutorial-type-badges">
+                        <span class="tutorial-type-badge">图文</span>
+                    </div>
+                </div>
+                <h2 class="tutorial-card-title">如何关闭挂单</h2>
+                <p class="tutorial-card-desc">在订单列表中撤销或结束进行中的卖单。</p>
+                <div class="tutorial-card-footer">
+                    <span class="tutorial-card-arrow">查看教程 <svg viewBox="0 0 16 16" fill="none"><path d="M3.333 8h9.334M9.333 4.667L12.667 8l-3.334 3.333" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                </div>
+            </button>
+        </div>
+    </div>
+</main>
+
+<!-- 教程详情弹层 -->
+<div class="tutorial-modal-overlay" id="tutorialModal" aria-hidden="true">
+    <div class="tutorial-modal" role="dialog" aria-modal="true" aria-labelledby="tutorialModalTitle">
+        <div class="tutorial-modal-header">
+            <div class="tutorial-modal-title-wrap">
+                <span class="tutorial-modal-cat" id="tutorialModalCat"></span>
+                <h2 class="tutorial-modal-title" id="tutorialModalTitle"></h2>
+            </div>
+            <button type="button" class="tutorial-modal-close" id="tutorialModalClose" aria-label="关闭">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            </button>
+        </div>
+        <div class="tutorial-modal-body" id="tutorialModalBody">
+            <div class="tutorial-step-indicator">
+                <span class="tutorial-step-label" id="tutorialStepLabel"></span>
+                <div class="tutorial-step-dots" id="tutorialStepDots"></div>
+            </div>
+            <div class="tutorial-step-screenshot" aria-hidden="false">
+                <span>截图待更新</span>
+            </div>
+            <p class="tutorial-step-text" id="tutorialStepText"></p>
+            <div class="tutorial-video-placeholder" id="tutorialVideoPlaceholder" hidden>
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5"/><path d="M10 9l6 3-6 3V9z" fill="currentColor"/></svg>
+                <p>视频教程占位，正式版将嵌入播放器</p>
+            </div>
+            <div class="tutorial-related" id="tutorialRelatedWrap" hidden>
+                <h3>相关教程</h3>
+                <div class="tutorial-related-list" id="tutorialRelatedList"></div>
+            </div>
+        </div>
+        <div class="tutorial-modal-nav">
+            <button type="button" class="btn-secondary" id="tutorialPrevBtn">上一步</button>
+            <button type="button" class="btn-primary" id="tutorialNextBtn">下一步</button>
+        </div>
+    </div>
+</div>
+
+<!-- 回到顶部 -->
+<button type="button" class="back-to-top" id="backToTop" aria-label="回到顶部">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 19V5M5 12l7-7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+</button>
+
+<!-- 页脚 -->
+<footer class="footer">
+    <div class="container">
+        <div class="footer-top">
+            <div class="footer-brand">
+                <a href="index.html" class="footer-logo">
+                    <img src="images/logo.png" alt="波币钱包" class="logo-img">
+                    <div class="logo-text">
+                        <span class="logo-name">波币钱包</span>
+                        <span class="logo-sub">BBpay</span>
+                    </div>
+                </a>
+                <p class="footer-tagline">安全可靠的数字资产交易平台</p>
+            </div>
+            <div class="footer-links">
+                <div class="footer-col">
+                    <h4>产品</h4>
+                    <ul>
+                        <li><a href="download.html">下载APP</a></li>
+                        <li><a href="about.html">产品介绍</a></li>
+                        <li><a href="tutorial.html">使用教程</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>支持</h4>
+                    <ul>
+                        <li><a href="help.html">帮助中心</a></li>
+                        <li><a href="help.html#faq">常见问题</a></li>
+                        <li><a href="help.html#safety">安全须知</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>关于</h4>
+                    <ul>
+                        <li><a href="about.html">关于我们</a></li>
+                        <li><a href="about.html#contact">商务合作</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 波币钱包 BBpay. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
+
+<!-- 悬浮客服按钮 -->
+<div class="float-actions">
+    <a href="#" class="float-btn float-service" aria-label="在线客服">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="white"/></svg>
+        <span class="service-label">在线客服</span>
+    </a>
+    <div class="float-btn float-telegram" aria-label="Telegram客服">
+        <a href="https://t.me/BBQB666" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:white;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.12.03-1.99 1.27-5.62 3.72-.53.36-1.01.54-1.44.53-.47-.01-1.38-.27-2.06-.49-.83-.27-1.49-.42-1.43-.88.03-.24.37-.49 1.02-.74 3.98-1.73 6.63-2.87 7.95-3.43 3.79-1.58 4.57-1.85 5.08-1.86.11 0 .37.03.53.17.14.12.18.28.2.47-.01.06.01.24 0 .38z"/></svg>
+        </a>
+        <div class="telegram-popover">
+            <div class="tp-title">唯一合作渠道</div>
+            <div class="tp-contact">
+                <div class="tp-contact-info">
+                    <span class="tp-label">商务对接 Telegram</span>
+                    <a href="https://t.me/BBQB666" target="_blank" rel="noopener noreferrer">@BBQB666</a> 
+                </div>
+                <div class="tp-copy" onclick="navigator.clipboard.writeText('BBQB666'); alert('已复制：BBQB666');" title="复制账号">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                </div>
+            </div>
+            <div class="tp-warning">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                无多余符号，谨防假冒
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="js/main.js"></script>
+<script>
+(function () {
+    var TUTORIALS = {
+        download: {
+            title: '下载安装教程',
+            catLabel: '新手入门',
+            category: 'beginner',
+            hasVideo: true,
+            steps: [
+                '打开波币钱包官网或手机应用商店，搜索「波币钱包」或「BBpay」。',
+                '确认开发者信息与官方标识后，点击下载安装包。',
+                '若系统提示「未知来源」，请在设置中允许本次安装并完成安装。',
+                '安装完成后点击图标启动应用，按提示授予必要权限（如通知、存储）。',
+                '进入欢迎页，您可继续「注册账号」或前往「登录」已有账户。'
+            ]
+        },
+        register: {
+            title: '注册账号教程',
+            catLabel: '新手入门',
+            category: 'beginner',
+            hasVideo: true,
+            steps: [
+                '在登录页选择「注册」，输入本人常用手机号并获取短信验证码。',
+                '设置登录密码（建议包含字母与数字），并再次确认密码。',
+                '阅读并勾选用户协议与隐私政策，点击完成注册。',
+                '注册成功后建议立即完成安全设置（如手势或设备锁），再进入首页。'
+            ]
+        },
+        kyc: {
+            title: '实名认证教程',
+            catLabel: '新手入门',
+            category: 'beginner',
+            hasVideo: true,
+            steps: [
+                '在「我的」或「安全中心」进入「实名认证」，准备好本人身份证。',
+                '按指引拍摄或上传身份证正反面，确认信息清晰、四角完整。',
+                '提交后等待系统审核；审核通过后即可使用买币、卖币与提现等功能。'
+            ]
+        },
+        'bind-bank': {
+            title: '绑定银行卡',
+            catLabel: '收付款设置',
+            category: 'payment',
+            hasVideo: false,
+            steps: [
+                '进入「收付款方式」或「银行卡管理」，选择「添加银行卡」。',
+                '输入持卡人姓名（需与实名一致）、卡号及银行预留手机号。',
+                '完成短信或银行渠道验证后保存，即可在交易时选择该卡收付款。'
+            ]
+        },
+        'bind-alipay': {
+            title: '绑定支付宝',
+            catLabel: '收付款设置',
+            category: 'payment',
+            hasVideo: false,
+            steps: [
+                '在收付款设置中选择「支付宝」，点击「去绑定」。',
+                '输入支付宝账号或按页面跳转完成支付宝侧授权。',
+                '绑定成功后可在挂单或订单中选择支付宝作为收款或付款方式。'
+            ]
+        },
+        'bind-wechat': {
+            title: '绑定微信',
+            catLabel: '收付款设置',
+            category: 'payment',
+            hasVideo: false,
+            steps: [
+                '在收付款设置中选择「微信支付」，进入绑定流程。',
+                '按提示打开微信完成授权，确认绑定的微信账号与实名信息一致。',
+                '保存设置后，即可在相关交易场景使用微信收付款。'
+            ]
+        },
+        'buy-bobi': {
+            title: '如何购买波币',
+            catLabel: '买币教程',
+            category: 'buy',
+            hasVideo: true,
+            steps: [
+                '打开「买币」或「交易市场」，浏览可购买的挂单列表。',
+                '选择合适的卖家，确认单价、限额与收款方式后点击「购买」。',
+                '输入购买数量或金额，生成订单并在规定时间内完成线下付款。',
+                '付款后上传凭证或点击「已付款」，等待卖家放币。',
+                '订单完成后，波币将入账至您的平台钱包，可在资产页查看余额。'
+            ]
+        },
+        'sell-order': {
+            title: '如何挂单卖币',
+            catLabel: '卖币教程',
+            category: 'sell',
+            hasVideo: true,
+            steps: [
+                '确保账户内有可售波币余额，并已完成收付款方式绑定。',
+                '进入「卖币」或「发布卖单」，填写出售数量与单价。',
+                '选择默认收款方式（银行卡/支付宝/微信等）并核对限额说明。',
+                '确认订单信息后提交挂单，订单将展示在市场中供买家匹配。',
+                '买家付款后，核实到账再放币；全程请在平台内沟通与操作以保障安全。'
+            ]
+        },
+        recharge: {
+            title: '如何充值到平台',
+            catLabel: '充值提现',
+            category: 'recharge',
+            hasVideo: true,
+            steps: [
+                '在资产页选择「充值」或「链上充值」，复制平台提供的充值地址。',
+                '打开您的外部钱包，选择相同网络（如 TRC20/ERC20 等，以页面为准）。',
+                '粘贴地址并输入充值数量，确认手续费后发起转账。',
+                '等待区块确认后，余额将在资产页更新；若长时间未到账可查看区块记录或联系客服。'
+            ]
+        },
+        withdraw: {
+            title: '如何提现到钱包',
+            catLabel: '充值提现',
+            category: 'recharge',
+            hasVideo: true,
+            steps: [
+                '在资产页选择「提现」，输入您本人掌控的链上收款地址。',
+                '选择网络与提现数量，核对手续费与实际到账数量。',
+                '完成安全验证（如短信、资金密码）后提交申请，等待审核与链上转出。'
+            ]
+        },
+        'edit-price': {
+            title: '如何修改单价及收款方式',
+            catLabel: '账户管理',
+            category: 'account',
+            hasVideo: false,
+            steps: [
+                '在「我的挂单」或「卖单管理」中找到需要修改的订单。',
+                '点击「编辑」或进入详情页，调整单价或切换/新增收款方式。',
+                '保存修改后，新条件将对后续匹配生效（具体规则以APP内说明为准）。'
+            ]
+        },
+        'close-order': {
+            title: '如何关闭挂单',
+            catLabel: '账户管理',
+            category: 'account',
+            hasVideo: false,
+            steps: [
+                '进入「我的挂单」列表，选择状态为「进行中」或「待匹配」的卖单。',
+                '点击「撤销挂单」或「关闭」，确认后该单将不再对市场展示。'
+            ]
+        }
+    };
+
+    var grid = document.getElementById('tutorialGrid');
+    var tabs = document.querySelectorAll('.tutorial-tab');
+    var modal = document.getElementById('tutorialModal');
+    var modalTitle = document.getElementById('tutorialModalTitle');
+    var modalCat = document.getElementById('tutorialModalCat');
+    var stepLabel = document.getElementById('tutorialStepLabel');
+    var stepDots = document.getElementById('tutorialStepDots');
+    var stepText = document.getElementById('tutorialStepText');
+    var videoPh = document.getElementById('tutorialVideoPlaceholder');
+    var relatedWrap = document.getElementById('tutorialRelatedWrap');
+    var relatedList = document.getElementById('tutorialRelatedList');
+    var prevBtn = document.getElementById('tutorialPrevBtn');
+    var nextBtn = document.getElementById('tutorialNextBtn');
+    var closeBtn = document.getElementById('tutorialModalClose');
+    var backToTop = document.getElementById('backToTop');
+
+    var currentId = null;
+    var stepIndex = 0;
+
+    function filterCards(filter) {
+        grid.querySelectorAll('.tutorial-list-card').forEach(function (card) {
+            var cat = card.getAttribute('data-category');
+            var show = filter === 'all' || cat === filter;
+            card.classList.toggle('hidden', !show);
+            if (show && card.classList.contains('anim-fade-up')) {
+                card.classList.add('visible');
+            }
+        });
+    }
+
+    function setActiveFilter(f) {
+        tabs.forEach(function (t) {
+            var match = t.getAttribute('data-filter') === f;
+            t.classList.toggle('active', match);
+            t.setAttribute('aria-selected', match ? 'true' : 'false');
+        });
+        filterCards(f);
+    }
+
+    tabs.forEach(function (tab) {
+        tab.addEventListener('click', function () {
+            setActiveFilter(tab.getAttribute('data-filter'));
+        });
+    });
+
+    var hashToFilter = { beginner: 'beginner', bindpay: 'payment', buy: 'buy', sell: 'sell', recharge: 'recharge' };
+    var hash = (window.location.hash || '').replace(/^#/, '');
+    if (hashToFilter[hash]) {
+        setActiveFilter(hashToFilter[hash]);
+    }
+
+    function getRelated(id) {
+        var data = TUTORIALS[id];
+        if (!data) return [];
+        return Object.keys(TUTORIALS).filter(function (k) {
+            return k !== id && TUTORIALS[k].category === data.category;
+        }).slice(0, 3);
+    }
+
+    function renderStep() {
+        var data = TUTORIALS[currentId];
+        if (!data) return;
+        var total = data.steps.length;
+        var i = stepIndex;
+        stepLabel.textContent = '步骤 ' + (i + 1) + '/' + total;
+        stepText.textContent = data.steps[i];
+        stepDots.innerHTML = '';
+        for (var d = 0; d < total; d++) {
+            var dot = document.createElement('span');
+            dot.className = 'tutorial-step-dot' + (d === i ? ' active' : '');
+            stepDots.appendChild(dot);
+        }
+        prevBtn.disabled = i === 0;
+        nextBtn.textContent = i === total - 1 ? '完成' : '下一步';
+        videoPh.hidden = !data.hasVideo;
+        var related = getRelated(currentId);
+        if (related.length) {
+            relatedWrap.hidden = false;
+            relatedList.innerHTML = '';
+            related.forEach(function (rid) {
+                var t = TUTORIALS[rid];
+                var btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'tutorial-related-link';
+                btn.textContent = t.title;
+                btn.addEventListener('click', function () {
+                    openModal(rid);
+                });
+                relatedList.appendChild(btn);
+            });
+        } else {
+            relatedWrap.hidden = true;
+        }
+    }
+
+    function openModal(id) {
+        if (!TUTORIALS[id]) return;
+        currentId = id;
+        stepIndex = 0;
+        var data = TUTORIALS[id];
+        modalTitle.textContent = data.title;
+        modalCat.textContent = data.catLabel;
+        modal.classList.add('open');
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('modal-open');
+        renderStep();
+        closeBtn.focus();
+    }
+
+    function closeModal() {
+        modal.classList.remove('open');
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('modal-open');
+        currentId = null;
+    }
+
+    grid.querySelectorAll('.tutorial-list-card').forEach(function (card) {
+        card.addEventListener('click', function () {
+            openModal(card.getAttribute('data-tutorial'));
+        });
+    });
+
+    prevBtn.addEventListener('click', function () {
+        if (stepIndex > 0) {
+            stepIndex--;
+            renderStep();
+        }
+    });
+
+    nextBtn.addEventListener('click', function () {
+        var data = TUTORIALS[currentId];
+        if (!data) return;
+        if (stepIndex < data.steps.length - 1) {
+            stepIndex++;
+            renderStep();
+        } else {
+            closeModal();
+        }
+    });
+
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', function (e) {
+        if (e.target === modal) closeModal();
+    });
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && modal.classList.contains('open')) closeModal();
+    });
+
+    if (backToTop) {
+        window.addEventListener('scroll', function () {
+            backToTop.classList.toggle('visible', window.pageYOffset > 400);
+        }, { passive: true });
+        backToTop.addEventListener('click', function () {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    }
+})();
+</script>
+</body>
+</html>

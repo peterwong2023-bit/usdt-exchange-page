@@ -1,0 +1,373 @@
+/* ========================================
+   下载页
+   ======================================== */
+
+/* ===== 全屏渐变 Hero ===== */
+.download-hero {
+    position: relative;
+    min-height: min(100vh, 900px);
+    min-height: min(100dvh, 900px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 100px 0 56px;
+    overflow: hidden;
+}
+
+.download-hero-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background:
+        linear-gradient(165deg, var(--primary-dark) 0%, var(--primary) 38%, var(--primary-light) 72%, #60A5FA 100%);
+}
+
+/* 高定氛围层叠在渐变之上 */
+.download-hero .hero-bg {
+    z-index: 1;
+}
+
+.download-hero .hero-blur-circle {
+    opacity: 0.5;
+    filter: blur(110px);
+}
+
+.download-hero .hb-1 {
+    background: rgba(255, 255, 255, 0.22);
+}
+
+.download-hero .hb-2 {
+    background: rgba(147, 197, 253, 0.45);
+}
+
+.download-hero .hb-3 {
+    background: rgba(196, 181, 253, 0.35);
+}
+
+.download-hero .hero-noise {
+    opacity: 0.055;
+    mix-blend-mode: overlay;
+}
+
+.download-hero-bg::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(ellipse 90% 60% at 50% 0%, rgba(255,255,255,0.18) 0%, transparent 55%),
+        radial-gradient(ellipse 50% 45% at 100% 40%, rgba(96,165,250,0.35) 0%, transparent 50%),
+        radial-gradient(ellipse 45% 50% at 0% 70%, rgba(29,78,216,0.4) 0%, transparent 45%);
+    pointer-events: none;
+}
+
+.download-hero-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    max-width: 420px;
+    margin: 0 auto;
+}
+
+.download-hero-logo {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.download-hero-logo svg {
+    width: 72px;
+    height: 72px;
+    filter: drop-shadow(0 12px 28px rgba(0,0,0,0.2));
+}
+
+.download-hero-title {
+    font-size: clamp(28px, 6vw, 40px);
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    margin-bottom: 12px;
+    text-shadow: 0 2px 24px rgba(0,0,0,0.15);
+}
+
+.download-hero-sub {
+    font-size: 16px;
+    line-height: 1.65;
+    color: rgba(255,255,255,0.88);
+    margin-bottom: 32px;
+}
+
+.download-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+}
+
+.download-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 16px 24px;
+    border-radius: var(--radius-lg);
+    font-size: 16px;
+    font-weight: 600;
+    font-family: var(--font-cn);
+    transition: transform 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out);
+    border: 1px solid transparent;
+}
+
+.download-btn:hover {
+    transform: translateY(-2px);
+    color: inherit;
+}
+
+.download-btn-android {
+    background: #fff;
+    color: var(--text-primary);
+    box-shadow:
+        0 10px 32px rgba(15, 23, 42, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 1);
+}
+
+.download-btn-android:hover {
+    box-shadow:
+        0 14px 40px rgba(15, 23, 42, 0.22),
+        inset 0 1px 0 rgba(255, 255, 255, 1);
+}
+
+.download-btn-ios {
+    background: rgba(255,255,255,0.14);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.42);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow:
+        0 8px 28px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.download-btn-ios:hover {
+    box-shadow:
+        0 12px 36px rgba(0, 0, 0, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+
+.download-btn-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.download-btn-ios .download-btn-icon {
+    color: #fff;
+}
+
+.download-backup-wrap {
+    margin-top: 16px;
+    margin-bottom: 28px;
+}
+
+.download-backup-link {
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.85);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+
+.download-backup-link:hover {
+    color: #fff;
+}
+
+.download-qr {
+    width: 140px;
+    height: 140px;
+    margin: 0 auto;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow:
+        0 8px 28px rgba(15, 23, 42, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 1);
+}
+
+.download-qr-placeholder {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--gray-600);
+}
+
+@media (min-width: 480px) {
+    .download-actions {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .download-btn {
+        min-width: 200px;
+    }
+}
+
+/* ===== 区块 ===== */
+.download-section {
+    padding: 56px 0;
+    background: var(--bg-primary);
+}
+
+.download-section-alt {
+    background: var(--bg-secondary);
+}
+
+.download-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 720px;
+    margin: 0 auto;
+}
+
+.download-step-card {
+    display: flex;
+    gap: 18px;
+    align-items: flex-start;
+    background: var(--bg-primary);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: var(--radius-lg);
+    padding: 22px 20px;
+    box-shadow:
+        0 4px 20px rgba(15, 23, 42, 0.05),
+        inset 0 1px 0 rgba(255, 255, 255, 0.92);
+}
+
+.download-section-alt .download-step-card,
+.download-android-card {
+    background: var(--bg-primary);
+}
+
+.download-step-num {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-md);
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+    color: #fff;
+    font-family: var(--font-en);
+    font-size: 16px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.download-step-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.download-step-title-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+}
+
+.download-step-icon-tf {
+    display: flex;
+    flex-shrink: 0;
+}
+
+.download-step-title {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 8px;
+    line-height: 1.35;
+}
+
+.download-step-title-row .download-step-title {
+    margin-bottom: 0;
+}
+
+.download-step-title-row + .download-step-desc {
+    margin-top: 8px;
+}
+
+.download-step-body > .download-step-title:first-child {
+    margin-bottom: 8px;
+}
+
+.download-step-desc {
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--text-tertiary);
+    margin: 0;
+}
+
+.download-android-card {
+    max-width: 720px;
+    margin: 0 auto;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: var(--radius-lg);
+    padding: 24px 22px;
+    box-shadow:
+        0 4px 20px rgba(15, 23, 42, 0.05),
+        inset 0 1px 0 rgba(255, 255, 255, 0.92);
+}
+
+.download-android-list {
+    margin: 0;
+    padding-left: 1.25em;
+    list-style: disc;
+    color: var(--text-secondary);
+    font-size: 15px;
+    line-height: 1.85;
+}
+
+.download-android-list li + li {
+    margin-top: 12px;
+}
+
+/* ===== 网页版 ===== */
+.download-h5 {
+    padding: 48px 0 72px;
+    background: var(--bg-primary);
+}
+
+.download-h5-inner {
+    text-align: center;
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 32px 24px;
+    background: var(--primary-bg);
+    border: 1px solid rgba(37, 99, 235, 0.18);
+    border-radius: var(--radius-xl);
+    box-shadow:
+        0 10px 36px rgba(37, 99, 235, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+
+.download-h5-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 10px;
+}
+
+.download-h5-desc {
+    font-size: 15px;
+    color: var(--text-tertiary);
+    line-height: 1.65;
+    margin-bottom: 20px;
+}
+
+.download-h5-btn {
+    min-width: 200px;
+}
