@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>用户风险详情（完整版） - 波币AI风险监控系统</title>
     <link rel="stylesheet" href="styles-v4.css">
+    <link rel="stylesheet" href="premium-saas.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
@@ -50,31 +51,31 @@
         <!-- 用户基本信息 + 评分 -->
         <div class="dashboard-card" style="margin-bottom: 8px;">
             <div style="padding: 16px 20px; display: flex; align-items: center; gap: 20px;">
-                <img src="https://i.pravatar.cc/150?img=1" alt="avatar" style="width: 70px; height: 70px; border-radius: 14px; border: 2px solid #e2e8f0;">
+                <img id="headerAvatar" src="https://i.pravatar.cc/150?img=1" alt="avatar" style="width: 70px; height: 70px; border-radius: 14px; border: 2px solid #e2e8f0;">
                 <div style="flex: 1;">
                     <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
-                        <h1 style="font-size: 16px; font-weight: 900; color: #0f172a; margin: 0; font-family: 'JetBrains Mono', monospace;">#9f3e_7A12345h78</h1>
-                        <button class="btn btn-outline" style="font-size: 11px; padding: 4px 10px; background: #eff6ff; color: #3b82f6; border-color: #bfdbfe; font-weight: 700;" onclick="window.parent.app.openAuditDrawer('9f3e_7A12345h78', 'syndicate')">
+                        <h1 id="headerUserId" style="font-size: 16px; font-weight: 900; color: #0f172a; margin: 0; font-family: 'JetBrains Mono', monospace;">#9f3e_7A12345h78</h1>
+                        <button class="btn btn-outline" style="font-size: 11px; padding: 4px 10px; background: #eff6ff; color: #3b82f6; border-color: #bfdbfe; font-weight: 700;" onclick="openRelationshipGraph()">
                             <i class="fas fa-project-diagram"></i> 关联关系分析
                         </button>
                     </div>
                     <div style="font-size: 13px; color: #64748b; margin-bottom: 8px;">
-                        <i class="fas fa-map-marker-alt" style="color: #f59e0b;"></i> 深圳
+                        <span id="headerCity"><i class="fas fa-map-marker-alt" style="color: #f59e0b;"></i> 深圳</span>
                         <span style="margin: 0 12px;">|</span>
-                        <i class="fas fa-globe" style="color: #3b82f6;"></i> 112.25.67.89
+                        <span id="headerIp"><i class="fas fa-globe" style="color: #3b82f6;"></i> 112.25.67.89</span>
                         <span style="margin: 0 12px;">|</span>
-                        <i class="fas fa-clock" style="color: #10b981;"></i> 2025-11-28 14:23:15
+                        <span id="headerTime"><i class="fas fa-clock" style="color: #10b981;"></i> 2025-11-28 14:23:15</span>
                     </div>
                     
                 </div>
                 <div style="text-align: center;">
-                    <div style="width: 110px; height: 110px; border-radius: 20px; background: linear-gradient(135deg, #dc2626, #991b1b); display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; box-shadow: 0 8px 20px rgba(220, 38, 38, 0.4); position: relative; overflow: hidden; border: 2px solid rgba(255,255,255,0.2);">
+                    <div id="headerScoreBg" style="width: 110px; height: 110px; border-radius: 20px; background: linear-gradient(135deg, #dc2626, #991b1b); display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; box-shadow: 0 8px 20px rgba(220, 38, 38, 0.4); position: relative; overflow: hidden; border: 2px solid rgba(255,255,255,0.2);">
                         <!-- 顶部的风险等级标签 -->
-                        <div style="position: absolute; top: 0; width: 100%; background: rgba(0,0,0,0.15); padding: 4px 0; font-size: 11px; font-weight: 800; letter-spacing: 1px;">
+                        <div id="headerLevelLabel" style="position: absolute; top: 0; width: 100%; background: rgba(0,0,0,0.15); padding: 4px 0; font-size: 11px; font-weight: 800; letter-spacing: 1px;">
                             高危
                         </div>
                         <div style="margin-top: 15px;">
-                            <div style="font-size: 46px; font-weight: 900; font-family: 'JetBrains Mono', monospace; line-height: 1;">91</div>
+                            <div id="headerScore" style="font-size: 46px; font-weight: 900; font-family: 'JetBrains Mono', monospace; line-height: 1;">91</div>
                             
                         </div>
                     </div>
@@ -690,6 +691,62 @@
 </div>
 
     <script>
+        // 获取所有查询参数
+        const urlParams = new URLSearchParams(window.location.search);
+        let currentUserId = urlParams.get('user_id') || '9f3e_7A12345h78';
+        
+        // 动态加载用户信息
+        function loadUserInfo() {
+            if (typeof window.parent.riskUsersList !== 'undefined') {
+                const user = window.parent.riskUsersList.find(u => u.user_id === currentUserId);
+                if (user) {
+                    document.getElementById('headerUserId').textContent = user.user_id;
+                    document.getElementById('headerAvatar').src = user.avatar || '../bob.png';
+                    document.getElementById('headerScore').textContent = user.risk_score;
+                    document.getElementById('headerCity').innerHTML = `<i class="fas fa-map-marker-alt" style="color: #f59e0b;"></i> ${user.city || '未知'}`;
+                    document.getElementById('headerIp').innerHTML = `<i class="fas fa-globe" style="color: #3b82f6;"></i> ${user.last_ip || '未知'}`;
+                    
+                    const time = user.last_login_at || new Date().toISOString().replace('T', ' ').slice(0, 19);
+                    document.getElementById('headerTime').innerHTML = `<i class="fas fa-clock" style="color: #10b981;"></i> ${time}`;
+                    
+                    // 设置风险等级标签和颜色
+                    const scoreBg = document.getElementById('headerScoreBg');
+                    const levelLabel = document.getElementById('headerLevelLabel');
+                    
+                    if (user.risk_score >= 80) {
+                        scoreBg.style.background = 'linear-gradient(135deg, #dc2626, #991b1b)';
+                        scoreBg.style.boxShadow = '0 8px 20px rgba(220, 38, 38, 0.4)';
+                        levelLabel.textContent = '高危';
+                    } else if (user.risk_score >= 60) {
+                        scoreBg.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
+                        scoreBg.style.boxShadow = '0 8px 20px rgba(245, 158, 11, 0.4)';
+                        levelLabel.textContent = '中危';
+                    } else {
+                        scoreBg.style.background = 'linear-gradient(135deg, #3b82f6, #2563eb)';
+                        scoreBg.style.boxShadow = '0 8px 20px rgba(59, 130, 246, 0.4)';
+                        levelLabel.textContent = '低危';
+                    }
+                }
+            }
+        }
+        
+        // 优化关联关系跳转（防止抽屉嵌套）
+        function openRelationshipGraph() {
+            if (window.parent && typeof window.parent.app !== 'undefined') {
+                window.parent.app.closeAuditDrawer();
+                setTimeout(() => {
+                    window.parent.app.switchView('relationships');
+                    const searchInput = window.parent.document.getElementById('relationshipSearchInput');
+                    if (searchInput) {
+                        searchInput.value = currentUserId;
+                        window.parent.app.executeRelationshipSearch();
+                    }
+                }, 300);
+            } else {
+                window.location.href = `group-graph.html?anchor=${currentUserId}`;
+            }
+        }
+
         function scrollTo(layerId) {
             const element = document.getElementById(layerId);
             if (element) {
@@ -1333,6 +1390,8 @@
 
         // ===== 统一初始化 =====
         window.addEventListener('load', function() {
+            // 动态加载用户信息
+            loadUserInfo();
             // 根据工单状态调整操作区
             const urlParams = new URLSearchParams(window.location.search);
             const claimStatus = urlParams.get('claim_status');

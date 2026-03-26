@@ -1696,17 +1696,23 @@ class RiskMonitoringSystemV4 extends RiskMonitoringSystemBase {
     // 一键快速筛选方法
     applyQuickFilter(type, value) {
         this.showToast(`已应用快速筛选：${type === 'status' ? '处理状态' : '风险等级'}`, 'info');
-        
+
         const levelSelect = document.getElementById('filterRiskLevel');
-        
+        const prioritySelect = document.getElementById('filterPriority');
+
         if (type === 'risk_level') {
             if (levelSelect) levelSelect.value = value;
+            this.switchQueueTab('all');
         } else if (type === 'status') {
-            if (value === 'urgent' && levelSelect) levelSelect.value = 'critical';
-            else if (value === 'all' && levelSelect) levelSelect.value = '';
+            if (value === 'urgent') {
+                if (prioritySelect) prioritySelect.value = 'urgent';
+                this.switchQueueTab('unclaimed');
+            } else if (value === 'all') {
+                if (prioritySelect) prioritySelect.value = '';
+                this.switchQueueTab('all');
+            }
         }
-        
-        // 触发查询
+
         this.loadUsersView();
     }
 

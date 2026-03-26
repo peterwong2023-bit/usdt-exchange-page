@@ -238,10 +238,12 @@
   .th-tip { color: #94a3b8; font-size: 14px; cursor: help; margin-left: 4px; vertical-align: text-bottom; }
 
   /* Pagination */
-  .pgb { display: flex; align-items: center; justify-content: flex-end; gap: 8px; padding: 16px 24px; font-size: 13px; font-weight: 500; color: var(--text-muted); border-top: 1px solid var(--border-soft); background: var(--bg-main); }
-  .pg { min-width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); cursor: pointer; background: #fff; border: 1px solid var(--border-soft); color: var(--text-muted); font-size: 13px; font-weight: 600; transition: all .2s; }
-  .pg:hover { border-color: var(--primary); color: var(--primary); transform: translateY(-1px); box-shadow: 0 2px 4px rgba(37,99,235,0.1); }
-  .pg.on { background: var(--primary); color: #fff; border-color: var(--primary); box-shadow: 0 2px 8px rgba(37,99,235,0.25); }
+  .pgb { display: flex; align-items: center; gap: 12px; padding: 14px 24px; font-size: 13px; font-weight: 500; color: var(--text-muted); border-top: 1px solid var(--border-soft); background: rgba(248,250,252,0.6); }
+  .pgb select { background: #fff; border: 1px solid var(--border-soft); color: var(--text-muted); padding: 5px 8px; border-radius: var(--radius-sm); font-size: 12px; font-weight: 500; font-family: 'Outfit', sans-serif; cursor: pointer; transition: all .2s; }
+  .pgb select:hover { border-color: var(--primary); }
+  .pg { min-width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); cursor: pointer; background: #fff; border: 1px solid var(--border-soft); color: var(--text-muted); font-size: 12px; font-weight: 600; transition: all .2s; }
+  .pg:hover { border-color: var(--primary); color: var(--primary); box-shadow: 0 1px 3px rgba(37,99,235,0.1); }
+  .pg.on { background: var(--primary); color: #fff; border-color: var(--primary); box-shadow: 0 2px 6px rgba(37,99,235,0.2); }
 
   /* Buttons & Utilities */
   .btn-create { padding: 8px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; font-family: 'Outfit', sans-serif; border: 1px solid var(--border-soft); background: #fff; color: var(--text-main); cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all .2s; box-shadow: 0 1px 2px rgba(0,0,0,0.02); }
@@ -250,7 +252,7 @@
 
   /* Bottom Tabs */
   .btab-wrap { background: var(--bg-card); border: 1px solid var(--border-soft); border-radius: var(--radius-lg); margin-bottom: 24px; box-shadow: var(--shadow-sm); overflow: hidden; }
-  .btab-nav { display: flex; background: var(--bg-main); border-bottom: 1px solid var(--border-soft); padding: 0 8px; }
+  .btab-nav { display: flex; background: var(--bg-main); border-bottom: 1px solid var(--border-soft); }
   .btab-btn { padding: 16px 24px; font-size: 14px; font-weight: 600; color: var(--text-muted); cursor: pointer; border-bottom: 2px solid transparent; transition: all .2s; user-select: none; position: relative; }
   .btab-btn:hover { color: var(--text-main); }
   .btab-btn.active { color: var(--primary); border-bottom-color: var(--primary); background: #fff; border-radius: 8px 8px 0 0; }
@@ -335,27 +337,15 @@
   </div>
   <div class="mn">
 
-    <!-- ═══ 1. 全局筛选区 ═══ -->
-    <div class="frow">
-      <div class="fg">
-        <label>商户</label>
-        <select style="min-width:180px"><option selected>再次出发（1261）</option><option>星辰支付（1088）</option><option>鲸鱼商户（1342）</option></select>
+    <!-- ═══ 1. 商户选择 + 数据更新时间 ═══ -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+      <div style="display:flex;align-items:center;gap:12px">
+        <span style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px">商户</span>
+        <select style="min-width:180px;background:var(--bg-card);border:1px solid var(--border-soft);color:var(--text-main);padding:8px 12px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;font-family:'Outfit',sans-serif;outline:none;cursor:pointer;box-shadow:var(--shadow-sm);transition:all .2s"><option selected>再次出发（1261）</option><option>星辰支付（1088）</option><option>鲸鱼商户（1342）</option></select>
       </div>
-      <div class="fg">
-        <label>时间范围</label>
-        <div style="display:flex;gap:6px;align-items:center;"><input type="date" value="2026-02-19"><span style="color:var(--text-light);font-weight:500">~</span><input type="date" value="2026-03-20"></div>
-      </div>
-      <div class="fg">
-        <label>粒度</label>
-        <div class="prs" id="granPrs">
-          <div class="p on" onclick="switchGran(this)">日</div>
-          <div class="p" onclick="switchGran(this)">周</div>
-          <div class="p" onclick="switchGran(this)">月</div>
-        </div>
-      </div>
-      <div style="display:flex;gap:8px;padding-bottom:1px;">
-        <button class="bq" onclick="doQuery()"><i class="ri-search-line" style="font-size:12px;margin-right:2px"></i>查 询</button>
-        <button class="brr" onclick="doReset()">重置</button>
+      <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-light);font-weight:500">
+        <span style="width:6px;height:6px;background:var(--success);border-radius:50%;display:inline-block"></span>
+        数据更新于 <span class="mono" style="color:var(--text-muted);font-weight:600">2026-03-20 14:32:05</span>
       </div>
     </div>
 
@@ -400,9 +390,24 @@
 
     <!-- ═══ 4. 调度任务 + 周期明细 ═══ -->
     <div class="btab-wrap">
-      <div class="btab-nav">
-        <div class="btab-btn active" onclick="switchTab('task')">调度任务 <span id="taskTabBadge" style="display:inline-block;background:var(--danger);color:#fff;font-size:11px;min-width:18px;height:18px;line-height:18px;text-align:center;border-radius:9px;margin-left:6px;padding:0 5px;font-weight:700;font-family:'JetBrains Mono',monospace;vertical-align:middle;box-shadow:0 2px 4px rgba(239,68,68,0.2)"></span></div>
-        <div class="btab-btn" onclick="switchTab('period')">周期明细</div>
+      <div class="btab-nav" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0;padding:0 16px 0 8px">
+        <div style="display:flex;gap:0;align-items:stretch">
+          <div class="btab-btn active" onclick="switchTab('task')">调度任务 <span id="taskTabBadge" style="display:inline-block;background:var(--danger);color:#fff;font-size:11px;min-width:18px;height:18px;line-height:18px;text-align:center;border-radius:9px;margin-left:6px;padding:0 5px;font-weight:700;font-family:'JetBrains Mono',monospace;vertical-align:middle;box-shadow:0 2px 4px rgba(239,68,68,0.2)"></span></div>
+          <div class="btab-btn" onclick="switchTab('period')">周期明细</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 0">
+          <div style="width:1px;height:20px;background:var(--border-soft);margin-right:4px"></div>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <input type="date" value="2026-02-19" style="font-size:12px;padding:6px 10px;border:1px solid var(--border-soft);border-radius:var(--radius-sm);font-family:'Outfit',sans-serif;color:var(--text-main);background:#fff;outline:none;transition:all .2s;cursor:pointer" onfocus="this.style.borderColor='var(--primary)';this.style.boxShadow='0 0 0 3px var(--primary-light)'" onblur="this.style.borderColor='var(--border-soft)';this.style.boxShadow='none'">
+            <span style="color:var(--text-light);font-weight:500;font-size:11px">~</span>
+            <input type="date" value="2026-03-20" style="font-size:12px;padding:6px 10px;border:1px solid var(--border-soft);border-radius:var(--radius-sm);font-family:'Outfit',sans-serif;color:var(--text-main);background:#fff;outline:none;transition:all .2s;cursor:pointer" onfocus="this.style.borderColor='var(--primary)';this.style.boxShadow='0 0 0 3px var(--primary-light)'" onblur="this.style.borderColor='var(--border-soft)';this.style.boxShadow='none'">
+          </div>
+          <div class="prs" id="granPrs" style="font-size:11px">
+            <div class="p on" onclick="switchGran(this)">日</div>
+            <div class="p" onclick="switchGran(this)">周</div>
+            <div class="p" onclick="switchGran(this)">月</div>
+          </div>
+        </div>
       </div>
 
       <!-- Tab 1: 调度任务 -->
@@ -431,13 +436,14 @@
         <div style="overflow-x:auto;">
           <table class="tbl">
             <thead><tr>
-              <th>任务ID</th><th>类型</th><th>拼单</th><th>链/币种</th><th>金额（USDT）</th><th>来源地址</th><th>目标地址</th><th>状态</th><th>关联交易</th><th>创建时间</th><th>操作</th>
+              <th>任务ID</th><th>类型</th><th>拼单</th><th>金额（USDT）</th><th>来源地址</th><th>目标地址</th><th>状态</th><th>关联交易</th><th>创建时间</th><th>操作</th>
             </tr></thead>
             <tbody id="taskTbody"></tbody>
           </table>
         </div>
         <div class="pgb">
-          <span id="taskCount">共 8 条</span>
+          <span id="taskCount" style="font-weight:600">共 8 条</span>
+          <span style="width:1px;height:14px;background:var(--border-soft)"></span>
           <span id="taskTotalAmt" style="color:var(--text-muted);font-weight:500">合计 <b style="color:var(--text-main);font-family:'JetBrains Mono',monospace">679,800.00</b> USDT</span>
           <span style="flex:1"></span>
           <div class="pg">&lt;</div><div class="pg on">1</div><div class="pg">&gt;</div>
@@ -447,6 +453,9 @@
 
       <!-- Tab 2: 周期明细 -->
       <div class="btab-panel" id="tabPeriod">
+        <div class="btab-filter" style="justify-content:flex-end">
+          <span style="font-size:12px;color:var(--text-light);font-weight:500;display:flex;align-items:center;gap:4px"><i class="ri-information-line" style="font-size:13px"></i>粒度和时间范围由上方控件控制</span>
+        </div>
         <div style="overflow-x:auto;">
           <table class="tbl">
             <thead><tr>
@@ -456,7 +465,8 @@
           </table>
         </div>
         <div class="pgb">
-          <span>共 30 条</span>
+          <span style="font-weight:600">共 30 条</span>
+          <span style="flex:1"></span>
           <div class="pg">&lt;</div><div class="pg on">1</div><div class="pg">2</div><div class="pg">3</div><div class="pg">&gt;</div>
           <select><option>10 条/页</option><option>20 条/页</option><option>50 条/页</option></select>
         </div>
@@ -465,9 +475,12 @@
 
     <!-- ═══ 5. 资金趋势 ═══ -->
     <div class="cd">
-      <div class="ch" style="flex-wrap:wrap;gap:8px;">
+      <div class="ch">
         <h3>资金趋势</h3>
-        <div class="legend-row">
+      </div>
+      <div class="cb">
+        <div id="trendChart" style="width:100%;height:340px;"></div>
+        <div class="legend-row" style="justify-content:center;padding:16px 0 4px;border-top:1px solid var(--border-soft);margin-top:16px">
           <label><input type="checkbox" checked data-series="out_total" onchange="toggleSeries(this)"><span style="width:12px;height:3px;background:#2563eb;display:inline-block;border-radius:2px;margin:0 2px"></span>出款总额<div class="legend-tip"><b>出款总额</b>本期所有出款订单金额合计<br><span class="lt-dim">越高说明出款压力越大</span></div></label>
           <label><input type="checkbox" checked data-series="to_hot" onchange="toggleSeries(this)"><span style="width:12px;height:3px;background:#0ea5e9;display:inline-block;border-radius:2px;margin:0 2px"></span>入热池<div class="legend-tip"><b>入热池</b>商户入款归集到热池的金额<br><span class="lt-dim">越高说明资金回流越充足</span></div></label>
           <label><input type="checkbox" checked data-series="to_cold" onchange="toggleSeries(this)"><span style="width:12px;height:3px;background:#8b5cf6;display:inline-block;border-radius:2px;margin:0 2px"></span>冷归集<div class="legend-tip"><b>冷归集</b>从热池归集至冷钱包的金额<br><span class="lt-dim">有值说明当期触发了冷归集</span></div></label>
@@ -475,7 +488,6 @@
           <label><input type="checkbox" data-series="net" onchange="toggleSeries(this)"><span style="width:12px;height:3px;background:#64748b;display:inline-block;border-radius:2px;margin:0 2px;border-top:1px dashed #64748b"></span>净流入/净流出<div class="legend-tip"><b>净流入/净流出</b>计算：入热池 − 出款（不含冷归集）<br>正值 = 净流入（热池在增加）<br>负值 = 净流出（热池在减少）</div></label>
         </div>
       </div>
-      <div class="cb"><div id="trendChart" style="width:100%;height:340px;"></div></div>
     </div>
 
   </div>
@@ -517,11 +529,12 @@ function doReset() { location.reload(); }
 function switchTab(tab) {
   document.querySelectorAll('.btab-btn').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.btab-panel').forEach(p => p.classList.remove('active'));
+  const btns = document.querySelectorAll('.btab-btn');
   if (tab === 'task') {
-    document.querySelector('.btab-btn:nth-child(1)').classList.add('active');
+    btns[0].classList.add('active');
     document.getElementById('tabTask').classList.add('active');
   } else {
-    document.querySelector('.btab-btn:nth-child(2)').classList.add('active');
+    btns[1].classList.add('active');
     document.getElementById('tabPeriod').classList.add('active');
   }
 }
@@ -662,7 +675,6 @@ function renderTaskTable() {
       <td class="mono">${r.id}</td>
       <td><span class="tag ${TYPE_MAP[r.type]}">${r.type}</span></td>
       <td>${batchCell}</td>
-      <td>${r.chain}</td>
       <td class="mono">${fmt(r.amt)}</td>
       <td class="mono"><span class="truncate" title="${r.from}">${r.from}</span></td>
       <td class="mono"><span class="truncate" title="${r.to}">${r.to}</span></td>
@@ -672,7 +684,7 @@ function renderTaskTable() {
       <td><span class="ol" onclick="openTaskDrawer('${r.id}')">详情</span></td>
     </tr>`;
   });
-  if (!rows.length) tb.innerHTML = '<tr><td colspan="11" style="text-align:center;color:var(--text-light);padding:32px 0;font-size:13px;font-weight:500">暂无任务</td></tr>';
+  if (!rows.length) tb.innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--text-light);padding:32px 0;font-size:13px;font-weight:500">暂无任务</td></tr>';
   document.getElementById('taskCount').textContent = `共 ${rows.length} 条`;
 
   const activeCount = getActiveTaskCount();

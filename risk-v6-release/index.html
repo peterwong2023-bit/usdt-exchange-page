@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="styles-v4.css?v=202601091856">
     <link rel="stylesheet" href="styles-v4-enhanced.css?v=202601101415">
     <link rel="stylesheet" href="risk-monitor-panel.css?v=202601101430">
+    <link rel="stylesheet" href="premium-saas.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
@@ -182,18 +183,6 @@
     </style>
 
 
-    <!-- 风险等级颜色强制修正 -->
-    <style>
-        /* 风险分数圆圈颜色 */
-        .risk-user-score.critical { background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%) !important; box-shadow: 0 4px 10px rgba(220, 38, 38, 0.3) !important; }
-        .risk-user-score.high { background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%) !important; box-shadow: 0 4px 10px rgba(234, 88, 12, 0.3) !important; }
-        .risk-user-score.medium { background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%) !important; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3) !important; }
-
-        /* 卡片边框与背景色 */
-        .risk-item-user.critical { border-left-color: #dc2626 !important; background: linear-gradient(to right, #ffffff 0%, #fef2f2 100%) !important; border-color: #fca5a5 !important; }
-        .risk-item-user.high { border-left-color: #ea580c !important; background: linear-gradient(to right, #ffffff 0%, #fff7ed 100%) !important; border-color: #fed7aa !important; }
-        .risk-item-user.medium { border-left-color: #3b82f6 !important; background: linear-gradient(to right, #ffffff 0%, #eff6ff 100%) !important; border-color: #bfdbfe !important; }
-    </style>
 
 </head>
 <body>
@@ -1153,12 +1142,12 @@
     <script src="data-v2.js"></script>
     <script src="data-v4.js?v=202603051900"></script>
     <script src="app-v3.js?v=2"></script>
-    <script src="app-v5.js?v=202603052200"></script>
+    <script src="app-v5.js?v=202603052230"></script>
         </main>
     </div>
 
     <!-- 工单操作确认弹窗 -->
-    <div id="workflowModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:10000; justify-content:center; align-items:center; backdrop-filter:blur(4px);">
+    <div id="workflowModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:10000; justify-content:center; align-items:center;">
         <div id="workflowModalContent" style="background:white; border-radius:16px; width:420px; max-width:90%; box-shadow:0 25px 50px rgba(0,0,0,0.25); overflow:hidden; animation:wfModalIn 0.25s ease-out;">
             <div style="padding:20px 24px 16px; border-bottom:1px solid #f1f5f9;">
                 <div style="display:flex; align-items:center; gap:12px;">

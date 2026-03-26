@@ -1,0 +1,311 @@
+/* ==============================================================
+   PREMIUM SAAS UI OVERRIDES (Stripe, Vercel, Datadog style)
+   ============================================================== */
+
+/* 1. Global Variables & Color Palette */
+:root {
+    /* Brand Colors - Crisp & Premium */
+    --primary-blue: #0066ff; /* Vercel/Stripe style blue */
+    --primary-blue-hover: #005ce6;
+    
+    /* Semantic Colors - High Contrast, Soft Backgrounds */
+    --danger-color: #e5484d;
+    --danger-bg: #fff0f1;
+    --danger-border: #ffc9cf;
+    
+    --warning-color: #f5a623;
+    --warning-bg: #fffcf0;
+    --warning-border: #fce196;
+    
+    --success-color: #17b877;
+    --success-bg: #e6fcf4;
+    --success-border: #a2f0d1;
+    
+    --info-color: #0066ff;
+    --info-bg: #f0f7ff;
+    --info-border: #c2ddff;
+
+    /* Neutrals */
+    --text-primary: #111827;
+    --text-secondary: #4b5563;
+    --text-tertiary: #6b7280;
+    --text-muted: #9ca3af;
+    
+    --bg-page: #fafafa;
+    --bg-surface: #ffffff;
+    
+    /* Shadows & Effects */
+    --shadow-premium: 0 2px 8px -2px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0,0,0,0.02);
+    --shadow-premium-hover: 0 12px 32px -4px rgba(0, 0, 0, 0.08), 0 4px 8px -2px rgba(0,0,0,0.03);
+    --shadow-modal: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    
+    --glass-blur: blur(12px);
+    
+    /* Borders */
+    --border-soft: #eaeaea;
+    --border-medium: #d1d5db;
+    
+    /* Radius */
+    --radius-lg: 16px;
+    --radius-md: 12px;
+    --radius-sm: 8px;
+}
+
+/* 2. Typography */
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    color: var(--text-primary);
+    background-color: var(--bg-page);
+    letter-spacing: -0.01em;
+}
+
+h1, h2, h3, h4, h5, h6, .card-header h3 {
+    letter-spacing: -0.02em;
+    font-weight: 700;
+}
+
+.kpi-value, .risk-user-score, .stat-value, .score-number-v2, .review-user-id {
+    font-family: 'JetBrains Mono', monospace !important;
+    letter-spacing: -0.03em;
+}
+
+/* 3. Cards & Containers */
+.dashboard-card, .table-card-enhanced, .user-queue-container {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-soft) !important;
+    border-radius: var(--radius-lg) !important;
+    box-shadow: var(--shadow-premium) !important;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.dashboard-card:hover {
+    box-shadow: var(--shadow-premium-hover) !important;
+    transform: translateY(-2px);
+    border-color: var(--border-medium) !important;
+}
+
+.card-header, .table-header-enhanced, .queue-list-header {
+    background: var(--bg-surface) !important;
+    border-bottom: 1px solid var(--border-soft) !important;
+    padding: 16px 24px !important;
+}
+
+/* 4. KPI Numbers & Visualizations */
+.kpi-card, .queue-stat-card, .event-stat-card {
+    background: var(--bg-surface) !important;
+    border: 1px solid var(--border-soft) !important;
+    border-radius: var(--radius-lg) !important;
+    box-shadow: var(--shadow-premium) !important;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.kpi-card:hover, .queue-stat-card:hover, .event-stat-card:hover {
+    box-shadow: var(--shadow-premium-hover) !important;
+    transform: translateY(-4px) !important;
+}
+
+/* Subtle KPI gradients at the top */
+.kpi-card.danger, .queue-stat-card.critical { border-top: 4px solid var(--danger-color) !important; border-bottom: 1px solid var(--border-soft) !important; border-left: 1px solid var(--border-soft) !important; border-right: 1px solid var(--border-soft) !important; background: linear-gradient(180deg, var(--danger-bg) 0%, var(--bg-surface) 60px) !important; }
+.kpi-card.warning, .queue-stat-card.high { border-top: 4px solid var(--warning-color) !important; border-bottom: 1px solid var(--border-soft) !important; border-left: 1px solid var(--border-soft) !important; border-right: 1px solid var(--border-soft) !important; background: linear-gradient(180deg, var(--warning-bg) 0%, var(--bg-surface) 60px) !important; }
+.kpi-card.success, .queue-stat-card.total { border-top: 4px solid var(--success-color) !important; border-bottom: 1px solid var(--border-soft) !important; border-left: 1px solid var(--border-soft) !important; border-right: 1px solid var(--border-soft) !important; background: linear-gradient(180deg, var(--success-bg) 0%, var(--bg-surface) 60px) !important; }
+.kpi-card.info, .queue-stat-card.pending { border-top: 4px solid var(--info-color) !important; border-bottom: 1px solid var(--border-soft) !important; border-left: 1px solid var(--border-soft) !important; border-right: 1px solid var(--border-soft) !important; background: linear-gradient(180deg, var(--info-bg) 0%, var(--bg-surface) 60px) !important; }
+
+/* 5. Queues & Lists (risk-item-user) */
+.risk-item-user {
+    background: var(--bg-surface) !important;
+    border: 1px solid var(--border-soft) !important;
+    border-radius: var(--radius-md) !important;
+    padding: 16px 24px !important;
+    margin-bottom: 12px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 20px !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03) !important;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.risk-item-user:hover {
+    box-shadow: var(--shadow-premium-hover) !important;
+    transform: translateY(-2px) scale(1.002) !important;
+    z-index: 2;
+    border-color: var(--border-medium) !important;
+}
+
+.risk-item-user.critical { border-left: 4px solid var(--danger-color) !important; background: linear-gradient(90deg, var(--danger-bg) 0%, var(--bg-surface) 15%) !important; }
+.risk-item-user.high { border-left: 4px solid var(--warning-color) !important; background: linear-gradient(90deg, var(--warning-bg) 0%, var(--bg-surface) 15%) !important; }
+.risk-item-user.medium { border-left: 4px solid var(--info-color) !important; background: linear-gradient(90deg, var(--info-bg) 0%, var(--bg-surface) 15%) !important; }
+
+.risk-user-avatar {
+    width: 48px !important;
+    height: 48px !important;
+    border-radius: 50% !important;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1) !important;
+    border: none !important;
+}
+
+.risk-user-info {
+    flex: 1;
+    display: block;
+    min-width: 0;
+}
+
+/* User ID & Badges line */
+.risk-user-id {
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    color: var(--text-primary) !important;
+    margin-right: 12px;
+}
+
+/* Badges Alignment */
+.risk-user-info > * {
+    vertical-align: middle;
+}
+
+.risk-user-meta {
+    display: flex !important;
+    gap: 16px !important;
+    font-size: 13px !important;
+    color: var(--text-tertiary) !important;
+    margin-top: 4px;
+}
+
+.risk-user-meta span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.risk-user-score {
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 12px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 18px !important;
+    font-weight: 800 !important;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1) !important;
+    border: 2px solid rgba(255,255,255,0.4) !important;
+}
+
+.risk-action-btn {
+    padding: 8px 16px !important;
+    border-radius: var(--radius-sm) !important;
+    font-weight: 600 !important;
+    font-size: 13px !important;
+    border: 1px solid var(--border-soft) !important;
+    background: var(--bg-surface) !important;
+    color: var(--text-secondary) !important;
+    transition: all 0.2s !important;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.risk-action-btn:hover {
+    background: #f3f4f6 !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-medium) !important;
+}
+
+.risk-action-btn.review {
+    background: var(--primary-blue) !important;
+    color: white !important;
+    border: none !important;
+    box-shadow: 0 2px 8px rgba(0, 102, 255, 0.25) !important;
+}
+
+.risk-action-btn.review:hover {
+    background: var(--primary-blue-hover) !important;
+    box-shadow: 0 4px 12px rgba(0, 102, 255, 0.35) !important;
+    transform: translateY(-1px);
+}
+
+/* 6. Modals & Drawers Silky Animations */
+.audit-drawer-overlay, #workflowModal {
+    background: rgba(17, 24, 39, 0.5) !important;
+    backdrop-filter: var(--glass-blur) !important;
+    -webkit-backdrop-filter: var(--glass-blur) !important;
+    transition: opacity 0.3s ease !important;
+}
+
+.audit-drawer, .rcm-drawer {
+    box-shadow: -15px 0 40px rgba(0,0,0,0.15) !important;
+    border-left: 1px solid rgba(255,255,255,0.1) !important;
+}
+
+#workflowModalContent {
+    box-shadow: var(--shadow-modal) !important;
+    border: 1px solid var(--border-soft) !important;
+    border-radius: 20px !important;
+    padding-bottom: 8px !important;
+}
+
+@keyframes wfModalIn { 
+    from { transform: translateY(-20px) scale(0.97); opacity: 0; } 
+    to { transform: translateY(0) scale(1); opacity: 1; } 
+}
+
+@keyframes drawerSlideIn {
+    from { transform: translateX(100%); opacity: 0.8; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+.audit-drawer.active, .rcm-drawer.active {
+    animation: drawerSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+/* Specific component tweaks */
+.dashboard-card {
+    padding: 0 !important;
+}
+.card-body {
+    padding: 24px !important;
+}
+
+/* Buttons */
+.btn-primary, .btn-filter-compact.primary {
+    background: var(--primary-blue) !important;
+    border: none !important;
+    box-shadow: 0 2px 8px rgba(0, 102, 255, 0.25) !important;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+.btn-primary:hover, .btn-filter-compact.primary:hover {
+    background: var(--primary-blue-hover) !important;
+    box-shadow: 0 4px 12px rgba(0, 102, 255, 0.35) !important;
+    transform: translateY(-1px);
+}
+
+/* Top Nav Enhancements */
+.top-global-nav {
+    background: #0f172a !important; /* Keep it dark and sleek */
+    border-bottom: 1px solid rgba(255,255,255,0.1) !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+}
+
+/* Detail Page specific enhancements */
+.user-profile-wrapper .user-profile {
+    border: 1px solid rgba(255,255,255,0.1) !important;
+    backdrop-filter: blur(8px) !important;
+}
+
+/* Badges */
+.risk-badge, .risk-badge-v2 {
+    padding: 4px 10px !important;
+    border-radius: 6px !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.02em !important;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05) !important;
+    text-transform: uppercase;
+}
+
+.risk-badge-v2.critical, .risk-badge.critical { background: var(--danger-bg) !important; color: var(--danger-color) !important; border: 1px solid var(--danger-border) !important; }
+.risk-badge-v2.high, .risk-badge.high { background: var(--warning-bg) !important; color: var(--warning-color) !important; border: 1px solid var(--warning-border) !important; }
+.risk-badge-v2.medium, .risk-badge.medium { background: var(--info-bg) !important; color: var(--info-color) !important; border: 1px solid var(--info-border) !important; }
+.risk-badge-v2.low, .risk-badge.low { background: var(--success-bg) !important; color: var(--success-color) !important; border: 1px solid var(--success-border) !important; }
+
