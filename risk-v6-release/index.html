@@ -350,18 +350,17 @@
                     <div class="card-body" style="padding: 16px 20px;">
                         <div style="display: grid; grid-template-columns: auto 1fr 1fr 1fr; gap: 20px; align-items: center;">
                             <!-- 命中率圆形 -->
-                            <div style="text-align: center;">
-                                <svg width="100" height="100">
+                            <div style="position: relative; width: 100px; height: 100px; margin: 0 auto;">
+                                <svg width="100" height="100" style="position: absolute; top: 0; left: 0;">
                                     <circle cx="50" cy="50" r="42" fill="none" stroke="#e2e8f0" stroke-width="10"/>
                                     <circle cx="50" cy="50" r="42" fill="none" stroke="#10b981" stroke-width="10"
                                         stroke-dasharray="264" stroke-dashoffset="21" stroke-linecap="round"
                                         transform="rotate(-90 50 50)"/>
                                 </svg>
-                                <div style="margin-top:-68px; position:relative;">
-                                    <div style="font-size:28px; font-weight:900; color:#0f172a; font-family:'JetBrains Mono',monospace;">92</div>
-                                    <div style="font-size:10px; color:#64748b; font-weight:700;">命中率</div>
+                                <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                                    <div style="font-size:26px; font-weight:900; color:#0f172a; font-family:'JetBrains Mono',monospace; line-height: 1;">92</div>
+                                    <div style="font-size:10px; color:#64748b; font-weight:700; margin-top: 2px;">命中率</div>
                                 </div>
-                                <div style="margin-top:26px;"></div>
                             </div>
                             <!-- 模型质量 -->
                             <div style="display:flex; flex-direction:column; gap:10px;">
