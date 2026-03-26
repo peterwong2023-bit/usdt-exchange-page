@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>地址池 - VVOSS Admin v3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css" rel="stylesheet">
+<style>
+  :root {
+    --bg-main: #f3f5f9;
+    --bg-card: #ffffff;
+    --border-soft: #e5e8f0;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --text-light: #94a3b8;
+    --primary: #2563eb;
+    --primary-hover: #1d4ed8;
+    --primary-light: #eff6ff;
+    --success: #10b981;
+    --success-light: #ecfdf5;
+    --warning: #f59e0b;
+    --warning-light: #fffbeb;
+    --danger: #ef4444;
+    --danger-light: #fef2f2;
+    --purple: #8b5cf6;
+    --purple-light: #f5f3ff;
+    --sb-bg: #090e17;
+    --sb-text: #64748b;
+    --sb-active: #ffffff;
+    --shadow-sm: 0 2px 4px rgba(15,23,42,0.02);
+    --shadow-md: 0 4px 12px rgba(15,23,42,0.04);
+    --shadow-lg: 0 12px 32px rgba(15,23,42,0.06);
+    --radius-sm: 6px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg-main); color: var(--text-main); font-family: 'Outfit', -apple-system, sans-serif; font-size: 13px; display: flex; min-height: 100vh; -webkit-font-smoothing: antialiased; }
+
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  .sb { width: 220px; min-height: 100vh; background: var(--sb-bg); flex-shrink: 0; overflow-y: auto; padding-bottom: 20px; border-right: 1px solid rgba(255,255,255,0.05); }
+  .sb-logo { padding: 24px 20px 4px; font-size: 18px; font-weight: 700; color: #fff; letter-spacing: -0.5px; display: flex; align-items: center; gap: 8px; }
+  .sb-logo::before { content: ''; display: block; width: 8px; height: 8px; background: var(--primary); border-radius: 50%; box-shadow: 0 0 12px var(--primary); }
+  .sb-ver { padding: 0 20px 24px 36px; font-size: 10px; color: #475569; font-family: 'JetBrains Mono', monospace; }
+  .n { padding: 10px 20px; font-size: 13px; color: var(--sb-text); cursor: pointer; display: flex; align-items: center; gap: 12px; transition: all .2s; font-weight: 500; }
+  .n:hover { color: #fff; background: rgba(255,255,255,.03); }
+  .n i { font-size: 16px; width: 20px; text-align: center; opacity: 0.7; }
+  .sec { padding: 16px 20px 8px; font-size: 11px; color: #475569; cursor: pointer; display: flex; align-items: center; gap: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+  .sec i { font-size: 14px; width: 20px; text-align: center; }
+  .sec .arr { margin-left: auto; font-size: 14px; }
+  .nc { padding: 9px 20px 9px 52px; font-size: 13px; color: #94a3b8; cursor: pointer; transition: all .2s; display: flex; align-items: center; gap: 10px; font-weight: 400; position: relative; }
+  .nc:hover { color: #fff; }
+  .nc i { font-size: 15px; width: 18px; text-align: center; opacity: 0.5; }
+  .nc.act { color: #fff; font-weight: 600; background: linear-gradient(90deg, rgba(37,99,235,0.1) 0%, transparent 100%); }
+  .nc.act i { opacity: 1; color: var(--primary); }
+  .nc.act::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--primary); border-radius: 0 4px 4px 0; box-shadow: 0 0 10px rgba(37,99,235,0.5); }
+
+  .topbar { height: 60px; background: rgba(255,255,255,0.8); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border-soft); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; position: sticky; top: 0; z-index: 10; }
+  .topbar .hb { font-size: 20px; color: var(--text-muted); cursor: pointer; transition: color .2s; }
+  .topbar .hb:hover { color: var(--text-main); }
+  .topbar .usr { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 500; color: var(--text-main); cursor: pointer; }
+  .topbar .av { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--purple)); display: flex; align-items: center; justify-content: center; font-size: 13px; color: #fff; font-weight: 600; box-shadow: 0 2px 8px rgba(37,99,235,0.2); }
+
+  .mw { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .mn { flex: 1; padding: 24px 32px; overflow-y: auto; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+
+  .tag { display: inline-flex; align-items: center; justify-content: center; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; font-family: 'Outfit', sans-serif; letter-spacing: 0.3px; }
+  .tag-g { background: var(--success-light); color: var(--success); }
+  .tag-y { background: var(--warning-light); color: var(--warning); }
+  .tag-b { background: var(--primary-light); color: var(--primary); }
+  .tag-gray { background: var(--bg-main); color: var(--text-muted); }
+
+  .top-actions { display: flex; align-items: center; justify-content: flex-end; margin-bottom: 16px; animation: fadeUp 0.5s cubic-bezier(0.16,1,0.3,1) 0.1s both; }
+  .btn-create { display: flex; align-items: center; gap: 6px; padding: 9px 18px; background: var(--primary); color: #fff; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; font-family: 'Outfit', sans-serif; cursor: pointer; transition: all .25s; box-shadow: 0 2px 8px rgba(37,99,235,0.2); }
+  .btn-create:hover { background: var(--primary-hover); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(37,99,235,0.3); }
+  .btn-create i { font-size: 16px; }
+
+  .card { background: var(--bg-card); border: 1px solid var(--border-soft); border-radius: var(--radius-lg); box-shadow: 0 4px 20px rgba(15,23,42,0.03); overflow: hidden; animation: fadeUp 0.5s cubic-bezier(0.16,1,0.3,1) 0.2s both; }
+
+  .tbl { width: 100%; border-collapse: separate; border-spacing: 0; }
+  .tbl th { text-align: left; padding: 16px 20px; background: rgba(248,250,252,0.8); backdrop-filter: blur(8px); color: var(--text-muted); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border-soft); white-space: nowrap; position: sticky; top: 0; z-index: 2; }
+  .tbl td { padding: 16px 20px; border-bottom: 1px solid var(--border-soft); font-size: 13px; font-weight: 500; color: var(--text-main); white-space: nowrap; transition: background .2s; }
+  .tbl tr:last-child td { border-bottom: none; }
+  .tbl tr:hover td { background: var(--bg-main); }
+
+  .pool-link { color: var(--primary); font-weight: 600; cursor: pointer; transition: color .2s; }
+  .pool-link:hover { color: var(--primary-hover); text-decoration: underline; }
+  .bal-cell { display: flex; flex-direction: column; gap: 2px; }
+  .bal-row { font-size: 12px; display: flex; align-items: center; gap: 6px; }
+  .bal-row .sym { font-size: 11px; font-weight: 700; padding: 1px 5px; border-radius: 4px; }
+  .bal-row .sym-khrx { background: #fff7ed; color: #ea580c; }
+  .bal-row .sym-khr { background: var(--primary-light); color: var(--primary); }
+  .ol { color: var(--primary); cursor: pointer; font-weight: 600; font-size: 13px; transition: color .2s; }
+  .ol:hover { color: var(--primary-hover); text-decoration: underline; }
+  .op-sep { color: var(--border-soft); margin: 0 6px; }
+  .op-del { color: var(--text-light); cursor: pointer; font-weight: 600; font-size: 13px; transition: color .2s; }
+  .op-del:hover { color: var(--danger); }
+  .op-del.disabled { opacity: 0.35; cursor: not-allowed; pointer-events: none; }
+
+  .pgb { display: flex; align-items: center; gap: 12px; padding: 14px 24px; font-size: 13px; font-weight: 500; color: var(--text-muted); border-top: 1px solid var(--border-soft); background: rgba(248,250,252,0.6); }
+  .pg { min-width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); cursor: pointer; background: #fff; border: 1px solid var(--border-soft); color: var(--text-muted); font-size: 12px; font-weight: 600; transition: all .2s; }
+  .pg:hover { border-color: var(--primary); color: var(--primary); }
+  .pg.on { background: var(--primary); color: #fff; border-color: var(--primary); box-shadow: 0 2px 6px rgba(37,99,235,0.2); }
+  .pgb select { background: #fff; border: 1px solid var(--border-soft); color: var(--text-muted); padding: 5px 8px; border-radius: var(--radius-sm); font-size: 12px; font-weight: 500; font-family: 'Outfit', sans-serif; cursor: pointer; transition: all .2s; }
+
+  /* Modal */
+  .modal-mask { position: fixed; inset: 0; background: rgba(15,23,42,0.4); backdrop-filter: blur(4px); z-index: 200; display: none; align-items: center; justify-content: center; }
+  .modal-mask.open { display: flex; }
+  .modal { background: #fff; border-radius: var(--radius-lg); box-shadow: 0 20px 60px rgba(15,23,42,0.15); width: 440px; animation: fadeUp 0.3s ease-out; overflow: hidden; }
+  .modal-header { padding: 24px 28px 0; display: flex; align-items: center; justify-content: space-between; }
+  .modal-header h3 { font-size: 18px; font-weight: 700; }
+  .modal-close { font-size: 20px; color: var(--text-muted); cursor: pointer; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: all .2s; }
+  .modal-close:hover { background: var(--bg-main); color: var(--danger); }
+  .modal-body { padding: 24px 28px; }
+  .modal-body label { display: block; font-size: 13px; font-weight: 600; color: var(--text-main); margin-bottom: 8px; }
+  .modal-body label .req { color: var(--danger); margin-right: 4px; }
+  .modal-body input, .modal-body select { width: 100%; padding: 10px 14px; border: 1px solid var(--border-soft); border-radius: 10px; font-size: 13px; font-weight: 500; font-family: 'Outfit', sans-serif; outline: none; transition: all .2s; color: var(--text-main); background: #fff; }
+  .modal-body input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+  .modal-body input::placeholder { color: var(--text-light); }
+  .modal-body .field + .field { margin-top: 20px; }
+  .modal-footer { padding: 16px 28px 24px; display: flex; justify-content: flex-end; gap: 12px; }
+  .modal-footer .btn-cancel { padding: 9px 20px; border: 1px solid var(--border-soft); background: #fff; color: var(--text-main); border-radius: 10px; font-size: 13px; font-weight: 600; font-family: 'Outfit', sans-serif; cursor: pointer; transition: all .2s; }
+  .modal-footer .btn-cancel:hover { border-color: var(--text-muted); }
+  .modal-footer .btn-submit { padding: 9px 20px; background: var(--primary); color: #fff; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; font-family: 'Outfit', sans-serif; cursor: pointer; transition: all .2s; box-shadow: 0 2px 8px rgba(37,99,235,0.2); }
+  .modal-footer .btn-submit:hover { background: var(--primary-hover); }
+
+  /* Drawer */
+  .drawer-mask { position: fixed; inset: 0; background: rgba(15,23,42,0.4); backdrop-filter: blur(4px); z-index: 100; opacity: 0; pointer-events: none; transition: opacity .4s cubic-bezier(0.16,1,0.3,1); }
+  .drawer-mask.open { opacity: 1; pointer-events: auto; }
+  .drawer { position: fixed; top: 0; right: -680px; width: 680px; height: 100vh; background: #fff; z-index: 101; transition: right .5s cubic-bezier(0.16,1,0.3,1); box-shadow: -12px 0 48px rgba(0,0,0,.15); display: flex; flex-direction: column; }
+  .drawer.open { right: 0; }
+  .drawer-header { padding: 24px 32px; border-bottom: 1px solid var(--border-soft); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; background: rgba(248,250,252,0.8); backdrop-filter: blur(8px); }
+  .drawer-header h3 { font-size: 18px; font-weight: 700; color: var(--text-main); letter-spacing: -0.3px; display: flex; align-items: center; gap: 8px; }
+  .drawer-header h3::before { content: ''; display: block; width: 6px; height: 18px; background: var(--primary); border-radius: 3px; }
+  .drawer-close { font-size: 20px; color: var(--text-muted); cursor: pointer; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: all .3s cubic-bezier(0.16,1,0.3,1); background: #fff; box-shadow: 0 2px 8px rgba(15,23,42,0.05); border: 1px solid var(--border-soft); }
+  .drawer-close:hover { background: var(--danger); color: #fff; border-color: transparent; transform: rotate(90deg) scale(1.1); box-shadow: 0 4px 12px rgba(239,68,68,0.3); }
+  .drawer-body { flex: 1; overflow-y: auto; padding: 32px; }
+
+  .kv-list { border: 1px solid var(--border-soft); border-radius: var(--radius-md); overflow: hidden; }
+  .kv-row { display: flex; border-bottom: 1px solid var(--border-soft); }
+  .kv-row:last-child { border-bottom: none; }
+  .kv-label { width: 140px; flex-shrink: 0; padding: 12px 16px; font-size: 13px; font-weight: 600; color: var(--text-muted); background: var(--bg-main); border-right: 1px solid var(--border-soft); }
+  .kv-val { flex: 1; padding: 12px 16px; font-size: 13px; font-weight: 600; color: var(--text-main); word-break: break-all; }
+
+  .section-title { font-size: 14px; font-weight: 700; color: var(--text-main); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+  .section-title i { font-size: 16px; color: var(--primary); background: var(--primary-light); padding: 3px; border-radius: 4px; }
+
+  .threshold-card { border: 1px solid var(--border-soft); border-radius: var(--radius-md); overflow: hidden; }
+  .threshold-row { display: flex; align-items: center; padding: 14px 16px; border-bottom: 1px solid var(--border-soft); }
+  .threshold-row:last-child { border-bottom: none; }
+  .threshold-row .th-label { width: 100px; font-size: 13px; font-weight: 600; color: var(--text-muted); }
+  .threshold-row .th-val { flex: 1; font-size: 14px; font-weight: 700; color: var(--text-main); font-family: 'JetBrains Mono', monospace; }
+  .threshold-row .th-edit { font-size: 13px; color: var(--primary); cursor: pointer; font-weight: 600; transition: color .2s; }
+  .threshold-row .th-edit:hover { color: var(--primary-hover); }
+  .threshold-row .th-unset { color: var(--text-light); font-style: italic; font-weight: 500; }
+  .threshold-status { padding: 10px 16px; background: var(--bg-main); font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+  .threshold-status .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .threshold-status .dot-g { background: var(--success); }
+  .threshold-status .dot-y { background: var(--warning); }
+
+  .addr-preview { border: 1px solid var(--border-soft); border-radius: var(--radius-md); overflow: hidden; }
+  .addr-preview-row { display: flex; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--border-soft); font-size: 12px; gap: 12px; }
+  .addr-preview-row:last-child { border-bottom: none; }
+  .addr-preview-row .ap-addr { font-family: 'JetBrains Mono', monospace; font-weight: 600; color: var(--text-main); flex: 1; }
+  .addr-preview-row .ap-status { }
+  .addr-preview-row .ap-bal { font-family: 'JetBrains Mono', monospace; font-weight: 600; color: var(--text-muted); min-width: 120px; text-align: right; }
+  .addr-preview-link { padding: 10px 16px; text-align: center; background: var(--bg-main); }
+  .addr-preview-link a { color: var(--primary); font-weight: 600; font-size: 12px; text-decoration: none; }
+  .addr-preview-link a:hover { text-decoration: underline; }
+  .addr-preview-empty { padding: 24px 16px; text-align: center; color: var(--text-light); font-size: 13px; }
+
+  [data-tip] { position: relative; }
+  [data-tip]:hover::after { content: attr(data-tip); position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); background: #0f172a; color: #fff; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 500; white-space: nowrap; z-index: 50; box-shadow: 0 4px 12px rgba(15,23,42,0.2); pointer-events: none; }
+</style>
+</head>
+<body>
+
+<div class="sb">
+  <div class="sb-logo">VVOSS Admin</div>
+  <div class="sb-ver">670e65b</div>
+  <div class="n"><i class="ri-flashlight-line"></i> 激活平台</div>
+  <div class="n"><i class="ri-battery-charge-line"></i> 能量平台</div>
+  <div class="sec"><i class="ri-wallet-3-line"></i> 资金与交易 <i class="ri-arrow-up-s-line arr"></i></div>
+  <div class="nc"><i class="ri-wallet-line"></i> 钱包管理</div>
+  <div class="nc"><i class="ri-link"></i> 链上交易</div>
+  <div class="nc"><i class="ri-file-list-3-line"></i> 出款记录</div>
+  <div class="nc"><i class="ri-triangle-line"></i> TRON委托</div>
+  <div class="nc"><i class="ri-lock-line"></i> TRON质押</div>
+  <div class="nc"><i class="ri-share-forward-line"></i> TRON投票</div>
+  <div class="nc"><i class="ri-exchange-dollar-line"></i> 转账费用</div>
+  <div class="nc"><i class="ri-bar-chart-2-line"></i> 统计报表</div>
+  <div class="nc"><i class="ri-search-line"></i> 链上余额查询</div>
+  <div class="nc"><i class="ri-line-chart-line"></i> 风险入款统计</div>
+  <div class="sec"><i class="ri-safe-2-line"></i> 冷钱包 <i class="ri-arrow-up-s-line arr"></i></div>
+  <div class="nc" onclick="location.href='address-library.html'" style="cursor:pointer"><i class="ri-list-unordered"></i> 地址库</div>
+  <div class="nc act"><i class="ri-archive-stack-line"></i> 地址池</div>
+  <div class="nc" onclick="location.href='withdraw-stats-tron-usdt.html'" style="cursor:pointer"><i class="ri-funds-line"></i> 调度中心</div>
+  <div class="nc"><i class="ri-smartphone-line"></i> 设备任务</div>
+  <div class="nc"><i class="ri-history-line"></i> 操作记录</div>
+  <div class="sec"><i class="ri-task-line"></i> 任务与监控 <i class="ri-arrow-up-s-line arr"></i></div>
+  <div class="nc"><i class="ri-smartphone-line"></i> 移动设备</div>
+  <div class="nc"><i class="ri-list-check-2"></i> 移动任务</div>
+  <div class="nc"><i class="ri-scan-line"></i> 区块扫描</div>
+  <div class="nc"><i class="ri-links-line"></i> 链网同步状态</div>
+  <div class="sec"><i class="ri-settings-3-line"></i> 系统与权限 <i class="ri-arrow-up-s-line arr"></i></div>
+  <div class="nc"><i class="ri-user-settings-line"></i> 账户管理</div>
+  <div class="nc"><i class="ri-store-2-line"></i> 商户账号</div>
+  <div class="nc"><i class="ri-shield-user-line"></i> 角色管理</div>
+  <div class="nc"><i class="ri-error-warning-line"></i> 黑名单管理</div>
+</div>
+
+<div class="mw">
+  <div class="topbar">
+    <div class="hb"><i class="ri-menu-line"></i></div>
+    <div class="usr"><div class="av">L</div><span>laoluan</span></div>
+  </div>
+  <div class="mn">
+    <div class="top-actions">
+      <button class="btn-create" onclick="openCreateModal()"><i class="ri-add-line"></i> 创建地址池</button>
+    </div>
+
+    <div class="card">
+      <div style="overflow-x:auto;">
+        <table class="tbl">
+          <thead><tr>
+            <th>地址池</th>
+            <th>地址数量</th>
+            <th>绑定商户</th>
+            <th>总余额</th>
+            <th>创建时间</th>
+            <th>操作</th>
+          </tr></thead>
+          <tbody id="poolTbody"></tbody>
+        </table>
+      </div>
+      <div class="pgb">
+        <span id="totalCount" style="font-weight:600">共 3 条</span>
+        <span style="flex:1"></span>
+        <div class="pg">&lt;</div><div class="pg on">1</div><div class="pg">&gt;</div>
+        <select><option>10 条/页</option><option>20 条/页</option></select>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Create Modal -->
+<div class="modal-mask" id="createModal">
+  <div class="modal">
+    <div class="modal-header"><h3>创建地址池</h3><div class="modal-close" onclick="closeCreateModal()"><i class="ri-close-line"></i></div></div>
+    <div class="modal-body">
+      <div class="field">
+        <label><span class="req">*</span> 地址池名称</label>
+        <input type="text" id="poolNameInput" placeholder="例如：TRON 主冷钱包池">
+      </div>
+      <div class="field">
+        <label><span class="req">*</span> 链</label>
+        <input type="text" value="波场 (Tron)" disabled style="background:var(--bg-main);color:var(--text-muted);cursor:not-allowed">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeCreateModal()">取 消</button>
+      <button class="btn-submit" onclick="handleCreate()">创 建</button>
+    </div>
+  </div>
+</div>
+
+<!-- Drawer -->
+<div class="drawer-mask" id="drawerMask" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-header"><h3 id="drawerTitle">地址池详情</h3><div class="drawer-close" onclick="closeDrawer()"><i class="ri-close-line"></i></div></div>
+  <div class="drawer-body" id="drawerBody"></div>
+</div>
+
+<script>
+const POOLS = [
+  { id: 'p1', name: '牛逼池', addrCount: 1, merchant: '再次出发归集 #1260', khrx: 0, khr: 0, ctime: '2026/3/25 21:13:36', minThreshold: 50000, maxThreshold: 500000,
+    addrs: [
+      { addr: 'TFH1...Nke4', status: '已激活', bal: 'KHRX 0 / KHR 0' },
+    ],
+    logs: [
+      { t: '2026/3/25 21:13:53', event: '地址加入', w: '管理员', d: '地址 #9 TFH1...Nke4 已加入此地址池' },
+      { t: '2026/3/25 21:13:36', event: '创建地址池', w: '管理员', d: '地址池"牛逼池"已创建' },
+    ]},
+  { id: 'p2', name: '新', addrCount: 0, merchant: '未绑定', khrx: -1, khr: -1, ctime: '2026/3/23 22:34:44', minThreshold: null, maxThreshold: null,
+    addrs: [],
+    logs: [
+      { t: '2026/3/23 22:34:44', event: '创建地址池', w: '管理员', d: '地址池"新"已创建' },
+    ]},
+  { id: 'p3', name: '中国大池', addrCount: 4, merchant: '广东归集 #1045', khrx: 1415.578045, khr: 53.007376, ctime: '2026/3/23 21:49:31', minThreshold: 100000, maxThreshold: 800000,
+    addrs: [
+      { addr: 'TVPb...uNNV', status: '未激活', bal: 'KHRX 0 / KHR 0' },
+      { addr: 'TT7t...D6L9', status: '已激活', bal: 'KHRX 0.000001 / KHR 0' },
+      { addr: 'TRHT...YmaV', status: '已激活', bal: 'KHRX 0.000003 / KHR 6.9345' },
+      { addr: 'TEtW...nDvo', status: '已激活', bal: 'KHRX 1,415.578 / KHR 46.073' },
+    ],
+    logs: [
+      { t: '2026/3/25 19:08:32', event: '地址加入', w: '管理员', d: '地址 #7 TT7t...D6L9、地址 #8 TVPb...uNNV 已加入此地址池' },
+      { t: '2026/3/25 06:05:18', event: '地址加入', w: '管理员', d: '地址 #5 TEtW...nDvo、地址 #6 TRHT...YmaV 已加入此地址池' },
+      { t: '2026/3/25 06:04:00', event: '同步余额', w: '系统', d: '地址池总余额已同步' },
+      { t: '2026/3/23 21:50:10', event: '绑定商户', w: '管理员', d: '已绑定商户"广东归集 #1045"' },
+      { t: '2026/3/23 21:49:31', event: '创建地址池', w: '管理员', d: '地址池"中国大池"已创建' },
+    ]},
+];
+
+function fmt(n) { if (n < 0) return '未同步'; return n === 0 ? '0' : n < 0.01 ? n.toFixed(6) : n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 6 }); }
+
+const STATUS_MAP = { '已激活': 'tag-g', '未激活': 'tag-y', '已验证': 'tag-g', '未验证': 'tag-gray', '验证中': 'tag-b' };
+
+function renderTable() {
+  const tb = document.getElementById('poolTbody');
+  tb.innerHTML = '';
+  POOLS.forEach(p => {
+    const balHtml = p.khrx < 0 ? '<span style="color:var(--text-light);font-style:italic">未同步</span>' :
+      `<div class="bal-cell"><div class="bal-row"><span class="sym sym-khrx">KHRX</span> <span class="mono" style="font-weight:600">${fmt(p.khrx)}</span></div><div class="bal-row"><span class="sym sym-khr">KHR</span> <span class="mono" style="font-weight:600">${fmt(p.khr)}</span></div></div>`;
+    const merchantHtml = p.merchant === '未绑定' ? '<span style="color:var(--text-light)">未绑定</span>' : p.merchant;
+    const canDel = p.addrCount === 0;
+    const delClass = canDel ? 'op-del' : 'op-del disabled';
+    const delTip = canDel ? '' : ' data-tip="池内有地址，无法删除"';
+    tb.innerHTML += `<tr>
+      <td><span class="pool-link" onclick="openDrawer('${p.id}')">${p.name}</span></td>
+      <td><span class="mono" style="font-weight:600">${p.addrCount}</span></td>
+      <td>${merchantHtml}</td>
+      <td>${balHtml}</td>
+      <td>${p.ctime}</td>
+      <td>
+        <span class="ol" onclick="openDrawer('${p.id}')">详情</span>
+        <span class="op-sep">|</span>
+        <span class="ol" onclick="alert('跳转到地址库并按该池筛选')">查看地址</span>
+        <span class="op-sep">|</span>
+        <span class="ol" onclick="alert('同步余额')">同步余额</span>
+        <span class="op-sep">|</span>
+        <span class="${delClass}"${delTip} onclick="${canDel ? "if(confirm('确认删除地址池「"+p.name+"」？'))alert('已删除')" : ''}">删除</span>
+      </td>
+    </tr>`;
+  });
+  document.getElementById('totalCount').textContent = `共 ${POOLS.length} 条`;
+}
+
+function openCreateModal() { document.getElementById('createModal').classList.add('open'); document.getElementById('poolNameInput').value = ''; document.getElementById('poolNameInput').focus(); }
+function closeCreateModal() { document.getElementById('createModal').classList.remove('open'); }
+function handleCreate() {
+  const name = document.getElementById('poolNameInput').value.trim();
+  if (!name) { alert('请输入地址池名称'); return; }
+  alert(`地址池"${name}"创建成功`);
+  closeCreateModal();
+}
+
+function openDrawer(id) {
+  const p = POOLS.find(r => r.id === id);
+  if (!p) return;
+  document.getElementById('drawerTitle').textContent = p.name;
+  document.getElementById('drawerMask').classList.add('open');
+  document.getElementById('drawer').classList.add('open');
+  const body = document.getElementById('drawerBody');
+
+  const thresholdHtml = `
+    <div style="margin-top:28px">
+      <div class="section-title"><i class="ri-settings-3-line"></i> 阈值配置</div>
+      <div class="threshold-card">
+        <div class="threshold-row">
+          <span class="th-label">最低阈值</span>
+          <span class="th-val">${p.minThreshold ? p.minThreshold.toLocaleString() + ' USDT' : '<span class="th-unset">未设置</span>'}</span>
+          <span class="th-edit" onclick="alert('编辑最低阈值')"><i class="ri-pencil-line"></i> 编辑</span>
+        </div>
+        <div class="threshold-row">
+          <span class="th-label">最高阈值</span>
+          <span class="th-val">${p.maxThreshold ? p.maxThreshold.toLocaleString() + ' USDT' : '<span class="th-unset">未设置</span>'}</span>
+          <span class="th-edit" onclick="alert('编辑最高阈值')"><i class="ri-pencil-line"></i> 编辑</span>
+        </div>
+        ${p.minThreshold && p.maxThreshold ? `<div class="threshold-status">
+          <span class="dot ${(p.khrx >= 0 && p.khr >= p.minThreshold) ? 'dot-g' : 'dot-y'}"></span>
+          <span style="color:var(--text-muted)">当前状态：${p.khrx < 0 ? '余额未同步' : (p.khr >= p.minThreshold && p.khr <= p.maxThreshold ? '正常（总余额在阈值范围内）' : p.khr < p.minThreshold ? '低于最低阈值' : '高于最高阈值')}</span>
+        </div>` : '<div class="threshold-status"><span class="dot dot-y"></span><span style="color:var(--warning)">阈值未配置，建议设置后启用监控</span></div>'}
+      </div>
+    </div>`;
+
+  let addrPreviewHtml = '';
+  if (p.addrs.length > 0) {
+    const rows = p.addrs.slice(0, 5).map(a => `
+      <div class="addr-preview-row">
+        <span class="ap-addr">${a.addr}</span>
+        <span class="ap-status"><span class="tag ${STATUS_MAP[a.status]}">${a.status}</span></span>
+        <span class="ap-bal">${a.bal}</span>
+      </div>`).join('');
+    addrPreviewHtml = `
+      <div style="margin-top:28px">
+        <div class="section-title"><i class="ri-list-unordered"></i> 池内地址 <span style="font-size:12px;color:var(--text-light);font-weight:500;margin-left:4px">(${p.addrCount})</span></div>
+        <div class="addr-preview">
+          ${rows}
+          ${p.addrCount > 5 ? '<div class="addr-preview-link"><a href="address-library.html">查看全部 ' + p.addrCount + ' 个地址 →</a></div>' : '<div class="addr-preview-link"><a href="address-library.html">在地址库中查看 →</a></div>'}
+        </div>
+      </div>`;
+  } else {
+    addrPreviewHtml = `
+      <div style="margin-top:28px">
+        <div class="section-title"><i class="ri-list-unordered"></i> 池内地址</div>
+        <div class="addr-preview">
+          <div class="addr-preview-empty"><i class="ri-inbox-line" style="font-size:24px;display:block;margin-bottom:6px;color:var(--border-soft)"></i>暂无地址</div>
+        </div>
+      </div>`;
+  }
+
+  const logHtml = (p.logs || []).length ? `
+    <div style="margin-top:28px">
+      <div class="section-title"><i class="ri-history-line"></i> 操作日志</div>
+      <div style="border:1px solid var(--border-soft);border-radius:var(--radius-md);overflow:hidden">
+        <table class="tbl" style="margin:0">
+          <thead><tr><th>时间</th><th>事件</th><th>执行方</th><th>内容</th></tr></thead>
+          <tbody>${p.logs.map(ev => `<tr>
+            <td class="mono" style="font-size:11px;white-space:nowrap">${ev.t}</td>
+            <td style="font-size:12px;font-weight:600">${ev.event}</td>
+            <td style="font-size:12px;color:var(--text-muted)">${ev.w}</td>
+            <td style="font-size:12px;white-space:normal;max-width:280px;word-break:break-all;color:var(--text-muted)">${ev.d}</td>
+          </tr>`).join('')}</tbody>
+        </table>
+      </div>
+    </div>` : '';
+
+  body.innerHTML = `
+    <div>
+      <div class="section-title"><i class="ri-information-line"></i> 基本信息</div>
+      <div class="kv-list">
+        <div class="kv-row"><div class="kv-label">地址池</div><div class="kv-val">${p.name}</div></div>
+        <div class="kv-row"><div class="kv-label">地址数量</div><div class="kv-val"><span class="mono" style="font-weight:700">${p.addrCount}</span></div></div>
+        <div class="kv-row"><div class="kv-label">绑定商户</div><div class="kv-val">${p.merchant === '未绑定' ? '<span style="color:var(--text-light)">未绑定</span>' : p.merchant}</div></div>
+        <div class="kv-row"><div class="kv-label">总余额</div><div class="kv-val">${p.khrx < 0 ? '<span style="color:var(--text-light);font-style:italic">未同步</span>' : '<div class="bal-cell"><div class="bal-row"><span class="sym sym-khrx">KHRX</span> <span class="mono" style="font-weight:600">' + fmt(p.khrx) + '</span></div><div class="bal-row"><span class="sym sym-khr">KHR</span> <span class="mono" style="font-weight:600">' + fmt(p.khr) + '</span></div></div>'}</div></div>
+        <div class="kv-row"><div class="kv-label">创建时间</div><div class="kv-val">${p.ctime}</div></div>
+      </div>
+    </div>
+    ${thresholdHtml}
+    ${addrPreviewHtml}
+    ${logHtml}`;
+}
+
+function closeDrawer() {
+  document.getElementById('drawerMask').classList.remove('open');
+  document.getElementById('drawer').classList.remove('open');
+}
+
+renderTable();
+</script>
+</body>
+</html>
