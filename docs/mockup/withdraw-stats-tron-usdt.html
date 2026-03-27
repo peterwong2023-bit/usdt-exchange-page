@@ -378,7 +378,7 @@
     <div class="main-tabs">
       <div class="main-tab active" onclick="switchMainTab('dashboard')"><i class="ri-dashboard-line"></i> 数据看板</div>
       <div class="main-tab" onclick="switchMainTab('task')"><i class="ri-list-check-2"></i> 调度任务 <span class="tab-badge" id="mainTaskBadge"></span></div>
-      <div class="main-tab" onclick="switchMainTab('period')"><i class="ri-calendar-line"></i> 周期明细</div>
+      <div class="main-tab" onclick="switchMainTab('period')"><i class="ri-calendar-line"></i> 统计报表</div>
     </div>
 
     <!-- ═══ Panel 1: 数据看板 ═══ -->
@@ -559,12 +559,12 @@
     </div>
     </div><!-- end panelTask -->
 
-    <!-- ═══ Panel 3: 周期明细 ═══ -->
+    <!-- ═══ Panel 3: 统计报表 ═══ -->
     <div class="main-panel" id="panelPeriod">
     <div class="btab-wrap">
       <div class="btab-nav" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0;padding:0 16px 0 8px">
         <div style="display:flex;align-items:center;gap:10px;padding:12px 8px">
-          <span style="font-size:15px;font-weight:700;color:var(--text-main);display:flex;align-items:center;gap:8px"><i class="ri-calendar-line" style="font-size:16px;color:var(--primary)"></i> 周期明细</span>
+          <span style="font-size:15px;font-weight:700;color:var(--text-main);display:flex;align-items:center;gap:8px"><i class="ri-calendar-line" style="font-size:16px;color:var(--primary)"></i> 统计报表</span>
         </div>
         <div style="display:flex;align-items:center;gap:12px;padding:10px 0">
           <div style="display:flex;gap:6px;align-items:center">
@@ -679,7 +679,7 @@ function renderChart() {
   chart.on('click', function(params) { const idx=params.dataIndex; if(dates[idx]) openDrawer(dates[idx],idx); });
 }
 
-/* ── 周期明细表 ── */
+/* ── 统计报表表 ── */
 function netAvg7(idx) {
   const start = Math.max(0, idx - 6);
   let sum = 0, cnt = 0;
