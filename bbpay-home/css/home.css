@@ -301,7 +301,6 @@
     position: relative;
     z-index: 2;
     padding-top: 20px;
-    perspective: 1200px;
 }
 .phone-mockup {
     position: relative;
@@ -316,9 +315,7 @@
         0 0 0 5px #e2e8f0,
         0 30px 60px rgba(15, 23, 42, 0.2),
         0 8px 24px rgba(15, 23, 42, 0.08);
-    animation: phone-float-3d 8s ease-in-out infinite;
-    transform: rotateY(-12deg) rotateX(4deg);
-    transform-style: preserve-3d;
+    animation: phone-float 8s ease-in-out infinite;
     z-index: 5;
 }
 .phone-notch {
@@ -366,9 +363,9 @@
     100% { background-position: -200% 0; }
 }
 
-@keyframes phone-float-3d {
-    0%, 100% { transform: rotateY(-12deg) rotateX(4deg) translateY(0); }
-    50% { transform: rotateY(-12deg) rotateX(4deg) translateY(-16px); }
+@keyframes phone-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-16px); }
 }
 
 /* 浮动 3D 图标球 */
