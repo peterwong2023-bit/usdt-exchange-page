@@ -6,7 +6,7 @@
 <title>统计报表 - VVOSS Admin v3</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css" rel="stylesheet">
 <style>
   :root {
@@ -22,21 +22,14 @@
     --success: #10b981;
     --success-light: #ecfdf5;
     --warning: #f59e0b;
-    --warning-light: #fffbeb;
     --danger: #ef4444;
     --danger-light: #fef2f2;
     --purple: #8b5cf6;
-    --purple-light: #f5f3ff;
     --sb-bg: #090e17;
     --sb-text: #64748b;
-    --sb-active: #ffffff;
-    --shadow-sm: 0 2px 4px rgba(15,23,42,0.02);
-    --shadow-md: 0 4px 12px rgba(15,23,42,0.04);
-    --shadow-lg: 0 12px 32px rgba(15,23,42,0.06);
     --radius-sm: 6px;
     --radius-md: 12px;
     --radius-lg: 16px;
-
     --grp-info: #334155;
     --grp-balance: #dbeafe;
     --grp-income: #dcfce7;
@@ -44,21 +37,21 @@
     --grp-cold: #ede9fe;
     --grp-risk: #fee2e2;
   }
-
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { background: var(--bg-main); color: var(--text-main); font-family: 'Outfit', -apple-system, sans-serif; font-size: 13px; display: flex; min-height: 100vh; -webkit-font-smoothing: antialiased; }
-
-  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  body { background: var(--bg-main); color: var(--text-main); font-family: 'Noto Sans SC', 'Inter', -apple-system, 'PingFang SC', sans-serif; font-size: 13px; display: flex; min-height: 100vh; -webkit-font-smoothing: antialiased; }
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
   ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 6px; }
   ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-
   @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes scaleIn { from { opacity: 0; transform: translate(-50%,-50%) scale(0.95); } to { opacity: 1; transform: translate(-50%,-50%) scale(1); } }
 
+  /* Sidebar */
   .sb { width: 220px; min-height: 100vh; background: var(--sb-bg); flex-shrink: 0; overflow-y: auto; padding-bottom: 20px; border-right: 1px solid rgba(255,255,255,0.05); }
   .sb-logo { padding: 24px 20px 4px; font-size: 18px; font-weight: 700; color: #fff; letter-spacing: -0.5px; display: flex; align-items: center; gap: 8px; }
   .sb-logo::before { content: ''; display: block; width: 8px; height: 8px; background: var(--primary); border-radius: 50%; box-shadow: 0 0 12px var(--primary); }
-  .sb-ver { padding: 0 20px 24px 36px; font-size: 10px; color: #475569; font-family: 'JetBrains Mono', monospace; }
+  .sb-ver { padding: 0 20px 24px 36px; font-size: 10px; color: #475569; font-family: 'Inter', monospace; font-feature-settings: 'tnum' 1; }
   .n { padding: 10px 20px; font-size: 13px; color: var(--sb-text); cursor: pointer; display: flex; align-items: center; gap: 12px; transition: all .2s; font-weight: 500; }
   .n:hover { color: #fff; background: rgba(255,255,255,.03); }
   .n i { font-size: 16px; width: 20px; text-align: center; opacity: 0.7; }
@@ -72,42 +65,41 @@
   .nc.act i { opacity: 1; color: var(--primary); }
   .nc.act::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--primary); border-radius: 0 4px 4px 0; box-shadow: 0 0 10px rgba(37,99,235,0.5); }
 
-  .topbar { height: 60px; background: rgba(255,255,255,0.8); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border-soft); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; position: sticky; top: 0; z-index: 10; }
-  .topbar .hb { font-size: 20px; color: var(--text-muted); cursor: pointer; transition: color .2s; }
+  .topbar { height: 56px; background: rgba(255,255,255,0.85); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border-soft); display: flex; align-items: center; justify-content: space-between; padding: 0 28px; position: sticky; top: 0; z-index: 10; }
+  .topbar .hb { font-size: 18px; color: var(--text-muted); cursor: pointer; transition: color .2s; }
   .topbar .hb:hover { color: var(--text-main); }
   .topbar .usr { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 500; color: var(--text-main); cursor: pointer; }
-  .topbar .av { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--purple)); display: flex; align-items: center; justify-content: center; font-size: 13px; color: #fff; font-weight: 600; box-shadow: 0 2px 8px rgba(37,99,235,0.2); }
-
+  .topbar .av { width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--purple)); display: flex; align-items: center; justify-content: center; font-size: 12px; color: #fff; font-weight: 600; }
   .mw { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-  .mn { flex: 1; padding: 24px 32px; overflow-y: auto; }
-  .mono { font-family: 'JetBrains Mono', monospace; }
-
+  .mn { flex: 1; padding: 24px 28px; overflow-y: auto; }
+  .mono { font-family: 'Inter', -apple-system, sans-serif; font-size: 13px; letter-spacing: -0.2px; font-feature-settings: 'tnum' 1; font-variant-numeric: tabular-nums; }
   .page-title { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 20px; animation: fadeUp 0.4s cubic-bezier(0.16,1,0.3,1) both; }
 
   /* Filter bar */
-  .filter-bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; animation: fadeUp 0.5s cubic-bezier(0.16,1,0.3,1) 0.1s both; }
+  .filter-bar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; animation: fadeUp 0.5s cubic-bezier(0.16,1,0.3,1) 0.1s both; }
   .filter-bar select, .filter-bar input {
-    padding: 8px 14px; border: 1px solid var(--border-soft); border-radius: 10px; font-size: 13px;
-    font-weight: 500; font-family: 'Outfit', sans-serif; outline: none; transition: all .2s;
-    color: var(--text-main); background: #fff; min-width: 130px; height: 38px;
+    padding: 7px 12px; border: 1px solid var(--border-soft); border-radius: 8px; font-size: 13px;
+    font-weight: 500; font-family: 'Noto Sans SC', 'Inter', sans-serif; outline: none; transition: all .2s;
+    color: var(--text-main); background: #fff; min-width: 130px; height: 36px;
+    appearance: none; -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px;
   }
-  .filter-bar input[type="date"] { min-width: 150px; }
+  .filter-bar input[type="date"] { min-width: 148px; background-image: none; padding-right: 12px; }
   .filter-bar select:focus, .filter-bar input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
-  .btn-query { display: flex; align-items: center; gap: 6px; padding: 8px 20px; background: var(--primary); color: #fff; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; font-family: 'Outfit', sans-serif; cursor: pointer; transition: all .25s; height: 38px; }
-  .btn-query:hover { background: var(--primary-hover); }
-  .btn-reset { display: flex; align-items: center; gap: 6px; padding: 8px 16px; background: #fff; color: var(--text-muted); border: 1px solid var(--border-soft); border-radius: 10px; font-size: 13px; font-weight: 600; font-family: 'Outfit', sans-serif; cursor: pointer; transition: all .25s; height: 38px; }
+  .btn-query { display: flex; align-items: center; gap: 5px; padding: 7px 18px; background: var(--primary); color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; font-family: 'Noto Sans SC', 'Inter', sans-serif; cursor: pointer; transition: all .25s; height: 36px; box-shadow: 0 2px 8px rgba(37,99,235,0.18); }
+  .btn-query:hover { background: var(--primary-hover); box-shadow: 0 4px 12px rgba(37,99,235,0.25); transform: translateY(-1px); }
+  .btn-reset { display: flex; align-items: center; gap: 5px; padding: 7px 14px; background: #fff; color: var(--text-muted); border: 1px solid var(--border-soft); border-radius: 8px; font-size: 13px; font-weight: 600; font-family: 'Noto Sans SC', 'Inter', sans-serif; cursor: pointer; transition: all .25s; height: 36px; }
   .btn-reset:hover { border-color: var(--text-muted); color: var(--text-main); }
 
-  /* Table card */
-  .card { background: var(--bg-card); border: 1px solid var(--border-soft); border-radius: var(--radius-lg); box-shadow: 0 4px 20px rgba(15,23,42,0.03); overflow: hidden; animation: fadeUp 0.5s cubic-bezier(0.16,1,0.3,1) 0.2s both; }
-  .tbl-wrap { overflow-x: auto; position: relative; }
+  /* Table */
+  .card { background: var(--bg-card); border: 1px solid var(--border-soft); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(15,23,42,0.04); overflow: hidden; animation: fadeUp 0.5s cubic-bezier(0.16,1,0.3,1) 0.2s both; }
+  .tbl-wrap { overflow-x: auto; }
+  .tbl { width: 100%; border-collapse: collapse; min-width: 2300px; }
 
-  .tbl { width: 100%; border-collapse: collapse; border-spacing: 0; min-width: 1800px; }
-
-  /* Group headers (level 1) */
   .tbl .grp-header th {
-    text-align: center; padding: 10px 12px; font-size: 12px; font-weight: 700;
-    letter-spacing: 0.5px; border-bottom: 2px solid var(--border-soft);
+    text-align: center; padding: 9px 12px; font-size: 12px; font-weight: 700;
+    letter-spacing: 0.6px; border-bottom: 2px solid var(--border-soft);
     color: var(--text-main); white-space: nowrap;
   }
   .grp-info-bg { background: var(--grp-info); color: #fff !important; }
@@ -117,83 +109,151 @@
   .grp-cold-bg { background: var(--grp-cold); }
   .grp-risk-bg { background: var(--grp-risk); }
 
-  /* Sub headers (level 2) */
   .tbl .sub-header th {
-    text-align: right; padding: 10px 14px; font-size: 11px; font-weight: 600;
+    text-align: right; padding: 9px 14px; font-size: 11px; font-weight: 600;
     color: var(--text-muted); border-bottom: 1px solid var(--border-soft);
     white-space: nowrap; position: sticky; top: 0; z-index: 3;
-    text-transform: uppercase; letter-spacing: 0.3px; background: rgba(248,250,252,0.95);
-    backdrop-filter: blur(8px);
+    letter-spacing: 0.2px; background: rgba(248,250,252,0.96); backdrop-filter: blur(8px);
   }
   .tbl .sub-header th.al { text-align: left; }
-
   .tbl .sub-header .grp-info-sub { background: rgba(51,65,85,0.06); }
-  .tbl .sub-header .grp-balance-sub { background: rgba(219,234,254,0.4); }
-  .tbl .sub-header .grp-income-sub { background: rgba(220,252,231,0.4); }
-  .tbl .sub-header .grp-outgo-sub { background: rgba(255,237,213,0.4); }
-  .tbl .sub-header .grp-cold-sub { background: rgba(237,233,254,0.4); }
-  .tbl .sub-header .grp-risk-sub { background: rgba(254,226,226,0.4); }
+  .tbl .sub-header .grp-balance-sub { background: rgba(219,234,254,0.35); }
+  .tbl .sub-header .grp-income-sub { background: rgba(220,252,231,0.35); }
+  .tbl .sub-header .grp-outgo-sub { background: rgba(255,237,213,0.35); }
+  .tbl .sub-header .grp-cold-sub { background: rgba(237,233,254,0.35); }
+  .tbl .sub-header .grp-risk-sub { background: rgba(254,226,226,0.35); }
 
-  /* Data cells */
   .tbl td {
-    padding: 14px 14px; border-bottom: 1px solid var(--border-soft);
+    padding: 12px 14px; border-bottom: 1px solid var(--border-soft);
     font-size: 13px; font-weight: 500; color: var(--text-main); white-space: nowrap;
-    text-align: right; transition: background .2s;
+    text-align: right; transition: background .15s;
   }
   .tbl td.al { text-align: left; }
-  .tbl tr:hover td { background: rgba(37,99,235,0.02); }
 
-  /* Frozen cols */
-  .tbl .frozen {
-    position: sticky; z-index: 4; background: #fff;
-  }
-  .tbl .frozen-0 { left: 0; min-width: 80px; }
-  .tbl .frozen-1 { left: 80px; min-width: 130px; }
-  .tbl .frozen-2 { left: 210px; min-width: 80px; box-shadow: 4px 0 8px rgba(15,23,42,0.04); }
+  /* Frozen columns */
+  .tbl .frozen { position: sticky; z-index: 4; background: #fff; }
+  .tbl .frozen-0 { left: 0; min-width: 76px; }
+  .tbl .frozen-1 { left: 76px; min-width: 168px; }
+  .tbl .frozen-2 { left: 244px; min-width: 72px; box-shadow: 4px 0 12px rgba(15,23,42,0.04); }
   .tbl .grp-header .frozen { z-index: 5; }
   .tbl .sub-header .frozen { z-index: 5; background: rgba(248,250,252,0.98); }
-  .tbl tr:hover .frozen { background: rgba(245,247,252,1); }
+
+  /* Merchant row */
+  .row-merchant { cursor: pointer; transition: background .15s; }
+  .row-merchant:hover td { background: rgba(37,99,235,0.025); }
+  .row-merchant:hover .frozen { background: rgba(240,244,255,1); }
+  .row-merchant td { font-weight: 600; }
+  .expand-icon { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 5px; background: var(--primary-light); color: var(--primary); font-size: 14px; margin-right: 8px; transition: all .25s; flex-shrink: 0; }
+  .row-merchant.expanded .expand-icon { background: var(--primary); color: #fff; border-radius: 6px; }
+
+  /* Pool sub-row */
+  .row-pool { display: none; }
+  .row-pool.show { display: table-row; }
+  .row-pool td { font-weight: 400; color: var(--text-muted); background: rgba(248,250,252,0.6); font-size: 12px; padding: 10px 14px; }
+  .row-pool:hover td { background: rgba(37,99,235,0.02); }
+  .row-pool:hover .frozen { background: rgba(248,250,252,1); }
+  .row-pool .frozen { background: rgba(248,250,252,0.6); }
+  .pool-name { display: flex; align-items: center; }
+  .tree-line { display: inline-flex; align-items: center; color: #c8ceda; margin-right: 8px; font-size: 13px; font-family: monospace; user-select: none; }
+  .pool-label { color: var(--text-main); font-weight: 500; font-size: 12px; }
 
   /* Summary row */
-  .tbl .sum-row td {
-    font-weight: 700; background: rgba(248,250,252,0.8);
-    border-top: 2px solid var(--border-soft); border-bottom: none;
-    color: var(--text-main);
-  }
+  .tbl .sum-row td { font-weight: 700; background: rgba(248,250,252,0.85); border-top: 2px solid var(--border-soft); border-bottom: none; }
   .tbl .sum-row:hover td { background: rgba(248,250,252,0.9); }
 
   .val-pos { color: var(--success); font-weight: 700; }
   .val-neg { color: var(--danger); font-weight: 700; }
-  .val-zero { color: var(--text-light); }
+  .val-zero { color: var(--text-light); font-weight: 400; }
   .val-bold { font-weight: 700; }
+  .grp-sep { border-left: 2px solid var(--border-soft) !important; }
 
   .tip-icon {
     display: inline-flex; align-items: center; justify-content: center;
-    width: 14px; height: 14px; border-radius: 50%; background: rgba(100,116,139,0.12);
-    font-size: 9px; color: var(--text-muted); margin-left: 4px; cursor: help;
+    width: 14px; height: 14px; border-radius: 50%; background: rgba(100,116,139,0.1);
+    font-size: 9px; color: var(--text-muted); margin-left: 3px; cursor: help;
     vertical-align: middle; position: relative;
   }
   .tip-icon:hover::after {
     content: attr(data-tip); position: absolute; bottom: calc(100% + 8px); left: 50%;
     transform: translateX(-50%); background: #0f172a; color: #fff; padding: 8px 14px;
-    border-radius: 8px; font-size: 12px; font-weight: 500; white-space: nowrap;
-    z-index: 50; box-shadow: 0 4px 12px rgba(15,23,42,0.2); pointer-events: none;
-    font-family: 'Outfit', sans-serif; letter-spacing: 0;
+    border-radius: 8px; font-size: 11.5px; font-weight: 500; white-space: nowrap;
+    z-index: 50; box-shadow: 0 4px 16px rgba(15,23,42,0.25); pointer-events: none;
+    font-family: 'Noto Sans SC', 'Inter', sans-serif; letter-spacing: 0; line-height: 1.5;
   }
 
+  /* Clickable count */
+  .cnt-link {
+    color: var(--primary); cursor: pointer; font-weight: 600; transition: all .15s;
+    text-decoration: none; border-bottom: 1px dashed rgba(37,99,235,0.3);
+    padding-bottom: 1px;
+  }
+  .cnt-link:hover { color: var(--primary-hover); border-bottom-color: var(--primary); }
+
+  /* Modal overlay */
+  .modal-overlay {
+    display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(15,23,42,0.45); z-index: 100; backdrop-filter: blur(4px);
+    animation: fadeIn 0.2s ease;
+  }
+  .modal-overlay.show { display: block; }
+
+  .modal {
+    position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%);
+    background: #fff; border-radius: 16px; box-shadow: 0 24px 64px rgba(15,23,42,0.15);
+    width: 90vw; max-width: 1100px; max-height: 80vh; display: flex; flex-direction: column;
+    z-index: 101; animation: scaleIn 0.25s cubic-bezier(0.16,1,0.3,1);
+  }
+  .modal-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 24px; border-bottom: 1px solid var(--border-soft); flex-shrink: 0;
+  }
+  .modal-title { font-size: 15px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
+  .modal-title .badge { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; background: var(--primary-light); color: var(--primary); }
+  .modal-close { width: 32px; height: 32px; border-radius: 8px; border: none; background: rgba(100,116,139,0.08); color: var(--text-muted); font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .2s; }
+  .modal-close:hover { background: var(--danger-light); color: var(--danger); }
+
+  .modal-body { overflow-y: auto; flex: 1; }
+  .modal-tbl { width: 100%; border-collapse: collapse; }
+  .modal-tbl th {
+    padding: 10px 16px; font-size: 12px; font-weight: 600; color: var(--text-muted);
+    text-align: left; background: rgba(248,250,252,0.95); border-bottom: 1px solid var(--border-soft);
+    position: sticky; top: 0; z-index: 2; white-space: nowrap; letter-spacing: 0.2px;
+  }
+  .modal-tbl th.ar { text-align: right; }
+  .modal-tbl td {
+    padding: 10px 16px; font-size: 12.5px; color: var(--text-main); border-bottom: 1px solid var(--border-soft);
+    white-space: nowrap; font-weight: 500;
+  }
+  .modal-tbl td.ar { text-align: right; }
+  .modal-tbl tr:hover td { background: rgba(37,99,235,0.02); }
+  .modal-tbl .hash { font-family: 'Inter', monospace; font-size: 11.5px; color: var(--text-muted); letter-spacing: -0.2px; font-feature-settings: 'tnum' 1; }
+  .modal-tbl .addr { font-family: 'Inter', monospace; font-size: 11px; color: var(--text-main); font-feature-settings: 'tnum' 1; }
+  .icon-btn { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 5px; color: var(--text-light); cursor: pointer; transition: all .15s; font-size: 13px; }
+  .icon-btn:hover { background: var(--primary-light); color: var(--primary); }
+  .status-ok { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: var(--success); font-weight: 600; }
+  .status-ok::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--success); }
+
+  .modal-foot {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 24px; border-top: 1px solid var(--border-soft); flex-shrink: 0;
+    background: rgba(248,250,252,0.6);
+  }
+  .modal-foot .info { font-size: 13px; color: var(--text-muted); font-weight: 500; }
+  .modal-foot .info b { color: var(--text-main); }
+  .modal-foot .right-area { display: flex; align-items: center; gap: 12px; }
+  .modal-foot .summary { font-size: 13px; font-weight: 600; color: var(--primary); font-family: 'Inter', sans-serif; font-feature-settings: 'tnum' 1; }
+  .btn-export { display: flex; align-items: center; gap: 5px; padding: 7px 16px; background: var(--success); color: #fff; border: none; border-radius: 8px; font-size: 12px; font-weight: 600; font-family: 'Noto Sans SC', 'Inter', sans-serif; cursor: pointer; transition: all .2s; }
+  .btn-export:hover { opacity: 0.9; transform: translateY(-1px); }
+
   /* Pagination */
-  .pgb { display: flex; align-items: center; gap: 12px; padding: 14px 24px; font-size: 13px; font-weight: 500; color: var(--text-muted); border-top: 1px solid var(--border-soft); background: rgba(248,250,252,0.6); }
-  .pg { min-width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); cursor: pointer; background: #fff; border: 1px solid var(--border-soft); color: var(--text-muted); font-size: 12px; font-weight: 600; transition: all .2s; }
+  .pgb { display: flex; align-items: center; gap: 12px; padding: 12px 24px; font-size: 13px; font-weight: 500; color: var(--text-muted); border-top: 1px solid var(--border-soft); background: rgba(248,250,252,0.5); }
+  .pg { min-width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 6px; cursor: pointer; background: #fff; border: 1px solid var(--border-soft); color: var(--text-muted); font-size: 12px; font-weight: 600; transition: all .2s; }
   .pg:hover { border-color: var(--primary); color: var(--primary); }
-  .pg.on { background: var(--primary); color: #fff; border-color: var(--primary); box-shadow: 0 2px 6px rgba(37,99,235,0.2); }
-  .pgb select { background: #fff; border: 1px solid var(--border-soft); color: var(--text-muted); padding: 5px 8px; border-radius: var(--radius-sm); font-size: 12px; font-weight: 500; font-family: 'Outfit', sans-serif; cursor: pointer; transition: all .2s; }
+  .pg.on { background: var(--primary); color: #fff; border-color: var(--primary); box-shadow: 0 2px 6px rgba(37,99,235,0.18); }
+  .pgb select { background: #fff; border: 1px solid var(--border-soft); color: var(--text-muted); padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 500; font-family: 'Noto Sans SC', 'Inter', sans-serif; cursor: pointer; }
 
-  /* Column group separators */
-  .grp-sep { border-left: 2px solid var(--border-soft) !important; }
-
-  /* Responsive hint */
-  .scroll-hint { display: none; padding: 8px 16px; background: var(--primary-light); color: var(--primary); font-size: 12px; font-weight: 600; text-align: center; border-radius: var(--radius-sm) var(--radius-sm) 0 0; }
-  @media (max-width: 1400px) { .scroll-hint { display: block; } }
+  .scroll-hint { display: none; padding: 6px 16px; background: var(--primary-light); color: var(--primary); font-size: 11px; font-weight: 600; text-align: center; }
+  @media (max-width: 1600px) { .scroll-hint { display: block; } }
 </style>
 </head>
 <body>
@@ -237,25 +297,20 @@
     <div class="hb"><i class="ri-menu-line"></i></div>
     <div class="usr"><div class="av">L</div><span>laoluan</span></div>
   </div>
-
   <div class="mn">
     <div class="page-title">统计报表</div>
-
     <div class="filter-bar">
-      <select id="fMerchant">
-        <option value="">商户名称</option>
-        <option>高次出款归集</option>
-        <option>高次出款</option>
-        <option>出差高频</option>
-      </select>
-      <select id="fChain">
-        <option>资料 (Tron)</option>
-      </select>
+      <select id="fMerchant"><option value="">商户名称</option><option>uutalk</option><option>bitda</option></select>
+      <select id="fChain"><option>波场 (TRON)</option></select>
       <select id="fCurrency">
-        <option>KHR (柬币)</option>
+        <option>KHR (波场)</option>
+        <option>KHRX (波场)</option>
+        <option>KHRD (波场)</option>
+        <option>KHRDOLD (波场)</option>
+        <option>KHRCOLD (波场)</option>
       </select>
-      <input type="date" id="fDateFrom" value="2026-06-04">
-      <input type="date" id="fDateTo" value="2026-04-04">
+      <input type="date" id="fDateFrom" value="2026-03-01">
+      <input type="date" id="fDateTo" value="2026-03-20">
       <button class="btn-query" onclick="renderTable()"><i class="ri-search-line"></i> 查询</button>
       <button class="btn-reset" onclick="resetFilters()"><i class="ri-refresh-line"></i> 重置</button>
     </div>
@@ -266,33 +321,36 @@
         <table class="tbl" id="mainTable">
           <thead>
             <tr class="grp-header">
-              <th colspan="3" class="grp-info-bg frozen" style="left:0;min-width:290px;">基本信息</th>
-              <th colspan="4" class="grp-balance-bg grp-sep">余额概览</th>
-              <th colspan="3" class="grp-income-bg grp-sep">入款</th>
-              <th colspan="2" class="grp-outgo-bg grp-sep">出款</th>
+              <th colspan="3" class="grp-info-bg frozen" style="left:0;min-width:316px;">基本信息</th>
+              <th colspan="5" class="grp-balance-bg grp-sep">余额概览</th>
+              <th colspan="5" class="grp-income-bg grp-sep">入款与归集</th>
+              <th colspan="2" class="grp-outgo-bg grp-sep">对外出款</th>
               <th colspan="5" class="grp-cold-bg grp-sep">冷钱包调度</th>
-              <th colspan="4" class="grp-risk-bg grp-sep">风控</th>
+              <th colspan="4" class="grp-risk-bg grp-sep">风险与退款</th>
             </tr>
             <tr class="sub-header">
               <th class="al frozen frozen-0 grp-info-sub">商户ID</th>
               <th class="al frozen frozen-1 grp-info-sub">商户名称</th>
               <th class="frozen frozen-2 grp-info-sub">钱包总数</th>
-              <th class="grp-balance-sub grp-sep">热池余额</th>
+              <th class="grp-balance-sub grp-sep">总余额 <span class="tip-icon" data-tip="= 热池 + 冷钱包 + 风险资金（不含待确认）">ⓘ</span></th>
+              <th class="grp-balance-sub">热池余额</th>
               <th class="grp-balance-sub">冷钱包余额 <span class="tip-icon" data-tip="实时余额快照，不受日期筛选影响">ⓘ</span></th>
-              <th class="grp-balance-sub">总余额 <span class="tip-icon" data-tip="= 热池余额 + 冷钱包余额">ⓘ</span></th>
-              <th class="grp-balance-sub">待确认金额</th>
-              <th class="grp-income-sub grp-sep">入款金额</th>
+              <th class="grp-balance-sub">风险资金余额 <span class="tip-icon" data-tip="被污染钱包的正常资金隔离余额">ⓘ</span></th>
+              <th class="grp-balance-sub">待确认金额 <span class="tip-icon" data-tip="链上已发起但未确认的在途资金">ⓘ</span></th>
+              <th class="grp-income-sub grp-sep">入款金额 <span class="tip-icon" data-tip="客户充值到业务地址的金额，不含内部调度">ⓘ</span></th>
               <th class="grp-income-sub">入款笔数</th>
               <th class="grp-income-sub">异常入款</th>
-              <th class="grp-outgo-sub grp-sep">出款金额</th>
+              <th class="grp-income-sub">入热池金额</th>
+              <th class="grp-income-sub">入热池笔数</th>
+              <th class="grp-outgo-sub grp-sep">出款金额 <span class="tip-icon" data-tip="热池代付给客户的金额，不含冷归集等内部转账">ⓘ</span></th>
               <th class="grp-outgo-sub">出款笔数</th>
               <th class="grp-cold-sub grp-sep">冷归集金额</th>
               <th class="grp-cold-sub">冷归集笔数</th>
               <th class="grp-cold-sub">热回笼金额</th>
               <th class="grp-cold-sub">热回笼笔数</th>
-              <th class="grp-cold-sub">净调度 <span class="tip-icon" data-tip="= 热回笼金额 − 冷归集金额，正值为净回笼，负值为净归集">ⓘ</span></th>
-              <th class="grp-risk-sub grp-sep">已撤金额</th>
-              <th class="grp-risk-sub">已撤笔数</th>
+              <th class="grp-cold-sub">净调度 <span class="tip-icon" data-tip="= 热回笼 − 冷归集，正值净回笼，负值净归集">ⓘ</span></th>
+              <th class="grp-risk-sub grp-sep">风险归集金额</th>
+              <th class="grp-risk-sub">风险归集笔数</th>
               <th class="grp-risk-sub">风控退款金额</th>
               <th class="grp-risk-sub">风控退款笔数</th>
             </tr>
@@ -301,152 +359,317 @@
         </table>
       </div>
       <div class="pgb">
-        <span>共 <b id="totalRows">3</b> 条</span>
+        <span>共 <b id="totalRows">2</b> 个商户</span>
         <div style="flex:1"></div>
         <div class="pg on">1</div>
-        <div style="margin-left:8px">
-          <select><option>10 条/页</option><option>20 条/页</option><option>50 条/页</option></select>
-        </div>
+        <div style="margin-left:8px"><select><option>10 条/页</option><option>20 条/页</option><option>50 条/页</option></select></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Transaction Detail Modal -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-head">
+      <div class="modal-title" id="modalTitle">出款详细记录 <span class="badge" id="modalBadge">KHR</span></div>
+      <button class="modal-close" onclick="closeModal()"><i class="ri-close-line"></i></button>
+    </div>
+    <div class="modal-body">
+      <table class="modal-tbl">
+        <thead>
+          <tr>
+            <th>交易哈希</th>
+            <th>订单号</th>
+            <th>区块号</th>
+            <th>时间</th>
+            <th>发送方</th>
+            <th>接收方</th>
+            <th class="ar">金额</th>
+            <th>状态</th>
+          </tr>
+        </thead>
+        <tbody id="modalBody"></tbody>
+      </table>
+    </div>
+    <div class="modal-foot">
+      <div class="info">第 <b>1</b>-<b id="modalPageCnt">0</b> 条，共 <b id="modalTotal">0</b> 条</div>
+      <div class="right-area">
+        <span class="summary" id="modalSum">0.00 KHR</span>
+        <button class="btn-export"><i class="ri-download-2-line"></i> 导出CSV</button>
       </div>
     </div>
   </div>
 </div>
 
 <script>
-const DATA = [
+const MERCHANTS = [
   {
-    id: '1260', name: '高次出款归集', wallets: 11,
-    hotBal: 80.33, coldBal: 520.00, pending: 3.5,
-    inAmt: 0, inCnt: 0, abnormalIn: 0,
-    outAmt: -51.6, outCnt: 10,
-    coldCollAmt: 150.00, coldCollCnt: 3, hotRecallAmt: 0, hotRecallCnt: 0,
-    cancelAmt: 54.1, cancelCnt: 12, riskAmt: 0, riskCnt: 0
+    id: '1260', name: 'uutalk',
+    wallets: 28,
+    pools: [
+      {
+        name: 'uutalk', wallets: 11,
+        hotBal: 130.33, coldBal: 0, riskBal: 0, pending: 3.5,
+        inAmt: 412.00, inCnt: 65, abnormalIn: 0, toHotAmt: 390.50, toHotCnt: 22,
+        outAmt: 186.40, outCnt: 28,
+        coldCollAmt: 0, coldCollCnt: 0, hotRecallAmt: 0, hotRecallCnt: 0,
+        riskCollAmt: 0, riskCollCnt: 0, riskRefundAmt: 0, riskRefundCnt: 0
+      },
+      {
+        name: 'uutalk归集', wallets: 8,
+        hotBal: 80.33, coldBal: 0, riskBal: 0, pending: 0,
+        inAmt: 245.80, inCnt: 38, abnormalIn: 1.20, toHotAmt: 220.10, toHotCnt: 15,
+        outAmt: 51.60, outCnt: 10,
+        coldCollAmt: 0, coldCollCnt: 0, hotRecallAmt: 0, hotRecallCnt: 0,
+        riskCollAmt: 0, riskCollCnt: 0, riskRefundAmt: 0, riskRefundCnt: 0
+      },
+      {
+        name: 'uutalk冷钱包', wallets: 6,
+        hotBal: 0, coldBal: 1400.50, riskBal: 0, pending: 0,
+        inAmt: 0, inCnt: 0, abnormalIn: 0, toHotAmt: 0, toHotCnt: 0,
+        outAmt: 0, outCnt: 0,
+        coldCollAmt: 350.00, coldCollCnt: 8, hotRecallAmt: 80.00, hotRecallCnt: 2,
+        riskCollAmt: 0, riskCollCnt: 0, riskRefundAmt: 0, riskRefundCnt: 0
+      },
+      {
+        name: 'uutalk风险', wallets: 3,
+        hotBal: 0, coldBal: 0, riskBal: 17.70, pending: 0,
+        inAmt: 0, inCnt: 0, abnormalIn: 0, toHotAmt: 0, toHotCnt: 0,
+        outAmt: 0, outCnt: 0,
+        coldCollAmt: 0, coldCollCnt: 0, hotRecallAmt: 0, hotRecallCnt: 0,
+        riskCollAmt: 17.70, riskCollCnt: 2, riskRefundAmt: 0, riskRefundCnt: 0
+      }
+    ]
   },
   {
-    id: '1261', name: '高次出款', wallets: 16,
-    hotBal: 130.33, coldBal: 880.50, pending: 0,
-    inAmt: 54.1, inCnt: 12, abnormalIn: 0,
-    outAmt: 0, outCnt: 0,
-    coldCollAmt: 200.00, coldCollCnt: 5, hotRecallAmt: 80.00, hotRecallCnt: 2,
-    cancelAmt: 0, cancelCnt: 0, riskAmt: 0, riskCnt: 0
-  },
-  {
-    id: '1262', name: '出差高频', wallets: 1,
-    hotBal: 65.50, coldBal: 0, pending: 0,
-    inAmt: 0, inCnt: 0, abnormalIn: 0,
-    outAmt: 0, outCnt: 0,
-    coldCollAmt: 0, coldCollCnt: 0, hotRecallAmt: 0, hotRecallCnt: 0,
-    cancelAmt: 0, cancelCnt: 0, riskAmt: 0, riskCnt: 0
+    id: '1263', name: 'bitda',
+    wallets: 13,
+    pools: [
+      {
+        name: 'bitda', wallets: 6,
+        hotBal: 210.00, coldBal: 0, riskBal: 0, pending: 8.30,
+        inAmt: 580.00, inCnt: 92, abnormalIn: 0, toHotAmt: 540.00, toHotCnt: 35,
+        outAmt: 320.50, outCnt: 48,
+        coldCollAmt: 0, coldCollCnt: 0, hotRecallAmt: 0, hotRecallCnt: 0,
+        riskCollAmt: 0, riskCollCnt: 0, riskRefundAmt: 0, riskRefundCnt: 0
+      },
+      {
+        name: 'bitda归集', wallets: 4,
+        hotBal: 45.00, coldBal: 0, riskBal: 0, pending: 0,
+        inAmt: 22.00, inCnt: 5, abnormalIn: 0, toHotAmt: 20.00, toHotCnt: 4,
+        outAmt: 10.00, outCnt: 3,
+        coldCollAmt: 0, coldCollCnt: 0, hotRecallAmt: 0, hotRecallCnt: 0,
+        riskCollAmt: 0, riskCollCnt: 0, riskRefundAmt: 0, riskRefundCnt: 0
+      },
+      {
+        name: 'bitda冷钱包', wallets: 2,
+        hotBal: 0, coldBal: 1200.00, riskBal: 0, pending: 0,
+        inAmt: 0, inCnt: 0, abnormalIn: 0, toHotAmt: 0, toHotCnt: 0,
+        outAmt: 0, outCnt: 0,
+        coldCollAmt: 300.00, coldCollCnt: 4, hotRecallAmt: 120.00, hotRecallCnt: 1,
+        riskCollAmt: 0, riskCollCnt: 0, riskRefundAmt: 0, riskRefundCnt: 0
+      },
+      {
+        name: 'bitda风险', wallets: 1,
+        hotBal: 0, coldBal: 0, riskBal: 3.00, pending: 0,
+        inAmt: 0, inCnt: 0, abnormalIn: 0, toHotAmt: 0, toHotCnt: 0,
+        outAmt: 0, outCnt: 0,
+        coldCollAmt: 0, coldCollCnt: 0, hotRecallAmt: 0, hotRecallCnt: 0,
+        riskCollAmt: 3.00, riskCollCnt: 1, riskRefundAmt: 15.00, riskRefundCnt: 2
+      }
+    ]
   }
 ];
 
-function fmt(v, decimals = 2) {
-  if (v === 0 || v === null || v === undefined) return '0.00';
-  return v.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+function sumPools(pools) {
+  const keys = ['hotBal','coldBal','riskBal','pending','inAmt','inCnt','abnormalIn','toHotAmt','toHotCnt','outAmt','outCnt','coldCollAmt','coldCollCnt','hotRecallAmt','hotRecallCnt','riskCollAmt','riskCollCnt','riskRefundAmt','riskRefundCnt'];
+  const s = {}; keys.forEach(k => s[k] = 0);
+  pools.forEach(p => keys.forEach(k => s[k] += (p[k] || 0)));
+  s.wallets = pools.reduce((a, p) => a + p.wallets, 0);
+  return s;
 }
 
-function fmtCnt(v) {
+function fmt(v) { return v === 0 ? '0.00' : v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+function fz(v) { return v === 0 ? '<span class="val-zero">—</span>' : fmt(v); }
+function fnet(v) {
   if (v === 0) return '<span class="val-zero">—</span>';
-  return v;
+  return v > 0 ? `<span class="val-pos">+${fmt(v)}</span>` : `<span class="val-neg">${fmt(v)}</span>`;
 }
 
-function fmtAmt(v) {
+const TYPE_LABELS = {
+  inCnt: '入款', toHotCnt: '入热池', outCnt: '对外出款',
+  coldCollCnt: '冷归集', hotRecallCnt: '热回笼',
+  riskCollCnt: '风险归集', riskRefundCnt: '风控退款'
+};
+const TYPE_AMT_KEY = {
+  inCnt: 'inAmt', toHotCnt: 'toHotAmt', outCnt: 'outAmt',
+  coldCollCnt: 'coldCollAmt', hotRecallCnt: 'hotRecallAmt',
+  riskCollCnt: 'riskCollAmt', riskRefundCnt: 'riskRefundAmt'
+};
+
+function fcLink(v, ctx, field) {
   if (v === 0) return '<span class="val-zero">—</span>';
-  return fmt(v);
+  return `<span class="cnt-link" onclick="event.stopPropagation(); openModal('${ctx}','${field}',${v})">${v}</span>`;
 }
 
-function fmtNet(v) {
-  if (v === 0) return '<span class="val-zero">—</span>';
-  if (v > 0) return `<span class="val-pos">+${fmt(v)}</span>`;
-  return `<span class="val-neg">${fmt(v)}</span>`;
+function dataCells(d, ctx) {
+  const total = d.hotBal + d.coldBal + d.riskBal;
+  const net = d.hotRecallAmt - d.coldCollAmt;
+  return `
+    <td class="mono grp-sep val-bold">${fmt(total)}</td>
+    <td class="mono">${fmt(d.hotBal)}</td>
+    <td class="mono">${fmt(d.coldBal)}</td>
+    <td class="mono">${fmt(d.riskBal)}</td>
+    <td class="mono">${fmt(d.pending)}</td>
+    <td class="mono grp-sep">${fz(d.inAmt)}</td>
+    <td>${fcLink(d.inCnt, ctx, 'inCnt')}</td>
+    <td class="mono">${fz(d.abnormalIn)}</td>
+    <td class="mono">${fz(d.toHotAmt)}</td>
+    <td>${fcLink(d.toHotCnt, ctx, 'toHotCnt')}</td>
+    <td class="mono grp-sep">${fz(d.outAmt)}</td>
+    <td>${fcLink(d.outCnt, ctx, 'outCnt')}</td>
+    <td class="mono grp-sep">${fz(d.coldCollAmt)}</td>
+    <td>${fcLink(d.coldCollCnt, ctx, 'coldCollCnt')}</td>
+    <td class="mono">${fz(d.hotRecallAmt)}</td>
+    <td>${fcLink(d.hotRecallCnt, ctx, 'hotRecallCnt')}</td>
+    <td class="mono">${fnet(net)}</td>
+    <td class="mono grp-sep">${fz(d.riskCollAmt)}</td>
+    <td>${fcLink(d.riskCollCnt, ctx, 'riskCollCnt')}</td>
+    <td class="mono">${fz(d.riskRefundAmt)}</td>
+    <td>${fcLink(d.riskRefundCnt, ctx, 'riskRefundCnt')}</td>`;
 }
 
 function renderTable() {
   const tbody = document.getElementById('tableBody');
   let html = '';
 
-  DATA.forEach(d => {
-    const total = d.hotBal + d.coldBal;
-    const net = d.hotRecallAmt - d.coldCollAmt;
-    html += `<tr>
-      <td class="al frozen frozen-0 mono">${d.id}</td>
-      <td class="al frozen frozen-1" style="font-weight:600;color:var(--primary)">${d.name}</td>
-      <td class="frozen frozen-2">${d.wallets}</td>
-      <td class="mono grp-sep">${fmt(d.hotBal)}</td>
-      <td class="mono">${fmt(d.coldBal)}</td>
-      <td class="mono val-bold">${fmt(total)}</td>
-      <td class="mono">${fmt(d.pending)}</td>
-      <td class="mono grp-sep">${d.inAmt ? fmt(d.inAmt) : '<span class="val-zero">—</span>'}</td>
-      <td>${fmtCnt(d.inCnt)}</td>
-      <td class="mono">${fmtAmt(d.abnormalIn)}</td>
-      <td class="mono grp-sep">${d.outAmt ? fmt(Math.abs(d.outAmt)) : '<span class="val-zero">—</span>'}</td>
-      <td>${fmtCnt(d.outCnt)}</td>
-      <td class="mono grp-sep">${fmtAmt(d.coldCollAmt)}</td>
-      <td>${fmtCnt(d.coldCollCnt)}</td>
-      <td class="mono">${fmtAmt(d.hotRecallAmt)}</td>
-      <td>${fmtCnt(d.hotRecallCnt)}</td>
-      <td class="mono">${fmtNet(net)}</td>
-      <td class="mono grp-sep">${fmtAmt(d.cancelAmt)}</td>
-      <td>${fmtCnt(d.cancelCnt)}</td>
-      <td class="mono">${fmtAmt(d.riskAmt)}</td>
-      <td>${fmtCnt(d.riskCnt)}</td>
+  MERCHANTS.forEach((m, mi) => {
+    const s = sumPools(m.pools);
+    html += `<tr class="row-merchant" data-mid="${mi}" onclick="toggleExpand(${mi})">
+      <td class="al frozen frozen-0 mono">${m.id}</td>
+      <td class="al frozen frozen-1"><span class="expand-icon" id="ei${mi}"><i class="ri-arrow-down-s-line"></i></span>${m.name}</td>
+      <td class="frozen frozen-2">${m.wallets}</td>
+      ${dataCells(s, m.name)}
     </tr>`;
+
+    m.pools.forEach((p, pi) => {
+      const treeSym = pi === m.pools.length - 1 ? '└─' : '├─';
+      html += `<tr class="row-pool" data-parent="${mi}">
+        <td class="al frozen frozen-0"></td>
+        <td class="al frozen frozen-1"><span class="pool-name"><span class="tree-line">${treeSym}</span><span class="pool-label">${p.name}</span></span></td>
+        <td class="frozen frozen-2">${p.wallets}</td>
+        ${dataCells(p, m.name + ' - ' + p.name)}
+      </tr>`;
+    });
   });
 
-  const sumHot = DATA.reduce((s, d) => s + d.hotBal, 0);
-  const sumCold = DATA.reduce((s, d) => s + d.coldBal, 0);
-  const sumTotal = sumHot + sumCold;
-  const sumPending = DATA.reduce((s, d) => s + d.pending, 0);
-  const sumIn = DATA.reduce((s, d) => s + d.inAmt, 0);
-  const sumInCnt = DATA.reduce((s, d) => s + d.inCnt, 0);
-  const sumAbnIn = DATA.reduce((s, d) => s + d.abnormalIn, 0);
-  const sumOut = DATA.reduce((s, d) => s + Math.abs(d.outAmt), 0);
-  const sumOutCnt = DATA.reduce((s, d) => s + d.outCnt, 0);
-  const sumCC = DATA.reduce((s, d) => s + d.coldCollAmt, 0);
-  const sumCCn = DATA.reduce((s, d) => s + d.coldCollCnt, 0);
-  const sumHR = DATA.reduce((s, d) => s + d.hotRecallAmt, 0);
-  const sumHRn = DATA.reduce((s, d) => s + d.hotRecallCnt, 0);
-  const sumNet = sumHR - sumCC;
-  const sumCancel = DATA.reduce((s, d) => s + d.cancelAmt, 0);
-  const sumCancelN = DATA.reduce((s, d) => s + d.cancelCnt, 0);
-  const sumRisk = DATA.reduce((s, d) => s + d.riskAmt, 0);
-  const sumRiskN = DATA.reduce((s, d) => s + d.riskCnt, 0);
-  const sumWallets = DATA.reduce((s, d) => s + d.wallets, 0);
+  const allPools = MERCHANTS.flatMap(m => m.pools);
+  const gt = sumPools(allPools);
+  const gtWallets = MERCHANTS.reduce((s, m) => s + m.wallets, 0);
+  const gtTotal = gt.hotBal + gt.coldBal + gt.riskBal;
+  const gtNet = gt.hotRecallAmt - gt.coldCollAmt;
 
   html += `<tr class="sum-row">
-    <td class="al frozen frozen-0" colspan="1" style="font-weight:800;color:var(--text-main)">合计</td>
+    <td class="al frozen frozen-0" style="font-weight:800">合计</td>
     <td class="al frozen frozen-1"></td>
-    <td class="frozen frozen-2">${sumWallets}</td>
-    <td class="mono grp-sep">${fmt(sumHot)}</td>
-    <td class="mono">${fmt(sumCold)}</td>
-    <td class="mono val-bold">${fmt(sumTotal)}</td>
-    <td class="mono">${fmt(sumPending)}</td>
-    <td class="mono grp-sep">${fmtAmt(sumIn)}</td>
-    <td>${fmtCnt(sumInCnt)}</td>
-    <td class="mono">${fmtAmt(sumAbnIn)}</td>
-    <td class="mono grp-sep">${fmtAmt(sumOut)}</td>
-    <td>${fmtCnt(sumOutCnt)}</td>
-    <td class="mono grp-sep">${fmtAmt(sumCC)}</td>
-    <td>${fmtCnt(sumCCn)}</td>
-    <td class="mono">${fmtAmt(sumHR)}</td>
-    <td>${fmtCnt(sumHRn)}</td>
-    <td class="mono">${fmtNet(sumNet)}</td>
-    <td class="mono grp-sep">${fmtAmt(sumCancel)}</td>
-    <td>${fmtCnt(sumCancelN)}</td>
-    <td class="mono">${fmtAmt(sumRisk)}</td>
-    <td>${fmtCnt(sumRiskN)}</td>
+    <td class="frozen frozen-2" style="font-weight:800">${gtWallets}</td>
+    <td class="mono grp-sep val-bold">${fmt(gtTotal)}</td>
+    <td class="mono">${fmt(gt.hotBal)}</td>
+    <td class="mono">${fmt(gt.coldBal)}</td>
+    <td class="mono">${fmt(gt.riskBal)}</td>
+    <td class="mono">${fmt(gt.pending)}</td>
+    <td class="mono grp-sep">${fz(gt.inAmt)}</td>
+    <td>${gt.inCnt || '<span class="val-zero">—</span>'}</td>
+    <td class="mono">${fz(gt.abnormalIn)}</td>
+    <td class="mono">${fz(gt.toHotAmt)}</td>
+    <td>${gt.toHotCnt || '<span class="val-zero">—</span>'}</td>
+    <td class="mono grp-sep">${fz(gt.outAmt)}</td>
+    <td>${gt.outCnt || '<span class="val-zero">—</span>'}</td>
+    <td class="mono grp-sep">${fz(gt.coldCollAmt)}</td>
+    <td>${gt.coldCollCnt || '<span class="val-zero">—</span>'}</td>
+    <td class="mono">${fz(gt.hotRecallAmt)}</td>
+    <td>${gt.hotRecallCnt || '<span class="val-zero">—</span>'}</td>
+    <td class="mono">${fnet(gtNet)}</td>
+    <td class="mono grp-sep">${fz(gt.riskCollAmt)}</td>
+    <td>${gt.riskCollCnt || '<span class="val-zero">—</span>'}</td>
+    <td class="mono">${fz(gt.riskRefundAmt)}</td>
+    <td>${gt.riskRefundCnt || '<span class="val-zero">—</span>'}</td>
   </tr>`;
 
   tbody.innerHTML = html;
-  document.getElementById('totalRows').textContent = DATA.length;
+  document.getElementById('totalRows').textContent = MERCHANTS.length;
+}
+
+function toggleExpand(mid) {
+  const rows = document.querySelectorAll(`.row-pool[data-parent="${mid}"]`);
+  const icon = document.getElementById(`ei${mid}`);
+  const merchant = document.querySelector(`.row-merchant[data-mid="${mid}"]`);
+  const isExpanded = merchant.classList.contains('expanded');
+  if (isExpanded) {
+    merchant.classList.remove('expanded');
+    icon.innerHTML = '<i class="ri-arrow-down-s-line"></i>';
+    rows.forEach(r => r.classList.remove('show'));
+  } else {
+    merchant.classList.add('expanded');
+    icon.innerHTML = '<i class="ri-arrow-up-s-line"></i>';
+    rows.forEach(r => r.classList.add('show'));
+  }
 }
 
 function resetFilters() {
   document.getElementById('fMerchant').selectedIndex = 0;
-  document.getElementById('fDateFrom').value = '2026-06-04';
-  document.getElementById('fDateTo').value = '2026-04-04';
+  document.getElementById('fDateFrom').value = '2026-03-01';
+  document.getElementById('fDateTo').value = '2026-03-20';
   renderTable();
 }
+
+function rndHash() { return Array.from({length:64}, ()=>'0123456789abcdef'[Math.floor(Math.random()*16)]).join(''); }
+function rndAddr() { return 'T' + Array.from({length:33}, ()=>'0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'[Math.floor(Math.random()*62)]).join(''); }
+function rndOrder() { return Math.random() > 0.3 ? Math.floor(Math.random()*9000000+1000000).toString() : '—'; }
+function rndBlock() { return Math.floor(Math.random()*900000+80000000); }
+function rndTime() {
+  const d = new Date(2026, 2, Math.floor(Math.random()*20)+1, Math.floor(Math.random()*24), Math.floor(Math.random()*60), Math.floor(Math.random()*60));
+  return d.toISOString().replace('T',' ').slice(0,19);
+}
+function rndAmt() { return (Math.random()*20+1).toFixed(6); }
+
+function openModal(ctx, field, cnt) {
+  const label = TYPE_LABELS[field] || field;
+  document.getElementById('modalTitle').innerHTML = `${label}详细记录 - ${ctx} <span class="badge">KHR</span>`;
+  const tbody = document.getElementById('modalBody');
+  let html = '';
+  let totalAmt = 0;
+  const rows = Math.min(cnt, 20);
+  for (let i = 0; i < rows; i++) {
+    const h = rndHash();
+    const s = rndAddr();
+    const r = rndAddr();
+    const a = rndAmt();
+    totalAmt += parseFloat(a);
+    html += `<tr>
+      <td><span class="hash">${h.slice(0,4)}...${h.slice(-4)}</span> <span class="icon-btn" title="复制"><i class="ri-file-copy-line"></i></span> <span class="icon-btn" title="链上查看"><i class="ri-external-link-line"></i></span></td>
+      <td class="mono" style="font-size:12px">${rndOrder()}</td>
+      <td class="mono" style="font-size:12px">${rndBlock()}</td>
+      <td style="font-size:12px;color:var(--text-muted)">${rndTime()}</td>
+      <td><span class="addr">${s.slice(0,4)}...${s.slice(-4)}</span> <span class="icon-btn"><i class="ri-file-copy-line"></i></span> <span class="icon-btn"><i class="ri-external-link-line"></i></span></td>
+      <td><span class="addr">${r.slice(0,4)}...${r.slice(-4)}</span> <span class="icon-btn"><i class="ri-file-copy-line"></i></span> <span class="icon-btn"><i class="ri-external-link-line"></i></span></td>
+      <td class="ar mono" style="font-weight:600">${parseFloat(a).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:6})} KHR</td>
+      <td><span class="status-ok">已确认</span></td>
+    </tr>`;
+  }
+  tbody.innerHTML = html;
+  document.getElementById('modalPageCnt').textContent = rows;
+  document.getElementById('modalTotal').textContent = cnt;
+  document.getElementById('modalSum').textContent = totalAmt.toFixed(4) + ' KHR';
+  document.getElementById('modalOverlay').classList.add('show');
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('show');
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
 renderTable();
 </script>
