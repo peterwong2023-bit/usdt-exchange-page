@@ -132,30 +132,14 @@
 
   /* Frozen columns */
   .tbl .frozen { position: sticky; z-index: 4; background: #fff; }
-  .tbl .frozen-0 { left: 0; min-width: 76px; }
-  .tbl .frozen-1 { left: 76px; min-width: 168px; }
-  .tbl .frozen-2 { left: 244px; min-width: 72px; box-shadow: 4px 0 12px rgba(15,23,42,0.04); }
+  .tbl .frozen-0 { left: 0; min-width: 180px; }
+  .tbl .frozen-1 { left: 180px; min-width: 80px; box-shadow: 4px 0 12px rgba(15,23,42,0.04); }
   .tbl .grp-header .frozen { z-index: 5; }
   .tbl .sub-header .frozen { z-index: 5; background: rgba(248,250,252,0.98); }
 
-  /* Merchant row */
-  .row-merchant { cursor: pointer; transition: background .15s; }
-  .row-merchant:hover td { background: rgba(37,99,235,0.025); }
-  .row-merchant:hover .frozen { background: rgba(240,244,255,1); }
-  .row-merchant td { font-weight: 600; }
-  .expand-icon { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 5px; background: var(--primary-light); color: var(--primary); font-size: 14px; margin-right: 8px; transition: all .25s; flex-shrink: 0; }
-  .row-merchant.expanded .expand-icon { background: var(--primary); color: #fff; border-radius: 6px; }
-
-  /* Pool sub-row */
-  .row-pool { display: none; }
-  .row-pool.show { display: table-row; }
-  .row-pool td { font-weight: 400; color: var(--text-muted); background: rgba(248,250,252,0.6); font-size: 12px; padding: 10px 14px; }
-  .row-pool:hover td { background: rgba(37,99,235,0.02); }
-  .row-pool:hover .frozen { background: rgba(248,250,252,1); }
-  .row-pool .frozen { background: rgba(248,250,252,0.6); }
-  .pool-name { display: flex; align-items: center; }
-  .tree-line { display: inline-flex; align-items: center; color: #c8ceda; margin-right: 8px; font-size: 13px; font-family: monospace; user-select: none; }
-  .pool-label { color: var(--text-main); font-weight: 500; font-size: 12px; }
+  /* Data rows */
+  .tbl tbody tr:hover td { background: rgba(37,99,235,0.025); }
+  .tbl tbody tr:hover .frozen { background: rgba(240,244,255,1); }
 
   /* Summary row */
   .tbl .sum-row td { font-weight: 700; background: rgba(248,250,252,0.85); border-top: 2px solid var(--border-soft); border-bottom: none; }
@@ -305,7 +289,7 @@
   <div class="mn">
     <div class="page-title">统计报表</div>
     <div class="filter-bar">
-      <select id="fMerchant"><option value="">商户名称</option><option>uutalk</option><option>bitda</option></select>
+      <select id="fMerchant" onchange="renderTable()"><option value="uutalk" selected>uutalk</option><option value="bitda">bitda</option></select>
       <select id="fChain"><option>波场 (TRON)</option></select>
       <select id="fCurrency">
         <option>KHR (波场)</option>
@@ -326,7 +310,7 @@
         <table class="tbl" id="mainTable">
           <thead>
             <tr class="grp-header">
-              <th colspan="3" class="grp-info-bg frozen" style="left:0;min-width:316px;">基本信息</th>
+              <th colspan="2" class="grp-info-bg frozen" style="left:0;min-width:260px;">基本信息</th>
               <th colspan="5" class="grp-balance-bg grp-sep">余额概览</th>
               <th colspan="5" class="grp-income-bg grp-sep">入款与归集</th>
               <th colspan="2" class="grp-outgo-bg grp-sep">对外出款</th>
@@ -334,9 +318,8 @@
               <th colspan="4" class="grp-risk-bg grp-sep">风险与退款</th>
             </tr>
             <tr class="sub-header">
-              <th class="al frozen frozen-0 grp-info-sub">商户ID</th>
-              <th class="al frozen frozen-1 grp-info-sub">商户名称</th>
-              <th class="frozen frozen-2 grp-info-sub">钱包总数</th>
+              <th class="al frozen frozen-0 grp-info-sub">资金池</th>
+              <th class="frozen frozen-1 grp-info-sub">钱包总数</th>
               <th class="grp-balance-sub grp-sep">总余额 <span class="tip-icon" data-tip="= 热池 + 冷钱包 + 风险资金（不含待确认）">ⓘ</span></th>
               <th class="grp-balance-sub">热池余额</th>
               <th class="grp-balance-sub">冷钱包余额 <span class="tip-icon" data-tip="实时余额快照，不受日期筛选影响">ⓘ</span></th>
@@ -353,7 +336,7 @@
               <th class="grp-cold-sub">冷归集笔数</th>
               <th class="grp-cold-sub">热回笼金额</th>
               <th class="grp-cold-sub">热回笼笔数</th>
-              <th class="grp-cold-sub">净调度 <span class="tip-icon" data-tip="= 热回笼 − 冷归集，正值净回笼，负值净归集">ⓘ</span></th>
+              <th class="grp-cold-sub">净流入/流出 <span class="tip-icon" data-tip="= 热回笼 − 冷归集，正值为净流入热池，负值为净流出到冷钱包">ⓘ</span></th>
               <th class="grp-risk-sub grp-sep">风险归集金额</th>
               <th class="grp-risk-sub">风险归集笔数</th>
               <th class="grp-risk-sub">风控退款金额</th>
@@ -364,7 +347,7 @@
         </table>
       </div>
       <div class="pgb">
-        <span>共 <b id="totalRows">2</b> 个商户</span>
+        <span>共 <b id="totalRows">4</b> 个资金池</span>
         <div style="flex:1"></div>
         <div class="pg on">1</div>
         <div style="margin-left:8px"><select><option>10 条/页</option><option>20 条/页</option><option>50 条/页</option></select></div>
@@ -547,79 +530,20 @@ function dataCells(d, ctx) {
 
 function renderTable() {
   const tbody = document.getElementById('tableBody');
+  const selected = document.getElementById('fMerchant').value;
+  const m = MERCHANTS.find(x => x.name === selected) || MERCHANTS[0];
   let html = '';
 
-  MERCHANTS.forEach((m, mi) => {
-    const s = sumPools(m.pools);
-    html += `<tr class="row-merchant" data-mid="${mi}" onclick="toggleExpand(${mi})">
-      <td class="al frozen frozen-0 mono">${m.id}</td>
-      <td class="al frozen frozen-1"><span class="expand-icon" id="ei${mi}"><i class="ri-arrow-down-s-line"></i></span>${m.name}</td>
-      <td class="frozen frozen-2">${m.wallets}</td>
-      ${dataCells(s, m.name)}
+  m.pools.forEach(p => {
+    html += `<tr>
+      <td class="al frozen frozen-0" style="font-weight:600">${p.name}</td>
+      <td class="frozen frozen-1">${p.wallets}</td>
+      ${dataCells(p, p.name)}
     </tr>`;
-
-    m.pools.forEach((p, pi) => {
-      const treeSym = pi === m.pools.length - 1 ? '└─' : '├─';
-      html += `<tr class="row-pool" data-parent="${mi}">
-        <td class="al frozen frozen-0"></td>
-        <td class="al frozen frozen-1"><span class="pool-name"><span class="tree-line">${treeSym}</span><span class="pool-label">${p.name}</span></span></td>
-        <td class="frozen frozen-2">${p.wallets}</td>
-        ${dataCells(p, m.name + ' - ' + p.name)}
-      </tr>`;
-    });
   });
 
-  const allPools = MERCHANTS.flatMap(m => m.pools);
-  const gt = sumPools(allPools);
-  const gtWallets = MERCHANTS.reduce((s, m) => s + m.wallets, 0);
-  const gtTotal = gt.hotBal + gt.coldBal + gt.riskBal;
-  const gtNet = gt.hotRecallAmt - gt.coldCollAmt;
-
-  html += `<tr class="sum-row">
-    <td class="al frozen frozen-0" style="font-weight:800">合计</td>
-    <td class="al frozen frozen-1"></td>
-    <td class="frozen frozen-2" style="font-weight:800">${gtWallets}</td>
-    <td class="mono grp-sep val-bold">${fmt(gtTotal)}</td>
-    <td class="mono">${fmt(gt.hotBal)}</td>
-    <td class="mono">${fmt(gt.coldBal)}</td>
-    <td class="mono">${fmt(gt.riskBal)}</td>
-    <td class="mono">${fmt(gt.pending)}</td>
-    <td class="mono grp-sep">${fz(gt.inAmt)}</td>
-    <td>${gt.inCnt || '<span class="val-zero">—</span>'}</td>
-    <td class="mono">${fz(gt.abnormalIn)}</td>
-    <td class="mono">${fz(gt.toHotAmt)}</td>
-    <td>${gt.toHotCnt || '<span class="val-zero">—</span>'}</td>
-    <td class="mono grp-sep">${fz(gt.outAmt)}</td>
-    <td>${gt.outCnt || '<span class="val-zero">—</span>'}</td>
-    <td class="mono grp-sep">${fz(gt.coldCollAmt)}</td>
-    <td>${gt.coldCollCnt || '<span class="val-zero">—</span>'}</td>
-    <td class="mono">${fz(gt.hotRecallAmt)}</td>
-    <td>${gt.hotRecallCnt || '<span class="val-zero">—</span>'}</td>
-    <td class="mono">${fnet(gtNet)}</td>
-    <td class="mono grp-sep">${fz(gt.riskCollAmt)}</td>
-    <td>${gt.riskCollCnt || '<span class="val-zero">—</span>'}</td>
-    <td class="mono">${fz(gt.riskRefundAmt)}</td>
-    <td>${gt.riskRefundCnt || '<span class="val-zero">—</span>'}</td>
-  </tr>`;
-
   tbody.innerHTML = html;
-  document.getElementById('totalRows').textContent = MERCHANTS.length;
-}
-
-function toggleExpand(mid) {
-  const rows = document.querySelectorAll(`.row-pool[data-parent="${mid}"]`);
-  const icon = document.getElementById(`ei${mid}`);
-  const merchant = document.querySelector(`.row-merchant[data-mid="${mid}"]`);
-  const isExpanded = merchant.classList.contains('expanded');
-  if (isExpanded) {
-    merchant.classList.remove('expanded');
-    icon.innerHTML = '<i class="ri-arrow-down-s-line"></i>';
-    rows.forEach(r => r.classList.remove('show'));
-  } else {
-    merchant.classList.add('expanded');
-    icon.innerHTML = '<i class="ri-arrow-up-s-line"></i>';
-    rows.forEach(r => r.classList.add('show'));
-  }
+  document.getElementById('totalRows').textContent = m.pools.length;
 }
 
 function resetFilters() {
