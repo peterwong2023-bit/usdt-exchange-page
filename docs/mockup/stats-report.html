@@ -137,13 +137,24 @@
   .tbl .grp-header .frozen { z-index: 5; }
   .tbl .sub-header .frozen { z-index: 5; background: rgba(248,250,252,0.98); }
 
-  /* Data rows */
-  .tbl tbody tr:hover td { background: rgba(37,99,235,0.025); }
-  .tbl tbody tr:hover .frozen { background: rgba(240,244,255,1); }
+  /* Merchant summary row (expandable) */
+  .row-merchant { cursor: pointer; transition: background .15s; }
+  .row-merchant:hover td { background: rgba(37,99,235,0.025); }
+  .row-merchant:hover .frozen { background: rgba(240,244,255,1); }
+  .row-merchant td { font-weight: 600; }
+  .expand-icon { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 5px; background: var(--primary-light); color: var(--primary); font-size: 14px; margin-right: 8px; transition: all .25s; flex-shrink: 0; }
+  .row-merchant.expanded .expand-icon { background: var(--primary); color: #fff; border-radius: 6px; }
 
-  /* Summary row */
-  .tbl .sum-row td { font-weight: 700; background: rgba(248,250,252,0.85); border-top: 2px solid var(--border-soft); border-bottom: none; }
-  .tbl .sum-row:hover td { background: rgba(248,250,252,0.9); }
+  /* Pool sub-rows */
+  .row-pool { display: none; }
+  .row-pool.show { display: table-row; }
+  .row-pool td { font-weight: 400; color: var(--text-muted); background: rgba(248,250,252,0.6); font-size: 12.5px; padding: 10px 14px; }
+  .row-pool:hover td { background: rgba(37,99,235,0.02); }
+  .row-pool:hover .frozen { background: rgba(248,250,252,1); }
+  .row-pool .frozen { background: rgba(248,250,252,0.6); }
+  .pool-name { display: flex; align-items: center; }
+  .tree-line { display: inline-flex; align-items: center; color: #c8ceda; margin-right: 8px; font-size: 13px; font-family: monospace; user-select: none; }
+  .pool-label { color: var(--text-main); font-weight: 500; font-size: 12.5px; }
 
   .val-pos { color: var(--success); font-weight: 700; }
   .val-neg { color: var(--danger); font-weight: 700; }
@@ -532,11 +543,19 @@ function renderTable() {
   const tbody = document.getElementById('tableBody');
   const selected = document.getElementById('fMerchant').value;
   const m = MERCHANTS.find(x => x.name === selected) || MERCHANTS[0];
+  const s = sumPools(m.pools);
   let html = '';
 
-  m.pools.forEach(p => {
-    html += `<tr>
-      <td class="al frozen frozen-0" style="font-weight:600">${p.name}</td>
+  html += `<tr class="row-merchant" onclick="toggleExpand()">
+    <td class="al frozen frozen-0"><span class="expand-icon" id="expandIcon"><i class="ri-arrow-down-s-line"></i></span>${m.name}</td>
+    <td class="frozen frozen-1">${m.wallets}</td>
+    ${dataCells(s, m.name)}
+  </tr>`;
+
+  m.pools.forEach((p, pi) => {
+    const treeSym = pi === m.pools.length - 1 ? '└─' : '├─';
+    html += `<tr class="row-pool">
+      <td class="al frozen frozen-0"><span class="pool-name"><span class="tree-line">${treeSym}</span><span class="pool-label">${p.name}</span></span></td>
       <td class="frozen frozen-1">${p.wallets}</td>
       ${dataCells(p, p.name)}
     </tr>`;
@@ -544,6 +563,22 @@ function renderTable() {
 
   tbody.innerHTML = html;
   document.getElementById('totalRows').textContent = m.pools.length;
+}
+
+function toggleExpand() {
+  const rows = document.querySelectorAll('.row-pool');
+  const icon = document.getElementById('expandIcon');
+  const merchant = document.querySelector('.row-merchant');
+  const isExpanded = merchant.classList.contains('expanded');
+  if (isExpanded) {
+    merchant.classList.remove('expanded');
+    icon.innerHTML = '<i class="ri-arrow-down-s-line"></i>';
+    rows.forEach(r => r.classList.remove('show'));
+  } else {
+    merchant.classList.add('expanded');
+    icon.innerHTML = '<i class="ri-arrow-up-s-line"></i>';
+    rows.forEach(r => r.classList.add('show'));
+  }
 }
 
 function resetFilters() {
