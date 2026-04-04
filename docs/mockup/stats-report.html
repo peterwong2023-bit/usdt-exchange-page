@@ -171,15 +171,19 @@
     display: inline-flex; align-items: center; justify-content: center;
     width: 14px; height: 14px; border-radius: 50%; background: rgba(100,116,139,0.1);
     font-size: 9px; color: var(--text-muted); margin-left: 3px; cursor: help;
-    vertical-align: middle; position: relative;
+    vertical-align: middle;
   }
-  .tip-icon:hover { z-index: 999; }
-  .tip-icon:hover::after {
-    content: attr(data-tip); position: absolute; bottom: calc(100% + 8px); left: 50%;
-    transform: translateX(-50%); background: #0f172a; color: #fff; padding: 10px 16px;
+  .g-tip {
+    position: fixed; background: #0f172a; color: #fff; padding: 10px 16px;
     border-radius: 8px; font-size: 12px; font-weight: 500; white-space: nowrap;
-    z-index: 999; box-shadow: 0 8px 24px rgba(15,23,42,0.3); pointer-events: none;
-    font-family: 'Noto Sans SC', 'Inter', sans-serif; letter-spacing: 0; line-height: 1.5;
+    z-index: 9999; box-shadow: 0 8px 24px rgba(15,23,42,0.3); pointer-events: none;
+    font-family: 'Noto Sans SC', 'Inter', sans-serif; line-height: 1.5;
+    opacity: 0; transition: opacity .15s;
+  }
+  .g-tip.show { opacity: 1; }
+  .g-tip::after {
+    content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+    border: 6px solid transparent; border-top-color: #0f172a;
   }
 
   /* Clickable count */
@@ -671,6 +675,28 @@ function closeModal() {
 }
 
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+// Global tooltip for .tip-icon (avoids overflow clipping)
+const tipEl = document.createElement('div');
+tipEl.className = 'g-tip';
+document.body.appendChild(tipEl);
+
+document.addEventListener('mouseover', e => {
+  const icon = e.target.closest('.tip-icon');
+  if (!icon) return;
+  const text = icon.getAttribute('data-tip');
+  if (!text) return;
+  tipEl.textContent = text;
+  tipEl.classList.add('show');
+  const rect = icon.getBoundingClientRect();
+  tipEl.style.left = (rect.left + rect.width / 2 - tipEl.offsetWidth / 2) + 'px';
+  tipEl.style.top = (rect.top - tipEl.offsetHeight - 10) + 'px';
+});
+
+document.addEventListener('mouseout', e => {
+  const icon = e.target.closest('.tip-icon');
+  if (icon) tipEl.classList.remove('show');
+});
 
 renderTable();
 </script>
