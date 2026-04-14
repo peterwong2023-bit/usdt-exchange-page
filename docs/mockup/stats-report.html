@@ -95,7 +95,7 @@
   /* Table */
   .card { background: var(--bg-card); border: 1px solid var(--border-soft); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(15,23,42,0.04); overflow: hidden; animation: fadeUp 0.5s cubic-bezier(0.16,1,0.3,1) 0.2s both; }
   .tbl-wrap { overflow-x: auto; }
-  .tbl { width: 100%; border-collapse: collapse; min-width: 2300px; }
+  .tbl { width: 100%; border-collapse: collapse; min-width: 2050px; }
 
   .tbl .grp-header th {
     text-align: center; padding: 9px 12px; font-size: 12px; font-weight: 700;
@@ -252,6 +252,37 @@
   .pg.on { background: var(--primary); color: #fff; border-color: var(--primary); box-shadow: 0 2px 6px rgba(37,99,235,0.18); }
   .pgb select { background: #fff; border: 1px solid var(--border-soft); color: var(--text-muted); padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 500; font-family: 'Noto Sans SC', 'Inter', sans-serif; cursor: pointer; }
 
+  .rt-badge {
+    display: inline-block; font-size: 10px; font-weight: 700; padding: 1px 7px;
+    border-radius: 4px; background: rgba(255,255,255,0.85); color: var(--primary);
+    vertical-align: middle; margin-left: 4px; letter-spacing: 0.3px; line-height: 1.6;
+  }
+  .period-bar {
+    display: flex; align-items: center; gap: 12px; padding: 8px 20px;
+    background: var(--primary-light); font-size: 12px; font-weight: 500;
+    color: var(--primary); border-bottom: 1px solid rgba(37,99,235,0.08);
+  }
+  .period-bar i { font-size: 14px; }
+  .period-bar .sep { color: rgba(37,99,235,0.3); }
+
+  /* Wallet popover */
+  .wallet-pop {
+    position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+    background: #fff; border-radius: 10px; box-shadow: 0 8px 32px rgba(15,23,42,0.14);
+    border: 1px solid var(--border-soft); padding: 10px 0; min-width: 180px;
+    z-index: 20; animation: fadeUp 0.2s cubic-bezier(0.16,1,0.3,1);
+  }
+  .wallet-pop::before {
+    content: ''; position: absolute; top: -6px; left: 50%; transform: translateX(-50%) rotate(45deg);
+    width: 10px; height: 10px; background: #fff; border-left: 1px solid var(--border-soft);
+    border-top: 1px solid var(--border-soft);
+  }
+  .wallet-pop .wp-row {
+    display: flex; justify-content: space-between; padding: 5px 16px;
+    font-size: 12px; font-weight: 500; color: var(--text-muted);
+  }
+  .wallet-pop .wp-row span:last-child { color: var(--text-main); font-weight: 600; font-family: 'Inter', sans-serif; }
+
   .scroll-hint { display: none; padding: 6px 16px; background: var(--primary-light); color: var(--primary); font-size: 11px; font-weight: 600; text-align: center; }
   @media (max-width: 1600px) { .scroll-hint { display: block; } }
 </style>
@@ -287,7 +318,7 @@
   <div class="nc"><i class="ri-links-line"></i> 链网同步状态</div>
   <div class="sec"><i class="ri-settings-3-line"></i> 系统与权限 <i class="ri-arrow-up-s-line arr"></i></div>
   <div class="nc"><i class="ri-user-settings-line"></i> 账户管理</div>
-  <div class="nc"><i class="ri-store-2-line"></i> 商户账号</div>
+  <div class="nc" onclick="location.href='merchant-accounts.html'" style="cursor:pointer"><i class="ri-store-2-line"></i> 商户账号</div>
   <div class="nc"><i class="ri-shield-user-line"></i> 角色管理</div>
   <div class="nc"><i class="ri-error-warning-line"></i> 黑名单管理</div>
 </div>
@@ -316,33 +347,37 @@
     </div>
 
     <div class="card">
+      <div class="period-bar" id="periodBar">
+        <i class="ri-calendar-line"></i>
+        <span>当前期间: <b id="periodRange">2026/03/01 - 2026/03/20</b></span>
+        <span class="sep">|</span>
+        <span>实时余额截至 <b id="periodTime">--:--</b></span>
+      </div>
       <div class="scroll-hint"><i class="ri-arrow-left-right-line"></i> 左右滑动查看完整数据</div>
       <div class="tbl-wrap">
         <table class="tbl" id="mainTable">
           <thead>
             <tr class="grp-header">
               <th colspan="2" class="grp-info-bg frozen" style="left:0;min-width:260px;">基本信息</th>
-              <th colspan="5" class="grp-balance-bg grp-sep">余额概览</th>
-              <th colspan="5" class="grp-income-bg grp-sep">入款与归集</th>
-              <th colspan="2" class="grp-outgo-bg grp-sep">对外出款</th>
+              <th colspan="2" class="grp-balance-bg grp-sep">余额概览 <span class="rt-badge">实时</span></th>
+              <th colspan="5" class="grp-income-bg grp-sep">入款与热池</th>
+              <th colspan="3" class="grp-outgo-bg grp-sep">对外出款</th>
               <th colspan="5" class="grp-cold-bg grp-sep">冷钱包调度</th>
               <th colspan="4" class="grp-risk-bg grp-sep">风险与退款</th>
             </tr>
             <tr class="sub-header">
               <th class="al frozen frozen-0 grp-info-sub">资金池</th>
               <th class="frozen frozen-1 grp-info-sub">钱包总数</th>
-              <th class="grp-balance-sub grp-sep">总余额 <span class="tip-icon" data-tip="= 热池 + 冷钱包 + 风险资金（不含待确认）">ⓘ</span></th>
-              <th class="grp-balance-sub">热池余额</th>
-              <th class="grp-balance-sub">冷钱包余额 <span class="tip-icon" data-tip="实时余额快照，不受日期筛选影响">ⓘ</span></th>
-              <th class="grp-balance-sub">风险资金余额 <span class="tip-icon" data-tip="被污染钱包的正常资金隔离余额">ⓘ</span></th>
-              <th class="grp-balance-sub">待确认金额 <span class="tip-icon" data-tip="链上已发起但未确认的在途资金">ⓘ</span></th>
-              <th class="grp-income-sub grp-sep">入款金额 <span class="tip-icon" data-tip="客户充值到业务地址的金额，不含内部调度">ⓘ</span></th>
+              <th class="grp-balance-sub grp-sep">总余额 <span class="tip-icon" data-tip="= 所有资金池余额加总（不含待确认）· 实时快照，不受日期筛选影响">ⓘ</span></th>
+              <th class="grp-balance-sub">待确认金额 <span class="tip-icon" data-tip="链上已发起但未确认的在途资金 · 实时快照，不受日期筛选影响">ⓘ</span></th>
+              <th class="grp-income-sub grp-sep">入款金额 <span class="tip-icon" data-tip="业务入款 + 外部入款（客户充值到业务地址的金额）">ⓘ</span></th>
               <th class="grp-income-sub">入款笔数</th>
               <th class="grp-income-sub">异常入款</th>
               <th class="grp-income-sub">入热池金额</th>
               <th class="grp-income-sub">入热池笔数</th>
-              <th class="grp-outgo-sub grp-sep">出款金额 <span class="tip-icon" data-tip="热池代付给客户的金额，不含冷归集等内部转账">ⓘ</span></th>
+              <th class="grp-outgo-sub grp-sep">出款金额 <span class="tip-icon" data-tip="对外提现总额（含热池代付和冷钱包出款）">ⓘ</span></th>
               <th class="grp-outgo-sub">出款笔数</th>
+              <th class="grp-outgo-sub">净入出 <span class="tip-icon" data-tip="= 入款金额 − 出款金额，正值为净流入，负值为净流出">ⓘ</span></th>
               <th class="grp-cold-sub grp-sep">冷归集金额</th>
               <th class="grp-cold-sub">冷归集笔数</th>
               <th class="grp-cold-sub">热回笼金额</th>
@@ -408,32 +443,32 @@ const MERCHANTS = [
     wallets: 28,
     pools: [
       {
-        name: 'uutalk', wallets: 11,
-        hotBal: 130.33, coldBal: 0, riskBal: 0, pending: 3.5,
+        name: 'uutalk', type: 'biz', wallets: 11,
+        balance: 130.33, pending: 3.5,
         inAmt: 412.00, inCnt: 65, abnormalIn: 0, toHotAmt: 390.50, toHotCnt: 22,
         outAmt: 186.40, outCnt: 28,
         coldCollAmt: 0, coldCollCnt: 0, hotRecallAmt: 0, hotRecallCnt: 0,
-        riskCollAmt: 0, riskCollCnt: 0, riskRefundAmt: 0, riskRefundCnt: 0
+        riskCollAmt: 0, riskCollCnt: 0, riskRefundAmt: 5.20, riskRefundCnt: 1
       },
       {
-        name: 'uutalk归集', wallets: 8,
-        hotBal: 80.33, coldBal: 0, riskBal: 0, pending: 0,
-        inAmt: 245.80, inCnt: 38, abnormalIn: 1.20, toHotAmt: 220.10, toHotCnt: 15,
-        outAmt: 51.60, outCnt: 10,
+        name: 'uutalk归集', type: 'agg', wallets: 8,
+        balance: 80.33, pending: 0,
+        inAmt: 0, inCnt: 0, abnormalIn: 0, toHotAmt: 220.10, toHotCnt: 15,
+        outAmt: 0, outCnt: 0,
         coldCollAmt: 0, coldCollCnt: 0, hotRecallAmt: 0, hotRecallCnt: 0,
         riskCollAmt: 0, riskCollCnt: 0, riskRefundAmt: 0, riskRefundCnt: 0
       },
       {
-        name: 'uutalk冷钱包', wallets: 6,
-        hotBal: 0, coldBal: 1400.50, riskBal: 0, pending: 0,
+        name: 'uutalk冷钱包', type: 'cold', wallets: 6,
+        balance: 1400.50, pending: 0,
         inAmt: 0, inCnt: 0, abnormalIn: 0, toHotAmt: 0, toHotCnt: 0,
-        outAmt: 0, outCnt: 0,
+        outAmt: 45.00, outCnt: 3,
         coldCollAmt: 350.00, coldCollCnt: 8, hotRecallAmt: 80.00, hotRecallCnt: 2,
         riskCollAmt: 0, riskCollCnt: 0, riskRefundAmt: 0, riskRefundCnt: 0
       },
       {
-        name: 'uutalk风险', wallets: 3,
-        hotBal: 0, coldBal: 0, riskBal: 17.70, pending: 0,
+        name: 'uutalk风险', type: 'risk', wallets: 3,
+        balance: 17.70, pending: 0,
         inAmt: 0, inCnt: 0, abnormalIn: 0, toHotAmt: 0, toHotCnt: 0,
         outAmt: 0, outCnt: 0,
         coldCollAmt: 0, coldCollCnt: 0, hotRecallAmt: 0, hotRecallCnt: 0,
@@ -446,46 +481,47 @@ const MERCHANTS = [
     wallets: 13,
     pools: [
       {
-        name: 'bitda', wallets: 6,
-        hotBal: 210.00, coldBal: 0, riskBal: 0, pending: 8.30,
+        name: 'bitda', type: 'biz', wallets: 6,
+        balance: 210.00, pending: 8.30,
         inAmt: 580.00, inCnt: 92, abnormalIn: 0, toHotAmt: 540.00, toHotCnt: 35,
         outAmt: 320.50, outCnt: 48,
         coldCollAmt: 0, coldCollCnt: 0, hotRecallAmt: 0, hotRecallCnt: 0,
-        riskCollAmt: 0, riskCollCnt: 0, riskRefundAmt: 0, riskRefundCnt: 0
+        riskCollAmt: 0, riskCollCnt: 0, riskRefundAmt: 15.00, riskRefundCnt: 2
       },
       {
-        name: 'bitda归集', wallets: 4,
-        hotBal: 45.00, coldBal: 0, riskBal: 0, pending: 0,
-        inAmt: 22.00, inCnt: 5, abnormalIn: 0, toHotAmt: 20.00, toHotCnt: 4,
-        outAmt: 10.00, outCnt: 3,
+        name: 'bitda归集', type: 'agg', wallets: 4,
+        balance: 45.00, pending: 0,
+        inAmt: 0, inCnt: 0, abnormalIn: 0, toHotAmt: 20.00, toHotCnt: 4,
+        outAmt: 0, outCnt: 0,
         coldCollAmt: 0, coldCollCnt: 0, hotRecallAmt: 0, hotRecallCnt: 0,
         riskCollAmt: 0, riskCollCnt: 0, riskRefundAmt: 0, riskRefundCnt: 0
       },
       {
-        name: 'bitda冷钱包', wallets: 2,
-        hotBal: 0, coldBal: 1200.00, riskBal: 0, pending: 0,
+        name: 'bitda冷钱包', type: 'cold', wallets: 2,
+        balance: 1200.00, pending: 0,
         inAmt: 0, inCnt: 0, abnormalIn: 0, toHotAmt: 0, toHotCnt: 0,
-        outAmt: 0, outCnt: 0,
+        outAmt: 60.00, outCnt: 5,
         coldCollAmt: 300.00, coldCollCnt: 4, hotRecallAmt: 120.00, hotRecallCnt: 1,
         riskCollAmt: 0, riskCollCnt: 0, riskRefundAmt: 0, riskRefundCnt: 0
       },
       {
-        name: 'bitda风险', wallets: 1,
-        hotBal: 0, coldBal: 0, riskBal: 3.00, pending: 0,
+        name: 'bitda风险', type: 'risk', wallets: 1,
+        balance: 3.00, pending: 0,
         inAmt: 0, inCnt: 0, abnormalIn: 0, toHotAmt: 0, toHotCnt: 0,
         outAmt: 0, outCnt: 0,
         coldCollAmt: 0, coldCollCnt: 0, hotRecallAmt: 0, hotRecallCnt: 0,
-        riskCollAmt: 3.00, riskCollCnt: 1, riskRefundAmt: 15.00, riskRefundCnt: 2
+        riskCollAmt: 3.00, riskCollCnt: 1, riskRefundAmt: 0, riskRefundCnt: 0
       }
     ]
   }
 ];
 
 function sumPools(pools) {
-  const keys = ['hotBal','coldBal','riskBal','pending','inAmt','inCnt','abnormalIn','toHotAmt','toHotCnt','outAmt','outCnt','coldCollAmt','coldCollCnt','hotRecallAmt','hotRecallCnt','riskCollAmt','riskCollCnt','riskRefundAmt','riskRefundCnt'];
+  const keys = ['balance','pending','inAmt','inCnt','abnormalIn','toHotAmt','toHotCnt','outAmt','outCnt','coldCollAmt','coldCollCnt','hotRecallAmt','hotRecallCnt','riskCollAmt','riskCollCnt','riskRefundAmt','riskRefundCnt'];
   const s = {}; keys.forEach(k => s[k] = 0);
   pools.forEach(p => keys.forEach(k => s[k] += (p[k] || 0)));
   s.wallets = pools.reduce((a, p) => a + p.wallets, 0);
+  s.type = 'summary';
   return s;
 }
 
@@ -511,32 +547,61 @@ function fcLink(v, ctx, field) {
   if (v === 0) return '<span class="val-zero">—</span>';
   return `<span class="cnt-link" onclick="event.stopPropagation(); openModal('${ctx}','${field}',${v})">${v}</span>`;
 }
+function fcPlain(v) {
+  if (v === 0) return '<span class="val-zero">—</span>';
+  return `${v}`;
+}
 
-function dataCells(d, ctx) {
-  const total = d.hotBal + d.coldBal + d.riskBal;
-  const net = d.hotRecallAmt - d.coldCollAmt;
+const DASH = '<span class="val-zero">—</span>';
+const POOL_FIELDS = {
+  biz:     { inAmt:1, inCnt:1, abnormalIn:1, toHotAmt:1, toHotCnt:1, outAmt:1, outCnt:1, riskRefundAmt:1, riskRefundCnt:1 },
+  agg:     { toHotAmt:1, toHotCnt:1 },
+  cold:    { outAmt:1, outCnt:1, coldCollAmt:1, coldCollCnt:1, hotRecallAmt:1, hotRecallCnt:1 },
+  risk:    { riskCollAmt:1, riskCollCnt:1 },
+  summary: null
+};
+
+function poolAllow(type, field) {
+  if (!type || type === 'summary') return true;
+  const allow = POOL_FIELDS[type];
+  return allow ? !!allow[field] : true;
+}
+
+function pz(type, field, html) { return poolAllow(type, field) ? html : DASH; }
+
+function dataCells(d, ctx, noLink) {
+  const t = d.type || 'summary';
+  const fc = noLink ? fcPlain : (v, c, f) => fcLink(v, c, f);
+  const netCold = d.hotRecallAmt - d.coldCollAmt;
+  const netExt = d.inAmt - d.outAmt;
   return `
-    <td class="mono grp-sep val-bold">${fmt(total)}</td>
-    <td class="mono">${fmt(d.hotBal)}</td>
-    <td class="mono">${fmt(d.coldBal)}</td>
-    <td class="mono">${fmt(d.riskBal)}</td>
+    <td class="mono grp-sep val-bold">${fmt(d.balance)}</td>
     <td class="mono">${fmt(d.pending)}</td>
-    <td class="mono grp-sep">${fz(d.inAmt)}</td>
-    <td>${fcLink(d.inCnt, ctx, 'inCnt')}</td>
-    <td class="mono">${fz(d.abnormalIn)}</td>
-    <td class="mono">${fz(d.toHotAmt)}</td>
-    <td>${fcLink(d.toHotCnt, ctx, 'toHotCnt')}</td>
-    <td class="mono grp-sep">${fz(d.outAmt)}</td>
-    <td>${fcLink(d.outCnt, ctx, 'outCnt')}</td>
-    <td class="mono grp-sep">${fz(d.coldCollAmt)}</td>
-    <td>${fcLink(d.coldCollCnt, ctx, 'coldCollCnt')}</td>
-    <td class="mono">${fz(d.hotRecallAmt)}</td>
-    <td>${fcLink(d.hotRecallCnt, ctx, 'hotRecallCnt')}</td>
-    <td class="mono">${fnet(net)}</td>
-    <td class="mono grp-sep">${fz(d.riskCollAmt)}</td>
-    <td>${fcLink(d.riskCollCnt, ctx, 'riskCollCnt')}</td>
-    <td class="mono">${fz(d.riskRefundAmt)}</td>
-    <td>${fcLink(d.riskRefundCnt, ctx, 'riskRefundCnt')}</td>`;
+    <td class="mono grp-sep">${pz(t,'inAmt', fz(d.inAmt))}</td>
+    <td>${pz(t,'inCnt', fc(d.inCnt, ctx, 'inCnt'))}</td>
+    <td class="mono">${pz(t,'abnormalIn', fz(d.abnormalIn))}</td>
+    <td class="mono">${pz(t,'toHotAmt', fz(d.toHotAmt))}</td>
+    <td>${pz(t,'toHotCnt', fc(d.toHotCnt, ctx, 'toHotCnt'))}</td>
+    <td class="mono grp-sep">${pz(t,'outAmt', fz(d.outAmt))}</td>
+    <td>${pz(t,'outCnt', fc(d.outCnt, ctx, 'outCnt'))}</td>
+    <td class="mono">${t === 'summary' || (poolAllow(t,'inAmt') || poolAllow(t,'outAmt')) ? fnet(netExt) : DASH}</td>
+    <td class="mono grp-sep">${pz(t,'coldCollAmt', fz(d.coldCollAmt))}</td>
+    <td>${pz(t,'coldCollCnt', fc(d.coldCollCnt, ctx, 'coldCollCnt'))}</td>
+    <td class="mono">${pz(t,'hotRecallAmt', fz(d.hotRecallAmt))}</td>
+    <td>${pz(t,'hotRecallCnt', fc(d.hotRecallCnt, ctx, 'hotRecallCnt'))}</td>
+    <td class="mono">${poolAllow(t,'coldCollAmt') ? fnet(netCold) : DASH}</td>
+    <td class="mono grp-sep">${pz(t,'riskCollAmt', fz(d.riskCollAmt))}</td>
+    <td>${pz(t,'riskCollCnt', fc(d.riskCollCnt, ctx, 'riskCollCnt'))}</td>
+    <td class="mono">${pz(t,'riskRefundAmt', fz(d.riskRefundAmt))}</td>
+    <td>${pz(t,'riskRefundCnt', fc(d.riskRefundCnt, ctx, 'riskRefundCnt'))}</td>`;
+}
+
+function updatePeriodBar() {
+  const from = document.getElementById('fDateFrom').value;
+  const to = document.getElementById('fDateTo').value;
+  document.getElementById('periodRange').textContent = `${from.replace(/-/g,'/')} - ${to.replace(/-/g,'/')}`;
+  const now = new Date();
+  document.getElementById('periodTime').textContent = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
 }
 
 function renderTable() {
@@ -546,10 +611,16 @@ function renderTable() {
   const s = sumPools(m.pools);
   let html = '';
 
+  const walletBreakdown = m.pools.map(p => {
+    const labels = { biz:'业务钱包', agg:'归集钱包', cold:'冷归集钱包', risk:'风险钱包' };
+    return { label: labels[p.type] || p.name, count: p.wallets };
+  });
+  window._wbData = walletBreakdown;
+
   html += `<tr class="row-merchant" onclick="toggleExpand()">
     <td class="al frozen frozen-0"><span class="expand-icon" id="expandIcon"><i class="ri-arrow-down-s-line"></i></span>${m.name}</td>
-    <td class="frozen frozen-1">${m.wallets}</td>
-    ${dataCells(s, m.name)}
+    <td class="frozen frozen-1"><span style="position:relative;display:inline-block"><span class="cnt-link" onclick="event.stopPropagation(); showWalletPop(this.parentElement, window._wbData)">${m.wallets}</span></span></td>
+    ${dataCells(s, m.name, true)}
   </tr>`;
 
   m.pools.forEach((p, pi) => {
@@ -557,12 +628,13 @@ function renderTable() {
     html += `<tr class="row-pool">
       <td class="al frozen frozen-0"><span class="pool-name"><span class="tree-line">${treeSym}</span><span class="pool-label">${p.name}</span></span></td>
       <td class="frozen frozen-1">${p.wallets}</td>
-      ${dataCells(p, p.name)}
+      ${dataCells(p, p.name, false)}
     </tr>`;
   });
 
   tbody.innerHTML = html;
   document.getElementById('totalRows').textContent = m.pools.length;
+  updatePeriodBar();
 }
 
 function toggleExpand() {
@@ -633,7 +705,21 @@ function closeModal() {
   document.getElementById('modalOverlay').classList.remove('show');
 }
 
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closeWalletPop(); } });
+
+function showWalletPop(el, data) {
+  closeWalletPop();
+  const pop = document.createElement('div');
+  pop.className = 'wallet-pop';
+  pop.id = 'walletPop';
+  pop.innerHTML = data.map(r => `<div class="wp-row"><span>${r.label}</span><span>${r.count}</span></div>`).join('');
+  el.parentElement.appendChild(pop);
+  setTimeout(() => document.addEventListener('click', closeWalletPop, { once: true }), 10);
+}
+function closeWalletPop() {
+  const pop = document.getElementById('walletPop');
+  if (pop) pop.remove();
+}
 
 // Global tooltip for .tip-icon (avoids overflow clipping)
 const tipEl = document.createElement('div');
