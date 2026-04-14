@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>商户账号 - VVOSS Admin</title>
+<title>商户角色模板 - VVOSS Admin</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -94,6 +94,9 @@
   .stat-icon.green { background: var(--success-light); color: var(--success); }
   .stat-icon.orange { background: var(--warning-light); color: var(--warning); }
   .stat-icon.red { background: var(--danger-light); color: var(--danger); }
+  .stat-icon.purple { background: var(--purple-light); color: var(--purple); }
+  /* 使用 tag-purple on stat icon (override .tag padding for 40×40 tile) */
+  .stat-icon.tag-purple { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; padding: 0; border-radius: 10px; font-size: 18px; flex-shrink: 0; background: var(--purple-light); color: var(--purple); }
   .stat-value { font-size: 22px; font-weight: 700; color: var(--text-main); font-family: 'Inter', sans-serif; }
   .stat-label { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
 
@@ -134,6 +137,10 @@
   .two-fa-on { color: var(--success); font-weight: 600; display: flex; align-items: center; gap: 4px; font-size: 12px; }
   .two-fa-off { color: var(--text-light); display: flex; align-items: center; gap: 4px; font-size: 12px; }
 
+  .perm-cell { font-size: 12px; line-height: 1.5; color: var(--text-main); max-width: 220px; }
+  .perm-pages { font-weight: 500; }
+  .perm-count { font-family: 'Inter', sans-serif; font-feature-settings: 'tnum' 1; color: var(--text-muted); font-weight: 600; margin-left: 4px; }
+
   .action-group { display: flex; align-items: center; gap: 2px; }
   .btn-ghost { background: transparent; border: none; color: var(--text-muted); cursor: pointer; padding: 5px 7px; font-size: 14px; border-radius: 6px; transition: all .15s; display: inline-flex; align-items: center; justify-content: center; }
   .btn-ghost:hover { background: var(--primary-light); color: var(--primary); }
@@ -152,6 +159,7 @@
   .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15,23,42,0.45); z-index: 100; backdrop-filter: blur(4px); animation: fadeIn 0.2s ease; }
   .modal-overlay.show { display: block; }
   .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); background: #fff; border-radius: 16px; box-shadow: 0 24px 64px rgba(15,23,42,0.15); width: 480px; max-height: 85vh; display: flex; flex-direction: column; z-index: 101; animation: scaleIn 0.25s cubic-bezier(0.16,1,0.3,1); }
+  .modal.modal-wide { width: 520px; }
   .modal-head { display: flex; align-items: center; justify-content: space-between; padding: 18px 24px; border-bottom: 1px solid var(--border-soft); flex-shrink: 0; }
   .modal-title { font-size: 15px; font-weight: 700; color: var(--text-main); }
   .modal-close { width: 32px; height: 32px; border-radius: 8px; border: none; background: rgba(100,116,139,0.08); color: var(--text-muted); font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .2s; }
@@ -177,13 +185,32 @@
   .btn-modal.outline { background: #fff; color: var(--text-main); border: 1px solid var(--border-soft); }
   .btn-modal.outline:hover { border-color: var(--text-muted); }
 
+  /* Custom checkboxes */
+  .cb-list { display: flex; flex-direction: column; gap: 4px; margin-top: 4px; }
+  .cb-row { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: var(--radius-md); border: 1px solid transparent; transition: background .15s, border-color .15s; }
+  .cb-row:hover:not(.is-disabled) { background: #f8fafc; border-color: var(--border-soft); }
+  .cb-row.is-disabled { opacity: 0.95; }
+  .cb-row label { flex: 1; cursor: pointer; display: flex; align-items: flex-start; gap: 12px; margin: 0; }
+  .cb-row.is-disabled label { cursor: default; }
+  .cb-row input[type="checkbox"] { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
+  .cb-mark { width: 18px; height: 18px; border-radius: 5px; border: 2px solid #cbd5e1; background: #fff; flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center; transition: border-color .2s, background .2s, box-shadow .2s; }
+  .cb-row input[type="checkbox"]:checked + .cb-mark { background: var(--primary); border-color: var(--primary); box-shadow: 0 2px 6px rgba(37,99,235,0.25); }
+  .cb-row input[type="checkbox"]:checked + .cb-mark i { opacity: 1; transform: scale(1); }
+  .cb-row input[type="checkbox"]:disabled:checked + .cb-mark i { opacity: 1; transform: scale(1); }
+  .cb-row input[type="checkbox"]:disabled + .cb-mark { background: #f1f5f9; border-color: #e2e8f0; box-shadow: none; }
+  .cb-row input[type="checkbox"]:disabled:checked + .cb-mark { background: var(--primary); border-color: var(--primary); opacity: 0.85; }
+  .cb-mark i { font-size: 12px; color: #fff; opacity: 0; transform: scale(0.6); transition: opacity .15s, transform .15s; }
+  .cb-text { flex: 1; min-width: 0; }
+  .cb-title { font-size: 13px; font-weight: 600; color: var(--text-main); }
+  .cb-sub { font-size: 11px; color: var(--text-light); margin-top: 2px; line-height: 1.4; }
+
   /* Tooltip */
   [title] { position: relative; }
 </style>
 </head>
 <body>
 
-<!-- Sidebar — same structure as stats-report -->
+<!-- Sidebar — same structure as merchant-accounts; 系统与权限 split into 系统管理 + 商户管理 -->
 <div class="sb">
   <div class="sb-logo">VVOSS Admin</div>
   <div class="sb-ver">670e65b</div>
@@ -216,9 +243,9 @@
   <div class="nc"><i class="ri-shield-user-line"></i> 系统角色</div>
   <div class="nc"><i class="ri-error-warning-line"></i> 黑名单管理</div>
   <div class="sec"><i class="ri-store-2-line"></i> 商户管理 <i class="ri-arrow-up-s-line arr"></i></div>
-  <div class="nc act"><i class="ri-user-star-line"></i> 商户账号</div>
-  <div class="nc" onclick="location.href='merchant-role-templates.html'" style="cursor:pointer"><i class="ri-shield-star-line"></i> 商户角色模板</div>
-  <div class="nc" onclick="location.href='merchant-message-push.html'" style="cursor:pointer"><i class="ri-mail-send-line"></i> 商户公告</div>
+  <div class="nc" onclick="location.href='merchant-accounts.html'" style="cursor:pointer"><i class="ri-user-star-line"></i> 商户账号</div>
+  <div class="nc act"><i class="ri-file-shield-2-line"></i> 商户角色模板</div>
+  <div class="nc" onclick="location.href='merchant-message-push.html'" style="cursor:pointer"><i class="ri-notification-3-line"></i> 商户公告</div>
 </div>
 
 <div class="mw">
@@ -228,399 +255,287 @@
   </div>
 
   <div class="mn">
-    <div class="page-title">商户账号</div>
+    <div class="page-title">商户角色模板</div>
 
-    <!-- Stats -->
     <div class="stats-row">
       <div class="stat-card">
-        <div class="stat-icon blue"><i class="ri-group-line"></i></div>
+        <div class="stat-icon blue"><i class="ri-shield-star-line"></i></div>
         <div>
-          <div class="stat-value">48</div>
-          <div class="stat-label">总账号数</div>
+          <div class="stat-value">4</div>
+          <div class="stat-label">角色模板总数</div>
         </div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon green"><i class="ri-user-follow-line"></i></div>
+        <div class="stat-icon green"><i class="ri-lock-line"></i></div>
         <div>
-          <div class="stat-value">41</div>
-          <div class="stat-label">已启用</div>
+          <div class="stat-value">1</div>
+          <div class="stat-label">系统内置</div>
         </div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon orange"><i class="ri-shield-keyhole-line"></i></div>
+        <div class="stat-icon orange"><i class="ri-file-copy-line"></i></div>
         <div>
-          <div class="stat-value">32</div>
-          <div class="stat-label">已开启 2FA</div>
+          <div class="stat-value">3</div>
+          <div class="stat-label">模板角色</div>
         </div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon red"><i class="ri-user-unfollow-line"></i></div>
+        <div class="stat-icon tag-purple"><i class="ri-store-2-line"></i></div>
         <div>
-          <div class="stat-value">7</div>
-          <div class="stat-label">已禁用 / 锁定</div>
+          <div class="stat-value">12</div>
+          <div class="stat-label">使用商户数</div>
         </div>
       </div>
     </div>
 
-    <!-- Filter bar -->
     <div class="filter-bar">
-      <select>
-        <option>所属商户: 全部</option>
-        <option>管怡一头</option>
-        <option>lire</option>
-        <option>大正</option>
-        <option>世界大联</option>
-        <option>广汇</option>
+      <input type="text" id="filterRoleName" placeholder="搜索角色名称...">
+      <select id="filterType">
+        <option value="">类型: 全部</option>
+        <option>系统内置</option>
+        <option>模板</option>
       </select>
-      <input type="text" placeholder="搜索用户名...">
-      <select>
-        <option>角色: 全部</option>
-        <option>商户管理员</option>
-        <option>商户财务</option>
-        <option>商户运营</option>
-        <option>商户只读</option>
-      </select>
-      <select>
-        <option>状态: 全部</option>
-        <option>启用</option>
-        <option>禁用</option>
-        <option>锁定</option>
-      </select>
-      <button class="btn-query"><i class="ri-search-line"></i> 搜索</button>
-      <button class="btn-reset"><i class="ri-refresh-line"></i> 重置</button>
+      <button class="btn-query" type="button"><i class="ri-search-line"></i> 搜索</button>
+      <button class="btn-reset" type="button" onclick="document.getElementById('filterRoleName').value=''; document.getElementById('filterType').selectedIndex=0;"><i class="ri-refresh-line"></i> 重置</button>
       <div style="flex:1"></div>
-      <button class="btn-create" onclick="openModal('createModal')"><i class="ri-add-line"></i> 创建商户账号</button>
+      <button class="btn-create" type="button" onclick="openRoleEditor('create')"><i class="ri-add-line"></i> 新建角色模板</button>
     </div>
 
-    <!-- Table -->
     <div class="card">
       <table>
         <thead>
           <tr>
-            <th>账号ID</th>
-            <th>用户名</th>
-            <th>所属商户</th>
-            <th>角色</th>
-            <th>状态</th>
-            <th>2FA</th>
-            <th>最后登录</th>
+            <th>角色名称</th>
+            <th>说明</th>
+            <th>权限范围</th>
+            <th>类型</th>
+            <th>使用商户数</th>
             <th>创建时间</th>
             <th class="ar">操作</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td class="mono">1028</td>
-            <td>
-              <div class="user-cell">
-                <div class="user-avatar" style="background:linear-gradient(135deg,#2563eb,#7c3aed)">R</div>
-                <div class="user-name">rui01</div>
-              </div>
-            </td>
-            <td>管怡一头</td>
-            <td><span class="tag tag-b"><i class="ri-shield-star-line"></i> 商户管理员</span></td>
-            <td><span class="tag tag-g">启用</span></td>
-            <td><span class="two-fa-on"><i class="ri-shield-check-fill"></i> 已启用</span></td>
-            <td>
-              <div style="font-size:13px">2026-04-14 16:03:56</div>
-              <div class="ip-text">103.25.41.88</div>
-            </td>
-            <td class="mono" style="font-size:12px;color:var(--text-muted)">2026-04-14 16:03:20</td>
+            <td><span class="user-name">管理员</span></td>
+            <td style="color:var(--text-muted);max-width:200px">拥有商户后台全部管理权限</td>
+            <td><div class="perm-cell"><span class="perm-pages">全部权限</span><span class="perm-count">(7/7)</span></div></td>
+            <td><span class="tag tag-b"><i class="ri-lock-line"></i> 系统内置</span></td>
+            <td class="mono">12</td>
+            <td class="mono" style="font-size:12px;color:var(--text-muted)">2025-01-01</td>
             <td>
               <div class="action-group" style="justify-content:flex-end">
-                <button class="btn-ghost" title="编辑角色" onclick="openModal('editRoleModal')"><i class="ri-edit-line"></i></button>
-                <button class="btn-ghost" title="重置密码"><i class="ri-lock-password-line"></i></button>
-                <button class="btn-ghost" title="重置 2FA"><i class="ri-shield-keyhole-line"></i></button>
-                <button class="btn-ghost danger" title="禁用"><i class="ri-forbid-line"></i></button>
-                <button class="btn-ghost" title="登录日志"><i class="ri-file-list-line"></i></button>
+                <button class="btn-ghost" title="查看" onclick="openModal('viewRoleModal')"><i class="ri-eye-line"></i></button>
               </div>
             </td>
           </tr>
           <tr>
-            <td class="mono">1027</td>
-            <td>
-              <div class="user-cell">
-                <div class="user-avatar" style="background:linear-gradient(135deg,#10b981,#059669)">P</div>
-                <div class="user-name">peePOll</div>
-              </div>
-            </td>
-            <td>lire</td>
-            <td><span class="tag tag-b"><i class="ri-shield-star-line"></i> 商户管理员</span></td>
-            <td><span class="tag tag-g">启用</span></td>
-            <td><span class="two-fa-on"><i class="ri-shield-check-fill"></i> 已启用</span></td>
-            <td>
-              <div style="font-size:13px">2026-04-07 20:36:01</div>
-              <div class="ip-text">45.33.12.77</div>
-            </td>
-            <td class="mono" style="font-size:12px;color:var(--text-muted)">2026-04-04 13:21:39</td>
+            <td><span class="user-name">财务</span></td>
+            <td style="color:var(--text-muted);max-width:200px">查看充值、提现和统计报表</td>
+            <td><div class="perm-cell"><span class="perm-pages">首页/充值/提现/报表</span><span class="perm-count">(4/7)</span></div></td>
+            <td><span class="tag tag-g">模板</span></td>
+            <td class="mono">8</td>
+            <td class="mono" style="font-size:12px;color:var(--text-muted)">2025-06-15</td>
             <td>
               <div class="action-group" style="justify-content:flex-end">
-                <button class="btn-ghost" title="编辑角色"><i class="ri-edit-line"></i></button>
-                <button class="btn-ghost" title="重置密码"><i class="ri-lock-password-line"></i></button>
-                <button class="btn-ghost" title="重置 2FA"><i class="ri-shield-keyhole-line"></i></button>
-                <button class="btn-ghost danger" title="禁用"><i class="ri-forbid-line"></i></button>
-                <button class="btn-ghost" title="登录日志"><i class="ri-file-list-line"></i></button>
+                <button class="btn-ghost" title="编辑" onclick="openRoleEditor('finance')"><i class="ri-edit-line"></i></button>
+                <button class="btn-ghost danger" title="删除"><i class="ri-delete-bin-line"></i></button>
               </div>
             </td>
           </tr>
           <tr>
-            <td class="mono">1026</td>
-            <td>
-              <div class="user-cell">
-                <div class="user-avatar" style="background:linear-gradient(135deg,#f97316,#ea580c)">R</div>
-                <div class="user-name">rc</div>
-              </div>
-            </td>
-            <td>大正</td>
-            <td><span class="tag tag-g"><i class="ri-money-cny-circle-line"></i> 商户财务</span></td>
-            <td><span class="tag tag-g">启用</span></td>
-            <td><span class="two-fa-off"><i class="ri-shield-line"></i> 未启用</span></td>
-            <td>
-              <div style="font-size:13px">2026-01-31 10:05:16</div>
-              <div class="ip-text">192.168.1.100</div>
-            </td>
-            <td class="mono" style="font-size:12px;color:var(--text-muted)">2026-01-31 10:05:03</td>
+            <td><span class="user-name">运营</span></td>
+            <td style="color:var(--text-muted);max-width:200px">查看充值、提现和风控记录</td>
+            <td><div class="perm-cell"><span class="perm-pages">首页/充值/提现/风控</span><span class="perm-count">(4/7)</span></div></td>
+            <td><span class="tag tag-orange">模板</span></td>
+            <td class="mono">5</td>
+            <td class="mono" style="font-size:12px;color:var(--text-muted)">2025-06-15</td>
             <td>
               <div class="action-group" style="justify-content:flex-end">
-                <button class="btn-ghost" title="编辑角色"><i class="ri-edit-line"></i></button>
-                <button class="btn-ghost" title="重置密码"><i class="ri-lock-password-line"></i></button>
-                <button class="btn-ghost" title="重置 2FA"><i class="ri-shield-keyhole-line"></i></button>
-                <button class="btn-ghost danger" title="禁用"><i class="ri-forbid-line"></i></button>
-                <button class="btn-ghost" title="登录日志"><i class="ri-file-list-line"></i></button>
+                <button class="btn-ghost" title="编辑" onclick="openRoleEditor('ops')"><i class="ri-edit-line"></i></button>
+                <button class="btn-ghost danger" title="删除"><i class="ri-delete-bin-line"></i></button>
               </div>
             </td>
           </tr>
           <tr>
-            <td class="mono">1025</td>
-            <td>
-              <div class="user-cell">
-                <div class="user-avatar" style="background:linear-gradient(135deg,#8b5cf6,#6d28d9)">Z</div>
-                <div class="user-name">zpeter</div>
-              </div>
-            </td>
-            <td>世界大联</td>
-            <td><span class="tag tag-orange"><i class="ri-customer-service-line"></i> 商户运营</span></td>
-            <td><span class="tag tag-g">启用</span></td>
-            <td><span class="two-fa-on"><i class="ri-shield-check-fill"></i> 已启用</span></td>
-            <td>
-              <div style="font-size:13px">2026-04-07 20:36:42</div>
-              <div class="ip-text">211.99.33.55</div>
-            </td>
-            <td class="mono" style="font-size:12px;color:var(--text-muted)">2026-03-24 01:43:10</td>
+            <td><span class="user-name">只读</span></td>
+            <td style="color:var(--text-muted);max-width:200px">仅查看首页和统计报表</td>
+            <td><div class="perm-cell"><span class="perm-pages">首页/报表</span><span class="perm-count">(2/7)</span></div></td>
+            <td><span class="tag tag-gray">模板</span></td>
+            <td class="mono">3</td>
+            <td class="mono" style="font-size:12px;color:var(--text-muted)">2025-09-01</td>
             <td>
               <div class="action-group" style="justify-content:flex-end">
-                <button class="btn-ghost" title="编辑角色"><i class="ri-edit-line"></i></button>
-                <button class="btn-ghost" title="重置密码"><i class="ri-lock-password-line"></i></button>
-                <button class="btn-ghost" title="重置 2FA"><i class="ri-shield-keyhole-line"></i></button>
-                <button class="btn-ghost danger" title="禁用"><i class="ri-forbid-line"></i></button>
-                <button class="btn-ghost" title="登录日志"><i class="ri-file-list-line"></i></button>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td class="mono">1024</td>
-            <td>
-              <div class="user-cell">
-                <div class="user-avatar" style="background:linear-gradient(135deg,#14b8a6,#0d9488)">R</div>
-                <div class="user-name">rui01c</div>
-              </div>
-            </td>
-            <td>管怡一头</td>
-            <td><span class="tag tag-gray"><i class="ri-eye-line"></i> 商户只读</span></td>
-            <td><span class="tag tag-g">启用</span></td>
-            <td><span class="two-fa-off"><i class="ri-shield-line"></i> 未启用</span></td>
-            <td>
-              <div style="font-size:13px">2026-07-28 17:47:30</div>
-              <div class="ip-text">10.0.0.5</div>
-            </td>
-            <td class="mono" style="font-size:12px;color:var(--text-muted)">2026-01-23 09:24:20</td>
-            <td>
-              <div class="action-group" style="justify-content:flex-end">
-                <button class="btn-ghost" title="编辑角色"><i class="ri-edit-line"></i></button>
-                <button class="btn-ghost" title="重置密码"><i class="ri-lock-password-line"></i></button>
-                <button class="btn-ghost" title="重置 2FA"><i class="ri-shield-keyhole-line"></i></button>
-                <button class="btn-ghost danger" title="禁用"><i class="ri-forbid-line"></i></button>
-                <button class="btn-ghost" title="登录日志"><i class="ri-file-list-line"></i></button>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td class="mono">1020</td>
-            <td>
-              <div class="user-cell">
-                <div class="user-avatar" style="background:linear-gradient(135deg,#ef4444,#dc2626)">P</div>
-                <div class="user-name">peer</div>
-              </div>
-            </td>
-            <td>lire</td>
-            <td><span class="tag tag-g"><i class="ri-money-cny-circle-line"></i> 商户财务</span></td>
-            <td><span class="tag tag-r">禁用</span></td>
-            <td><span class="two-fa-off"><i class="ri-shield-line"></i> 未启用</span></td>
-            <td>
-              <div style="font-size:13px">2026-01-04 16:04:20</div>
-              <div class="ip-text">—</div>
-            </td>
-            <td class="mono" style="font-size:12px;color:var(--text-muted)">2026-05-28 08:22:21</td>
-            <td>
-              <div class="action-group" style="justify-content:flex-end">
-                <button class="btn-ghost" title="编辑角色"><i class="ri-edit-line"></i></button>
-                <button class="btn-ghost" title="重置密码"><i class="ri-lock-password-line"></i></button>
-                <button class="btn-ghost" title="重置 2FA"><i class="ri-shield-keyhole-line"></i></button>
-                <button class="btn-ghost success" title="启用"><i class="ri-checkbox-circle-line"></i></button>
-                <button class="btn-ghost" title="登录日志"><i class="ri-file-list-line"></i></button>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td class="mono">1002</td>
-            <td>
-              <div class="user-cell">
-                <div class="user-avatar" style="background:linear-gradient(135deg,#64748b,#475569)">L</div>
-                <div class="user-name">Loit</div>
-              </div>
-            </td>
-            <td>世界大联</td>
-            <td><span class="tag tag-b"><i class="ri-shield-star-line"></i> 商户管理员</span></td>
-            <td><span class="tag tag-y">锁定</span></td>
-            <td><span class="two-fa-on"><i class="ri-shield-check-fill"></i> 已启用</span></td>
-            <td>
-              <div style="font-size:13px">2026-04-01 10:06:18</div>
-              <div class="ip-text">82.14.55.201</div>
-            </td>
-            <td class="mono" style="font-size:12px;color:var(--text-muted)">2026-12-29 22:53:03</td>
-            <td>
-              <div class="action-group" style="justify-content:flex-end">
-                <button class="btn-ghost" title="编辑角色"><i class="ri-edit-line"></i></button>
-                <button class="btn-ghost" title="重置密码"><i class="ri-lock-password-line"></i></button>
-                <button class="btn-ghost" title="重置 2FA"><i class="ri-shield-keyhole-line"></i></button>
-                <button class="btn-ghost warning" title="解锁"><i class="ri-lock-unlock-line"></i></button>
-                <button class="btn-ghost" title="登录日志"><i class="ri-file-list-line"></i></button>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td class="mono">1000</td>
-            <td>
-              <div class="user-cell">
-                <div class="user-avatar" style="background:linear-gradient(135deg,#2563eb,#4f46e5)">G</div>
-                <div class="user-name">good</div>
-              </div>
-            </td>
-            <td>广汇</td>
-            <td><span class="tag tag-b"><i class="ri-shield-star-line"></i> 商户管理员</span></td>
-            <td><span class="tag tag-g">启用</span></td>
-            <td><span class="two-fa-on"><i class="ri-shield-check-fill"></i> 已启用</span></td>
-            <td>
-              <div style="font-size:13px">2026-04-02 00:41:06</div>
-              <div class="ip-text">172.16.8.22</div>
-            </td>
-            <td class="mono" style="font-size:12px;color:var(--text-muted)">2026-11-20 14:30:08</td>
-            <td>
-              <div class="action-group" style="justify-content:flex-end">
-                <button class="btn-ghost" title="编辑角色"><i class="ri-edit-line"></i></button>
-                <button class="btn-ghost" title="重置密码"><i class="ri-lock-password-line"></i></button>
-                <button class="btn-ghost" title="重置 2FA"><i class="ri-shield-keyhole-line"></i></button>
-                <button class="btn-ghost danger" title="禁用"><i class="ri-forbid-line"></i></button>
-                <button class="btn-ghost" title="登录日志"><i class="ri-file-list-line"></i></button>
+                <button class="btn-ghost" title="编辑" onclick="openRoleEditor('readonly')"><i class="ri-edit-line"></i></button>
+                <button class="btn-ghost danger" title="删除"><i class="ri-delete-bin-line"></i></button>
               </div>
             </td>
           </tr>
         </tbody>
       </table>
       <div class="pgb">
-        <span>共 <b>48</b> 条记录</span>
+        <span>共 <b>4</b> 条记录</span>
         <div style="flex:1"></div>
         <div class="pg on">1</div>
-        <div class="pg">2</div>
-        <div class="pg">3</div>
-        <div class="pg">4</div>
-        <div class="pg">5</div>
         <div style="margin-left:8px"><select><option>10 条/页</option><option>20 条/页</option><option>50 条/页</option></select></div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Create Account Modal -->
-<div class="modal-overlay" id="createModal" onclick="closeModal('createModal')">
-  <div class="modal" onclick="event.stopPropagation()">
+<!-- Create / Edit modal -->
+<div class="modal-overlay" id="roleEditorModal" onclick="closeModal('roleEditorModal')">
+  <div class="modal modal-wide" onclick="event.stopPropagation()">
     <div class="modal-head">
-      <div class="modal-title">创建商户账号</div>
-      <button class="modal-close" onclick="closeModal('createModal')"><i class="ri-close-line"></i></button>
+      <div class="modal-title" id="roleEditorTitle">新建角色模板</div>
+      <button type="button" class="modal-close" onclick="closeModal('roleEditorModal')"><i class="ri-close-line"></i></button>
     </div>
     <div class="modal-body">
       <div class="form-group">
-        <label class="form-label">所属商户 <span class="req">*</span></label>
-        <select class="form-select">
-          <option value="">请选择商户...</option>
-          <option>管怡一头</option>
-          <option>lire</option>
-          <option>大正</option>
-          <option>世界大联</option>
-          <option>广汇</option>
-        </select>
+        <label class="form-label" for="roleNameInput">角色名称 <span class="req">*</span></label>
+        <input type="text" class="form-input" id="roleNameInput" placeholder="请输入角色名称">
       </div>
       <div class="form-group">
-        <label class="form-label">用户名 <span class="req">*</span></label>
-        <input type="text" class="form-input" placeholder="请输入用户名（3-20字符）">
+        <label class="form-label" for="roleDescInput">角色说明</label>
+        <input type="text" class="form-input" id="roleDescInput" placeholder="简要描述该角色的用途">
       </div>
-      <div class="form-group">
-        <label class="form-label">密码 <span class="req">*</span></label>
-        <input type="password" class="form-input" placeholder="请输入密码（8+字符）">
-        <div class="form-hint">密码需包含大小写字母和数字</div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">确认密码 <span class="req">*</span></label>
-        <input type="password" class="form-input" placeholder="请再次输入密码">
-      </div>
-      <div class="form-group">
-        <label class="form-label">角色 <span class="req">*</span></label>
-        <select class="form-select">
-          <option value="">请选择角色...</option>
-          <option>商户管理员</option>
-          <option>商户财务</option>
-          <option>商户运营</option>
-          <option>商户只读</option>
-        </select>
-        <div class="form-hint">商户管理员拥有该商户下的全部管理权限</div>
+      <div class="form-group" style="margin-bottom:8px">
+        <span class="form-label">页面权限</span>
+        <div class="cb-list" id="roleEditorPermList">
+          <div class="cb-row is-disabled">
+            <label>
+              <input type="checkbox" id="perm_home" checked disabled>
+              <span class="cb-mark"><i class="ri-check-line"></i></span>
+              <span class="cb-text">
+                <div class="cb-title">我的首页</div>
+                <div class="cb-sub">默认权限，不可取消</div>
+              </span>
+            </label>
+          </div>
+          <div class="cb-row">
+            <label for="perm_deposit">
+              <input type="checkbox" id="perm_deposit">
+              <span class="cb-mark"><i class="ri-check-line"></i></span>
+              <span class="cb-text"><div class="cb-title">用户充值</div></span>
+            </label>
+          </div>
+          <div class="cb-row">
+            <label for="perm_withdraw">
+              <input type="checkbox" id="perm_withdraw">
+              <span class="cb-mark"><i class="ri-check-line"></i></span>
+              <span class="cb-text"><div class="cb-title">用户提现</div></span>
+            </label>
+          </div>
+          <div class="cb-row">
+            <label for="perm_callback">
+              <input type="checkbox" id="perm_callback">
+              <span class="cb-mark"><i class="ri-check-line"></i></span>
+              <span class="cb-text"><div class="cb-title">回调日志</div></span>
+            </label>
+          </div>
+          <div class="cb-row">
+            <label for="perm_risk">
+              <input type="checkbox" id="perm_risk">
+              <span class="cb-mark"><i class="ri-check-line"></i></span>
+              <span class="cb-text"><div class="cb-title">风险记录</div></span>
+            </label>
+          </div>
+          <div class="cb-row">
+            <label for="perm_report">
+              <input type="checkbox" id="perm_report">
+              <span class="cb-mark"><i class="ri-check-line"></i></span>
+              <span class="cb-text"><div class="cb-title">统计报表</div></span>
+            </label>
+          </div>
+          <div class="cb-row">
+            <label for="perm_account">
+              <input type="checkbox" id="perm_account">
+              <span class="cb-mark"><i class="ri-check-line"></i></span>
+              <span class="cb-text"><div class="cb-title">账号管理</div></span>
+            </label>
+          </div>
+        </div>
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn-modal outline" onclick="closeModal('createModal')">取消</button>
-      <button class="btn-modal primary">创建账号</button>
+      <button type="button" class="btn-modal outline" onclick="closeModal('roleEditorModal')">取消</button>
+      <button type="button" class="btn-modal primary" onclick="closeModal('roleEditorModal')">保存</button>
     </div>
   </div>
 </div>
 
-<!-- Edit Role Modal -->
-<div class="modal-overlay" id="editRoleModal" onclick="closeModal('editRoleModal')">
-  <div class="modal" onclick="event.stopPropagation()">
+<!-- View (read-only) modal -->
+<div class="modal-overlay" id="viewRoleModal" onclick="closeModal('viewRoleModal')">
+  <div class="modal modal-wide" onclick="event.stopPropagation()">
     <div class="modal-head">
-      <div class="modal-title">编辑角色</div>
-      <button class="modal-close" onclick="closeModal('editRoleModal')"><i class="ri-close-line"></i></button>
+      <div class="modal-title">查看角色模板</div>
+      <button type="button" class="modal-close" onclick="closeModal('viewRoleModal')"><i class="ri-close-line"></i></button>
     </div>
     <div class="modal-body">
       <div class="form-group">
-        <label class="form-label">用户名</label>
-        <input type="text" class="form-input form-readonly" value="rui01" readonly>
+        <label class="form-label">角色名称</label>
+        <input type="text" class="form-input form-readonly" value="管理员" readonly>
       </div>
       <div class="form-group">
-        <label class="form-label">所属商户</label>
-        <input type="text" class="form-input form-readonly" value="管怡一头" readonly>
+        <label class="form-label">角色说明</label>
+        <input type="text" class="form-input form-readonly" value="拥有商户后台全部管理权限" readonly>
       </div>
-      <div class="form-group">
-        <label class="form-label">角色 <span class="req">*</span></label>
-        <select class="form-select">
-          <option selected>商户管理员</option>
-          <option>商户财务</option>
-          <option>商户运营</option>
-          <option>商户只读</option>
-        </select>
+      <div class="form-group" style="margin-bottom:8px">
+        <span class="form-label">页面权限</span>
+        <div class="cb-list">
+          <div class="cb-row is-disabled">
+            <label>
+              <input type="checkbox" checked disabled>
+              <span class="cb-mark"><i class="ri-check-line"></i></span>
+              <span class="cb-text"><div class="cb-title">我的首页</div><div class="cb-sub">默认权限</div></span>
+            </label>
+          </div>
+          <div class="cb-row is-disabled">
+            <label>
+              <input type="checkbox" checked disabled>
+              <span class="cb-mark"><i class="ri-check-line"></i></span>
+              <span class="cb-text"><div class="cb-title">用户充值</div></span>
+            </label>
+          </div>
+          <div class="cb-row is-disabled">
+            <label>
+              <input type="checkbox" checked disabled>
+              <span class="cb-mark"><i class="ri-check-line"></i></span>
+              <span class="cb-text"><div class="cb-title">用户提现</div></span>
+            </label>
+          </div>
+          <div class="cb-row is-disabled">
+            <label>
+              <input type="checkbox" checked disabled>
+              <span class="cb-mark"><i class="ri-check-line"></i></span>
+              <span class="cb-text"><div class="cb-title">回调日志</div></span>
+            </label>
+          </div>
+          <div class="cb-row is-disabled">
+            <label>
+              <input type="checkbox" checked disabled>
+              <span class="cb-mark"><i class="ri-check-line"></i></span>
+              <span class="cb-text"><div class="cb-title">风险记录</div></span>
+            </label>
+          </div>
+          <div class="cb-row is-disabled">
+            <label>
+              <input type="checkbox" checked disabled>
+              <span class="cb-mark"><i class="ri-check-line"></i></span>
+              <span class="cb-text"><div class="cb-title">统计报表</div></span>
+            </label>
+          </div>
+          <div class="cb-row is-disabled">
+            <label>
+              <input type="checkbox" checked disabled>
+              <span class="cb-mark"><i class="ri-check-line"></i></span>
+              <span class="cb-text"><div class="cb-title">账号管理</div></span>
+            </label>
+          </div>
+        </div>
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn-modal outline" onclick="closeModal('editRoleModal')">取消</button>
-      <button class="btn-modal primary">保存</button>
+      <button type="button" class="btn-modal outline" onclick="closeModal('viewRoleModal')">关闭</button>
     </div>
   </div>
 </div>
@@ -628,9 +543,51 @@
 <script>
 function openModal(id) { document.getElementById(id).classList.add('show'); }
 function closeModal(id) { document.getElementById(id).classList.remove('show'); }
-document.addEventListener('keydown', e => {
+
+var permIds = ['perm_deposit','perm_withdraw','perm_callback','perm_risk','perm_report','perm_account'];
+
+function setPermChecks(map) {
+  permIds.forEach(function (id) {
+    var el = document.getElementById(id);
+    if (el) el.checked = !!map[id];
+  });
+}
+
+/** @param {'create'|'finance'|'ops'|'readonly'} mode */
+function openRoleEditor(mode) {
+  var titleEl = document.getElementById('roleEditorTitle');
+  var nameEl = document.getElementById('roleNameInput');
+  var descEl = document.getElementById('roleDescInput');
+
+  if (mode === 'create') {
+    titleEl.textContent = '新建角色模板';
+    nameEl.value = '';
+    descEl.value = '';
+    setPermChecks({});
+    document.getElementById('perm_home').checked = true;
+  } else if (mode === 'finance') {
+    titleEl.textContent = '编辑角色模板';
+    nameEl.value = '财务';
+    descEl.value = '查看充值、提现和统计报表';
+    setPermChecks({ perm_deposit: true, perm_withdraw: true, perm_report: true });
+  } else if (mode === 'ops') {
+    titleEl.textContent = '编辑角色模板';
+    nameEl.value = '运营';
+    descEl.value = '查看充值、提现和风控记录';
+    setPermChecks({ perm_deposit: true, perm_withdraw: true, perm_risk: true });
+  } else if (mode === 'readonly') {
+    titleEl.textContent = '编辑角色模板';
+    nameEl.value = '只读';
+    descEl.value = '仅查看首页和统计报表';
+    setPermChecks({ perm_report: true });
+  }
+  document.getElementById('perm_home').checked = true;
+  openModal('roleEditorModal');
+}
+
+document.addEventListener('keydown', function (e) {
   if (e.key === 'Escape') {
-    document.querySelectorAll('.modal-overlay.show').forEach(el => el.classList.remove('show'));
+    document.querySelectorAll('.modal-overlay.show').forEach(function (el) { el.classList.remove('show'); });
   }
 });
 </script>

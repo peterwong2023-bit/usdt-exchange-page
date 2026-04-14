@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>商户公告管理 - VVOSS Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css" rel="stylesheet">
+<style>
+  :root {
+    --bg-main: #f3f5f9;
+    --bg-card: #ffffff;
+    --border-soft: #e5e8f0;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --text-light: #94a3b8;
+    --primary: #2563eb;
+    --primary-hover: #1d4ed8;
+    --primary-light: #eff6ff;
+    --success: #10b981;
+    --success-light: #ecfdf5;
+    --warning: #f59e0b;
+    --warning-light: #fffbeb;
+    --danger: #ef4444;
+    --danger-light: #fef2f2;
+    --purple: #8b5cf6;
+    --purple-light: #f5f3ff;
+    --orange: #f97316;
+    --orange-light: #fff7ed;
+    --sb-bg: #090e17;
+    --sb-text: #64748b;
+    --radius-sm: 6px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg-main); color: var(--text-main); font-family: 'Noto Sans SC', 'Inter', -apple-system, 'PingFang SC', sans-serif; font-size: 13px; display: flex; min-height: 100vh; -webkit-font-smoothing: antialiased; }
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 6px; }
+  ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes scaleIn { from { opacity: 0; transform: translate(-50%,-50%) scale(0.95); } to { opacity: 1; transform: translate(-50%,-50%) scale(1); } }
+
+  /* Sidebar */
+  .sb { width: 220px; min-height: 100vh; background: var(--sb-bg); flex-shrink: 0; overflow-y: auto; padding-bottom: 20px; border-right: 1px solid rgba(255,255,255,0.05); }
+  .sb-logo { padding: 24px 20px 4px; font-size: 18px; font-weight: 700; color: #fff; letter-spacing: -0.5px; display: flex; align-items: center; gap: 8px; }
+  .sb-logo::before { content: ''; display: block; width: 8px; height: 8px; background: var(--primary); border-radius: 50%; box-shadow: 0 0 12px var(--primary); }
+  .sb-ver { padding: 0 20px 24px 36px; font-size: 10px; color: #475569; font-family: 'Inter', monospace; font-feature-settings: 'tnum' 1; }
+  .n { padding: 10px 20px; font-size: 13px; color: var(--sb-text); cursor: pointer; display: flex; align-items: center; gap: 12px; transition: all .2s; font-weight: 500; }
+  .n:hover { color: #fff; background: rgba(255,255,255,.03); }
+  .n i { font-size: 16px; width: 20px; text-align: center; opacity: 0.7; }
+  .sec { padding: 16px 20px 8px; font-size: 11px; color: #475569; cursor: pointer; display: flex; align-items: center; gap: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+  .sec i { font-size: 14px; width: 20px; text-align: center; }
+  .sec .arr { margin-left: auto; font-size: 14px; }
+  .nc { padding: 9px 20px 9px 52px; font-size: 13px; color: #94a3b8; cursor: pointer; transition: all .2s; display: flex; align-items: center; gap: 10px; font-weight: 400; position: relative; }
+  .nc:hover { color: #fff; }
+  .nc i { font-size: 15px; width: 18px; text-align: center; opacity: 0.5; }
+  .nc.act { color: #fff; font-weight: 600; background: linear-gradient(90deg, rgba(37,99,235,0.1) 0%, transparent 100%); }
+  .nc.act i { opacity: 1; color: var(--primary); }
+  .nc.act::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--primary); border-radius: 0 4px 4px 0; box-shadow: 0 0 10px rgba(37,99,235,0.5); }
+
+  /* Topbar */
+  .topbar { height: 56px; background: rgba(255,255,255,0.85); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border-soft); display: flex; align-items: center; justify-content: space-between; padding: 0 28px; position: sticky; top: 0; z-index: 10; }
+  .topbar .hb { font-size: 18px; color: var(--text-muted); cursor: pointer; transition: color .2s; }
+  .topbar .hb:hover { color: var(--text-main); }
+  .topbar .usr { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 500; color: var(--text-main); cursor: pointer; }
+  .topbar .av { width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--purple)); display: flex; align-items: center; justify-content: center; font-size: 12px; color: #fff; font-weight: 600; }
+
+  .mw { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .mn { flex: 1; padding: 24px 28px; overflow-y: auto; }
+  .page-title { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 6px; animation: fadeUp 0.4s cubic-bezier(0.16,1,0.3,1) both; }
+  .page-desc { font-size: 13px; color: var(--text-muted); margin-bottom: 24px; animation: fadeUp 0.4s cubic-bezier(0.16,1,0.3,1) 0.05s both; }
+
+  /* Card */
+  .card { background: var(--bg-card); border: 1px solid var(--border-soft); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(15,23,42,0.04); animation: fadeUp 0.5s cubic-bezier(0.16,1,0.3,1) 0.1s both; }
+  .card-head { display: flex; align-items: center; justify-content: space-between; padding: 18px 24px; border-bottom: 1px solid var(--border-soft); }
+  .card-title { font-size: 14px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
+  .card-title .count { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 10px; background: var(--primary-light); color: var(--primary); }
+  .card-hint { font-size: 12px; color: var(--text-light); }
+
+  /* Notice item */
+  .notice-list { padding: 0; }
+  .notice-item { display: flex; align-items: center; gap: 16px; padding: 16px 24px; border-bottom: 1px solid #f1f5f9; transition: background .15s; }
+  .notice-item:last-child { border-bottom: none; }
+  .notice-item:hover { background: rgba(37,99,235,0.015); }
+  .notice-order { width: 24px; height: 24px; border-radius: 6px; background: #f1f5f9; color: var(--text-muted); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; font-family: 'Inter', sans-serif; }
+  .notice-content { flex: 1; font-size: 14px; font-weight: 500; color: var(--text-main); line-height: 1.6; }
+  .notice-content.hidden { color: var(--text-light); text-decoration: line-through; }
+
+  /* Toggle switch */
+  .toggle { position: relative; width: 40px; height: 22px; border-radius: 11px; cursor: pointer; transition: all .25s; flex-shrink: 0; border: none; }
+  .toggle.on { background: var(--success); }
+  .toggle.off { background: #cbd5e1; }
+  .toggle::after { content: ''; position: absolute; top: 3px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: all .25s; box-shadow: 0 1px 3px rgba(0,0,0,0.15); }
+  .toggle.on::after { left: 21px; }
+  .toggle.off::after { left: 3px; }
+  .toggle-label { font-size: 11px; font-weight: 600; flex-shrink: 0; min-width: 42px; text-align: center; }
+  .toggle-label.on { color: var(--success); }
+  .toggle-label.off { color: var(--text-light); }
+
+  /* Action buttons */
+  .notice-actions { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
+  .btn-ghost { background: transparent; border: none; color: var(--text-muted); cursor: pointer; padding: 6px 8px; font-size: 14px; border-radius: 6px; transition: all .15s; display: inline-flex; align-items: center; justify-content: center; }
+  .btn-ghost:hover { background: var(--primary-light); color: var(--primary); }
+  .btn-ghost.danger:hover { background: var(--danger-light); color: var(--danger); }
+
+  /* Add button */
+  .btn-add { display: flex; align-items: center; gap: 5px; padding: 7px 16px; background: var(--primary); color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; font-family: 'Noto Sans SC', 'Inter', sans-serif; cursor: pointer; transition: all .25s; box-shadow: 0 2px 8px rgba(37,99,235,0.18); }
+  .btn-add:hover { background: var(--primary-hover); box-shadow: 0 4px 12px rgba(37,99,235,0.25); transform: translateY(-1px); }
+  .btn-add:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+  /* Empty state */
+  .empty-state { padding: 48px 24px; text-align: center; color: var(--text-light); }
+  .empty-state i { font-size: 40px; margin-bottom: 12px; opacity: 0.3; display: block; }
+  .empty-state p { font-size: 13px; }
+
+  /* Modal */
+  .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15,23,42,0.45); z-index: 100; backdrop-filter: blur(4px); animation: fadeIn 0.2s ease; }
+  .modal-overlay.show { display: block; }
+  .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); background: #fff; border-radius: 16px; box-shadow: 0 24px 64px rgba(15,23,42,0.15); width: 520px; max-height: 85vh; display: flex; flex-direction: column; z-index: 101; animation: scaleIn 0.25s cubic-bezier(0.16,1,0.3,1); }
+  .modal-head { display: flex; align-items: center; justify-content: space-between; padding: 18px 24px; border-bottom: 1px solid var(--border-soft); flex-shrink: 0; }
+  .modal-title { font-size: 15px; font-weight: 700; color: var(--text-main); }
+  .modal-close { width: 32px; height: 32px; border-radius: 8px; border: none; background: rgba(100,116,139,0.08); color: var(--text-muted); font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .2s; }
+  .modal-close:hover { background: var(--danger-light); color: var(--danger); }
+  .modal-body { padding: 20px 24px; overflow-y: auto; flex: 1; }
+  .modal-footer { padding: 0 24px 20px; display: flex; justify-content: flex-end; gap: 10px; }
+
+  .form-group { margin-bottom: 16px; }
+  .form-label { display: block; font-size: 12px; font-weight: 600; color: var(--text-main); margin-bottom: 6px; }
+  .form-label .req { color: var(--danger); }
+  .form-textarea {
+    width: 100%; padding: 10px 12px; border: 1px solid var(--border-soft); border-radius: 8px;
+    font-size: 14px; font-family: 'Noto Sans SC', 'Inter', sans-serif; outline: none; transition: all .2s;
+    color: var(--text-main); background: #fff; resize: vertical; min-height: 80px; line-height: 1.6;
+  }
+  .form-textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+  .form-hint { font-size: 11px; color: var(--text-light); margin-top: 4px; }
+  .form-char-count { font-size: 11px; color: var(--text-light); text-align: right; margin-top: 4px; }
+  .btn-modal { padding: 8px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all .2s; font-family: 'Noto Sans SC', 'Inter', sans-serif; }
+  .btn-modal.primary { background: var(--primary); color: #fff; box-shadow: 0 2px 6px rgba(37,99,235,0.18); }
+  .btn-modal.primary:hover { background: var(--primary-hover); }
+  .btn-modal.outline { background: #fff; color: var(--text-main); border: 1px solid var(--border-soft); }
+  .btn-modal.outline:hover { border-color: var(--text-muted); }
+
+  /* Preview card */
+  .preview { margin-top: 24px; animation: fadeUp 0.4s cubic-bezier(0.16,1,0.3,1) 0.2s both; }
+  .preview-title { font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .preview-title i { font-size: 14px; }
+  .preview-card { background: var(--bg-card); border: 1px solid var(--border-soft); border-radius: var(--radius-md); overflow: hidden; }
+  .preview-notice { display: flex; align-items: center; gap: 12px; padding: 12px 16px; }
+  .preview-notice-icon { width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, var(--primary-light), #dbeafe); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+  .preview-notice-text { flex: 1; font-size: 13px; font-weight: 500; color: var(--text-main); }
+  .preview-notice-more { font-size: 12px; color: var(--primary); cursor: pointer; font-weight: 500; white-space: nowrap; }
+  .preview-list { border-top: 1px solid #f1f5f9; padding: 8px 16px; }
+  .preview-list li { font-size: 12px; color: var(--text-muted); padding: 4px 0; list-style: none; }
+  .preview-list li::before { content: '•'; color: var(--primary); margin-right: 8px; }
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div class="sb">
+  <div class="sb-logo">VVOSS Admin</div>
+  <div class="sb-ver">670e65b</div>
+  <div class="n"><i class="ri-flashlight-line"></i> 激活平台</div>
+  <div class="n"><i class="ri-battery-charge-line"></i> 能量平台</div>
+  <div class="sec"><i class="ri-wallet-3-line"></i> 资金与交易 <i class="ri-arrow-up-s-line arr"></i></div>
+  <div class="nc"><i class="ri-wallet-line"></i> 钱包管理</div>
+  <div class="nc"><i class="ri-link"></i> 链上交易</div>
+  <div class="nc"><i class="ri-file-list-3-line"></i> 出款记录</div>
+  <div class="nc"><i class="ri-triangle-line"></i> TRON委托</div>
+  <div class="nc"><i class="ri-lock-line"></i> TRON质押</div>
+  <div class="nc"><i class="ri-share-forward-line"></i> TRON投票</div>
+  <div class="nc"><i class="ri-exchange-dollar-line"></i> 转账费用</div>
+  <div class="nc" onclick="location.href='stats-report.html?v=5'" style="cursor:pointer"><i class="ri-bar-chart-2-line"></i> 统计报表</div>
+  <div class="nc"><i class="ri-search-line"></i> 链上余额查询</div>
+  <div class="nc"><i class="ri-line-chart-line"></i> 风险入款统计</div>
+  <div class="sec"><i class="ri-safe-2-line"></i> 冷钱包 <i class="ri-arrow-up-s-line arr"></i></div>
+  <div class="nc" onclick="location.href='address-library.html'" style="cursor:pointer"><i class="ri-list-unordered"></i> 地址库</div>
+  <div class="nc" onclick="location.href='address-pool.html'" style="cursor:pointer"><i class="ri-archive-stack-line"></i> 地址池</div>
+  <div class="nc" onclick="location.href='withdraw-stats-tron-usdt.html'" style="cursor:pointer"><i class="ri-funds-line"></i> 调度中心</div>
+  <div class="nc" onclick="location.href='device-tasks.html'" style="cursor:pointer"><i class="ri-smartphone-line"></i> 设备任务</div>
+  <div class="nc" onclick="location.href='operation-logs.html'" style="cursor:pointer"><i class="ri-history-line"></i> 操作记录</div>
+  <div class="sec"><i class="ri-task-line"></i> 任务与监控 <i class="ri-arrow-up-s-line arr"></i></div>
+  <div class="nc"><i class="ri-smartphone-line"></i> 移动设备</div>
+  <div class="nc"><i class="ri-list-check-2"></i> 移动任务</div>
+  <div class="nc"><i class="ri-scan-line"></i> 区块扫描</div>
+  <div class="nc"><i class="ri-links-line"></i> 链网同步状态</div>
+  <div class="sec"><i class="ri-settings-3-line"></i> 系统管理 <i class="ri-arrow-up-s-line arr"></i></div>
+  <div class="nc"><i class="ri-user-settings-line"></i> 账户管理</div>
+  <div class="nc"><i class="ri-shield-user-line"></i> 系统角色</div>
+  <div class="nc"><i class="ri-error-warning-line"></i> 黑名单管理</div>
+  <div class="sec"><i class="ri-store-2-line"></i> 商户管理 <i class="ri-arrow-up-s-line arr"></i></div>
+  <div class="nc" onclick="location.href='merchant-accounts.html'" style="cursor:pointer"><i class="ri-user-star-line"></i> 商户账号</div>
+  <div class="nc" onclick="location.href='merchant-role-templates.html'" style="cursor:pointer"><i class="ri-shield-star-line"></i> 商户角色模板</div>
+  <div class="nc act"><i class="ri-mail-send-line"></i> 商户公告</div>
+</div>
+
+<div class="mw">
+  <div class="topbar">
+    <div class="hb"><i class="ri-menu-line"></i></div>
+    <div class="usr"><div class="av">L</div><span>laoluan</span></div>
+  </div>
+
+  <div class="mn">
+    <div class="page-title">商户公告管理</div>
+    <div class="page-desc">管理展示在商户后台首页的通知公告，最多 5 条，开启后所有商户可见</div>
+
+    <!-- Notice list card -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">
+          <i class="ri-notification-3-line" style="color:var(--primary);font-size:16px"></i>
+          公告列表
+          <span class="count" id="noticeCount">3 / 5</span>
+        </div>
+        <button class="btn-add" id="btnAdd" onclick="openAddModal()"><i class="ri-add-line"></i> 添加公告</button>
+      </div>
+      <div class="notice-list" id="noticeList">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+
+    <!-- Preview -->
+    <div class="preview">
+      <div class="preview-title"><i class="ri-eye-line"></i> 商户后台预览效果</div>
+      <div class="preview-card">
+        <div class="preview-notice">
+          <div class="preview-notice-icon"><i class="ri-notification-3-line"></i></div>
+          <div class="preview-notice-text" id="previewText">—</div>
+          <div class="preview-notice-more">查看更多 ↓</div>
+        </div>
+        <div class="preview-list" id="previewList"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add / Edit Modal -->
+<div class="modal-overlay" id="editModal" onclick="closeModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-head">
+      <div class="modal-title" id="modalTitle">添加公告</div>
+      <button class="modal-close" onclick="closeModal()"><i class="ri-close-line"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">公告内容 <span class="req">*</span></label>
+        <textarea class="form-textarea" id="noticeInput" placeholder="输入公告内容，例如：系统将于今晚22:00进行维护升级..." maxlength="200" oninput="updateCharCount()"></textarea>
+        <div class="form-char-count"><span id="charCount">0</span> / 200</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-modal outline" onclick="closeModal()">取消</button>
+      <button class="btn-modal primary" onclick="saveNotice()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirm Modal -->
+<div class="modal-overlay" id="deleteModal" onclick="closeDeleteModal()">
+  <div class="modal" style="width:400px" onclick="event.stopPropagation()">
+    <div class="modal-head">
+      <div class="modal-title">确认删除</div>
+      <button class="modal-close" onclick="closeDeleteModal()"><i class="ri-close-line"></i></button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:14px;line-height:1.6;color:var(--text-muted)">删除后该公告将不再显示，确定要删除吗？</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-modal outline" onclick="closeDeleteModal()">取消</button>
+      <button class="btn-modal primary" style="background:var(--danger)" onclick="confirmDelete()">删除</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const MAX_NOTICES = 5;
+let notices = [
+  { id: 1, content: '【系统维护】5月20日凌晨1:00-3:00将进行平台升级维护，届时部分功能可能不可用。', visible: true },
+  { id: 2, content: '【安全提醒】请定期修改登录密码，建议启用 2FA 双因素认证保障账户安全。', visible: true },
+  { id: 3, content: '【新功能】资金流水支持备注功能，欢迎体验！', visible: false },
+];
+let editingId = null;
+let deletingId = null;
+let nextId = 4;
+
+function render() {
+  const list = document.getElementById('noticeList');
+  const btnAdd = document.getElementById('btnAdd');
+  document.getElementById('noticeCount').textContent = `${notices.length} / ${MAX_NOTICES}`;
+  btnAdd.disabled = notices.length >= MAX_NOTICES;
+
+  if (notices.length === 0) {
+    list.innerHTML = '<div class="empty-state"><i class="ri-notification-off-line"></i><p>暂无公告，点击上方「添加公告」创建</p></div>';
+  } else {
+    list.innerHTML = notices.map((n, i) => `
+      <div class="notice-item">
+        <div class="notice-order">${i + 1}</div>
+        <div class="notice-content ${n.visible ? '' : 'hidden'}">${n.content}</div>
+        <button class="toggle ${n.visible ? 'on' : 'off'}" onclick="toggleNotice(${n.id})" title="${n.visible ? '点击隐藏' : '点击显示'}"></button>
+        <span class="toggle-label ${n.visible ? 'on' : 'off'}">${n.visible ? '显示中' : '已隐藏'}</span>
+        <div class="notice-actions">
+          <button class="btn-ghost" title="编辑" onclick="openEditModal(${n.id})"><i class="ri-edit-line"></i></button>
+          <button class="btn-ghost danger" title="删除" onclick="openDeleteModal(${n.id})"><i class="ri-delete-bin-line"></i></button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  renderPreview();
+}
+
+function renderPreview() {
+  const visible = notices.filter(n => n.visible);
+  const previewText = document.getElementById('previewText');
+  const previewList = document.getElementById('previewList');
+
+  if (visible.length === 0) {
+    previewText.textContent = '暂无公告';
+    previewList.innerHTML = '';
+  } else {
+    previewText.textContent = visible[0].content;
+    if (visible.length > 1) {
+      previewList.innerHTML = visible.map(n => `<li>${n.content}</li>`).join('');
+      previewList.style.display = '';
+    } else {
+      previewList.innerHTML = '';
+    }
+  }
+}
+
+function toggleNotice(id) {
+  const n = notices.find(x => x.id === id);
+  if (n) n.visible = !n.visible;
+  render();
+}
+
+function openAddModal() {
+  if (notices.length >= MAX_NOTICES) return;
+  editingId = null;
+  document.getElementById('modalTitle').textContent = '添加公告';
+  document.getElementById('noticeInput').value = '';
+  updateCharCount();
+  document.getElementById('editModal').classList.add('show');
+  setTimeout(() => document.getElementById('noticeInput').focus(), 100);
+}
+
+function openEditModal(id) {
+  editingId = id;
+  const n = notices.find(x => x.id === id);
+  document.getElementById('modalTitle').textContent = '编辑公告';
+  document.getElementById('noticeInput').value = n ? n.content : '';
+  updateCharCount();
+  document.getElementById('editModal').classList.add('show');
+  setTimeout(() => document.getElementById('noticeInput').focus(), 100);
+}
+
+function closeModal() {
+  document.getElementById('editModal').classList.remove('show');
+  editingId = null;
+}
+
+function saveNotice() {
+  const content = document.getElementById('noticeInput').value.trim();
+  if (!content) return;
+
+  if (editingId !== null) {
+    const n = notices.find(x => x.id === editingId);
+    if (n) n.content = content;
+  } else {
+    notices.push({ id: nextId++, content, visible: true });
+  }
+  closeModal();
+  render();
+}
+
+function openDeleteModal(id) {
+  deletingId = id;
+  document.getElementById('deleteModal').classList.add('show');
+}
+
+function closeDeleteModal() {
+  document.getElementById('deleteModal').classList.remove('show');
+  deletingId = null;
+}
+
+function confirmDelete() {
+  notices = notices.filter(n => n.id !== deletingId);
+  closeDeleteModal();
+  render();
+}
+
+function updateCharCount() {
+  const len = document.getElementById('noticeInput').value.length;
+  document.getElementById('charCount').textContent = len;
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeModal(); closeDeleteModal(); }
+});
+
+render();
+</script>
+</body>
+</html>
