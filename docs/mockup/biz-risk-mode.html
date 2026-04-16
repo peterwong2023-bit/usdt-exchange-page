@@ -931,12 +931,41 @@ p.subtitle {
   animation: pulse 1.4s ease-in-out infinite;
 }
 
+.save-bar-sub .diff-add { color: var(--success); font-weight: 700; margin-right: 4px; }
+.save-bar-sub .diff-del { color: var(--danger);  font-weight: 700; margin-right: 4px; }
+.save-bar-sub .sep      { color: var(--text-light); margin: 0 8px; }
+
+/* Preview banner on label card */
+.preview-banner[hidden] { display: none !important; }
+.preview-banner {
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  background: linear-gradient(90deg, rgba(37,99,235,0.08), rgba(99,102,241,0.04));
+  border: 1px solid rgba(37,99,235,0.2);
+  border-left: 3px solid var(--primary);
+  border-radius: 8px;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+.preview-banner svg { color: var(--primary); flex-shrink: 0; margin-top: 2px; }
+.preview-banner b   { color: var(--primary); font-weight: 600; }
+
+/* Clickable slider marks */
+.slider-marks .mark {
+  cursor: pointer;
+  transition: color 0.15s ease;
+  user-select: none;
+}
+.slider-marks .mark:hover { color: var(--text-primary); text-decoration: underline; text-underline-offset: 3px; }
+
 .save-bar {
   position: fixed;
   left: 50%;
   bottom: 24px;
   transform: translateX(-50%) translateY(140%);
-  z-index: 1500;
+  z-index: 900;
   min-width: 460px;
   max-width: calc(100vw - 40px);
   background: rgba(255,255,255,0.96);
@@ -1137,11 +1166,11 @@ p.subtitle {
           风险评分阈值
           <span class="tier-badge" id="thresholdBadge" style="color: var(--tier-low)">· 宽松</span>
         </div>
-        <div class="sub">
+        <div class="sub" id="thresholdSub">
           评分 ≥ <span id="thresholdHintVal">80</span> 视为"有风险"，按当前模式处置；评分 &lt; <span id="thresholdHintVal2">80</span> 正常入账
         </div>
       </div>
-      <button class="btn" id="btnResetThreshold" disabled>恢复默认</button>
+      <button class="btn" id="btnResetThreshold" title="将阈值重置为推荐值 80" disabled>重置为 80</button>
     </div>
 
     <div class="threshold-grid">
@@ -1204,12 +1233,16 @@ p.subtitle {
 
   <!-- ========== Label config (accept only) ========== -->
   <div class="card" id="labelCard" hidden>
+    <div class="preview-banner" id="labelPreviewBanner" hidden>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+      <span>预览中 · 你正在配置 <b>全收模式</b> 的标签，当前运行的是 <b id="previewCurrentMode">退款模式</b>。切换模式后配置才会生效。</span>
+    </div>
     <div class="label-head">
       <div>
         <div class="title">风险桶标签配置</div>
         <div class="sub">命中以下标签的入款将隔离进风险桶</div>
       </div>
-      <button class="btn" id="btnResetLabels">恢复推荐配置</button>
+      <button class="btn" id="btnResetLabels">重置为推荐值</button>
     </div>
 
     <div class="transfer-grid">
@@ -1600,23 +1633,18 @@ p.subtitle {
 <!-- Toast -->
 <div class="toast-wrap" id="toastWrap"></div>
 
-<!-- ========== Threshold Save Bar ========== -->
-<div class="save-bar" id="thresholdSaveBar" role="region" aria-label="阈值未保存提醒">
+<!-- ========== Unified Save Bar ========== -->
+<div class="save-bar" id="saveBar" role="region" aria-label="待保存修改提醒">
   <div class="save-bar-icon">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/></svg>
   </div>
   <div class="save-bar-text">
-    <div class="save-bar-title">风险评分阈值待保存</div>
-    <div class="save-bar-sub">
-      <span class="from" id="saveBarFrom">80</span>
-      <span class="arrow">→</span>
-      <span class="to" id="saveBarTo">80</span>
-      <span style="color: var(--text-tertiary); margin-left: 6px;" id="saveBarTierLabel">· 宽松</span>
-    </div>
+    <div class="save-bar-title" id="saveBarTitle">待保存的修改</div>
+    <div class="save-bar-sub" id="saveBarSub"></div>
   </div>
   <div class="save-bar-actions">
-    <button class="btn" id="btnCancelThreshold">撤销</button>
-    <button class="btn btn-primary" id="btnSaveThreshold">保存</button>
+    <button class="btn" id="btnCancelAll">撤销</button>
+    <button class="btn btn-primary" id="btnSaveAll">保存</button>
   </div>
 </div>
 
@@ -1653,10 +1681,27 @@ const state = {
   selectedMode: 'refund',
   riskThreshold: 80,     // saved/committed value — drives actual behavior
   draftThreshold: 80,    // pending value — drives slider display
-  labelConfig: Object.fromEntries(RISK_LABELS.map(l => [l.key, l.defaultRisk])),
+  labelConfig:      Object.fromEntries(RISK_LABELS.map(l => [l.key, l.defaultRisk])), // saved
+  draftLabelConfig: Object.fromEntries(RISK_LABELS.map(l => [l.key, l.defaultRisk])), // draft
   lastToggled: null,
   lastToggledDir: 'in',
 };
+
+function isThresholdDirty() { return state.draftThreshold !== state.riskThreshold; }
+function isLabelDirty() {
+  return RISK_LABELS.some(l => state.labelConfig[l.key] !== state.draftLabelConfig[l.key]);
+}
+function isAnyDirty() { return isThresholdDirty() || isLabelDirty(); }
+function getLabelDiff() {
+  let added = 0, removed = 0;
+  RISK_LABELS.forEach(l => {
+    const was = state.labelConfig[l.key];
+    const now = state.draftLabelConfig[l.key];
+    if (now && !was) added++;
+    if (!now && was) removed++;
+  });
+  return { added, removed, total: added + removed };
+}
 
 /* =========== Helpers =========== */
 function getThresholdLevel(v) {
@@ -1769,8 +1814,14 @@ function renderThreshold() {
   badgeTop.textContent = '· ' + lvl.label;
   badgeTop.style.color = lvl.color;
   badgeTop.classList.toggle('is-draft', isDirty);
-  document.getElementById('thresholdHintVal').textContent = draft;
-  document.getElementById('thresholdHintVal2').textContent = draft;
+
+  // Sub text: clarify draft vs saved when dirty
+  const subEl = document.getElementById('thresholdSub');
+  if (isDirty) {
+    subEl.innerHTML = `<b style="color: var(--warning);">保存后生效：</b>评分 ≥ <span>${draft}</span> 视为"有风险"；&lt; ${draft} 正常入账 · <span style="color: var(--text-light);">当前 ≥ ${saved}</span>`;
+  } else {
+    subEl.innerHTML = `评分 ≥ <span id="thresholdHintVal">${draft}</span> 视为"有风险"，按当前模式处置；评分 &lt; <span id="thresholdHintVal2">${draft}</span> 正常入账`;
+  }
   document.getElementById('btnResetThreshold').disabled = (draft === 80);
 
   const wrap = document.querySelector('.slider-wrap');
@@ -1804,19 +1855,35 @@ function renderThreshold() {
 }
 
 function renderSaveBar() {
-  const draft = state.draftThreshold;
-  const saved = state.riskThreshold;
-  const isDirty = draft !== saved;
-  const bar = document.getElementById('thresholdSaveBar');
-  bar.classList.toggle('open', isDirty);
-  if (isDirty) {
-    const lvl = getThresholdLevel(draft);
-    document.getElementById('saveBarFrom').textContent = saved + ' 分';
-    document.getElementById('saveBarTo').textContent = draft + ' 分';
-    document.getElementById('saveBarTo').style.color = lvl.color;
-    document.getElementById('saveBarTierLabel').textContent = '· ' + lvl.label;
-    document.getElementById('saveBarTierLabel').style.color = lvl.color;
+  const tDirty = isThresholdDirty();
+  const lDirty = isLabelDirty();
+  const anyDirty = tDirty || lDirty;
+  const bar = document.getElementById('saveBar');
+  bar.classList.toggle('open', anyDirty);
+  if (!anyDirty) return;
+
+  const parts = [];
+  if (tDirty) {
+    const lvl = getThresholdLevel(state.draftThreshold);
+    parts.push(
+      `阈值 <span class="from">${state.riskThreshold} 分</span>` +
+      `<span class="arrow">→</span>` +
+      `<span class="to" style="color: ${lvl.color}">${state.draftThreshold} 分</span>` +
+      `<span style="color: ${lvl.color}; margin-left: 4px;">· ${lvl.label}</span>`
+    );
   }
+  if (lDirty) {
+    const d = getLabelDiff();
+    const bits = [];
+    if (d.added)   bits.push(`<span class="diff-add">+${d.added}</span>`);
+    if (d.removed) bits.push(`<span class="diff-del">−${d.removed}</span>`);
+    parts.push(`标签变更 ${bits.join('')}<span style="color: var(--text-tertiary);">项</span>`);
+  }
+  document.getElementById('saveBarSub').innerHTML = parts.join('<span class="sep">·</span>');
+
+  const count = (tDirty ? 1 : 0) + (lDirty ? 1 : 0);
+  document.getElementById('saveBarTitle').textContent =
+    count === 2 ? '2 项待保存修改' : (tDirty ? '阈值待保存' : '标签配置待保存');
 }
 
 function renderLabelCard() {
@@ -1824,13 +1891,23 @@ function renderLabelCard() {
   card.hidden = (state.selectedMode !== 'accept');
   if (card.hidden) return;
 
+  // Preview banner: selectedMode=accept but currentMode≠accept
+  const banner = document.getElementById('labelPreviewBanner');
+  if (state.currentMode !== 'accept') {
+    banner.hidden = false;
+    document.getElementById('previewCurrentMode').textContent =
+      state.currentMode === 'refund' ? '退款模式' : (state.currentMode + '模式');
+  } else {
+    banner.hidden = true;
+  }
+
   const bucketChips = document.getElementById('bucketChips');
   const poolChips = document.getElementById('poolChips');
   bucketChips.innerHTML = '';
   poolChips.innerHTML = '';
 
-  const inBucket = RISK_LABELS.filter(l => state.labelConfig[l.key]);
-  const outBucket = RISK_LABELS.filter(l => !state.labelConfig[l.key]);
+  const inBucket  = RISK_LABELS.filter(l =>  state.draftLabelConfig[l.key]);
+  const outBucket = RISK_LABELS.filter(l => !state.draftLabelConfig[l.key]);
 
   document.getElementById('bucketCount').textContent = inBucket.length;
   document.getElementById('totalCount').textContent = RISK_LABELS.length;
@@ -1906,14 +1983,15 @@ function renderAll() {
   renderThreshold();
   renderLabelCard();
   renderScene();
+  renderSaveBar();
 }
 
 /* =========== Interactions =========== */
 function toggleLabel(key) {
-  const goingIn = !state.labelConfig[key];
+  const goingIn = !state.draftLabelConfig[key];
   state.lastToggled = key;
   state.lastToggledDir = goingIn ? 'in' : 'out';
-  state.labelConfig[key] = goingIn;
+  state.draftLabelConfig[key] = goingIn;
   if (goingIn) {
     const body = document.getElementById('bucketBody');
     body.classList.remove('shake');
@@ -1922,15 +2000,15 @@ function toggleLabel(key) {
     setTimeout(() => body.classList.remove('shake'), 500);
   }
   renderLabelCard();
-  renderStatus();
+  renderSaveBar();
   setTimeout(() => { state.lastToggled = null; renderLabelCard(); }, 450);
 }
 
 function resetLabels() {
-  RISK_LABELS.forEach(l => state.labelConfig[l.key] = l.defaultRisk);
+  RISK_LABELS.forEach(l => state.draftLabelConfig[l.key] = l.defaultRisk);
   renderLabelCard();
-  renderStatus();
-  showToast('已恢复为平台推荐配置');
+  renderSaveBar();
+  showToast('已重置为推荐配置（待保存）');
 }
 
 function showSwitchConfirm() {
@@ -2012,33 +2090,68 @@ document.getElementById('btnResetThreshold').addEventListener('click', () => {
   renderThreshold();
 });
 
-document.getElementById('btnSaveThreshold').addEventListener('click', () => {
-  if (state.draftThreshold === state.riskThreshold) return;
-  const newVal = state.draftThreshold;
-  state.riskThreshold = newVal;
-  renderThreshold();
-  showToast(`阈值已保存为 ${newVal}`);
+// Clickable slider marks: jump draft threshold to that value
+document.querySelectorAll('.slider-marks .mark').forEach(mark => {
+  mark.addEventListener('click', () => {
+    const left = parseFloat(mark.style.left) || 0;
+    state.draftThreshold = Math.round(left);
+    renderThreshold();
+  });
 });
 
-document.getElementById('btnCancelThreshold').addEventListener('click', () => {
-  state.draftThreshold = state.riskThreshold;
-  renderThreshold();
+// Unified save / cancel
+document.getElementById('btnSaveAll').addEventListener('click', () => {
+  if (!isAnyDirty()) return;
+  const msgs = [];
+  if (isThresholdDirty()) {
+    state.riskThreshold = state.draftThreshold;
+    msgs.push(`阈值 ${state.riskThreshold} 分`);
+  }
+  if (isLabelDirty()) {
+    const d = getLabelDiff();
+    state.labelConfig = { ...state.draftLabelConfig };
+    const bits = [];
+    if (d.added)   bits.push(`+${d.added}`);
+    if (d.removed) bits.push(`−${d.removed}`);
+    msgs.push(`标签 ${bits.join(' ')}`);
+  }
+  renderAll();
+  showToast(`已保存：${msgs.join(' · ')}`);
+});
+
+document.getElementById('btnCancelAll').addEventListener('click', () => {
+  state.draftThreshold   = state.riskThreshold;
+  state.draftLabelConfig = { ...state.labelConfig };
+  renderAll();
 });
 
 window.addEventListener('beforeunload', (e) => {
-  if (state.draftThreshold !== state.riskThreshold) {
+  if (isAnyDirty()) {
     e.preventDefault();
     e.returnValue = '';
   }
 });
+
 document.getElementById('btnResetLabels').addEventListener('click', resetLabels);
 
 document.getElementById('btnCancel').addEventListener('click', hideModal);
 document.getElementById('btnConfirm').addEventListener('click', () => {
+  // Commit any pending drafts together with the mode switch so the live
+  // state matches what the user just confirmed in the preview.
+  const extra = [];
+  if (isThresholdDirty()) {
+    state.riskThreshold = state.draftThreshold;
+    extra.push(`阈值 ${state.riskThreshold}`);
+  }
+  if (isLabelDirty()) {
+    state.labelConfig = { ...state.draftLabelConfig };
+    extra.push('标签配置');
+  }
   state.currentMode = state.selectedMode;
   hideModal();
   renderAll();
-  showToast(`已切换到${state.currentMode === 'accept' ? '全收' : '退款'}模式`);
+  const suffix = extra.length ? `（同时保存 ${extra.join(' + ')}）` : '';
+  showToast(`已切换到${state.currentMode === 'accept' ? '全收' : '退款'}模式${suffix}`);
 });
 document.getElementById('modalMask').addEventListener('click', (e) => {
   if (e.target.id === 'modalMask') hideModal();
