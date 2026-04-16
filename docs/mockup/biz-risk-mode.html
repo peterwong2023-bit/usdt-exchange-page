@@ -900,6 +900,99 @@ p.subtitle {
 }
 .toast svg { color: var(--success); flex-shrink: 0; }
 
+/* =========== Threshold dirty state + save bar =========== */
+.threshold-value-card.is-dirty {
+  border-style: dashed;
+  border-color: var(--warning);
+  background: linear-gradient(180deg, rgba(245,158,11,.04), rgba(245,158,11,.02));
+  position: relative;
+}
+.threshold-value-card.is-dirty::after {
+  content: '未保存';
+  position: absolute;
+  top: -8px; right: 10px;
+  font-size: 10px; font-weight: 600;
+  color: #fff; background: var(--warning);
+  padding: 2px 6px; border-radius: 4px;
+  letter-spacing: 0.02em;
+  box-shadow: 0 2px 4px rgba(245,158,11,.35);
+}
+.threshold-badge.is-draft {
+  position: relative;
+}
+.threshold-badge.is-draft::before {
+  content: '';
+  display: inline-block;
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--warning);
+  margin-right: 5px;
+  vertical-align: middle;
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+.save-bar {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%) translateY(140%);
+  z-index: 1500;
+  min-width: 460px;
+  max-width: calc(100vw - 40px);
+  background: rgba(255,255,255,0.96);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(245,158,11,0.35);
+  border-radius: 14px;
+  box-shadow:
+    0 12px 32px rgba(15,23,42,0.14),
+    0 0 0 4px rgba(245,158,11,0.06);
+  padding: 12px 14px 12px 18px;
+  display: flex; align-items: center; gap: 14px;
+  opacity: 0;
+  pointer-events: none;
+  transition: transform .32s cubic-bezier(.22,.9,.32,1.1), opacity .24s ease;
+}
+.save-bar.open {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+.save-bar-icon {
+  width: 32px; height: 32px; flex-shrink: 0;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #f59e0b, #f97316);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 10px rgba(245,158,11,.3);
+}
+.save-bar-text {
+  flex: 1; min-width: 0;
+  display: flex; flex-direction: column; gap: 2px;
+}
+.save-bar-title { font-size: 13px; font-weight: 600; color: var(--text-primary); letter-spacing: 0.01em; }
+.save-bar-sub   { font-size: 12px; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.save-bar-sub .from { color: var(--text-tertiary); text-decoration: line-through; }
+.save-bar-sub .arrow { color: var(--text-tertiary); margin: 0 6px; }
+.save-bar-sub .to { color: var(--warning); font-weight: 700; }
+.save-bar-actions { display: flex; gap: 8px; flex-shrink: 0; }
+.save-bar .btn { height: 32px; padding: 0 14px; font-size: 12.5px; }
+.save-bar .btn-primary {
+  background: linear-gradient(135deg, var(--primary), #4f46e5);
+  border-color: transparent;
+  box-shadow: 0 3px 10px rgba(37,99,235,.28);
+}
+.save-bar .btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #1d4ed8, #4338ca);
+  box-shadow: 0 4px 12px rgba(37,99,235,.36);
+}
+
+@media (max-width: 560px) {
+  .save-bar { min-width: 0; width: calc(100vw - 24px); left: 12px; right: 12px; transform: translateY(140%); border-radius: 12px; }
+  .save-bar.open { transform: translateY(0); }
+  .save-bar-icon { display: none; }
+}
+
 /* Tooltip for chips */
 [data-tip] { position: relative; }
 [data-tip]::after {
@@ -1507,6 +1600,26 @@ p.subtitle {
 <!-- Toast -->
 <div class="toast-wrap" id="toastWrap"></div>
 
+<!-- ========== Threshold Save Bar ========== -->
+<div class="save-bar" id="thresholdSaveBar" role="region" aria-label="阈值未保存提醒">
+  <div class="save-bar-icon">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/></svg>
+  </div>
+  <div class="save-bar-text">
+    <div class="save-bar-title">风险评分阈值待保存</div>
+    <div class="save-bar-sub">
+      <span class="from" id="saveBarFrom">80</span>
+      <span class="arrow">→</span>
+      <span class="to" id="saveBarTo">80</span>
+      <span style="color: var(--text-tertiary); margin-left: 6px;" id="saveBarTierLabel">· 宽松</span>
+    </div>
+  </div>
+  <div class="save-bar-actions">
+    <button class="btn" id="btnCancelThreshold">撤销</button>
+    <button class="btn btn-primary" id="btnSaveThreshold">保存</button>
+  </div>
+</div>
+
 <script>
 /* =========== Data =========== */
 const RISK_LABELS = [
@@ -1538,7 +1651,8 @@ const RISK_LABELS = [
 const state = {
   currentMode: 'refund',
   selectedMode: 'refund',
-  riskThreshold: 80,
+  riskThreshold: 80,     // saved/committed value — drives actual behavior
+  draftThreshold: 80,    // pending value — drives slider display
   labelConfig: Object.fromEntries(RISK_LABELS.map(l => [l.key, l.defaultRisk])),
   lastToggled: null,
   lastToggledDir: 'in',
@@ -1642,29 +1756,34 @@ function renderModeCards() {
 }
 
 function renderThreshold() {
-  const v = state.riskThreshold;
-  const lvl = getThresholdLevel(v);
+  // Slider + value card reflect the DRAFT (what the user is editing).
+  const draft = state.draftThreshold;
+  const saved = state.riskThreshold;
+  const isDirty = draft !== saved;
+  const lvl = getThresholdLevel(draft);
 
-  document.getElementById('sliderHandle').style.left = v + '%';
-  document.getElementById('sliderTip').textContent = v + ' 分';
-  document.getElementById('thresholdBadge').textContent = '· ' + lvl.label;
-  document.getElementById('thresholdBadge').style.color = lvl.color;
-  document.getElementById('thresholdHintVal').textContent = v;
-  document.getElementById('thresholdHintVal2').textContent = v;
-  document.getElementById('btnResetThreshold').disabled = (v === 80);
+  // --- Slider + value card (DRAFT) ---
+  document.getElementById('sliderHandle').style.left = draft + '%';
+  document.getElementById('sliderTip').textContent = draft + ' 分';
+  const badgeTop = document.getElementById('thresholdBadge');
+  badgeTop.textContent = '· ' + lvl.label;
+  badgeTop.style.color = lvl.color;
+  badgeTop.classList.toggle('is-draft', isDirty);
+  document.getElementById('thresholdHintVal').textContent = draft;
+  document.getElementById('thresholdHintVal2').textContent = draft;
+  document.getElementById('btnResetThreshold').disabled = (draft === 80);
 
-  // Handle CSS vars
   const wrap = document.querySelector('.slider-wrap');
   wrap.style.setProperty('--handle-color', lvl.tierColor);
   wrap.style.setProperty('--handle-glow', addAlpha(lvl.tierColor, 0.22));
 
-  // Value card
   const card = document.getElementById('thresholdValueCard');
+  card.classList.toggle('is-dirty', isDirty);
   card.style.setProperty('--handle-color', lvl.color);
   card.style.setProperty('--handle-card-bg', addAlpha(lvl.color, 0.05));
   card.style.setProperty('--handle-card-border', addAlpha(lvl.color, 0.2));
   card.style.setProperty('--handle-glow', addAlpha(lvl.color, 0.15));
-  document.getElementById('thresholdBig').textContent = v;
+  document.getElementById('thresholdBig').textContent = draft;
   document.getElementById('thresholdBig').style.color = lvl.color;
   const badgeR = document.getElementById('thresholdBadgeRight');
   badgeR.textContent = lvl.label;
@@ -1674,13 +1793,30 @@ function renderThreshold() {
   const blocks = document.getElementById('thresholdBlocks');
   blocks.textContent = lvl.blocks;
   blocks.style.color = lvl.color;
-
   document.getElementById('thresholdHintText').textContent = lvl.hint;
 
-  // Status pill + detail text
-  document.getElementById('detailThreshold').textContent = v;
-  document.querySelectorAll('.detail-threshold-val').forEach(el => el.textContent = v);
+  // --- Status pill + detail text + scene (SAVED = what's actually in effect) ---
+  document.getElementById('detailThreshold').textContent = saved;
+  document.querySelectorAll('.detail-threshold-val').forEach(el => el.textContent = saved);
+
+  renderSaveBar();
   renderStatus();
+}
+
+function renderSaveBar() {
+  const draft = state.draftThreshold;
+  const saved = state.riskThreshold;
+  const isDirty = draft !== saved;
+  const bar = document.getElementById('thresholdSaveBar');
+  bar.classList.toggle('open', isDirty);
+  if (isDirty) {
+    const lvl = getThresholdLevel(draft);
+    document.getElementById('saveBarFrom').textContent = saved + ' 分';
+    document.getElementById('saveBarTo').textContent = draft + ' 分';
+    document.getElementById('saveBarTo').style.color = lvl.color;
+    document.getElementById('saveBarTierLabel').textContent = '· ' + lvl.label;
+    document.getElementById('saveBarTierLabel').style.color = lvl.color;
+  }
 }
 
 function renderLabelCard() {
@@ -1824,7 +1960,7 @@ function hideModal() {
   function onMove(e) {
     if (!dragging) return;
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    state.riskThreshold = valueFromClientX(clientX);
+    state.draftThreshold = valueFromClientX(clientX);
     renderThreshold();
     e.preventDefault();
   }
@@ -1843,7 +1979,7 @@ function hideModal() {
     dragging = true;
     slider.classList.add('dragging');
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    state.riskThreshold = valueFromClientX(clientX);
+    state.draftThreshold = valueFromClientX(clientX);
     renderThreshold();
     document.addEventListener('mousemove', onMove);
     document.addEventListener('mouseup',   onUp);
@@ -1872,9 +2008,28 @@ document.getElementById('modeAccept').addEventListener('click', () => {
 });
 
 document.getElementById('btnResetThreshold').addEventListener('click', () => {
-  state.riskThreshold = 80;
+  state.draftThreshold = 80;
   renderThreshold();
-  showToast('已恢复默认阈值 80');
+});
+
+document.getElementById('btnSaveThreshold').addEventListener('click', () => {
+  if (state.draftThreshold === state.riskThreshold) return;
+  const newVal = state.draftThreshold;
+  state.riskThreshold = newVal;
+  renderThreshold();
+  showToast(`阈值已保存为 ${newVal}`);
+});
+
+document.getElementById('btnCancelThreshold').addEventListener('click', () => {
+  state.draftThreshold = state.riskThreshold;
+  renderThreshold();
+});
+
+window.addEventListener('beforeunload', (e) => {
+  if (state.draftThreshold !== state.riskThreshold) {
+    e.preventDefault();
+    e.returnValue = '';
+  }
 });
 document.getElementById('btnResetLabels').addEventListener('click', resetLabels);
 
