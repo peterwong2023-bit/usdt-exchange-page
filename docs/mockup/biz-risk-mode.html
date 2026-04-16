@@ -1105,7 +1105,7 @@ p.subtitle {
         <div class="pill-bar" id="statusPillBar" style="background: var(--tier-low)"></div>
         <div class="pill-body">
           <div class="pill-label">风险阈值</div>
-          <div class="pill-value"><span id="statusThreshold">80</span> 分<span class="muted" id="statusLevelLabel">· 宽松</span></div>
+          <div class="pill-value"><span id="statusThreshold">80</span> 分<span class="muted" id="statusLevelLabel">· 默认</span></div>
         </div>
       </div>
       <div class="status-pill" id="statusPill2">
@@ -1164,7 +1164,7 @@ p.subtitle {
       <div>
         <div class="title">
           风险评分阈值
-          <span class="tier-badge" id="thresholdBadge" style="color: var(--tier-low)">· 宽松</span>
+          <span class="tier-badge" id="thresholdBadge" style="color: var(--tier-low)">· 默认</span>
         </div>
         <div class="sub" id="thresholdSub">
           评分 ≥ <span id="thresholdHintVal">80</span> 视为"有风险"，按当前模式处置；评分 &lt; <span id="thresholdHintVal2">80</span> 正常入账
@@ -1223,7 +1223,7 @@ p.subtitle {
         <div class="threshold-value-top">
           <span class="threshold-big mono" id="thresholdBig">80</span>
           <span class="threshold-slash">/ 100</span>
-          <span class="threshold-badge" id="thresholdBadgeRight">宽松</span>
+          <span class="threshold-badge" id="thresholdBadgeRight">默认</span>
         </div>
         <div class="threshold-blocks">将拦截：<b id="thresholdBlocks">严重</b></div>
         <div class="threshold-hint" id="thresholdHintText">仅严重档入款被识别为风险</div>
@@ -1708,7 +1708,7 @@ function getThresholdLevel(v) {
   if (v < 20)  return { label: '极严', color: '#dc2626', tierColor: '#10b981', blocks: '低、中、高、严重', hint: '低、中、高、严重四档入款均被识别为风险' };
   if (v < 50)  return { label: '严格', color: '#f97316', tierColor: '#eab308', blocks: '中、高、严重',     hint: '中、高、严重档入款被识别为风险' };
   if (v < 80)  return { label: '平衡', color: '#eab308', tierColor: '#f97316', blocks: '高、严重',         hint: '高、严重档入款被识别为风险' };
-  return         { label: '宽松', color: '#10b981', tierColor: '#b91c1c', blocks: '严重',             hint: '仅严重档入款被识别为风险' };
+  return         { label: '默认', color: '#10b981', tierColor: '#b91c1c', blocks: '严重',             hint: '仅严重档入款被识别为风险' };
 }
 
 function showToast(text, type = 'success') {
