@@ -1,0 +1,1896 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>风控模式 · 商户后台</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* =========== Design tokens =========== */
+:root {
+  --bg-main: #f3f5f9;
+  --bg-card: #ffffff;
+  --bg-soft: #f8fafc;
+  --border: #e5e8f0;
+  --border-dashed: #cbd5e1;
+  --border-subtle: rgba(226, 232, 240, 0.6);
+  --text-primary: #1e293b;
+  --text-secondary: #475569;
+  --text-tertiary: #64748b;
+  --text-light: #94a3b8;
+
+  --primary: #2563eb;
+  --primary-soft: rgba(37, 99, 235, 0.08);
+  --primary-softer: rgba(37, 99, 235, 0.04);
+  --success: #10b981;
+  --success-soft: rgba(16, 185, 129, 0.08);
+  --success-softer: rgba(16, 185, 129, 0.04);
+  --warning: #d97706;
+  --warning-bg: #fef3c7;
+  --warning-border: #fcd34d;
+  --danger: #ef4444;
+  --danger-soft: rgba(239, 68, 68, 0.08);
+  --purple: #8b5cf6;
+
+  /* tier colors */
+  --tier-low: #10b981;
+  --tier-mid: #eab308;
+  --tier-high: #f97316;
+  --tier-severe: #b91c1c;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 12px rgba(15, 23, 42, 0.02);
+  --shadow-md: 0 2px 4px rgba(15, 23, 42, 0.05), 0 8px 24px rgba(15, 23, 42, 0.04);
+  --shadow-lg: 0 4px 6px rgba(15, 23, 42, 0.05), 0 12px 32px rgba(15, 23, 42, 0.06);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  background: var(--bg-main);
+  color: var(--text-primary);
+  font-family: 'Plus Jakarta Sans', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  font-size: 13px;
+  font-feature-settings: "cv11" 1, "ss01" 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  padding: 32px 24px 64px;
+}
+.mono {
+  font-family: 'Plus Jakarta Sans', ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1, "cv11" 1, "ss01" 1;
+  letter-spacing: -0.01em;
+}
+
+/* =========== Keyframes =========== */
+@keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes shimmer { 0% { transform: translateX(-100%); } 40%, 100% { transform: translateX(260%); } }
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 2px 6px rgba(0,0,0,.12), 0 0 0 0 var(--handle-glow, rgba(37,99,235,.35)); }
+  50%      { box-shadow: 0 2px 6px rgba(0,0,0,.12), 0 0 0 8px transparent; }
+}
+@keyframes dropIn {
+  0%   { transform: translateY(-16px) scale(.84); opacity: 0; }
+  55%  { transform: translateY(3px) scale(1.07); opacity: 1; }
+  80%  { transform: translateY(-1px) scale(.98); }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+@keyframes popOut {
+  0%   { transform: translateY(0) scale(1); opacity: 1; }
+  30%  { transform: translateY(-5px) scale(1.05); }
+  100% { transform: translateY(12px) scale(.85); opacity: 0; }
+}
+@keyframes bucketShake {
+  0%, 100% { transform: rotate(0); }
+  20% { transform: rotate(-4deg); }
+  40% { transform: rotate(4deg); }
+  60% { transform: rotate(-2deg); }
+  80% { transform: rotate(2deg); }
+}
+@keyframes waterShimmer {
+  from { opacity: .5; transform: scaleX(.96); }
+  to   { opacity: .8; transform: scaleX(1.04); }
+}
+@keyframes flowDash {
+  from { stroke-dashoffset: 12; }
+  to   { stroke-dashoffset: 0; }
+}
+
+/* =========== Layout =========== */
+.page {
+  max-width: 1160px;
+  margin: 0 auto;
+  animation: fadeUp .4s cubic-bezier(.16,1,.3,1) both;
+  position: relative;
+}
+.page::before {
+  content: '';
+  position: absolute;
+  top: -150px; left: 50%;
+  transform: translateX(-50%);
+  width: 1000px; height: 400px;
+  background: radial-gradient(ellipse at center, rgba(37,99,235,0.06) 0%, rgba(37,99,235,0) 70%);
+  z-index: -1;
+  pointer-events: none;
+  transition: background 0.4s ease;
+}
+.page.is-refund::before {
+  background: radial-gradient(ellipse at center, rgba(16,185,129,0.06) 0%, rgba(16,185,129,0) 70%);
+}
+h1.title {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -.3px;
+  margin-bottom: 6px;
+}
+p.subtitle {
+  font-size: 13px;
+  color: var(--text-tertiary);
+  margin-bottom: 20px;
+}
+
+/* =========== Card =========== */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-sm);
+}
+.card.no-pad { padding: 0; overflow: hidden; }
+.card-title {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-bottom: 10px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: 13px;
+  font-weight: 600;
+}
+.card.no-title > .card-title { display: none; }
+
+/* =========== Tag =========== */
+.tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.6;
+  white-space: nowrap;
+}
+.tag-success { background: #dcfce7; color: #16a34a; border: 1px solid #bbf7d0; }
+.tag-primary { background: #dbeafe; color: #2563eb; border: 1px solid #bfdbfe; }
+
+/* =========== Status card =========== */
+.status-top {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 16px;
+}
+.status-top.mode-refund { background: linear-gradient(90deg, var(--success-soft), transparent 60%); }
+.status-top.mode-accept { background: linear-gradient(90deg, var(--primary-soft), transparent 60%); }
+.status-icon {
+  width: 44px; height: 44px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.status-icon.mode-refund { background: linear-gradient(135deg, #10b981, #059669); box-shadow: 0 4px 12px rgba(16,185,129,.3); }
+.status-icon.mode-accept { background: linear-gradient(135deg, #3b82f6, #2563eb); box-shadow: 0 4px 12px rgba(37,99,235,.3); }
+.status-icon svg { color: #fff; }
+.status-text { flex: 1; }
+.status-text .label { font-size: 11px; color: var(--text-tertiary); }
+.status-text .name { font-size: 16px; font-weight: 700; color: var(--text-primary); }
+.status-text .hint { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; }
+
+.status-pills {
+  display: flex;
+  border-top: 1px solid var(--border);
+  background: rgba(0,0,0,.015);
+}
+.status-pill {
+  flex: 1;
+  padding: 10px 16px;
+  display: flex; align-items: center; gap: 10px;
+}
+.status-pill + .status-pill { border-left: 1px solid var(--border); }
+.pill-bar { width: 6px; height: 28px; border-radius: 3px; }
+.pill-icon {
+  width: 28px; height: 28px; border-radius: 7px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.pill-body .pill-label { font-size: 10px; color: var(--text-tertiary); margin-bottom: 1px; }
+.pill-body .pill-value { font-size: 13px; font-weight: 700; color: var(--text-primary); line-height: 1.2; }
+.pill-body .pill-value .muted { font-size: 11px; font-weight: 500; color: var(--text-tertiary); margin-left: 4px; }
+
+/* =========== Section header =========== */
+.section-header {
+  display: flex; align-items: center; gap: 10px;
+  margin: 4px 0 10px;
+}
+.section-header .bar {
+  width: 3px; height: 14px; border-radius: 2px;
+  background: linear-gradient(180deg, #3b82f6, #6366f1);
+}
+.section-header .title { font-size: 13px; font-weight: 700; color: var(--text-primary); letter-spacing: .2px; }
+.section-header .sub   { font-size: 11px; color: var(--text-tertiary); }
+.section-header .line  { flex: 1; height: 1px; background: var(--border); margin-left: 4px; }
+
+/* "了解更多" folded block — extra top breathing room */
+.details.details-more { margin-top: 32px; }
+
+/* =========== Mode cards =========== */
+.mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.mode-card {
+  padding: 16px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  cursor: pointer;
+  transition: all .25s cubic-bezier(.4,0,.2,1);
+}
+.mode-card:hover:not(.selected) { transform: translateY(-2px); }
+.mode-card[data-mode="refund"]:hover:not(.selected) { box-shadow: 0 8px 24px rgba(16,185,129,.15); }
+.mode-card[data-mode="accept"]:hover:not(.selected) { box-shadow: 0 8px 24px rgba(37,99,235,.15); }
+.mode-card.selected[data-mode="refund"] { border-color: var(--success); background: rgba(16,185,129,.08); }
+.mode-card.selected[data-mode="accept"] { border-color: var(--primary); background: rgba(37,99,235,.08); }
+.mode-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.mode-head-left { display: flex; align-items: center; gap: 10px; }
+.mode-icon-box {
+  width: 32px; height: 32px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,.04);
+  color: var(--text-tertiary);
+  transition: all .2s;
+}
+.mode-card.selected[data-mode="refund"] .mode-icon-box { background: rgba(16,185,129,.15); color: var(--success); }
+.mode-card.selected[data-mode="accept"] .mode-icon-box { background: rgba(37,99,235,.15); color: var(--primary); }
+.mode-title {
+  font-size: 14px; font-weight: 700; color: var(--text-primary);
+}
+.mode-card.selected[data-mode="refund"] .mode-title { color: var(--success); }
+.mode-card.selected[data-mode="accept"] .mode-title { color: var(--primary); }
+.mode-desc {
+  font-size: 12px; color: var(--text-tertiary); padding-left: 42px;
+}
+
+/* Shimmer switch button */
+.switch-btn {
+  position: relative; overflow: hidden;
+  background: transparent;
+  border-radius: 7px;
+  padding: 0 11px 0 9px;
+  font-size: 11px; font-weight: 700;
+  cursor: pointer;
+  display: inline-flex; align-items: center; gap: 5px;
+  height: 26px; white-space: nowrap;
+  transition: transform .18s, box-shadow .18s;
+  font-family: inherit;
+}
+.switch-btn::before {
+  content: '';
+  position: absolute; top: 0; left: 0;
+  width: 45%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.5), transparent);
+  transform: translateX(-100%);
+  animation: shimmer 2.6s ease-in-out infinite;
+  pointer-events: none;
+}
+.switch-btn:hover { transform: scale(1.06); }
+.switch-btn:active { transform: scale(.95); }
+.switch-btn-green { border: 1.5px solid var(--success); color: var(--success); }
+.switch-btn-green:hover { box-shadow: 0 4px 14px rgba(16,185,129,.3); }
+.switch-btn-blue  { border: 1.5px solid var(--primary); color: var(--primary); }
+.switch-btn-blue:hover  { box-shadow: 0 4px 14px rgba(37,99,235,.3); }
+
+/* =========== Threshold =========== */
+.threshold-head {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: 14px;
+}
+.threshold-head .title { font-size: 13px; font-weight: 700; color: var(--text-primary); margin-bottom: 3px; }
+.threshold-head .sub   { font-size: 12px; color: var(--text-tertiary); }
+.threshold-head .tier-badge { font-size: 11px; font-weight: 500; margin-left: 6px; }
+.threshold-grid {
+  display: grid; grid-template-columns: 1fr 240px;
+  gap: 24px; align-items: center;
+}
+.slider-wrap { padding: 0 8px; }
+.tier-labels {
+  display: grid;
+  grid-template-columns: 20fr 30fr 30fr 20fr;
+  font-size: 11px;
+  margin-bottom: 5px;
+  padding: 0 2px;
+}
+.tier-labels > div { text-align: center; }
+.tier-labels b { font-weight: 600; }
+.tier-labels .range { color: var(--text-tertiary); font-size: 10px; margin-left: 3px; }
+
+.color-bar {
+  position: relative;
+  height: 10px;
+  border-radius: 5px;
+  overflow: hidden;
+  display: flex;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.06), inset 0 1px 2px rgba(0,0,0,.08);
+}
+.color-bar .seg { height: 100%; }
+.color-bar .seg-low    { flex: 20; background: linear-gradient(90deg, #10b981, #22c55e); }
+.color-bar .seg-mid    { flex: 30; background: linear-gradient(90deg, #eab308, #f59e0b); }
+.color-bar .seg-high   { flex: 30; background: linear-gradient(90deg, #f97316, #ea580c); }
+.color-bar .seg-severe { flex: 20; background: linear-gradient(90deg, #b91c1c, #7f1d1d); }
+.color-bar .divider    { position: absolute; top: 0; bottom: 0; width: 1px; background: rgba(255,255,255,.6); }
+
+/* Custom slider */
+.slider {
+  position: relative;
+  height: 22px;
+  margin: 8px 0 4px;
+  cursor: pointer;
+  user-select: none;
+  touch-action: none;
+}
+.slider-rail {
+  position: absolute;
+  left: 0; right: 0; top: 50%;
+  height: 2px;
+  margin-top: -1px;
+  background: transparent;
+}
+.slider-handle {
+  position: absolute;
+  top: 0;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2.5px solid var(--handle-color, #2563eb);
+  box-shadow:
+    0 2px 6px rgba(0,0,0,.12),
+    0 0 0 4px var(--handle-glow, rgba(37,99,235,.12));
+  transform: translateX(-50%);
+  cursor: grab;
+  animation: pulse 2.2s ease-in-out infinite;
+  transition: transform .15s ease, box-shadow .2s ease;
+}
+.slider-handle::before,
+.slider-handle::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 1.5px; height: 8px;
+  margin-top: -4px;
+  background: var(--handle-color, #2563eb);
+  opacity: .55;
+}
+.slider-handle::before { left: calc(50% - 3px); }
+.slider-handle::after  { left: calc(50% + 1.5px); }
+.slider-handle:hover { transform: translateX(-50%) scale(1.12); animation: none; box-shadow: 0 4px 12px rgba(0,0,0,.18), 0 0 0 6px var(--handle-glow, rgba(37,99,235,.18)); }
+.slider.dragging .slider-handle { cursor: grabbing; transform: translateX(-50%) scale(1.05); animation: none; box-shadow: 0 4px 12px rgba(0,0,0,.2), 0 0 0 10px var(--handle-glow, rgba(37,99,235,.25)); }
+
+.slider-tooltip {
+  position: absolute;
+  bottom: calc(100% + 4px);
+  transform: translateX(-50%);
+  padding: 2px 8px;
+  background: rgba(15, 23, 42, .9);
+  color: #fff;
+  font-size: 11px;
+  border-radius: 4px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .15s;
+}
+.slider:hover .slider-tooltip, .slider.dragging .slider-tooltip { opacity: 1; }
+.slider-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%; left: 50%;
+  margin-left: -4px;
+  border: 4px solid transparent;
+  border-top-color: rgba(15, 23, 42, .9);
+}
+
+.slider-marks {
+  position: relative;
+  margin-top: 6px;
+  height: 18px;
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+.slider-marks .mark {
+  position: absolute;
+  transform: translateX(-50%);
+}
+.slider-marks .mark.recommend { color: var(--tier-severe); font-weight: 700; }
+
+.drag-hint {
+  display: flex; align-items: center; justify-content: center; gap: 5px;
+  font-size: 10px; color: var(--text-tertiary);
+  margin-top: 10px;
+  user-select: none;
+}
+
+.threshold-value-card {
+  background: var(--handle-card-bg, rgba(16,185,129,.05));
+  border: 1px solid var(--handle-card-border, rgba(16,185,129,.2));
+  border-radius: 8px;
+  padding: 12px 16px;
+}
+.threshold-value-top {
+  display: flex; align-items: baseline; gap: 6px; margin-bottom: 8px;
+}
+.threshold-big {
+  font-size: 30px; font-weight: 700; line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--handle-color, var(--success));
+}
+.threshold-slash {
+  font-size: 12px; font-weight: 500; color: var(--text-tertiary);
+  letter-spacing: -0.01em;
+}
+.threshold-badge {
+  margin-left: auto; font-size: 10px; font-weight: 600;
+  padding: 3px 8px; border-radius: 4px;
+  color: var(--handle-color, var(--success));
+  background: var(--handle-glow, rgba(16,185,129,.12));
+  letter-spacing: 0.02em;
+}
+.threshold-blocks {
+  font-size: 12px; color: var(--text-secondary); line-height: 1.55; margin-bottom: 4px;
+}
+.threshold-blocks b { font-weight: 600; color: var(--handle-color, var(--success)); }
+.threshold-hint { font-size: 11px; color: var(--text-tertiary); line-height: 1.55; }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 3px 10px;
+  font-size: 12px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-primary);
+  cursor: pointer;
+  font-family: inherit;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.btn:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+
+/* =========== Label config (accept mode) =========== */
+.label-head {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: 14px;
+}
+.label-head .title { font-size: 13px; font-weight: 700; color: var(--text-primary); margin-bottom: 3px; }
+.label-head .sub   { font-size: 12px; color: var(--text-tertiary); }
+
+.transfer-grid {
+  display: grid;
+  grid-template-columns: 1fr 36px 1fr;
+  align-items: stretch;
+  gap: 8px;
+  background: var(--bg-soft);
+  border-radius: 12px;
+  padding: 12px;
+  border: 1px solid var(--border);
+}
+.bucket-col {
+  background: #fff;
+  border-radius: 8px;
+  padding: 16px;
+  border: 1px solid var(--warning-border);
+  box-shadow: 0 4px 12px rgba(217, 119, 6, 0.05);
+}
+.pool-col {
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 16px;
+  border: 1px dashed var(--border-subtle);
+}
+.bucket-col .col-title {
+  font-size: 11px; font-weight: 700; color: var(--warning); margin-bottom: 12px;
+  display: flex; align-items: center; gap: 5px;
+}
+.pool-col .col-title {
+  font-size: 11px; font-weight: 600; color: var(--text-tertiary); margin-bottom: 12px;
+}
+.transfer-arrow {
+  display: flex; align-items: center; justify-content: center;
+}
+.transfer-arrow-icon {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-tertiary);
+  margin-top: 18px;
+  transition: transform 0.2s;
+}
+
+.bucket-container { position: relative; padding-top: 14px; }
+.bucket-handle {
+  position: absolute;
+  top: 0; left: 50%; transform: translateX(-50%);
+  width: 40px; height: 14px;
+  border: 2px solid var(--warning);
+  border-bottom: none;
+  border-radius: 20px 20px 0 0;
+}
+.bucket-body {
+  border: 2px solid var(--warning);
+  border-top: 3px solid var(--warning);
+  border-radius: 6px 6px 18px 18px;
+  padding: 10px 12px 14px;
+  min-height: 116px;
+  background: linear-gradient(180deg, rgba(254,243,199,.65) 0%, rgba(254,243,199,.2) 100%);
+  position: relative; overflow: visible;
+  box-shadow: 0 4px 16px rgba(245,158,11,.1);
+  transition: transform .2s;
+}
+.bucket-body.shake { animation: bucketShake .45s ease-in-out; }
+.bucket-water-wrap {
+  position: absolute; inset: 0;
+  overflow: hidden;
+  border-radius: 4px 4px 16px 16px;
+  pointer-events: none;
+}
+.bucket-water {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: linear-gradient(0deg, rgba(245,158,11,.22) 0%, transparent 100%);
+  pointer-events: none;
+  animation: waterShimmer 2.2s ease-in-out infinite alternate;
+}
+.chip-row {
+  display: flex; flex-wrap: wrap; gap: 6px; position: relative; z-index: 1;
+}
+.chip {
+  padding: 4px 10px; border-radius: 20px;
+  font-size: 12px; font-weight: 700;
+  display: inline-flex; align-items: center; gap: 4px;
+  cursor: pointer; user-select: none;
+  transition: transform .15s, box-shadow .15s, filter .15s;
+  line-height: 1.4;
+}
+.chip:hover { transform: translateY(-2px) scale(1.02); filter: brightness(1.02); box-shadow: 0 4px 8px rgba(15,23,42,.08); }
+.chip:active { transform: scale(.95); }
+.chip.in {
+  background: var(--warning-bg);
+  border: 1.5px solid var(--warning-border);
+  color: var(--warning);
+  box-shadow: 0 1px 4px rgba(245,158,11,.15);
+}
+.chip.in .x { opacity: .45; font-size: 10px; }
+.chip.out {
+  background: #f1f5f9;
+  border: 1.5px solid #cbd5e1;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+.chip.out .arrow { opacity: .4; font-size: 11px; }
+.chip.anim-in  { animation: dropIn .4s cubic-bezier(.34,1.56,.64,1); }
+.chip.anim-out { animation: popOut .25s ease-out; }
+.chip.blocked {
+  padding: 3px 10px; font-size: 11px; font-weight: 600;
+  background: #ffe4e6;
+  border: 1.5px solid #fecdd3;
+  color: var(--danger);
+  cursor: default;
+}
+.chip.blocked:hover { transform: none; filter: none; }
+
+.empty-hint {
+  font-size: 12px; color: var(--text-tertiary);
+  font-style: italic;
+  padding: 4px 0;
+}
+
+.pool-body {
+  border: 1.5px dashed #e2e8f0;
+  border-radius: 10px;
+  padding: 10px 12px;
+  min-height: 130px;
+  display: flex; flex-wrap: wrap; gap: 7px; align-content: flex-start;
+}
+
+.blocked-row {
+  display: flex; align-items: center; gap: 7px; flex-wrap: wrap;
+  margin-top: 16px;
+  padding: 12px;
+  background: var(--danger-softer);
+  border: 1px dashed rgba(239, 68, 68, 0.4);
+  border-radius: 8px;
+}
+.blocked-label {
+  font-size: 12px; font-weight: 600; color: var(--danger);
+  display: inline-flex; align-items: center; gap: 4px;
+  white-space: nowrap;
+}
+
+/* =========== Scenario example =========== */
+.scene-intro {
+  font-size: 13px; color: var(--text-secondary); line-height: 1.8;
+  margin-bottom: 16px;
+}
+.scene-intro .pill-mini {
+  padding: 2px 6px; border-radius: 4px;
+  font-weight: 600;
+  margin: 0 6px;
+}
+.scene-intro .pill-mini.neutral { background: #f1f5f9; color: var(--text-primary); margin: 0; }
+.scene-intro .pill-mini.clean   { background: #dcfce7; color: #10b981; }
+.scene-intro .pill-mini.risky   { background: #fef3c7; color: var(--warning); }
+.scene-intro .pill-mini.blocked { background: #ffe4e6; color: var(--danger); }
+
+.scene-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.scene-card {
+  background: rgba(248, 250, 252, .8);
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 16px;
+  position: relative; overflow: hidden;
+  box-shadow: 0 4px 20px -4px rgba(0,0,0,.02);
+}
+.scene-card .glow {
+  position: absolute; top: -30px; left: -30px;
+  width: 80px; height: 80px;
+  opacity: .08;
+  filter: blur(20px);
+  border-radius: 50%;
+}
+.scene-head {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 12px;
+}
+.scene-head .icon-box {
+  width: 24px; height: 24px; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+}
+.scene-head .title { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+.scene-list {
+  font-size: 13px; color: var(--text-secondary); line-height: 1.8;
+}
+.scene-list .lead { margin-bottom: 6px; font-weight: 700; color: var(--text-primary); }
+.scene-list .row {
+  display: flex; align-items: flex-start; gap: 6px; margin-bottom: 4px;
+}
+.scene-list .row:last-child { margin-bottom: 0; }
+.scene-list .row b { color: var(--text-primary); }
+.scene-list .row.ok    svg { color: var(--success); }
+.scene-list .row.warn  svg { color: var(--warning); }
+.scene-list .row.bad   svg { color: var(--danger); }
+
+/* =========== Collapsible details =========== */
+/* ============================================================
+   EDITORIAL TECHNICAL REFERENCE — "了解更多" detail fold
+   Aesthetic: typeset financial manual · Instrument Serif numbers
+   ============================================================ */
+.details {
+  background: rgba(248, 250, 252, .6);
+  border: 1px solid rgba(226, 232, 240, .8);
+  border-radius: var(--radius-sm);
+  margin-bottom: 20px;
+}
+.details summary {
+  list-style: none;
+  padding: 12px 16px;
+  cursor: pointer;
+  display: flex; align-items: center; gap: 8px;
+  font-size: 14px; font-weight: 600; color: var(--text-primary);
+}
+.details summary::-webkit-details-marker { display: none; }
+.details summary::after {
+  content: '▾';
+  margin-left: auto;
+  font-size: 14px;
+  color: var(--text-tertiary);
+  transition: transform .2s;
+}
+.details[open] summary::after { transform: rotate(-180deg); }
+
+/* --- "了解更多" cleaner container --- */
+.details-more {
+  background: rgba(248, 250, 252, .6);
+  border: 1px solid rgba(226, 232, 240, .8);
+  border-radius: var(--radius-sm);
+  margin-bottom: 20px;
+  margin-top: 32px;
+}
+.details-more summary {
+  list-style: none;
+  padding: 12px 16px;
+  cursor: pointer;
+  display: flex; align-items: center; gap: 8px;
+}
+.details-more summary::-webkit-details-marker { display: none; }
+.details-more summary::after {
+  content: '▾';
+  margin-left: auto;
+  font-size: 14px;
+  color: var(--text-tertiary);
+  transition: transform .2s;
+}
+.details-more[open] summary::after { transform: rotate(-180deg); }
+.details-more summary .sum-title {
+  font-size: 14px; font-weight: 700; color: var(--text-primary);
+}
+.details-more summary .sum-sub {
+  font-size: 12px; font-weight: 400; color: var(--text-tertiary);
+  letter-spacing: .1px;
+}
+
+/* --- Expanded content canvas --- */
+.details-more .content {
+  padding: 0 16px 16px;
+  font-size: 13px; line-height: 1.8; color: var(--text-secondary);
+}
+
+/* --- Section blocks --- */
+.details-more .detail-section {
+  margin-bottom: 24px;
+}
+.details-more .detail-section:last-child { margin-bottom: 0; }
+
+/* --- Normal head --- */
+.details-more .detail-head {
+  display: flex; align-items: center; gap: 6px; margin-bottom: 10px;
+}
+.details-more .detail-head .bar { width: 3px; height: 14px; border-radius: 2px; }
+.details-more .detail-head .title { font-weight: 600; color: var(--text-primary); font-size: 14px; }
+.details-more .detail-head .meta { display: none; } /* Hide the editorial english metadata */
+
+/* --- Normal detail-box --- */
+.details-more .detail-box {
+  background: var(--bg-soft);
+  padding: 12px 16px; border-radius: 6px;
+  font-size: 13px;
+  line-height: 1.8;
+}
+.details-more .detail-box b.bold { color: var(--text-primary); font-weight: 600; }
+
+/* ==========================================================
+   Comparison table
+   ========================================================== */
+.details-more .cmp-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+  font-size: 13px;
+}
+.details-more .cmp-table th, .details-more .cmp-table td {
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 1px solid #f1f5f9;
+}
+.details-more .cmp-table tr:last-child td { border-bottom: none; }
+.details-more .cmp-table th {
+  background: #f8fafc;
+  font-size: 12px; font-weight: 600;
+  color: var(--text-secondary);
+}
+.details-more .cmp-table .item { color: var(--text-tertiary); font-weight: 500; width: 120px; }
+.details-more .cmp-table .accent-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+.details-more .cmp-table .accept { font-weight: 600; color: var(--text-primary); }
+
+/* ==========================================================
+   Two-column detail lists
+   ========================================================== */
+.details-more .detail-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+.details-more .detail-list { display: flex; flex-direction: column; gap: 8px; }
+.details-more .detail-list .row { display: flex; gap: 8px; }
+.details-more .detail-list .row b { color: var(--text-primary); font-weight: 600; }
+.details-more .detail-list .row .bullet { margin-top: 2px; flex-shrink: 0; }
+
+/* 地址污染管理 — different pattern (tag + text) */
+.details-more .detail-list .row .pollu-tag {
+  background: #e2e8f0; color: var(--text-primary);
+  font-size: 10px; padding: 0 4px; border-radius: 4px;
+  margin-top: 4px; line-height: 1.4;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  height: 18px;
+}
+.details-more .detail-list .row .pollu-tag.accept {
+  background: #dbeafe; color: var(--primary);
+}
+
+/* ==========================================================
+   Pipeline cards (出款路由)
+   ========================================================== */
+.details-more .pipeline-card {
+  background: var(--bg-soft);
+  padding: 12px; border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+.details-more .pipeline-card.primary { background: #f0f9ff; border-color: #bae6fd; }
+.details-more .pipeline-card .head { font-weight: 600; margin-bottom: 8px; color: var(--text-primary); }
+.details-more .pipeline-card.primary .head { color: var(--primary); }
+.details-more .pipeline-card .row { display: flex; gap: 6px; margin-top: 4px; line-height: 1.6; font-size: 13px; }
+.details-more .pipeline-card .row svg { margin-top: 3px; flex-shrink: 0; }
+.details-more .pipeline-card .row b { color: var(--text-primary); font-weight: 600; }
+
+/* ==========================================================
+   FAQ info cards
+   ========================================================== */
+.details-more .info-card {
+  background: var(--bg-soft);
+  padding: 12px 16px; border-radius: 6px;
+}
+.details-more .info-card .head { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+.details-more .info-card .head .name { font-weight: 600; color: var(--text-primary); }
+.details-more .info-card .body { font-size: 12px; line-height: 1.8; color: var(--text-secondary); }
+
+/* ==========================================================
+   Flow diagrams header + frames
+   ========================================================== */
+.details-more .flow-title {
+  display: flex; align-items: center; gap: 6px; margin-bottom: 8px;
+  font-size: 12px; font-weight: 600;
+}
+.details-more .flow-title .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+/* =========== Modal =========== */
+.modal-mask {
+  position: fixed; inset: 0;
+  background: rgba(15, 23, 42, .45);
+  backdrop-filter: blur(2px);
+  display: none; align-items: center; justify-content: center;
+  z-index: 1000;
+  animation: fadeIn .2s;
+}
+.modal-mask.open { display: flex; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.modal {
+  background: #fff;
+  border-radius: 10px;
+  padding: 20px 22px;
+  width: 420px;
+  max-width: calc(100% - 32px);
+  box-shadow: var(--shadow-lg);
+  animation: fadeUp .25s;
+}
+.modal-title {
+  font-size: 15px; font-weight: 700;
+  margin-bottom: 10px;
+  display: flex; align-items: center; gap: 8px;
+}
+.modal-body { font-size: 13px; line-height: 1.8; color: var(--text-secondary); margin-bottom: 18px; }
+.modal-foot { display: flex; justify-content: flex-end; gap: 8px; }
+.btn-primary {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+.btn-primary:hover:not(:disabled) { background: #1d4ed8; border-color: #1d4ed8; color: #fff; }
+
+/* =========== Toast =========== */
+.toast-wrap {
+  position: fixed; top: 24px; left: 50%; transform: translateX(-50%);
+  z-index: 2000;
+  pointer-events: none;
+  display: flex; flex-direction: column; gap: 8px;
+  align-items: center;
+}
+.toast {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 13px;
+  color: var(--text-primary);
+  box-shadow: var(--shadow-md);
+  display: flex; align-items: center; gap: 8px;
+  animation: fadeUp .2s;
+}
+.toast svg { color: var(--success); flex-shrink: 0; }
+
+/* Tooltip for chips */
+[data-tip] { position: relative; }
+[data-tip]::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 6px); left: 50%;
+  transform: translateX(-50%);
+  padding: 8px 12px;
+  background: rgba(15, 23, 42, .95);
+  color: #fff;
+  font-size: 12px;
+  line-height: 1.55;
+  letter-spacing: .1px;
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, .25);
+  width: max-content;
+  max-width: 280px;
+  white-space: pre-line;
+  text-align: left;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateX(-50%) translateY(4px);
+  transition: opacity .15s, transform .15s;
+  z-index: 50;
+}
+[data-tip]::before {
+  content: '';
+  position: absolute;
+  bottom: calc(100% + 1px); left: 50%;
+  margin-left: -5px;
+  border: 5px solid transparent;
+  border-top-color: rgba(15, 23, 42, .95);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .15s;
+  z-index: 50;
+}
+[data-tip]:hover::after,
+[data-tip]:hover::before { opacity: 1; }
+[data-tip]:hover::after { transform: translateX(-50%) translateY(0); }
+/* When a chip sits near the top of the viewport, show tip below */
+.chip.tip-below::after {
+  bottom: auto;
+  top: calc(100% + 6px);
+  transform: translateX(-50%) translateY(-4px);
+}
+.chip.tip-below:hover::after { transform: translateX(-50%) translateY(0); }
+.chip.tip-below::before {
+  bottom: auto;
+  top: calc(100% + 1px);
+  border-top-color: transparent;
+  border-bottom-color: rgba(15, 23, 42, .95);
+}
+
+.bold { color: var(--text-primary); font-weight: 600; }
+
+/* Small icon system */
+.icon { width: 1em; height: 1em; vertical-align: -.1em; flex-shrink: 0; }
+</style>
+</head>
+<body>
+<div class="page">
+  <h1 class="title">风控模式</h1>
+  <p class="subtitle">选择入款资金的风险处理方式</p>
+
+  <!-- ========== Status card ========== -->
+  <div class="card no-pad no-title" id="statusCard">
+    <div class="status-top mode-refund" id="statusTop">
+      <div class="status-icon mode-refund" id="statusIcon">
+        <svg class="icon" style="width:22px;height:22px" viewBox="0 0 24 24" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="status-text">
+        <div class="label">当前模式</div>
+        <div class="name" id="statusName">退款模式</div>
+        <div class="hint">切换立即生效，已有资金不受影响</div>
+      </div>
+      <span class="tag tag-success">运行中</span>
+    </div>
+    <div class="status-pills">
+      <div class="status-pill">
+        <div class="pill-bar" id="statusPillBar" style="background: var(--tier-low)"></div>
+        <div class="pill-body">
+          <div class="pill-label">风险阈值</div>
+          <div class="pill-value"><span id="statusThreshold">80</span> 分<span class="muted" id="statusLevelLabel">· 宽松</span></div>
+        </div>
+      </div>
+      <div class="status-pill" id="statusPill2">
+        <!-- JS fills this based on current mode -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== Section header ========== -->
+  <div class="section-header">
+    <span class="bar"></span>
+    <span class="title">风控策略</span>
+    <span class="sub" id="sectionHeaderSub">· 模式 · 阈值</span>
+    <span class="line"></span>
+  </div>
+
+  <!-- ========== Mode switch ========== -->
+  <div class="card">
+    <div class="card-title">
+      <span>切换模式</span>
+    </div>
+    <div class="mode-grid">
+      <div class="mode-card selected" data-mode="refund" id="modeRefund">
+        <div class="mode-head">
+          <div class="mode-head-left">
+            <div class="mode-icon-box">
+              <svg class="icon" style="width:16px;height:16px" viewBox="0 0 24 24" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+            </div>
+            <span class="mode-title">退款模式</span>
+          </div>
+          <div class="mode-action">
+            <span class="tag tag-success">当前</span>
+          </div>
+        </div>
+        <div class="mode-desc">只收干净资金，风险资金隔离后由付款方申请退回</div>
+      </div>
+
+      <div class="mode-card" data-mode="accept" id="modeAccept">
+        <div class="mode-head">
+          <div class="mode-head-left">
+            <div class="mode-icon-box">
+              <svg class="icon" style="width:16px;height:16px" viewBox="0 0 24 24" fill="none"><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+            </div>
+            <span class="mode-title">全收模式</span>
+          </div>
+          <div class="mode-action"></div>
+        </div>
+        <div class="mode-desc">全部接收，按风险标签分桶管理</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== Threshold ========== -->
+  <div class="card">
+    <div class="threshold-head">
+      <div>
+        <div class="title">
+          风险评分阈值
+          <span class="tier-badge" id="thresholdBadge" style="color: var(--tier-low)">· 宽松</span>
+        </div>
+        <div class="sub">
+          评分 ≥ <span id="thresholdHintVal">80</span> 视为"有风险"，按当前模式处置；评分 &lt; <span id="thresholdHintVal2">80</span> 正常入账
+        </div>
+      </div>
+      <button class="btn" id="btnResetThreshold" disabled>恢复默认</button>
+    </div>
+
+    <div class="threshold-grid">
+      <div class="slider-wrap">
+        <!-- Tier labels above -->
+        <div class="tier-labels">
+          <div><b style="color: var(--tier-low)">低</b><span class="range">0-19</span></div>
+          <div><b style="color: var(--tier-mid)">中</b><span class="range">20-49</span></div>
+          <div><b style="color: var(--tier-high)">高</b><span class="range">50-79</span></div>
+          <div><b style="color: var(--tier-severe)">严重</b><span class="range">80+</span></div>
+        </div>
+
+        <!-- Thick color bar -->
+        <div class="color-bar">
+          <div class="seg seg-low"></div>
+          <div class="seg seg-mid"></div>
+          <div class="seg seg-high"></div>
+          <div class="seg seg-severe"></div>
+          <div class="divider" style="left: 20%"></div>
+          <div class="divider" style="left: 50%"></div>
+          <div class="divider" style="left: 80%"></div>
+        </div>
+
+        <!-- Custom slider -->
+        <div class="slider" id="slider">
+          <div class="slider-rail"></div>
+          <div class="slider-handle" id="sliderHandle" style="left: 80%">
+            <div class="slider-tooltip" id="sliderTip">80 分</div>
+          </div>
+        </div>
+
+        <!-- Marks -->
+        <div class="slider-marks">
+          <span class="mark" style="left: 0%">0</span>
+          <span class="mark" style="left: 20%">20</span>
+          <span class="mark" style="left: 50%">50</span>
+          <span class="mark recommend" style="left: 80%">80 推荐</span>
+          <span class="mark" style="left: 100%">100</span>
+        </div>
+
+        <!-- Drag hint -->
+        <div class="drag-hint">
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><path d="M0 5 L4 1 L4 3.5 L6 3.5 L6 1 L10 5 L6 9 L6 6.5 L4 6.5 L4 9 Z"/></svg>
+          <span>拖动游标调节阈值</span>
+        </div>
+      </div>
+
+      <!-- Right value card -->
+      <div class="threshold-value-card" id="thresholdValueCard">
+        <div class="threshold-value-top">
+          <span class="threshold-big mono" id="thresholdBig">80</span>
+          <span class="threshold-slash">/ 100</span>
+          <span class="threshold-badge" id="thresholdBadgeRight">宽松</span>
+        </div>
+        <div class="threshold-blocks">将拦截：<b id="thresholdBlocks">严重</b></div>
+        <div class="threshold-hint" id="thresholdHintText">仅严重档入款被识别为风险</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== Label config (accept only) ========== -->
+  <div class="card" id="labelCard" hidden>
+    <div class="label-head">
+      <div>
+        <div class="title">风险桶标签配置</div>
+        <div class="sub">命中以下标签的入款将隔离进风险桶</div>
+      </div>
+      <button class="btn" id="btnResetLabels">恢复推荐配置</button>
+    </div>
+
+    <div class="transfer-grid">
+      <!-- Left: bucket -->
+      <div class="bucket-col">
+        <div class="col-title">
+          <svg width="12" height="12" viewBox="0 0 15 15" fill="none"><path d="M2.5 3.5h10l-1.2 8.5H3.7L2.5 3.5Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M5 3.5V2.5a2.5 2.5 0 015 0v1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+          <span>风险桶 · <span id="bucketCount">15</span>/<span id="totalCount">22</span> 个标签</span>
+        </div>
+        <div class="bucket-container">
+          <div class="bucket-handle"></div>
+          <div class="bucket-body" id="bucketBody">
+            <div class="bucket-water-wrap"><div class="bucket-water" id="bucketWater"></div></div>
+            <div class="chip-row" id="bucketChips"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Middle arrow -->
+      <div class="transfer-arrow">
+        <div class="transfer-arrow-icon">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 4v16"/><path d="M21 8l-4-4-4 4"/><path d="M7 20V4"/><path d="M3 16l4 4 4-4"/></svg>
+        </div>
+      </div>
+
+      <!-- Right: pool -->
+      <div class="pool-col">
+        <div class="col-title">可配置标签 · 高分命中后退回付款方</div>
+        <div class="pool-body" id="poolChips"></div>
+      </div>
+    </div>
+
+    <!-- Blocked labels -->
+    <div class="blocked-row">
+      <span class="blocked-label">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="10" rx="2" stroke="currentColor" stroke-width="2"/><path d="M8 11V7a4 4 0 018 0v4" stroke="currentColor" stroke-width="2"/></svg>
+        平台拦截（不可配置）：
+      </span>
+      <div class="chip blocked" data-tip="涉及毒品生产、贩运、销售或为毒品交易提供服务的主体与交易，属于极高风险非法活动，在处置上按最严重执行。&#10;&#10;平台默认直接退回付款方，商户不可配置。">毒品</div>
+      <div class="chip blocked" data-tip="涉及枪支、军火、武器及相关非法交易的主体与交易，属于极高风险非法活动，在处置上按最严重执行。&#10;&#10;平台默认直接退回付款方，商户不可配置。">军火</div>
+      <div class="chip blocked" data-tip="涉及儿童性虐待材料或相关交易传播的主体与资金流，通常需要立即隔离和上报。&#10;&#10;平台默认直接退回付款方，商户不可配置。">儿童色情</div>
+      <div class="chip blocked" data-tip="表示资产或地址已被冻结、查扣、没收或进入执法控制状态，虽非风险类型，但命中后应按最高优先级处置。&#10;&#10;平台默认直接退回付款方，商户不可配置。">执法处置</div>
+      <div class="chip blocked" data-tip="涉及恐怖组织、恐怖活动或其融资支持的交易与主体，通常应立即阻断并升级处置。&#10;&#10;平台默认直接退回付款方，商户不可配置。">恐怖融资</div>
+      <div class="chip blocked" data-tip="明确被官方制裁名单覆盖的个人、实体、钱包或其受控主体，通常属于必须阻断和报告的对象。&#10;&#10;平台默认直接退回付款方，商户不可配置。">受制裁实体</div>
+    </div>
+  </div>
+
+  <!-- ========== Scenario example ========== -->
+  <div class="card">
+    <div class="detail-head" style="margin-bottom: 12px;">
+      <div class="bar" style="background: #f59e0b"></div>
+      <span class="title">场景举例</span>
+    </div>
+
+    <div class="scene-intro">
+      假设你今天收到 <span class="pill-mini neutral">100 笔总入款</span>，经过系统检测后，通常约有：
+      <span class="pill-mini clean">干净 95 笔</span>
+      <span class="pill-mini risky">风险 4 笔</span>
+      <span class="pill-mini blocked">高危 1 笔</span>
+    </div>
+
+    <div class="scene-grid">
+      <!-- Left: income results -->
+      <div class="scene-card" id="sceneIncome">
+        <div class="glow" id="sceneIncomeGlow" style="background: #10b981"></div>
+        <div class="scene-head">
+          <div class="icon-box" id="sceneIncomeIcon" style="background: #dcfce7; color: #10b981">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M3 15V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M12 3V16M12 16L8 12M12 16L16 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <span class="title">入款结果</span>
+        </div>
+        <div class="scene-list" id="sceneIncomeBody"></div>
+      </div>
+
+      <!-- Right: withdrawal scene -->
+      <div class="scene-card">
+        <div class="glow" style="background: #8b5cf6"></div>
+        <div class="scene-head">
+          <div class="icon-box" style="background: #ede9fe; color: #8b5cf6">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M3 15V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M12 16V3M12 3L8 7M12 3L16 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <span class="title">出款场景</span>
+        </div>
+        <div class="scene-list" id="sceneOutBody"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== Collapsible details: 了解更多（合并模式对比 + 规则细节） ========== -->
+  <details class="details details-more">
+    <summary>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="color: #3b82f6"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M9.1 9a3 3 0 015.8 1c0 2-3 3-3 3M12 17h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <span class="sum-title">了解更多</span>
+      <span class="sum-sub">· 模式对比 · 规则细节 · 资金流向图</span>
+    </summary>
+    <div class="content">
+
+      <!-- Section 1: 对比表格 -->
+      <div class="detail-section">
+        <div class="detail-head">
+          <div class="bar" style="background: #3b82f6"></div>
+          <span class="title">两种模式对比</span>
+        </div>
+        <table class="cmp-table">
+          <thead>
+            <tr>
+              <th class="item">对比项</th>
+              <th><span class="accent-dot" style="background: #10b981"></span>退款模式</th>
+              <th><span class="accent-dot" style="background: #2563eb"></span>全收模式</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td class="item">入款接收</td><td>仅干净资金入账</td><td class="accept">全盘接收，按标签分桶</td></tr>
+            <tr><td class="item">风险入款处理</td><td>隔离，付款方申请后退回</td><td class="accept">命中风险标签 → 进风险桶（商户可配置）</td></tr>
+            <tr><td class="item">拦截名单处理</td><td>命中即拒绝退回</td><td class="accept">仅最高危目录拦截，其余可收入风险桶</td></tr>
+            <tr><td class="item">API 出款逻辑</td><td>仅向安全地址出款</td><td class="accept">安全地址从干净桶出；风险地址从风险桶出</td></tr>
+            <tr><td class="item">风险地址出款</td><td>拒绝出款，提示换地址</td><td class="accept">自动从风险桶出款（余额不足则拒绝）</td></tr>
+            <tr><td class="item">提款支持</td><td>仅支持 API 出款</td><td class="accept">API 出款 + 风险桶手动提款</td></tr>
+            <tr><td class="item">商户操作成本</td><td>★☆☆ 极简，无需管理</td><td class="accept">★★☆ 需配置风险标签与管理风险桶</td></tr>
+            <tr><td class="item">核心诉求</td><td>资金绝对安全、无需人工介入</td><td class="accept">入款转化率最大化</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Section 2: 风控标准 -->
+      <div class="detail-section">
+        <div class="detail-head">
+          <div class="bar" style="background: #8b5cf6"></div>
+          <span class="title">风险检测标准</span>
+        </div>
+        <div class="detail-box">
+          系统通过 <b class="bold">KYT (Know Your Transaction)</b> 技术对每笔入款和出款目标地址进行风险评分，评分范围 0-100。评分越高，代表关联黑灰产的风险越大。商户可自定义<b class="bold">风险评分阈值</b>（当前 <span id="detailThreshold">80</span> 分），评分 ≥ 阈值的资金按当前模式隔离或分桶处理。
+        </div>
+      </div>
+
+      <div class="detail-2col">
+        <!-- Section 3: 分桶规则 -->
+        <div>
+          <div class="detail-head">
+            <div class="bar" style="background: #10b981"></div>
+            <span class="title">入款分桶规则</span>
+          </div>
+          <div class="detail-list">
+            <div class="row"><span class="bullet" style="color: #10b981">●</span><span><b>干净桶：</b>风险评分 &lt; <span class="detail-threshold-val">80</span> 的资金，无论标签如何均进入干净桶正常结算。</span></div>
+            <div class="row"><span class="bullet" style="color: #f59e0b">●</span><span><b>风险桶：</b>评分 ≥ <span class="detail-threshold-val">80</span> 且命中商户配置的风险标签，资金隔离入桶，需手动处理。</span></div>
+            <div class="row"><span class="bullet" style="color: #94a3b8">↩</span><span><b>退回：</b>评分 ≥ <span class="detail-threshold-val">80</span> 但标签未配置进风险桶，资金隔离，由付款方申请后退回。</span></div>
+            <div class="row"><span class="bullet" style="color: #ef4444">⊘</span><span><b>平台拦截：</b>命中 S0 最高危标签（恐怖融资、受制裁实体等），直接拒绝入款并退回，不进入任何桶。</span></div>
+          </div>
+        </div>
+
+        <!-- Section 4: 地址污染管理 -->
+        <div>
+          <div class="detail-head">
+            <div class="bar" style="background: #f59e0b"></div>
+            <span class="title">地址污染管理</span>
+          </div>
+          <div class="detail-list">
+            <div class="row"><div class="pollu-tag">退款</div><span>风险入款将被隔离，由付款方申请后退回。为防止持续恶意试探，系统将自动为用户<b>派生并展示新的干净地址</b>。</span></div>
+            <div class="row"><div class="pollu-tag accept">全收</div><span>入款地址收到风险资金后将被<b>永久标记污染</b>（后续资金自动进风险桶）。同时系统会<b>自动派生新地址</b>，保障后续充值不受影响。</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 5: API 出款 -->
+      <div class="detail-section">
+        <div class="detail-head">
+          <div class="bar" style="background: #0ea5e9"></div>
+          <span class="title">API 出款路由规则</span>
+        </div>
+        <div class="detail-2col" style="margin-bottom: 0;">
+          <div class="pipeline-card">
+            <div class="head">退款模式</div>
+            <div class="row"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="color: #10b981"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M8 12l3 3 5-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>安全地址 → 正常出款</span></div>
+            <div class="row"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="color: #ef4444"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="m9 9 6 6M15 9l-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>风险/拦截地址 → 拒绝出款并提示更换</span></div>
+          </div>
+          <div class="pipeline-card primary">
+            <div class="head">全收模式</div>
+            <div class="row"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="color: #10b981"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M8 12l3 3 5-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>安全地址 → 从<b>干净桶</b>出</span></div>
+            <div class="row"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="color: #f59e0b"><path d="M4 12h16M4 12l4-4M4 12l4 4M20 12l-4-4M20 12l-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>风险地址 → 从<b>风险桶</b>出 (不足则拒绝)</span></div>
+            <div class="row"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="color: #ef4444"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="m9 9 6 6M15 9l-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>拦截地址 → 直接拒绝</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 6: 附加信息 -->
+      <div class="detail-2col">
+        <div class="info-card">
+          <div class="head">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="color: #8b5cf6"><rect x="3" y="6" width="18" height="14" rx="2" stroke="currentColor" stroke-width="2"/><path d="M3 10h18" stroke="currentColor" stroke-width="2"/></svg>
+            <span class="name">什么是"桶提款"（全收模式）？</span>
+          </div>
+          <div class="body">风险桶支持在后台手动提到任意地址，无需审批。提款记录推送至工作群留痕。</div>
+        </div>
+        <div class="info-card">
+          <div class="head">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="color: #ef4444"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+            <span class="name">高危名单包含哪些？</span>
+          </div>
+          <div class="body">受制裁实体（OFAC 等）、恐怖融资、毒品、军火、儿童色情、执法查扣资产等。由平台统一维护，商户不可自定义。</div>
+        </div>
+      </div>
+
+      <!-- Section 7: 资金流向图 -->
+      <div class="detail-section" style="margin-bottom: 0;">
+        <div class="detail-head">
+          <div class="bar" style="background: #f59e0b"></div>
+          <span class="title">资金流向图</span>
+        </div>
+
+        <!-- Refund flow -->
+        <div style="margin-bottom: 20px;">
+          <div class="flow-title"><span class="dot" style="background: #10b981"></span><span style="color: #10b981">退款模式 · 入款 + 出款流程</span></div>
+          <svg viewBox="0 0 960 200" style="width: 100%; height: auto;" fill="none">
+            <defs>
+              <marker id="arr" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7" fill="none" stroke="#cbd5e1" stroke-width="1.2"/></marker>
+              <linearGradient id="gradDetect" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#e0f2fe"/><stop offset="100%" stop-color="#f0f9ff"/></linearGradient>
+              <linearGradient id="gradGreen" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#dcfce7"/><stop offset="100%" stop-color="#f0fdf4"/></linearGradient>
+              <linearGradient id="gradRed" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ffe4e6"/><stop offset="100%" stop-color="#fff1f2"/></linearGradient>
+              <linearGradient id="gradNeutral" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#f8fafc"/></linearGradient>
+              <filter id="glow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="rgba(148,163,184,0.25)"/></filter>
+              <style>.flow-line { stroke-dasharray: 6 6; animation: flowDash 1.5s linear infinite; }</style>
+            </defs>
+            <line x1="475" y1="10" x2="475" y2="192" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="6 4"/>
+
+            <!-- Left: 入款 -->
+            <rect x="199" y="4" width="52" height="16" rx="8" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1"/>
+            <circle cx="210" cy="12" r="2.5" fill="#2563eb"/>
+            <text x="228" y="14.5" text-anchor="middle" font-size="7.5" fill="#2563eb" font-weight="700">入款</text>
+
+            <rect x="175" y="30" width="100" height="28" rx="12" fill="url(#gradNeutral)" stroke="#e2e8f0" stroke-width="1.2" filter="url(#glow)"/>
+            <text x="233" y="48" text-anchor="middle" font-size="7.5" font-weight="600" fill="#1e293b">一笔入款</text>
+            <line x1="225" y1="58" x2="225" y2="74" stroke="#cbd5e1" stroke-width="1.5" class="flow-line" marker-end="url(#arr)"/>
+
+            <rect x="173" y="74" width="104" height="26" rx="7" fill="url(#gradDetect)" stroke="#bae6fd" stroke-width="1.2" filter="url(#glow)"/>
+            <text x="231" y="91" text-anchor="middle" font-size="7" font-weight="600" fill="#1890FF">风险检测</text>
+
+            <path d="M197,100 Q155,128 125,140" stroke="#0ECB81" stroke-width="1.5" class="flow-line" fill="none" marker-end="url(#arr)"/>
+            <path d="M253,100 Q295,128 325,140" stroke="#F6465D" stroke-width="1.5" class="flow-line" fill="none" marker-end="url(#arr)"/>
+
+            <rect x="130" y="116" width="30" height="14" rx="7" fill="rgba(16,185,129,0.1)"/>
+            <text x="145" y="126" text-anchor="middle" font-size="6.5" fill="#0ECB81" font-weight="600">通过</text>
+            <rect x="285" y="116" width="38" height="14" rx="7" fill="rgba(244,63,94,0.1)"/>
+            <text x="304" y="126" text-anchor="middle" font-size="6.5" fill="#F6465D" font-weight="600">未通过</text>
+
+            <rect x="70" y="144" width="140" height="32" rx="8" fill="url(#gradGreen)" stroke="#bbf7d0" stroke-width="1" filter="url(#glow)"/>
+            <text x="140" y="160" text-anchor="middle" font-size="7" fill="#0ECB81" font-weight="600">正常入账</text>
+            <text x="140" y="171" text-anchor="middle" font-size="6.5" fill="#64748b">余额可用</text>
+
+            <rect x="243" y="144" width="155" height="32" rx="8" fill="url(#gradRed)" stroke="#fecdd3" stroke-width="1" filter="url(#glow)"/>
+            <text x="320" y="160" text-anchor="middle" font-size="7" fill="#F6465D" font-weight="600">隔离，待付款方退款</text>
+            <text x="320" y="171" text-anchor="middle" font-size="6.5" fill="#64748b">资金退回付款方</text>
+
+            <!-- Right: 出款 -->
+            <rect x="687" y="4" width="76" height="16" rx="8" fill="#f5f3ff" stroke="#ddd6fe" stroke-width="1"/>
+            <circle cx="699" cy="12" r="2.5" fill="#7c3aed"/>
+            <text x="730" y="14.5" text-anchor="middle" font-size="7.5" fill="#7c3aed" font-weight="700">出款 (API)</text>
+
+            <rect x="675" y="30" width="100" height="28" rx="12" fill="url(#gradNeutral)" stroke="#e2e8f0" stroke-width="1.2" filter="url(#glow)"/>
+            <text x="733" y="48" text-anchor="middle" font-size="7.5" font-weight="600" fill="#1e293b">发起出款</text>
+            <line x1="725" y1="58" x2="725" y2="74" stroke="#cbd5e1" stroke-width="1.5" class="flow-line" marker-end="url(#arr)"/>
+
+            <rect x="670" y="74" width="110" height="26" rx="7" fill="url(#gradDetect)" stroke="#bae6fd" stroke-width="1.2" filter="url(#glow)"/>
+            <text x="731" y="91" text-anchor="middle" font-size="7" font-weight="600" fill="#1890FF">检测目标地址</text>
+
+            <path d="M695,100 Q653,128 623,140" stroke="#0ECB81" stroke-width="1.5" class="flow-line" fill="none" marker-end="url(#arr)"/>
+            <path d="M755,100 Q797,128 827,140" stroke="#F6465D" stroke-width="1.5" class="flow-line" fill="none" marker-end="url(#arr)"/>
+
+            <rect x="628" y="116" width="30" height="14" rx="7" fill="rgba(16,185,129,0.1)"/>
+            <text x="643" y="126" text-anchor="middle" font-size="6.5" fill="#0ECB81" font-weight="600">安全</text>
+            <rect x="777" y="116" width="56" height="14" rx="7" fill="rgba(244,63,94,0.1)"/>
+            <text x="805" y="126" text-anchor="middle" font-size="6.5" fill="#F6465D" font-weight="600">有风险/高危</text>
+
+            <rect x="567" y="144" width="140" height="32" rx="8" fill="url(#gradGreen)" stroke="#bbf7d0" stroke-width="1" filter="url(#glow)"/>
+            <text x="637" y="160" text-anchor="middle" font-size="7" fill="#0ECB81" font-weight="600">正常出款</text>
+            <text x="637" y="171" text-anchor="middle" font-size="6.5" fill="#64748b">从余额出</text>
+
+            <rect x="745" y="144" width="155" height="32" rx="8" fill="url(#gradRed)" stroke="#fecdd3" stroke-width="1" filter="url(#glow)"/>
+            <text x="822" y="160" text-anchor="middle" font-size="7" fill="#F6465D" font-weight="600">拒绝，提示换地址</text>
+            <text x="822" y="171" text-anchor="middle" font-size="6.5" fill="#64748b">或高危直接拒绝</text>
+          </svg>
+        </div>
+
+        <!-- Accept flow -->
+        <div>
+          <div class="flow-title"><span class="dot" style="background: #2563eb"></span><span style="color: #2563eb">全收模式 · 入款 + 出款流程</span></div>
+          <svg viewBox="0 0 960 230" style="width: 100%; height: auto;" fill="none">
+            <defs>
+              <marker id="arr2" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7" fill="none" stroke="#cbd5e1" stroke-width="1.2"/></marker>
+              <linearGradient id="gradDetect2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#e0f2fe"/><stop offset="100%" stop-color="#f0f9ff"/></linearGradient>
+              <linearGradient id="gradGreen2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#dcfce7"/><stop offset="100%" stop-color="#f0fdf4"/></linearGradient>
+              <linearGradient id="gradYellow2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fef3c7"/><stop offset="100%" stop-color="#fffbeb"/></linearGradient>
+              <linearGradient id="gradRed2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ffe4e6"/><stop offset="100%" stop-color="#fff1f2"/></linearGradient>
+              <linearGradient id="gradNeutral2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#f8fafc"/></linearGradient>
+              <filter id="glow2" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="rgba(148,163,184,0.25)"/></filter>
+            </defs>
+            <line x1="480" y1="10" x2="480" y2="222" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="6 4"/>
+
+            <!-- Left: 入款 -->
+            <rect x="209" y="4" width="52" height="16" rx="8" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1"/>
+            <circle cx="220" cy="12" r="2.5" fill="#2563eb"/>
+            <text x="238" y="14.5" text-anchor="middle" font-size="7.5" fill="#2563eb" font-weight="700">入款</text>
+
+            <rect x="185" y="30" width="100" height="28" rx="12" fill="url(#gradNeutral2)" stroke="#e2e8f0" stroke-width="1.2" filter="url(#glow2)"/>
+            <text x="243" y="48" text-anchor="middle" font-size="7.5" font-weight="600" fill="#1e293b">一笔入款</text>
+            <line x1="235" y1="58" x2="235" y2="74" stroke="#cbd5e1" stroke-width="1.5" class="flow-line" marker-end="url(#arr2)"/>
+
+            <rect x="177" y="74" width="116" height="26" rx="7" fill="url(#gradDetect2)" stroke="#bae6fd" stroke-width="1.2" filter="url(#glow2)"/>
+            <text x="243" y="91" text-anchor="middle" font-size="7" font-weight="600" fill="#1890FF">风险检测 · 分桶</text>
+
+            <path d="M200,100 Q145,130 90,148" stroke="#0ECB81" stroke-width="1.5" class="flow-line" fill="none" marker-end="url(#arr2)"/>
+            <path d="M235,100 Q235,130 235,148" stroke="#F0B90B" stroke-width="1.5" class="flow-line" fill="none" marker-end="url(#arr2)"/>
+            <path d="M270,100 Q325,130 380,148" stroke="#F6465D" stroke-width="1.5" class="flow-line" fill="none" marker-end="url(#arr2)"/>
+
+            <rect x="95" y="120" width="30" height="14" rx="7" fill="rgba(16,185,129,0.1)"/>
+            <text x="110" y="130" text-anchor="middle" font-size="6.5" fill="#0ECB81" font-weight="600">干净</text>
+            <rect x="222" y="120" width="38" height="14" rx="7" fill="rgba(245,158,11,0.1)"/>
+            <text x="241" y="130" text-anchor="middle" font-size="6.5" fill="#9E7A0B" font-weight="600">风险标签</text>
+            <rect x="341" y="120" width="38" height="14" rx="7" fill="rgba(244,63,94,0.1)"/>
+            <text x="360" y="130" text-anchor="middle" font-size="6.5" fill="#F6465D" font-weight="600">拦截名单</text>
+
+            <rect x="35" y="152" width="120" height="30" rx="8" fill="url(#gradGreen2)" stroke="#bbf7d0" stroke-width="1" filter="url(#glow2)"/>
+            <text x="95" y="167" text-anchor="middle" font-size="7" fill="#0ECB81" font-weight="600">干净桶</text>
+            <text x="95" y="178" text-anchor="middle" font-size="6.5" fill="#64748b">API 出款</text>
+
+            <rect x="180" y="152" width="110" height="30" rx="8" fill="url(#gradYellow2)" stroke="#fef08a" stroke-width="1" filter="url(#glow2)"/>
+            <text x="235" y="167" text-anchor="middle" font-size="7" fill="#9E7A0B" font-weight="600">风险桶</text>
+            <text x="235" y="178" text-anchor="middle" font-size="6.5" fill="#64748b">API / 手动提款</text>
+
+            <rect x="315" y="152" width="140" height="30" rx="8" fill="url(#gradRed2)" stroke="#fecdd3" stroke-width="1" filter="url(#glow2)"/>
+            <text x="385" y="163" text-anchor="middle" font-size="7" fill="#F6465D" font-weight="600">拦截，直接退回</text>
+            <text x="385" y="175" text-anchor="middle" font-size="6.5" fill="#64748b">制裁 / 恐怖融资</text>
+
+            <!-- Right: 出款 -->
+            <rect x="687" y="4" width="76" height="16" rx="8" fill="#f5f3ff" stroke="#ddd6fe" stroke-width="1"/>
+            <circle cx="699" cy="12" r="2.5" fill="#7c3aed"/>
+            <text x="730" y="14.5" text-anchor="middle" font-size="7.5" fill="#7c3aed" font-weight="700">出款 (API)</text>
+
+            <rect x="675" y="30" width="100" height="28" rx="12" fill="url(#gradNeutral2)" stroke="#e2e8f0" stroke-width="1.2" filter="url(#glow2)"/>
+            <text x="733" y="48" text-anchor="middle" font-size="7.5" font-weight="600" fill="#1e293b">发起出款</text>
+            <line x1="725" y1="58" x2="725" y2="74" stroke="#cbd5e1" stroke-width="1.5" class="flow-line" marker-end="url(#arr2)"/>
+
+            <rect x="670" y="74" width="110" height="26" rx="7" fill="url(#gradDetect2)" stroke="#bae6fd" stroke-width="1.2" filter="url(#glow2)"/>
+            <text x="731" y="91" text-anchor="middle" font-size="7" font-weight="600" fill="#1890FF">检测目标地址</text>
+
+            <path d="M693,100 Q643,130 595,148" stroke="#0ECB81" stroke-width="1.5" class="flow-line" fill="none" marker-end="url(#arr2)"/>
+            <path d="M725,100 Q725,130 725,148" stroke="#F0B90B" stroke-width="1.5" class="flow-line" fill="none" marker-end="url(#arr2)"/>
+            <path d="M757,100 Q807,130 855,148" stroke="#F6465D" stroke-width="1.5" class="flow-line" fill="none" marker-end="url(#arr2)"/>
+
+            <rect x="600" y="120" width="30" height="14" rx="7" fill="rgba(16,185,129,0.1)"/>
+            <text x="615" y="130" text-anchor="middle" font-size="6.5" fill="#0ECB81" font-weight="600">安全</text>
+            <rect x="712" y="120" width="30" height="14" rx="7" fill="rgba(245,158,11,0.1)"/>
+            <text x="727" y="130" text-anchor="middle" font-size="6.5" fill="#9E7A0B" font-weight="600">风险</text>
+            <rect x="825" y="120" width="30" height="14" rx="7" fill="rgba(244,63,94,0.1)"/>
+            <text x="840" y="130" text-anchor="middle" font-size="6.5" fill="#F6465D" font-weight="600">高危</text>
+
+            <rect x="540" y="152" width="120" height="30" rx="8" fill="url(#gradGreen2)" stroke="#bbf7d0" stroke-width="1" filter="url(#glow2)"/>
+            <text x="600" y="167" text-anchor="middle" font-size="7" fill="#0ECB81" font-weight="600">干净桶出</text>
+            <text x="600" y="178" text-anchor="middle" font-size="6.5" fill="#64748b">正常出款</text>
+
+            <rect x="673" y="152" width="106" height="30" rx="8" fill="url(#gradYellow2)" stroke="#fef08a" stroke-width="1" filter="url(#glow2)"/>
+            <text x="726" y="167" text-anchor="middle" font-size="7" fill="#9E7A0B" font-weight="600">风险桶出</text>
+            <text x="726" y="178" text-anchor="middle" font-size="6.5" fill="#64748b">不足则提示换地址</text>
+
+            <rect x="793" y="152" width="110" height="30" rx="8" fill="url(#gradRed2)" stroke="#fecdd3" stroke-width="1" filter="url(#glow2)"/>
+            <text x="848" y="167" text-anchor="middle" font-size="7" fill="#F6465D" font-weight="600">拒绝出款</text>
+            <text x="848" y="178" text-anchor="middle" font-size="6.5" fill="#64748b">直接拒绝</text>
+          </svg>
+        </div>
+      </div>
+
+    </div>
+  </details>
+
+</div>
+
+<!-- Modal -->
+<div class="modal-mask" id="modalMask">
+  <div class="modal" id="modal">
+    <div class="modal-title" id="modalTitle">确认切换</div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-foot">
+      <button class="btn" id="btnCancel">取消</button>
+      <button class="btn btn-primary" id="btnConfirm">确认切换</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+/* =========== Data =========== */
+const RISK_LABELS = [
+  { key: 'moneyLaundering',       name: '洗钱',         desc: '涉及掩饰非法资金来源、去向或所有权的活动和主体，属于高危 AML 风险。',                                                             defaultRisk: false, tier: 'S1' },
+  { key: 'mixing',                name: '混币服务',     desc: '提供或深度依赖混币功能以打散交易链路、隐匿资金来源和去向的服务，通常应按极高风险处理。',                                         defaultRisk: false, tier: 'S1' },
+  { key: 'darknetMarket',         name: '暗网市场',     desc: '涉及暗网市场运营、商户、买卖或相关资金流转的主体与交易，通常与多类非法商品和服务相关。',                                         defaultRisk: false, tier: 'S1' },
+  { key: 'stolenFunds',           name: '被盗资金',     desc: '明确与盗窃、黑客入侵或非法转移所得资金相关的地址和交易，属于高危网络犯罪所得。',                                                 defaultRisk: false, tier: 'S1' },
+  { key: 'ransomware',            name: '勒索软件',     desc: '涉及勒索软件攻击、勒索收款或收益归集的主体与交易，属于高危网络犯罪。',                                                           defaultRisk: false, tier: 'S1' },
+  { key: 'malware',               name: '恶意软件',     desc: '涉及恶意软件分发、运营、收益归集或相关基础设施的主体与交易，属于高危网络犯罪。',                                                 defaultRisk: false, tier: 'S1' },
+  { key: 'illicitActorOrg',       name: '高风险主体',   desc: '被识别为非法组织、犯罪团伙或其他高度可疑主体的实体标签，整体风险极高，但不必然等同于制裁名单主体。',                             defaultRisk: false, tier: 'S1' },
+  { key: 'fraud',                 name: '欺诈',         desc: '涉及诈骗、欺诈商店、虚假投资或其他欺骗性获利行为，风险较高，但通常需要结合证据强度复核。',                                       defaultRisk: true,  tier: 'S2' },
+  { key: 'hacking',               name: '黑客相关',     desc: '存在黑客攻击或被盗资金相关嫌疑，但证据粒度不足以直接判断为被盗资金、勒索软件或恶意软件来源时使用。',                             defaultRisk: true,  tier: 'S2' },
+  { key: 'sanctions',             name: '制裁相关',     desc: '存在制裁暴露、制裁关联或平台侧较宽泛的 sanctions 标记，不足以直接认定为受制裁实体。',                                             defaultRisk: true,  tier: 'S2' },
+  { key: 'sanctionedJurisdiction',name: '制裁地区',     desc: '与受制裁国家、地区或司法辖区有关联，需结合主体属性、交易对手和适用法律进一步判断。',                                             defaultRisk: true,  tier: 'S2' },
+  { key: 'specialMeasures',       name: '制裁特别措施', desc: '命中特别监管措施或限制性合规要求，风险较高，但通常不直接等同于完整制裁封锁。',                                                   defaultRisk: true,  tier: 'S2' },
+  { key: 'blackGrayMarket',       name: '黑灰产',       desc: '涉及黑灰产业务、服务或关联生态，包含多类可疑但不完全同质的风险场景。',                                                           defaultRisk: true,  tier: 'S2' },
+  { key: 'gambling',              name: '赌博',         desc: '涉及博彩、赌博平台或相关交易，在不同法域合规性差异较大，通常建议人工复核。',                                                     defaultRisk: true,  tier: 'S2' },
+  { key: 'controlledSubstances',  name: '管制品',       desc: '涉及受法律或监管限制流通的商品、物质或材料，风险较高，但通常需要进一步识别具体品类和场景。',                                     defaultRisk: true,  tier: 'S2' },
+  { key: 'escortService',         name: '成人服务',     desc: '涉及陪侍或成人服务相关场景，具有较高合规和声誉风险，但不必然一刀切阻断。',                                                       defaultRisk: true,  tier: 'S2' },
+  { key: 'noKycExchange',         name: '无KYC交易所',  desc: '提供弱实名或无实名交易服务的主体，合规能力较弱，风险较高，但不必然直接属于非法主体。',                                           defaultRisk: true,  tier: 'S2' },
+  { key: 'privacyProtocol',       name: '隐私协议',     desc: '使用隐私增强协议或匿名化设计的协议类型，本身不当然违法，但可能增加追踪难度和 AML 风险。',                                         defaultRisk: true,  tier: 'S2' },
+  { key: 'political',             name: '政治敏感',     desc: '涉及政治人物、组织、议题或政治暴露风险，是否处置通常取决于业务政策和当地监管要求。',                                             defaultRisk: true,  tier: 'S3' },
+  { key: 'pornography',           name: '色情',         desc: '涉及一般成人色情内容或相关服务，主要是内容和声誉风险，是否拦截取决于业务政策和法域要求。',                                       defaultRisk: true,  tier: 'S3' },
+  { key: 'goreRelated',           name: '暴力血腥',     desc: '涉及血腥、暴力或极端不适内容，主要是内容治理和声誉风险，通常建议人工复核。',                                                     defaultRisk: true,  tier: 'S3' },
+  { key: 'religionRelated',       name: '宗教敏感',     desc: '涉及宗教敏感议题、组织或相关活动，主要属于敏感内容与声誉风险场景。',                                                             defaultRisk: true,  tier: 'S3' },
+];
+
+/* =========== State =========== */
+const state = {
+  currentMode: 'refund',
+  selectedMode: 'refund',
+  riskThreshold: 80,
+  labelConfig: Object.fromEntries(RISK_LABELS.map(l => [l.key, l.defaultRisk])),
+  lastToggled: null,
+  lastToggledDir: 'in',
+};
+
+/* =========== Helpers =========== */
+function getThresholdLevel(v) {
+  if (v < 20)  return { label: '极严', color: '#dc2626', tierColor: '#10b981', blocks: '低、中、高、严重', hint: '低、中、高、严重四档入款均被识别为风险' };
+  if (v < 50)  return { label: '严格', color: '#f97316', tierColor: '#eab308', blocks: '中、高、严重',     hint: '中、高、严重档入款被识别为风险' };
+  if (v < 80)  return { label: '平衡', color: '#eab308', tierColor: '#f97316', blocks: '高、严重',         hint: '高、严重档入款被识别为风险' };
+  return         { label: '宽松', color: '#10b981', tierColor: '#b91c1c', blocks: '严重',             hint: '仅严重档入款被识别为风险' };
+}
+
+function showToast(text, type = 'success') {
+  const wrap = document.getElementById('toastWrap');
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M8 12l3 3 5-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>${text}`;
+  wrap.appendChild(el);
+  setTimeout(() => el.style.opacity = '0', 1800);
+  setTimeout(() => el.remove(), 2100);
+}
+
+function addAlpha(hex, alpha) {
+  const h = hex.replace('#', '');
+  const r = parseInt(h.substring(0, 2), 16);
+  const g = parseInt(h.substring(2, 4), 16);
+  const b = parseInt(h.substring(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+/* =========== Renderers =========== */
+function renderStatus() {
+  const mode = state.currentMode;
+  const page = document.querySelector('.page');
+  page.classList.toggle('is-refund', mode === 'refund');
+
+  const top = document.getElementById('statusTop');
+  const iconBox = document.getElementById('statusIcon');
+  const name = document.getElementById('statusName');
+  top.className = 'status-top mode-' + mode;
+  iconBox.className = 'status-icon mode-' + mode;
+  name.textContent = mode === 'refund' ? '退款模式' : '全收模式';
+
+  // Pill 2 (mode-dependent)
+  const pill2 = document.getElementById('statusPill2');
+  if (mode === 'accept') {
+    const count = Object.values(state.labelConfig).filter(Boolean).length;
+    pill2.innerHTML = `
+      <div class="pill-icon" style="background: rgba(245,158,11,.1); color: var(--warning);">
+        <svg width="14" height="14" viewBox="0 0 15 15" fill="none"><path d="M2.5 3.5h10l-1.2 8.5H3.7L2.5 3.5Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M5 3.5V2.5a2.5 2.5 0 015 0v1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      </div>
+      <div class="pill-body">
+        <div class="pill-label">风险桶标签</div>
+        <div class="pill-value">${count}<span class="muted">/ ${RISK_LABELS.length}</span><span class="muted">个已启用</span></div>
+      </div>`;
+  } else {
+    pill2.innerHTML = `
+      <div class="pill-icon" style="background: rgba(239,68,68,.08); color: var(--danger);">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="m9 9 6 6M15 9l-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </div>
+      <div class="pill-body">
+        <div class="pill-label">处置方式</div>
+        <div class="pill-value">隔离后退回<span class="muted">付款方申请</span></div>
+      </div>`;
+  }
+
+  // Threshold pill
+  const lvl = getThresholdLevel(state.riskThreshold);
+  document.getElementById('statusThreshold').textContent = state.riskThreshold;
+  document.getElementById('statusLevelLabel').textContent = '· ' + lvl.label;
+  document.getElementById('statusPillBar').style.background = lvl.color;
+  document.getElementById('statusLevelLabel').style.color = lvl.color;
+}
+
+function renderModeCards() {
+  const sub = document.getElementById('sectionHeaderSub');
+  sub.textContent = state.selectedMode === 'accept' ? '· 模式 · 阈值 · 风险桶标签' : '· 模式 · 阈值';
+
+  ['refund', 'accept'].forEach(mode => {
+    const card = document.getElementById(mode === 'refund' ? 'modeRefund' : 'modeAccept');
+    const isSelected = state.selectedMode === mode;
+    const isCurrent  = state.currentMode === mode;
+    card.classList.toggle('selected', isSelected);
+
+    const action = card.querySelector('.mode-action');
+    action.innerHTML = '';
+    if (isCurrent) {
+      const tag = document.createElement('span');
+      tag.className = 'tag ' + (mode === 'refund' ? 'tag-success' : 'tag-primary');
+      tag.textContent = '当前';
+      action.appendChild(tag);
+    } else if (isSelected) {
+      const btn = document.createElement('button');
+      btn.className = 'switch-btn ' + (mode === 'refund' ? 'switch-btn-green' : 'switch-btn-blue');
+      btn.innerHTML = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M7 17h14m0 0-4-4m4 4-4 4M17 7H3m0 0 4-4m-4 4 4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>立即切换`;
+      btn.onclick = (e) => { e.stopPropagation(); showSwitchConfirm(); };
+      action.appendChild(btn);
+    }
+  });
+}
+
+function renderThreshold() {
+  const v = state.riskThreshold;
+  const lvl = getThresholdLevel(v);
+
+  document.getElementById('sliderHandle').style.left = v + '%';
+  document.getElementById('sliderTip').textContent = v + ' 分';
+  document.getElementById('thresholdBadge').textContent = '· ' + lvl.label;
+  document.getElementById('thresholdBadge').style.color = lvl.color;
+  document.getElementById('thresholdHintVal').textContent = v;
+  document.getElementById('thresholdHintVal2').textContent = v;
+  document.getElementById('btnResetThreshold').disabled = (v === 80);
+
+  // Handle CSS vars
+  const wrap = document.querySelector('.slider-wrap');
+  wrap.style.setProperty('--handle-color', lvl.tierColor);
+  wrap.style.setProperty('--handle-glow', addAlpha(lvl.tierColor, 0.22));
+
+  // Value card
+  const card = document.getElementById('thresholdValueCard');
+  card.style.setProperty('--handle-color', lvl.color);
+  card.style.setProperty('--handle-card-bg', addAlpha(lvl.color, 0.05));
+  card.style.setProperty('--handle-card-border', addAlpha(lvl.color, 0.2));
+  card.style.setProperty('--handle-glow', addAlpha(lvl.color, 0.15));
+  document.getElementById('thresholdBig').textContent = v;
+  document.getElementById('thresholdBig').style.color = lvl.color;
+  const badgeR = document.getElementById('thresholdBadgeRight');
+  badgeR.textContent = lvl.label;
+  badgeR.style.color = lvl.color;
+  badgeR.style.background = addAlpha(lvl.color, 0.15);
+
+  const blocks = document.getElementById('thresholdBlocks');
+  blocks.textContent = lvl.blocks;
+  blocks.style.color = lvl.color;
+
+  document.getElementById('thresholdHintText').textContent = lvl.hint;
+
+  // Status pill + detail text
+  document.getElementById('detailThreshold').textContent = v;
+  document.querySelectorAll('.detail-threshold-val').forEach(el => el.textContent = v);
+  renderStatus();
+}
+
+function renderLabelCard() {
+  const card = document.getElementById('labelCard');
+  card.hidden = (state.selectedMode !== 'accept');
+  if (card.hidden) return;
+
+  const bucketChips = document.getElementById('bucketChips');
+  const poolChips = document.getElementById('poolChips');
+  bucketChips.innerHTML = '';
+  poolChips.innerHTML = '';
+
+  const inBucket = RISK_LABELS.filter(l => state.labelConfig[l.key]);
+  const outBucket = RISK_LABELS.filter(l => !state.labelConfig[l.key]);
+
+  document.getElementById('bucketCount').textContent = inBucket.length;
+  document.getElementById('totalCount').textContent = RISK_LABELS.length;
+
+  // Water fill height
+  const waterHeight = Math.max(8, Math.min(72, (inBucket.length / RISK_LABELS.length) * 100));
+  document.getElementById('bucketWater').style.height = waterHeight + '%';
+
+  if (inBucket.length === 0) {
+    bucketChips.innerHTML = '<span class="empty-hint">桶为空 — 从右侧放入</span>';
+  } else {
+    inBucket.forEach(l => {
+      const chip = document.createElement('div');
+      chip.className = 'chip in';
+      if (state.lastToggled === l.key && state.lastToggledDir === 'in') chip.classList.add('anim-in');
+      chip.dataset.tip = l.desc + '\n\n点击移出风险桶';
+      chip.innerHTML = l.name + '<span class="x">✕</span>';
+      chip.onclick = () => toggleLabel(l.key);
+      bucketChips.appendChild(chip);
+    });
+  }
+
+  if (outBucket.length === 0) {
+    poolChips.innerHTML = '<span class="empty-hint" style="padding: 4px 0;">全部标签已入桶</span>';
+  } else {
+    outBucket.forEach(l => {
+      const chip = document.createElement('div');
+      chip.className = 'chip out';
+      if (state.lastToggled === l.key && state.lastToggledDir === 'out') chip.classList.add('anim-out');
+      chip.dataset.tip = l.desc + '\n\n点击放入风险桶';
+      chip.innerHTML = '<span class="arrow">←</span>' + l.name;
+      chip.onclick = () => toggleLabel(l.key);
+      poolChips.appendChild(chip);
+    });
+  }
+}
+
+function renderScene() {
+  const mode = state.selectedMode;
+  const incomeGlow = document.getElementById('sceneIncomeGlow');
+  const incomeIcon = document.getElementById('sceneIncomeIcon');
+  incomeGlow.style.background = mode === 'refund' ? '#10b981' : '#3b82f6';
+  incomeIcon.style.background = mode === 'refund' ? '#dcfce7' : '#dbeafe';
+  incomeIcon.style.color = mode === 'refund' ? '#10b981' : '#3b82f6';
+
+  const okIcon   = `<svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M8 12l3 3 5-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
+  const warnIcon = `<svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M12 8v5M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
+  const badIcon  = `<svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="m9 9 6 6M15 9l-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
+  const swapIcon = `<svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 12h16M4 12l4-4M4 12l4 4M20 12l-4-4M20 12l-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
+
+  document.getElementById('sceneIncomeBody').innerHTML = mode === 'refund'
+    ? `<div class="lead">收到 100 笔入款：</div>
+       <div class="row ok">${okIcon}<span><b>95 笔干净资金</b> · 正常入账</span></div>
+       <div class="row warn">${warnIcon}<span><b>4 笔风险资金</b> · 系统隔离，由付款方申请后退回</span></div>
+       <div class="row bad">${badIcon}<span><b>1 笔高危（平台拦截）</b> · 直接拒绝入账，不进入任何桶</span></div>`
+    : `<div class="lead">100 笔入款全部接收：</div>
+       <div class="row ok">${okIcon}<span><b>95 笔</b> · 存入干净桶</span></div>
+       <div class="row warn">${warnIcon}<span><b>4 笔</b> · 存入风险桶</span></div>
+       <div class="row bad">${badIcon}<span><b>1 笔高危（平台拦截）</b> · 直接拒绝入账，不进入任何桶</span></div>`;
+
+  document.getElementById('sceneOutBody').innerHTML = mode === 'refund'
+    ? `<div class="lead">发起 10 笔出款：</div>
+       <div class="row ok">${okIcon}<span><b>9 笔安全地址</b> · 正常出款</span></div>
+       <div class="row bad">${badIcon}<span><b>1 笔风险地址</b> · 直接拒绝，提示更换收款地址</span></div>`
+    : `<div class="lead">发起 10 笔出款：</div>
+       <div class="row ok">${okIcon}<span><b>9 笔安全地址</b> · 从干净桶正常出款</span></div>
+       <div class="row warn" style="color: #d97706;">${swapIcon}<span><b>1 笔风险地址</b> · 自动从风险桶出款 (余额不足则拒绝并提示换地址)</span></div>`;
+}
+
+function renderAll() {
+  renderStatus();
+  renderModeCards();
+  renderThreshold();
+  renderLabelCard();
+  renderScene();
+}
+
+/* =========== Interactions =========== */
+function toggleLabel(key) {
+  const goingIn = !state.labelConfig[key];
+  state.lastToggled = key;
+  state.lastToggledDir = goingIn ? 'in' : 'out';
+  state.labelConfig[key] = goingIn;
+  if (goingIn) {
+    const body = document.getElementById('bucketBody');
+    body.classList.remove('shake');
+    void body.offsetWidth;
+    body.classList.add('shake');
+    setTimeout(() => body.classList.remove('shake'), 500);
+  }
+  renderLabelCard();
+  renderStatus();
+  setTimeout(() => { state.lastToggled = null; renderLabelCard(); }, 450);
+}
+
+function resetLabels() {
+  RISK_LABELS.forEach(l => state.labelConfig[l.key] = l.defaultRisk);
+  renderLabelCard();
+  renderStatus();
+  showToast('已恢复为平台推荐配置');
+}
+
+function showSwitchConfirm() {
+  const target = state.selectedMode === 'accept' ? '全收' : '退款';
+  const body = state.selectedMode === 'accept'
+    ? '切换后，新入款将按风险标签分桶处理，立即生效。已有资金保持不变。'
+    : '切换后，新入款中风险资金将被隔离，由付款方申请后退回；拦截资金直接拒绝入账。立即生效，已有资金不受影响。';
+  document.getElementById('modalTitle').textContent = `确认切换到${target}模式`;
+  document.getElementById('modalBody').textContent = body;
+  document.getElementById('modalMask').classList.add('open');
+}
+function hideModal() {
+  document.getElementById('modalMask').classList.remove('open');
+}
+
+/* =========== Slider drag =========== */
+(function setupSlider() {
+  const slider = document.getElementById('slider');
+  let dragging = false;
+
+  function valueFromClientX(clientX) {
+    const rect = slider.getBoundingClientRect();
+    const x = Math.max(0, Math.min(rect.width, clientX - rect.left));
+    return Math.round((x / rect.width) * 100);
+  }
+
+  function onMove(e) {
+    if (!dragging) return;
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    state.riskThreshold = valueFromClientX(clientX);
+    renderThreshold();
+    e.preventDefault();
+  }
+
+  function onUp() {
+    if (!dragging) return;
+    dragging = false;
+    slider.classList.remove('dragging');
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup',   onUp);
+    document.removeEventListener('touchmove', onMove);
+    document.removeEventListener('touchend',  onUp);
+  }
+
+  function onDown(e) {
+    dragging = true;
+    slider.classList.add('dragging');
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    state.riskThreshold = valueFromClientX(clientX);
+    renderThreshold();
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup',   onUp);
+    document.addEventListener('touchmove', onMove, { passive: false });
+    document.addEventListener('touchend',  onUp);
+    e.preventDefault();
+  }
+
+  slider.addEventListener('mousedown',  onDown);
+  slider.addEventListener('touchstart', onDown, { passive: false });
+})();
+
+/* =========== Wire up =========== */
+document.getElementById('modeRefund').addEventListener('click', () => {
+  state.selectedMode = 'refund';
+  renderModeCards();
+  renderLabelCard();
+  renderScene();
+});
+document.getElementById('modeAccept').addEventListener('click', () => {
+  state.selectedMode = 'accept';
+  renderModeCards();
+  renderLabelCard();
+  renderScene();
+  renderStatus();
+});
+
+document.getElementById('btnResetThreshold').addEventListener('click', () => {
+  state.riskThreshold = 80;
+  renderThreshold();
+  showToast('已恢复默认阈值 80');
+});
+document.getElementById('btnResetLabels').addEventListener('click', resetLabels);
+
+document.getElementById('btnCancel').addEventListener('click', hideModal);
+document.getElementById('btnConfirm').addEventListener('click', () => {
+  state.currentMode = state.selectedMode;
+  hideModal();
+  renderAll();
+  showToast(`已切换到${state.currentMode === 'accept' ? '全收' : '退款'}模式`);
+});
+document.getElementById('modalMask').addEventListener('click', (e) => {
+  if (e.target.id === 'modalMask') hideModal();
+});
+
+/* Init */
+renderAll();
+</script>
+</body>
+</html>
