@@ -60,7 +60,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-  padding: 32px 24px 64px;
+  padding: 32px 24px 120px;
 }
 .mono {
   font-family: 'Plus Jakarta Sans', ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -109,6 +109,7 @@ body {
   margin: 0 auto;
   animation: fadeUp .4s cubic-bezier(.16,1,.3,1) both;
   position: relative;
+  padding-bottom: 80px;
 }
 .page::before {
   content: '';
@@ -622,6 +623,12 @@ p.subtitle {
   font-size: 13px; color: var(--text-secondary); line-height: 1.8;
   margin-bottom: 16px;
 }
+.scene-intro .note {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
 .scene-intro .pill-mini {
   padding: 2px 6px; border-radius: 4px;
   font-weight: 600;
@@ -666,6 +673,9 @@ p.subtitle {
 .scene-list .row {
   display: flex; align-items: flex-start; gap: 6px; margin-bottom: 4px;
 }
+.scene-list .row svg {
+  margin-top: 5px; flex-shrink: 0;
+}
 .scene-list .row:last-child { margin-bottom: 0; }
 .scene-list .row b { color: var(--text-primary); }
 .scene-list .row.ok    svg { color: var(--success); }
@@ -705,7 +715,7 @@ p.subtitle {
   background: rgba(248, 250, 252, .6);
   border: 1px solid rgba(226, 232, 240, .8);
   border-radius: var(--radius-sm);
-  margin-bottom: 20px;
+  margin-bottom: 80px;
   margin-top: 32px;
 }
 .details-more summary {
@@ -750,6 +760,26 @@ p.subtitle {
 .details-more .detail-head .bar { width: 3px; height: 14px; border-radius: 2px; }
 .details-more .detail-head .title { font-weight: 600; color: var(--text-primary); font-size: 14px; }
 .details-more .detail-head .meta { display: none; } /* Hide the editorial english metadata */
+
+/* --- Sub-section head (二级标题，在 detail-section 内分组) --- */
+.details-more .detail-subhead {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; font-weight: 600;
+  color: var(--text-secondary);
+  letter-spacing: .02em;
+  margin: 18px 0 10px;
+  text-transform: none;
+}
+.details-more .detail-subhead::before {
+  content: ''; width: 14px; height: 1px;
+  background: currentColor; opacity: .4;
+}
+.details-more .detail-subhead::after {
+  content: ''; flex: 1; height: 1px;
+  background: linear-gradient(to right, rgba(148,163,184,.25), transparent);
+}
+.details-more .detail-section > .detail-subhead:first-child { margin-top: 0; }
+.details-more .detail-section > .detail-box + .detail-subhead { margin-top: 16px; }
 
 /* --- Normal detail-box --- */
 .details-more .detail-box {
@@ -1080,6 +1110,136 @@ p.subtitle {
 
 /* Small icon system */
 .icon { width: 1em; height: 1em; vertical-align: -.1em; flex-shrink: 0; }
+
+/* Lightbox / SVG Zoom */
+.svg-zoom-wrapper {
+  position: relative;
+  cursor: zoom-in;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  padding: 8px;
+  background: transparent;
+  margin: 0 -8px;
+}
+.svg-zoom-wrapper:hover {
+  background: rgba(248, 250, 252, 0.8);
+  box-shadow: inset 0 0 0 1px rgba(226, 232, 240, 0.8), 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+.svg-zoom-wrapper .zoom-hint {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: rgba(15, 23, 42, 0.7);
+  color: #fff;
+  font-size: 12px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: all 0.2s ease;
+  pointer-events: none;
+}
+.svg-zoom-wrapper:hover .zoom-hint {
+  opacity: 1;
+  transform: translateY(0);
+}
+.lightbox-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.85);
+  z-index: 3000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease;
+  backdrop-filter: blur(4px);
+}
+.lightbox-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+.lightbox-content {
+  background: #fff;
+  border-radius: 12px;
+  padding: 32px;
+  width: 96vw;
+  max-width: none;
+  max-height: 94vh;
+  overflow: auto;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+  position: relative;
+  transform: scale(0.95);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.lightbox-overlay.active .lightbox-content {
+  transform: scale(1);
+}
+.lightbox-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #475569;
+  transition: all 0.2s;
+  z-index: 10;
+}
+.lightbox-close:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+.scroll-hint {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(15, 23, 42, 0.85);
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.scroll-hint.show {
+  opacity: 1;
+  animation: bounceHorizontal 2s infinite ease-in-out;
+}
+@keyframes bounceHorizontal {
+  0%, 100% { transform: translateX(-50%); }
+  50% { transform: translateX(calc(-50% - 8px)); }
+}
+.scroll-hint-icon {
+  display: flex;
+  align-items: center;
+  animation: scrollIconSlide 2s infinite ease-in-out;
+}
+@keyframes scrollIconSlide {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(-4px); }
+}
 </style>
 </head>
 <body>
@@ -1095,7 +1255,7 @@ p.subtitle {
       </div>
       <div class="status-text">
         <div class="label">当前模式</div>
-        <div class="name" id="statusName">退款模式</div>
+        <div class="name" id="statusName">退回模式</div>
         <div class="hint">切换立即生效，已有资金不受影响</div>
       </div>
       <span class="tag tag-success">运行中</span>
@@ -1134,13 +1294,13 @@ p.subtitle {
             <div class="mode-icon-box">
               <svg class="icon" style="width:16px;height:16px" viewBox="0 0 24 24" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
             </div>
-            <span class="mode-title">退款模式</span>
+            <span class="mode-title">退回模式</span>
           </div>
           <div class="mode-action">
             <span class="tag tag-success">当前</span>
           </div>
         </div>
-        <div class="mode-desc">只收干净资金，风险资金隔离后由付款方申请退回</div>
+        <div class="mode-desc">只收干净资金，风险资金隔离后按退回流程处理</div>
       </div>
 
       <div class="mode-card" data-mode="accept" id="modeAccept">
@@ -1149,11 +1309,11 @@ p.subtitle {
             <div class="mode-icon-box">
               <svg class="icon" style="width:16px;height:16px" viewBox="0 0 24 24" fill="none"><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
             </div>
-            <span class="mode-title">全收模式</span>
+            <span class="mode-title">分桶模式</span>
           </div>
           <div class="mode-action"></div>
         </div>
-        <div class="mode-desc">全部接收，按风险标签分桶管理</div>
+        <div class="mode-desc">普通风险分桶处理，风险地址可从风险桶出款</div>
       </div>
     </div>
   </div>
@@ -1226,7 +1386,7 @@ p.subtitle {
           <span class="threshold-badge" id="thresholdBadgeRight">默认</span>
         </div>
         <div class="threshold-blocks">将拦截：<b id="thresholdBlocks">严重</b></div>
-        <div class="threshold-hint" id="thresholdHintText">仅严重档入款被识别为风险</div>
+        <div class="threshold-hint" id="thresholdHintText">评分 ≥ 80 分的入款会被识别为风险</div>
       </div>
     </div>
   </div>
@@ -1235,7 +1395,7 @@ p.subtitle {
   <div class="card" id="labelCard" hidden>
     <div class="preview-banner" id="labelPreviewBanner" hidden>
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
-      <span>预览中 · 你正在配置 <b>全收模式</b> 的标签，当前运行的是 <b id="previewCurrentMode">退款模式</b>。切换模式后配置才会生效。</span>
+      <span>预览中 · 你正在配置 <b>分桶模式</b> 的标签，当前运行的是 <b id="previewCurrentMode">退回模式</b>。切换模式后配置才会生效。</span>
     </div>
     <div class="label-head">
       <div>
@@ -1264,7 +1424,7 @@ p.subtitle {
       <!-- Middle arrow -->
       <div class="transfer-arrow">
         <div class="transfer-arrow-icon">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 4v16"/><path d="M21 8l-4-4-4 4"/><path d="M7 20V4"/><path d="M3 16l4 4 4-4"/></svg>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3 4 7l4 4"/><path d="M4 7h16"/><path d="m16 21 4-4-4-4"/><path d="M20 17H4"/></svg>
         </div>
       </div>
 
@@ -1279,14 +1439,14 @@ p.subtitle {
     <div class="blocked-row">
       <span class="blocked-label">
         <svg width="10" height="10" viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="10" rx="2" stroke="currentColor" stroke-width="2"/><path d="M8 11V7a4 4 0 018 0v4" stroke="currentColor" stroke-width="2"/></svg>
-        平台拦截（不可配置）：
+        高危标签（不可配置）：
       </span>
-      <div class="chip blocked" data-tip="涉及毒品生产、贩运、销售或为毒品交易提供服务的主体与交易，属于极高风险非法活动，在处置上按最严重执行。&#10;&#10;平台默认直接退回付款方，商户不可配置。">毒品</div>
-      <div class="chip blocked" data-tip="涉及枪支、军火、武器及相关非法交易的主体与交易，属于极高风险非法活动，在处置上按最严重执行。&#10;&#10;平台默认直接退回付款方，商户不可配置。">军火</div>
-      <div class="chip blocked" data-tip="涉及儿童性虐待材料或相关交易传播的主体与资金流，通常需要立即隔离和上报。&#10;&#10;平台默认直接退回付款方，商户不可配置。">儿童色情</div>
-      <div class="chip blocked" data-tip="表示资产或地址已被冻结、查扣、没收或进入执法控制状态，虽非风险类型，但命中后应按最高优先级处置。&#10;&#10;平台默认直接退回付款方，商户不可配置。">执法处置</div>
-      <div class="chip blocked" data-tip="涉及恐怖组织、恐怖活动或其融资支持的交易与主体，通常应立即阻断并升级处置。&#10;&#10;平台默认直接退回付款方，商户不可配置。">恐怖融资</div>
-      <div class="chip blocked" data-tip="明确被官方制裁名单覆盖的个人、实体、钱包或其受控主体，通常属于必须阻断和报告的对象。&#10;&#10;平台默认直接退回付款方，商户不可配置。">受制裁实体</div>
+      <div class="chip blocked" data-tip="涉及毒品生产、贩运、销售或为毒品交易提供服务的主体与交易，属于极高风险非法活动，在处置上按最严重执行。&#10;&#10;该类标签由平台统一维护，商户不可配置。退回模式下将隔离并由付款方申请后退回；分桶模式下将隔离、不进入任何桶，并由用户发起退款退回。">毒品</div>
+      <div class="chip blocked" data-tip="涉及枪支、军火、武器及相关非法交易的主体与交易，属于极高风险非法活动，在处置上按最严重执行。&#10;&#10;该类标签由平台统一维护，商户不可配置。退回模式下将隔离并由付款方申请后退回；分桶模式下将隔离、不进入任何桶，并由用户发起退款退回。">军火</div>
+      <div class="chip blocked" data-tip="涉及儿童性虐待材料或相关交易传播的主体与资金流，通常需要立即隔离和上报。&#10;&#10;该类标签由平台统一维护，商户不可配置。退回模式下将隔离并由付款方申请后退回；分桶模式下将隔离、不进入任何桶，并由用户发起退款退回。">儿童色情</div>
+      <div class="chip blocked" data-tip="表示资产或地址已被冻结、查扣、没收或进入执法控制状态，虽非风险类型，但命中后应按最高优先级处置。&#10;&#10;该类标签由平台统一维护，商户不可配置。退回模式下将隔离并由付款方申请后退回；分桶模式下将隔离、不进入任何桶，并由用户发起退款退回。">执法处置</div>
+      <div class="chip blocked" data-tip="涉及恐怖组织、恐怖活动或其融资支持的交易与主体，通常应立即阻断并升级处置。&#10;&#10;该类标签由平台统一维护，商户不可配置。退回模式下将隔离并由付款方申请后退回；分桶模式下将隔离、不进入任何桶，并由用户发起退款退回。">恐怖融资</div>
+      <div class="chip blocked" data-tip="明确被官方制裁名单覆盖的个人、实体、钱包或其受控主体，通常属于必须阻断和报告的对象。&#10;&#10;该类标签由平台统一维护，商户不可配置。退回模式下将隔离并由付款方申请后退回；分桶模式下将隔离、不进入任何桶，并由用户发起退款退回。">受制裁实体</div>
     </div>
   </div>
 
@@ -1297,11 +1457,12 @@ p.subtitle {
       <span class="title">场景举例</span>
     </div>
 
-    <div class="scene-intro">
-      假设你今天收到 <span class="pill-mini neutral">100 笔总入款</span>，经过系统检测后，通常约有：
-      <span class="pill-mini clean">干净 95 笔</span>
+    <div class="scene-intro" id="sceneIntro">
+      假设你今天收到 <span class="pill-mini neutral">100 笔总入款</span>，通常约有：
+      <span class="pill-mini clean">正常 95 笔</span>
       <span class="pill-mini risky">风险 4 笔</span>
       <span class="pill-mini blocked">高危 1 笔</span>
+      <span class="note">以上为示意案例，实际是否识别为风险，以当前风险阈值和标签配置为准。</span>
     </div>
 
     <div class="scene-grid">
@@ -1350,14 +1511,14 @@ p.subtitle {
           <thead>
             <tr>
               <th class="item">对比项</th>
-              <th><span class="accent-dot" style="background: #10b981"></span>退款模式</th>
-              <th><span class="accent-dot" style="background: #2563eb"></span>全收模式</th>
+              <th><span class="accent-dot" style="background: #10b981"></span>退回模式</th>
+              <th><span class="accent-dot" style="background: #2563eb"></span>分桶模式</th>
             </tr>
           </thead>
           <tbody>
-            <tr><td class="item">入款接收</td><td>仅干净资金入账</td><td class="accept">全盘接收，按标签分桶</td></tr>
-            <tr><td class="item">风险入款处理</td><td>隔离，付款方申请后退回</td><td class="accept">命中风险标签 → 进风险桶（商户可配置）</td></tr>
-            <tr><td class="item">拦截名单处理</td><td>命中即拒绝退回</td><td class="accept">仅最高危目录拦截，其余可收入风险桶</td></tr>
+            <tr><td class="item">入款接收</td><td>仅低于阈值的资金入账</td><td class="accept">按标签分桶：进风险桶或隔离待退款</td></tr>
+            <tr><td class="item">风险入款处理</td><td>评分 ≥ 阈值的资金全部隔离，付款方申请后退回</td><td class="accept">命中已配置标签 → 进风险桶；未配置标签 → 隔离待退回</td></tr>
+            <tr><td class="item">高危标签处理</td><td>命中后仍按风险资金处理，由付款方申请后退回</td><td class="accept">命中后隔离，不进入任何桶，由用户发起退款退回</td></tr>
             <tr><td class="item">API 出款逻辑</td><td>仅向安全地址出款</td><td class="accept">安全地址从干净桶出；风险地址从风险桶出</td></tr>
             <tr><td class="item">风险地址出款</td><td>拒绝出款，提示换地址</td><td class="accept">自动从风险桶出款（余额不足则拒绝）</td></tr>
             <tr><td class="item">提款支持</td><td>仅支持 API 出款</td><td class="accept">API 出款 + 风险桶手动提款</td></tr>
@@ -1367,94 +1528,108 @@ p.subtitle {
         </table>
       </div>
 
-      <!-- Section 2: 风控标准 -->
+      <!-- Section 2: 评分阈值与分桶 -->
       <div class="detail-section">
         <div class="detail-head">
           <div class="bar" style="background: #8b5cf6"></div>
-          <span class="title">风险检测标准</span>
+          <span class="title">评分阈值与分桶</span>
         </div>
+
+        <div class="detail-subhead">检测标准</div>
         <div class="detail-box">
           系统通过 <b class="bold">KYT (Know Your Transaction)</b> 技术对每笔入款和出款目标地址进行风险评分，评分范围 0-100。评分越高，代表关联黑灰产的风险越大。商户可自定义<b class="bold">风险评分阈值</b>（当前 <span id="detailThreshold">80</span> 分），评分 ≥ 阈值的资金按当前模式隔离或分桶处理。
         </div>
-      </div>
 
-      <div class="detail-2col">
-        <!-- Section 3: 分桶规则 -->
-        <div>
-          <div class="detail-head">
-            <div class="bar" style="background: #10b981"></div>
-            <span class="title">入款分桶规则</span>
-          </div>
-          <div class="detail-list">
-            <div class="row"><span class="bullet" style="color: #10b981">●</span><span><b>干净桶：</b>风险评分 &lt; <span class="detail-threshold-val">80</span> 的资金，无论标签如何均进入干净桶正常结算。</span></div>
-            <div class="row"><span class="bullet" style="color: #f59e0b">●</span><span><b>风险桶：</b>评分 ≥ <span class="detail-threshold-val">80</span> 且命中商户配置的风险标签，资金隔离入桶，需手动处理。</span></div>
-            <div class="row"><span class="bullet" style="color: #94a3b8">↩</span><span><b>退回：</b>评分 ≥ <span class="detail-threshold-val">80</span> 但标签未配置进风险桶，资金隔离，由付款方申请后退回。</span></div>
-            <div class="row"><span class="bullet" style="color: #ef4444">⊘</span><span><b>平台拦截：</b>命中 S0 最高危标签（恐怖融资、受制裁实体等），直接拒绝入款并退回，不进入任何桶。</span></div>
-          </div>
-        </div>
-
-        <!-- Section 4: 地址污染管理 -->
-        <div>
-          <div class="detail-head">
-            <div class="bar" style="background: #f59e0b"></div>
-            <span class="title">地址污染管理</span>
-          </div>
-          <div class="detail-list">
-            <div class="row"><div class="pollu-tag">退款</div><span>风险入款将被隔离，由付款方申请后退回。为防止持续恶意试探，系统将自动为用户<b>派生并展示新的干净地址</b>。</span></div>
-            <div class="row"><div class="pollu-tag accept">全收</div><span>入款地址收到风险资金后将被<b>永久标记污染</b>（后续资金自动进风险桶）。同时系统会<b>自动派生新地址</b>，保障后续充值不受影响。</span></div>
-          </div>
+        <div class="detail-subhead">入款分桶规则</div>
+        <div class="detail-list">
+          <div class="row"><span class="bullet" style="color: #10b981">●</span><span><b>干净资金：</b>风险评分 &lt; <span class="detail-threshold-val">80</span>。退回模式下正常入账；分桶模式下进入干净桶。</span></div>
+          <div class="row"><span class="bullet" style="color: #f59e0b">●</span><span><b>风险桶：</b>仅在分桶模式下生效。评分 ≥ <span class="detail-threshold-val">80</span> 且命中商户已配置的普通风险标签时，资金进入风险桶，后续可用于出款或手动提款。</span></div>
+          <div class="row"><span class="bullet" style="color: #94a3b8">↩</span><span><b>退回模式处理：</b>评分 ≥ <span class="detail-threshold-val">80</span> 的资金全部隔离，由付款方申请后退回；命中高危标签也适用同一规则。</span></div>
+          <div class="row"><span class="bullet" style="color: #ef4444">⊘</span><span><b>分桶模式下的高危标签：</b>命中 S0 最高危标签（恐怖融资、受制裁实体等）时，资金隔离，不进入任何桶，需由用户发起退款退回。</span></div>
         </div>
       </div>
 
-      <!-- Section 5: API 出款 -->
+      <!-- Section 3: 处置路径 -->
       <div class="detail-section">
         <div class="detail-head">
           <div class="bar" style="background: #0ea5e9"></div>
-          <span class="title">API 出款路由规则</span>
+          <span class="title">处置路径</span>
         </div>
+
+        <div class="detail-subhead">API 出款路由</div>
         <div class="detail-2col" style="margin-bottom: 0;">
           <div class="pipeline-card">
-            <div class="head">退款模式</div>
+            <div class="head">退回模式</div>
             <div class="row"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="color: #10b981"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M8 12l3 3 5-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>安全地址 → 正常出款</span></div>
             <div class="row"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="color: #ef4444"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="m9 9 6 6M15 9l-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>风险/拦截地址 → 拒绝出款并提示更换</span></div>
           </div>
           <div class="pipeline-card primary">
-            <div class="head">全收模式</div>
+            <div class="head">分桶模式</div>
             <div class="row"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="color: #10b981"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M8 12l3 3 5-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>安全地址 → 从<b>干净桶</b>出</span></div>
             <div class="row"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="color: #f59e0b"><path d="M4 12h16M4 12l4-4M4 12l4 4M20 12l-4-4M20 12l-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>风险地址 → 从<b>风险桶</b>出 (不足则拒绝)</span></div>
-            <div class="row"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="color: #ef4444"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="m9 9 6 6M15 9l-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>拦截地址 → 直接拒绝</span></div>
+            <div class="row"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="color: #ef4444"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="m9 9 6 6M15 9l-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>高危地址 → 拒绝并提示更换地址</span></div>
           </div>
+        </div>
+
+        <div class="detail-subhead">地址污染管理</div>
+        <div class="detail-list">
+          <div class="row"><div class="pollu-tag">退回</div><span>评分 ≥ 阈值的入款将被隔离，由付款方申请后退回；命中高危标签也适用同一规则。为防止持续恶意试探，系统将自动为用户<b>派生并展示新的干净地址</b>。</span></div>
+          <div class="row"><div class="pollu-tag accept">分桶</div><span>入款地址收到风险资金后将被<b>永久标记污染</b>。命中已配置普通风险标签的后续资金自动进风险桶；命中高危标签时隔离待退款，不进入任何桶。同时系统会<b>自动派生新地址</b>，保障后续充值不受影响。</span></div>
         </div>
       </div>
 
-      <!-- Section 6: 附加信息 -->
-      <div class="detail-2col">
-        <div class="info-card">
-          <div class="head">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="color: #8b5cf6"><rect x="3" y="6" width="18" height="14" rx="2" stroke="currentColor" stroke-width="2"/><path d="M3 10h18" stroke="currentColor" stroke-width="2"/></svg>
-            <span class="name">什么是"桶提款"（全收模式）？</span>
-          </div>
-          <div class="body">风险桶支持在后台手动提到任意地址，无需审批。提款记录推送至工作群留痕。</div>
-        </div>
-        <div class="info-card">
-          <div class="head">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="color: #ef4444"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
-            <span class="name">高危名单包含哪些？</span>
-          </div>
-          <div class="body">受制裁实体（OFAC 等）、恐怖融资、毒品、军火、儿童色情、执法查扣资产等。由平台统一维护，商户不可自定义。</div>
-        </div>
-      </div>
-
-      <!-- Section 7: 资金流向图 -->
-      <div class="detail-section" style="margin-bottom: 0;">
+      <!-- Section 4: 常见问题 -->
+      <div class="detail-section">
         <div class="detail-head">
           <div class="bar" style="background: #f59e0b"></div>
+          <span class="title">常见问题</span>
+        </div>
+        <div class="detail-2col" style="margin-bottom: 0;">
+          <div class="info-card">
+            <div class="head">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="color: #2563eb"><path d="M21 12a9 9 0 1 1-3.51-7.11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M21 4v5h-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span class="name">切换模式对已入账的资金有影响吗？</span>
+            </div>
+            <div class="body">不影响。模式切换仅作用于切换后的新入款和新出款，历史资金状态保持不变。</div>
+          </div>
+          <div class="info-card">
+            <div class="head">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="color: #8b5cf6"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              <span class="name">调整阈值后什么时候生效？</span>
+            </div>
+            <div class="body">点击"保存"后立即生效，适用于之后的每一笔入款检测和出款地址检测，无延迟。</div>
+          </div>
+          <div class="info-card">
+            <div class="head">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="color: #0ea5e9"><path d="M12 3v18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><rect x="3" y="6" width="7" height="12" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="14" y="6" width="7" height="12" rx="1.5" stroke="currentColor" stroke-width="2"/></svg>
+              <span class="name">高危标签和我的风险桶有什么区别？</span>
+            </div>
+            <div class="body"><b>高危标签</b>：商户不可配置。退回模式下，命中后与普通风险资金一样隔离，由付款方申请后退回；分桶模式下，命中后隔离且不进入任何桶，需用户发起退款退回。<b>风险桶</b>：仅命中你已配置的普通风险标签时进入，可用于出款或手动提款。</div>
+          </div>
+          <div class="info-card">
+            <div class="head">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="color: #ef4444"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+              <span class="name">高危名单包含哪些？</span>
+            </div>
+            <div class="body">受制裁实体（OFAC 等）、恐怖融资、毒品、军火、儿童色情、执法查扣资产等。由平台统一维护，商户不可自定义。</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 5: 资金流向图 -->
+      <div class="detail-section" style="margin-bottom: 0;">
+        <div class="detail-head">
+          <div class="bar" style="background: #10b981"></div>
           <span class="title">资金流向图</span>
         </div>
 
         <!-- Refund flow -->
-        <div style="margin-bottom: 20px;">
-          <div class="flow-title"><span class="dot" style="background: #10b981"></span><span style="color: #10b981">退款模式 · 入款 + 出款流程</span></div>
+        <div class="detail-subhead">退回模式 · 入款 + 出款流程</div>
+        <div class="svg-zoom-wrapper" style="margin-bottom: 20px;" onclick="openLightbox(this)">
+          <div class="zoom-hint">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+            点击放大查看
+          </div>
           <svg viewBox="0 0 960 200" style="width: 100%; height: auto;" fill="none">
             <defs>
               <marker id="arr" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7" fill="none" stroke="#cbd5e1" stroke-width="1.2"/></marker>
@@ -1513,7 +1688,7 @@ p.subtitle {
             <rect x="628" y="116" width="30" height="14" rx="7" fill="rgba(16,185,129,0.1)"/>
             <text x="643" y="126" text-anchor="middle" font-size="6.5" fill="#0ECB81" font-weight="600">安全</text>
             <rect x="777" y="116" width="56" height="14" rx="7" fill="rgba(244,63,94,0.1)"/>
-            <text x="805" y="126" text-anchor="middle" font-size="6.5" fill="#F6465D" font-weight="600">有风险/高危</text>
+            <text x="805" y="126" text-anchor="middle" font-size="6.5" fill="#F6465D" font-weight="600">风险地址</text>
 
             <rect x="567" y="144" width="140" height="32" rx="8" fill="url(#gradGreen)" stroke="#bbf7d0" stroke-width="1" filter="url(#glow)"/>
             <text x="637" y="160" text-anchor="middle" font-size="7" fill="#0ECB81" font-weight="600">正常出款</text>
@@ -1521,13 +1696,17 @@ p.subtitle {
 
             <rect x="745" y="144" width="155" height="32" rx="8" fill="url(#gradRed)" stroke="#fecdd3" stroke-width="1" filter="url(#glow)"/>
             <text x="822" y="160" text-anchor="middle" font-size="7" fill="#F6465D" font-weight="600">拒绝，提示换地址</text>
-            <text x="822" y="171" text-anchor="middle" font-size="6.5" fill="#64748b">或高危直接拒绝</text>
+            <text x="822" y="171" text-anchor="middle" font-size="6.5" fill="#64748b">提示更换地址</text>
           </svg>
         </div>
 
         <!-- Accept flow -->
-        <div>
-          <div class="flow-title"><span class="dot" style="background: #2563eb"></span><span style="color: #2563eb">全收模式 · 入款 + 出款流程</span></div>
+        <div class="detail-subhead">分桶模式 · 入款 + 出款流程</div>
+        <div class="svg-zoom-wrapper" onclick="openLightbox(this)">
+          <div class="zoom-hint">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+            点击放大查看
+          </div>
           <svg viewBox="0 0 960 230" style="width: 100%; height: auto;" fill="none">
             <defs>
               <marker id="arr2" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7" fill="none" stroke="#cbd5e1" stroke-width="1.2"/></marker>
@@ -1561,7 +1740,7 @@ p.subtitle {
             <rect x="222" y="120" width="38" height="14" rx="7" fill="rgba(245,158,11,0.1)"/>
             <text x="241" y="130" text-anchor="middle" font-size="6.5" fill="#9E7A0B" font-weight="600">风险标签</text>
             <rect x="341" y="120" width="38" height="14" rx="7" fill="rgba(244,63,94,0.1)"/>
-            <text x="360" y="130" text-anchor="middle" font-size="6.5" fill="#F6465D" font-weight="600">拦截名单</text>
+            <text x="360" y="130" text-anchor="middle" font-size="6.5" fill="#F6465D" font-weight="600">高危标签</text>
 
             <rect x="35" y="152" width="120" height="30" rx="8" fill="url(#gradGreen2)" stroke="#bbf7d0" stroke-width="1" filter="url(#glow2)"/>
             <text x="95" y="167" text-anchor="middle" font-size="7" fill="#0ECB81" font-weight="600">干净桶</text>
@@ -1572,8 +1751,8 @@ p.subtitle {
             <text x="235" y="178" text-anchor="middle" font-size="6.5" fill="#64748b">API / 手动提款</text>
 
             <rect x="315" y="152" width="140" height="30" rx="8" fill="url(#gradRed2)" stroke="#fecdd3" stroke-width="1" filter="url(#glow2)"/>
-            <text x="385" y="163" text-anchor="middle" font-size="7" fill="#F6465D" font-weight="600">拦截，直接退回</text>
-            <text x="385" y="175" text-anchor="middle" font-size="6.5" fill="#64748b">制裁 / 恐怖融资</text>
+            <text x="385" y="163" text-anchor="middle" font-size="7" fill="#F6465D" font-weight="600">隔离待退款</text>
+            <text x="385" y="175" text-anchor="middle" font-size="6.5" fill="#64748b">不进入任何桶</text>
 
             <!-- Right: 出款 -->
             <rect x="687" y="4" width="76" height="16" rx="8" fill="#f5f3ff" stroke="#ddd6fe" stroke-width="1"/>
@@ -1607,8 +1786,8 @@ p.subtitle {
             <text x="726" y="178" text-anchor="middle" font-size="6.5" fill="#64748b">不足则提示换地址</text>
 
             <rect x="793" y="152" width="110" height="30" rx="8" fill="url(#gradRed2)" stroke="#fecdd3" stroke-width="1" filter="url(#glow2)"/>
-            <text x="848" y="167" text-anchor="middle" font-size="7" fill="#F6465D" font-weight="600">拒绝出款</text>
-            <text x="848" y="178" text-anchor="middle" font-size="6.5" fill="#64748b">直接拒绝</text>
+            <text x="848" y="167" text-anchor="middle" font-size="7" fill="#F6465D" font-weight="600">拒绝，提示换地址</text>
+            <text x="848" y="178" text-anchor="middle" font-size="6.5" fill="#64748b">更换后重新发起</text>
           </svg>
         </div>
       </div>
@@ -1648,7 +1827,73 @@ p.subtitle {
   </div>
 </div>
 
+<!-- Lightbox -->
+<div class="lightbox-overlay" id="svgLightbox" onclick="closeLightbox(event)">
+  <div class="lightbox-content" id="lightboxContent" onclick="event.stopPropagation()">
+    <button class="lightbox-close" onclick="closeLightbox(event)">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+    </button>
+    <div id="lightboxSvgContainer"></div>
+    <div id="lightboxScrollHint" class="scroll-hint">
+      <div class="scroll-hint-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="11 17 6 12 11 7"></polyline><polyline points="18 17 13 12 18 7"></polyline></svg>
+      </div>
+      <span>左右滑动查看完整流程</span>
+    </div>
+  </div>
+</div>
+
 <script>
+/* =========== Lightbox =========== */
+let hintTimeout;
+function openLightbox(el) {
+  const svg = el.querySelector(':scope > svg').cloneNode(true);
+  // Force a large fixed width so the SVG is genuinely magnified
+  // even on smaller laptop screens, enabling horizontal scrolling
+  svg.style.width = '1800px';
+  svg.style.maxWidth = 'none';
+  svg.style.height = 'auto';
+  const container = document.getElementById('lightboxSvgContainer');
+  container.innerHTML = '';
+  container.appendChild(svg);
+  const lightbox = document.getElementById('svgLightbox');
+  lightbox.classList.add('active');
+  document.body.style.overflow = 'hidden'; // Prevent background scrolling
+
+  // Check if scrolling is needed
+  const contentEl = document.getElementById('lightboxContent');
+  const scrollHint = document.getElementById('lightboxScrollHint');
+  
+  // Need to wait slightly for render to calculate scrollWidth
+  setTimeout(() => {
+    if (contentEl.scrollWidth > contentEl.clientWidth) {
+      scrollHint.classList.add('show');
+      // Auto hide hint after 3 seconds
+      clearTimeout(hintTimeout);
+      hintTimeout = setTimeout(() => {
+        scrollHint.classList.remove('show');
+      }, 3000);
+
+      // Hide hint if user starts scrolling manually
+      contentEl.addEventListener('scroll', function onScroll() {
+        scrollHint.classList.remove('show');
+        contentEl.removeEventListener('scroll', onScroll);
+      }, { once: true });
+    } else {
+      scrollHint.classList.remove('show');
+    }
+  }, 50);
+}
+function closeLightbox(e) {
+  if (e) e.stopPropagation();
+  const lightbox = document.getElementById('svgLightbox');
+  const scrollHint = document.getElementById('lightboxScrollHint');
+  lightbox.classList.remove('active');
+  scrollHint.classList.remove('show');
+  clearTimeout(hintTimeout);
+  document.body.style.overflow = '';
+}
+
 /* =========== Data =========== */
 const RISK_LABELS = [
   { key: 'moneyLaundering',       name: '洗钱',         desc: '涉及掩饰非法资金来源、去向或所有权的活动和主体，属于高危 AML 风险。',                                                             defaultRisk: false, tier: 'S1' },
@@ -1705,10 +1950,25 @@ function getLabelDiff() {
 
 /* =========== Helpers =========== */
 function getThresholdLevel(v) {
-  if (v < 20)  return { label: '极严', color: '#dc2626', tierColor: '#10b981', blocks: '低、中、高、严重', hint: '低、中、高、严重四档入款均被识别为风险' };
-  if (v < 50)  return { label: '严格', color: '#f97316', tierColor: '#eab308', blocks: '中、高、严重',     hint: '中、高、严重档入款被识别为风险' };
-  if (v < 80)  return { label: '平衡', color: '#eab308', tierColor: '#f97316', blocks: '高、严重',         hint: '高、严重档入款被识别为风险' };
-  return         { label: '默认', color: '#10b981', tierColor: '#b91c1c', blocks: '严重',             hint: '仅严重档入款被识别为风险' };
+  // 档位区间: 低[0,20) · 中[20,50) · 高[50,80) · 严重[80,100]
+  // 风险判定: score ≥ v
+  // 边界对齐时显示纯档位名，非边界值带分数限定（如「低 ≥10分」）
+  const tiers = [];
+  if (v <= 0)       tiers.push('低');
+  else if (v < 20)  tiers.push(`低 ≥${v}分`);
+  if (v <= 20)      tiers.push('中');
+  else if (v < 50)  tiers.push(`中 ≥${v}分`);
+  if (v <= 50)      tiers.push('高');
+  else if (v < 80)  tiers.push(`高 ≥${v}分`);
+  if (v <= 80)      tiers.push('严重');
+  else if (v <= 100) tiers.push(`严重 ≥${v}分`);
+  const blocks = tiers.join(' · ');
+  const hint = `评分 ≥ ${v} 分的入款会被识别为风险`;
+
+  if (v < 20)  return { label: '极严', color: '#dc2626', tierColor: '#10b981', blocks, hint };
+  if (v < 50)  return { label: '严格', color: '#f97316', tierColor: '#eab308', blocks, hint };
+  if (v < 80)  return { label: '平衡', color: '#eab308', tierColor: '#f97316', blocks, hint };
+  return         { label: '默认', color: '#10b981', tierColor: '#b91c1c', blocks, hint };
 }
 
 function showToast(text, type = 'success') {
@@ -1740,7 +2000,7 @@ function renderStatus() {
   const name = document.getElementById('statusName');
   top.className = 'status-top mode-' + mode;
   iconBox.className = 'status-icon mode-' + mode;
-  name.textContent = mode === 'refund' ? '退款模式' : '全收模式';
+  name.textContent = mode === 'refund' ? '退回模式' : '分桶模式';
 
   // Pill 2 (mode-dependent)
   const pill2 = document.getElementById('statusPill2');
@@ -1896,7 +2156,7 @@ function renderLabelCard() {
   if (state.currentMode !== 'accept') {
     banner.hidden = false;
     document.getElementById('previewCurrentMode').textContent =
-      state.currentMode === 'refund' ? '退款模式' : (state.currentMode + '模式');
+      state.currentMode === 'refund' ? '退回模式' : '分桶模式';
   } else {
     banner.hidden = true;
   }
@@ -1958,15 +2218,22 @@ function renderScene() {
   const badIcon  = `<svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="m9 9 6 6M15 9l-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
   const swapIcon = `<svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 12h16M4 12l4-4M4 12l4 4M20 12l-4-4M20 12l-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
 
+  document.getElementById('sceneIntro').innerHTML =
+    `假设你今天收到 <span class="pill-mini neutral">100 笔总入款</span>，通常约有：` +
+    `<span class="pill-mini clean">正常 95 笔</span>` +
+    `<span class="pill-mini risky">风险 4 笔</span>` +
+    `<span class="pill-mini blocked">高危 1 笔</span>` +
+    `<span class="note">以上为示意案例，实际是否识别为风险，以当前风险阈值和标签配置为准。</span>`;
+
   document.getElementById('sceneIncomeBody').innerHTML = mode === 'refund'
     ? `<div class="lead">收到 100 笔入款：</div>
-       <div class="row ok">${okIcon}<span><b>95 笔干净资金</b> · 正常入账</span></div>
+       <div class="row ok">${okIcon}<span><b>95 笔正常资金</b> · 正常入账</span></div>
        <div class="row warn">${warnIcon}<span><b>4 笔风险资金</b> · 系统隔离，由付款方申请后退回</span></div>
-       <div class="row bad">${badIcon}<span><b>1 笔高危（平台拦截）</b> · 直接拒绝入账，不进入任何桶</span></div>`
-    : `<div class="lead">100 笔入款全部接收：</div>
-       <div class="row ok">${okIcon}<span><b>95 笔</b> · 存入干净桶</span></div>
-       <div class="row warn">${warnIcon}<span><b>4 笔</b> · 存入风险桶</span></div>
-       <div class="row bad">${badIcon}<span><b>1 笔高危（平台拦截）</b> · 直接拒绝入账，不进入任何桶</span></div>`;
+       <div class="row bad">${badIcon}<span><b>1 笔高危标签资金</b> · 同样隔离，由付款方申请后退回</span></div>`
+    : `<div class="lead">收到 100 笔入款：</div>
+       <div class="row ok">${okIcon}<span><b>95 笔正常资金</b> · 存入干净桶</span></div>
+       <div class="row warn">${warnIcon}<span><b>4 笔风险资金</b> · 命中已配置标签后存入风险桶</span></div>
+       <div class="row bad">${badIcon}<span><b>1 笔高危标签资金</b> · 隔离，不进入任何桶，需用户发起退款退回</span></div>`;
 
   document.getElementById('sceneOutBody').innerHTML = mode === 'refund'
     ? `<div class="lead">发起 10 笔出款：</div>
@@ -2012,10 +2279,10 @@ function resetLabels() {
 }
 
 function showSwitchConfirm() {
-  const target = state.selectedMode === 'accept' ? '全收' : '退款';
+  const target = state.selectedMode === 'accept' ? '分桶' : '退回';
   const body = state.selectedMode === 'accept'
-    ? '切换后，新入款将按风险标签分桶处理，立即生效。已有资金保持不变。'
-    : '切换后，新入款中风险资金将被隔离，由付款方申请后退回；拦截资金直接拒绝入账。立即生效，已有资金不受影响。';
+    ? '切换后，新入款会按标签分桶处理：命中已配置的普通风险标签进入风险桶；命中高危标签则隔离、不进入任何桶，并由用户发起退款退回。立即生效，已有资金保持不变。'
+    : '切换后，评分达到阈值的新入款都会被隔离，由付款方申请后退回；命中高危标签也适用同一规则。立即生效，已有资金不受影响。';
   document.getElementById('modalTitle').textContent = `确认切换到${target}模式`;
   document.getElementById('modalBody').textContent = body;
   document.getElementById('modalMask').classList.add('open');
@@ -2151,7 +2418,7 @@ document.getElementById('btnConfirm').addEventListener('click', () => {
   hideModal();
   renderAll();
   const suffix = extra.length ? `（同时保存 ${extra.join(' + ')}）` : '';
-  showToast(`已切换到${state.currentMode === 'accept' ? '全收' : '退款'}模式${suffix}`);
+  showToast(`已切换到${state.currentMode === 'accept' ? '分桶' : '退回'}模式${suffix}`);
 });
 document.getElementById('modalMask').addEventListener('click', (e) => {
   if (e.target.id === 'modalMask') hideModal();
