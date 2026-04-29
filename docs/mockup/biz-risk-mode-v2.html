@@ -4297,22 +4297,14 @@ p.subtitle {
       <div class="atc-title">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/></svg>
         <span>风控策略与金额分档</span>
-        <span class="atc-status-badge" id="atcStatusBadge">已启用</span>
-        <span class="atc-count-badge" id="atcCountBadge">1 档</span>
-        <span class="atc-label-count" id="atcLabelCount" title="收款 / 出款各自启用的可选拦截标签数（不含平台必拦与仅记录）">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 2 7l10 5 10-5-10-5Z"/><path d="m2 17 10 5 10-5"/><path d="m2 12 10 5 10-5"/></svg>
-          标签 入 <b id="atcLabelCountDeposit">—</b> · 出 <b id="atcLabelCountWithdraw">—</b>
-        </span>
       </div>
       <div class="atc-actions">
-        <span class="atc-meta" id="atcMetaUpdated">上次更新：—</span>
         <button class="atc-action-btn atc-action-rewizard" id="btnRewizard" title="清空所有自定义档，重新走引导">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M9 21H3v-6"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/></svg>
           重新引导
         </button>
       </div>
     </div>
-    <div class="atc-head-hint">收款 / 出款的金额分档可分别独立配置；选中下方 tab 切换查看与编辑。</div>
 
     <!-- z4: 收款 / 出款 tab -->
     <div class="atc-tabs" id="atcTabs">
@@ -4966,21 +4958,10 @@ function renderStatus() {
     const witCnt = cfgWithdrawRanges.length;
 
     if (name) {
-      const segLabel = (depCnt === 1 && witCnt === 1) ? '收/出各 1 档' : `收 ${depCnt} 档 / 出 ${witCnt} 档`;
-      const refundShort = refund ? refund.short : '—';
-      const rejectShort = reject ? reject.short : '—';
-      const tierSuffix = (depCnt > 1 || witCnt > 1) ? '（首档）' : '';
-      name.textContent = `自定义 · ${segLabel} · 收${refundShort} / 出${rejectShort}${tierSuffix}`;
+      name.textContent = `自定义配置`;
     }
     if (hint) {
-      // 商户决策两条 + 平台固定一句（用 / 分组，避免 3 品并列误导）
-      const merchantParts = [];
-      if (refund) merchantParts.push(`收款 ${refund.label}`);
-      if (reject) merchantParts.push(`出款 ${reject.label}`);
-      const merchantStr = merchantParts.join(' / ');
-      hint.textContent = merchantStr
-        ? `${merchantStr} · 出款资金来源由系统按评分匹配（平台固定）`
-        : '出款资金来源由系统按评分匹配（平台固定）';
+      hint.textContent = '详细的分档与标签规则以下方列表为准 · 出款资金来源由系统按评分匹配（平台固定）';
     }
     if (tag) {
       tag.textContent = '已自定义';
