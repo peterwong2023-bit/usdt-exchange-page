@@ -4949,14 +4949,7 @@ function renderStatus() {
     if (defaultBlock) defaultBlock.hidden = false;
     if (meta) meta.hidden = true;
   } else {
-    // 自定义模式：标题 + 副标题 + 已自定义 tag + 上次更新（pill 已删除，避免与下方风控策略卡重复）
-    const dep0 = cfgDepositRanges[0] || null;
-    const wit0 = cfgWithdrawRanges[0] || null;
-    const refund = dep0 ? REFUND_BY_VAL[dep0.rule.refundFrom] : null;
-    const reject = wit0 ? REJECT_BY_VAL[wit0.rule.rejectFrom] : null;
-    const depCnt = cfgDepositRanges.length;
-    const witCnt = cfgWithdrawRanges.length;
-
+    // 自定义模式：标题 + 副标题 + 已自定义 tag
     if (name) {
       name.textContent = `自定义配置`;
     }
@@ -4970,8 +4963,7 @@ function renderStatus() {
     if (defaultBlock) defaultBlock.hidden = true;
 
     if (meta) {
-      meta.hidden = !w.lastUpdated;
-      if (metaTime) metaTime.textContent = w.lastUpdated || '—';
+      meta.hidden = true;
     }
   }
 }
@@ -6562,54 +6554,6 @@ function renderAmountTiersCard() {
   const tabCntWit = document.getElementById('atcTabCountWithdraw');
   if (tabCntDep) tabCntDep.textContent = String(cfgDepositRanges.length);
   if (tabCntWit) tabCntWit.textContent = String(cfgWithdrawRanges.length);
-  // 顶部总档数 = 收款档 + 出款档
-  if (countBadge) countBadge.textContent = `入${cfgDepositRanges.length} · 出${cfgWithdrawRanges.length}`;
-
-  // 顶部标签计数：入 X/22 · 出 X/22（仅商户可选档：S1 高危 + S2 高风险 + S3 敏感）
-  const lblTotal = RISK_LABELS.filter(l => {
-    const t = TIER_OF(l);
-    return t === 'lock' || t === 'rec' || t === 'opt';
-  }).length;
-  const cntDepLbl = RISK_LABELS.filter(l => {
-    const t = TIER_OF(l);
-    return (t === 'lock' || t === 'rec' || t === 'opt') && cfgDepositLabels[l.key];
-  }).length;
-  const cntWitLbl = RISK_LABELS.filter(l => {
-    const t = TIER_OF(l);
-    return (t === 'lock' || t === 'rec' || t === 'opt') && cfgWithdrawLabels[l.key];
-  }).length;
-  const elDepLbl = document.getElementById('atcLabelCountDeposit');
-  const elWitLbl = document.getElementById('atcLabelCountWithdraw');
-  if (elDepLbl) elDepLbl.textContent = `${cntDepLbl}/${lblTotal}`;
-  if (elWitLbl) elWitLbl.textContent = `${cntWitLbl}/${lblTotal}`;
-
-  // 状态徽章 + 上次更新
-  const w = state.wizard || {};
-  const statusBadge = document.getElementById('atcStatusBadge');
-  // usingDefault：两侧均仅 1 档且为默认 severe
-  const labelsAreDefault = (() => {
-    const def = defaultLabelMap();
-    return RISK_LABELS.every(l =>
-      !!cfgDepositLabels[l.key]  === !!def[l.key] &&
-      !!cfgWithdrawLabels[l.key] === !!def[l.key]
-    );
-  })();
-  const isAllDefault = cfgDepositRanges.length === 1
-    && cfgWithdrawRanges.length === 1
-    && cfgDepositRanges[0].rule.refundFrom === 'severe'
-    && cfgWithdrawRanges[0].rule.rejectFrom === 'severe'
-    && labelsAreDefault;
-  const showRecommended = !!w.usingDefault || isAllDefault;
-  if (statusBadge) {
-    statusBadge.textContent = showRecommended ? '推荐配置 · 单档' : '已自定义';
-  }
-  card.classList.toggle('using-default', showRecommended);
-
-  const meta = document.getElementById('atcMetaUpdated');
-  if (meta) {
-    meta.textContent = `上次更新：${w.lastUpdated || '—'}` +
-      (showRecommended ? ' · 当前为推荐默认值' : '');
-  }
 
   // 当前 tab 的数据集
   const side = _atcActiveTab;
