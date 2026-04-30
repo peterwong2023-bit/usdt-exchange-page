@@ -5481,7 +5481,7 @@ function renderDocRiskLabels() {
     S1: { label: '默认拦截',     code: 'S1', color: '#dc2626', hint: '默认开启 · 命中即拦截 · 可手动关闭',                                   bgIcon: 'lock'  },
     S2: { label: '可选拦截',     code: 'S2', color: '#f59e0b', hint: '默认关闭 · 按业务需要开启',                                           bgIcon: 'flame' },
     S3: { label: '可选拦截',     code: 'S3', color: '#f59e0b', hint: '默认关闭 · 按业务需要开启',                                           bgIcon: 'flame' },
-    S4: { label: '仅记录',       code: 'S4', color: '#64748b', hint: '默认关闭 · 可开启记录 · 命中仅记录不改变处置',                         bgIcon: 'tag'   },
+    S4: { label: '仅记录',       code: 'S4', color: '#64748b', hint: '默认关闭 · 命中仅记录 · 不影响收款/出款处置',                         bgIcon: 'tag'   },
   };
   const iconSvg = {
     lock:  '<rect x="5" y="11" width="14" height="10" rx="2" stroke="currentColor" stroke-width="2"/><path d="M8 11V7a4 4 0 018 0v4" stroke="currentColor" stroke-width="2"/>',
@@ -5586,7 +5586,7 @@ const TIER_META = {
   lock:     { name: '默认拦截',     short: 'S1', hint: '默认开启 · 可手动关闭',                                                color: '#dc2626' },
   rec:      { name: '可选拦截',     short: 'S2', hint: '默认关闭 · 按业务需要开启',                                          color: '#f59e0b' },
   opt:      { name: '可选拦截',     short: 'S3', hint: '默认关闭 · 按业务需要开启',                                          color: '#f59e0b' },
-  mark:     { name: '仅记录',       short: 'S4', hint: '默认关闭 · 可开启记录 · 不影响收款/出款处置',                          color: '#64748b' },
+  mark:     { name: '仅记录',       short: 'S4', hint: '默认关闭 · 命中仅记录 · 不影响收款/出款处置',                          color: '#64748b' },
 };
 /* 锁定策略：仅 S0 平台强锁（红锁），其余 S1/S2/S3/S4 全部商户可选 */
 const TIER_LOCKED = { lockHard: true, lock: false, rec: false, opt: false, mark: false };
