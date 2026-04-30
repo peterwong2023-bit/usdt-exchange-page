@@ -1,0 +1,2972 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>风险余额管理 · 商户后台</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* =========== Design tokens (从 docs/mockup/design.md 复用) =========== */
+:root {
+  --bg-main: #f3f5f9;
+  --bg-card: #ffffff;
+  --bg-soft: #f8fafc;
+  --border: #e5e8f0;
+  --border-dashed: #cbd5e1;
+  --border-subtle: rgba(226, 232, 240, 0.6);
+  --text-primary: #1e293b;
+  --text-secondary: #475569;
+  --text-tertiary: #64748b;
+  --text-light: #94a3b8;
+
+  --primary: #2563eb;
+  --primary-soft: rgba(37, 99, 235, 0.08);
+  --primary-softer: rgba(37, 99, 235, 0.04);
+  --purple: #8b5cf6;
+  --flow-deposit: #2563eb;
+  --flow-withdraw: #7c3aed;
+  --label-block: #7c1d6f;
+  --success: #10b981;
+  --success-soft: rgba(16, 185, 129, 0.08);
+  --success-softer: rgba(16, 185, 129, 0.04);
+  --warning: #d97706;
+  --warning-bg: #fef3c7;
+  --warning-border: #fcd34d;
+  --warning-soft: rgba(217, 119, 6, 0.08);
+  --warning-softer: rgba(217, 119, 6, 0.04);
+  --danger: #ef4444;
+  --danger-soft: rgba(239, 68, 68, 0.08);
+
+  --tier-low: #7AC74F;
+  --tier-mid: #FFD23F;
+  --tier-high: #F58A3C;
+  --tier-severe: #E94B3D;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 12px rgba(15, 23, 42, 0.02);
+  --shadow-md: 0 2px 4px rgba(15, 23, 42, 0.05), 0 8px 24px rgba(15, 23, 42, 0.04);
+  --shadow-lg: 0 4px 6px rgba(15, 23, 42, 0.05), 0 12px 32px rgba(15, 23, 42, 0.06);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  background-color: var(--bg-main);
+  background-image: radial-gradient(rgba(15,23,42,0.03) 1px, transparent 1px);
+  background-size: 20px 20px;
+  color: var(--text-primary);
+  font-family: 'Plus Jakarta Sans', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  font-size: 13px;
+  font-feature-settings: "cv11" 1, "ss01" 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  padding: 32px 24px 120px;
+}
+.mono {
+  font-family: 'Plus Jakarta Sans', ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1, "cv11" 1, "ss01" 1;
+  letter-spacing: -0.01em;
+}
+
+/* keyframes */
+@keyframes fadeUp { from { opacity: 0; transform: translateY(12px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes dropDown { from { opacity: 0; transform: translateY(-16px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes pulseSoft {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(217, 119, 6, .35); }
+  50%      { box-shadow: 0 0 0 6px transparent; }
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-3px); }
+  40%, 80% { transform: translateX(3px); }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.3); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.5); }
+
+/* Staggered Entrance */
+.balance-strip { animation: fadeUp .6s cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: .05s; }
+.buckets-grid > .bucket-card:nth-child(1) { animation: fadeUp .6s cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: .1s; }
+.buckets-grid > .bucket-card:nth-child(2) { animation: fadeUp .6s cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: .15s; }
+.buckets-grid > .bucket-card:nth-child(3) { animation: fadeUp .6s cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: .2s; }
+.buckets-grid > .bucket-card:nth-child(4) { animation: fadeUp .6s cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: .25s; }
+.return-card-v2 { animation: fadeUp .6s cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: .3s; }
+.card.no-pad { animation: fadeUp .6s cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: .35s; }
+
+
+/* =========== Layout =========== */
+.page {
+  max-width: 1160px;
+  margin: 0 auto;
+  position: relative;
+  padding-bottom: 80px;
+}
+h1.title {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -.3px;
+  margin-bottom: 6px;
+}
+p.subtitle {
+  font-size: 13px;
+  color: var(--text-tertiary);
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+p.subtitle b { color: var(--text-secondary); font-weight: 600; }
+
+/* =========== Card =========== */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-sm);
+}
+.card.no-pad { padding: 0; overflow: hidden; }
+.card-title {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-bottom: 10px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: 13px;
+  font-weight: 600;
+}
+.card-title .left { display: flex; align-items: center; gap: 8px; }
+.card-title .left .dot {
+  width: 4px; height: 14px; border-radius: 2px;
+  background: linear-gradient(180deg, var(--primary), #6366f1);
+}
+.card-title .left.warn .dot { background: linear-gradient(180deg, var(--warning), #b45309); }
+.card-title .left.success .dot { background: linear-gradient(180deg, var(--success), #047857); }
+.card-title .right { font-size: 11px; color: var(--text-tertiary); font-weight: 500; }
+
+/* =========== Tags =========== */
+.tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.6;
+  white-space: nowrap;
+}
+.tag-success { background: #dcfce7; color: #16a34a; border: 1px solid #bbf7d0; }
+.tag-primary { background: #dbeafe; color: #2563eb; border: 1px solid #bfdbfe; }
+.tag-warn    { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+.tag-danger  { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+.tag-neutral { background: #f1f5f9; color: var(--text-tertiary); border: 1px solid #e2e8f0; }
+.tag .pulse-dot {
+  display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--text-tertiary); margin-right: 4px; vertical-align: middle;
+  animation: pulseDot 1.5s ease-in-out infinite;
+}
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(1.4); }
+}
+
+/* =========== Summary card (3 cells) =========== */
+.summary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0;
+}
+.sum-cell {
+  padding: 18px 20px;
+  border-right: 1px solid var(--border);
+  position: relative;
+}
+.sum-cell:last-child { border-right: none; }
+.sum-cell .label {
+  font-size: 11.5px;
+  color: var(--text-tertiary);
+  letter-spacing: 0.04em;
+  font-weight: 600;
+  margin-bottom: 10px;
+  display: flex; align-items: center; gap: 5px;
+}
+.sum-cell .label .help {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: rgba(148,163,184,0.18);
+  color: var(--text-light);
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 9px;
+  font-weight: 700;
+  cursor: help;
+  position: relative;
+}
+.sum-cell .label .help[data-tip]:hover::after {
+  content: attr(data-tip);
+  position: absolute;
+  top: calc(100% + 6px); left: 0;
+  background: rgba(15, 23, 42, 0.95);
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  white-space: nowrap;
+  z-index: 10;
+  font-weight: 500;
+}
+.sum-cell .value {
+  font-family: 'Plus Jakarta Sans', ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.1;
+  letter-spacing: -.5px;
+  display: flex; align-items: baseline; gap: 5px;
+}
+.sum-cell .value .unit {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-tertiary);
+  letter-spacing: 0;
+}
+.sum-cell .desc {
+  margin-top: 8px;
+  font-size: 11.5px;
+  color: var(--text-tertiary);
+  line-height: 1.5;
+}
+.sum-cell.available .value { color: var(--text-primary); }
+.sum-cell.risk { background: linear-gradient(180deg, var(--primary-softer), transparent); }
+.sum-cell.risk .value { color: var(--primary); }
+.sum-cell.unsettled { background: linear-gradient(180deg, var(--warning-softer), transparent); }
+.sum-cell.unsettled .value { color: var(--warning); }
+.sum-cell .pulse {
+  position: absolute;
+  top: 16px; right: 16px;
+  width: 6px; height: 6px;
+  background: var(--warning);
+  border-radius: 50%;
+  animation: pulseSoft 2s ease-in-out infinite;
+}
+
+/* =========== Section header =========== */
+.section-header {
+  display: flex; align-items: center; gap: 10px;
+  margin: 24px 0 12px;
+}
+.section-header .bar {
+  width: 3px; height: 14px; border-radius: 2px;
+  background: linear-gradient(180deg, var(--primary), #6366f1);
+}
+.section-header.warn .bar { background: linear-gradient(180deg, var(--warning), #b45309); }
+.section-header.success .bar { background: linear-gradient(180deg, var(--success), #047857); }
+.section-header .title { font-size: 13px; font-weight: 700; color: var(--text-primary); letter-spacing: .2px; }
+.section-header .sub   { font-size: 11px; color: var(--text-tertiary); }
+.section-header .line  { flex: 1; height: 1px; background: var(--border); margin-left: 4px; }
+
+/* =========== Withdrawal form =========== */
+.withdraw-grid {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+.form-row { margin-bottom: 16px; }
+.form-row:last-child { margin-bottom: 0; }
+.form-label {
+  font-size: 11.5px;
+  color: var(--text-tertiary);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  margin-bottom: 6px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.form-label .req { color: var(--danger); margin-left: 2px; }
+.form-label .hint { color: var(--text-light); font-weight: 500; letter-spacing: 0; font-size: 11px; }
+
+.form-input, .form-textarea {
+  width: 100%;
+  padding: 11px 12px;
+  font-size: 13px;
+  font-family: inherit;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  transition: all .15s ease;
+}
+.form-input:focus, .form-textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-soft);
+}
+.form-input.is-invalid {
+  border-color: var(--danger);
+  background: rgba(239, 68, 68, 0.03);
+  animation: shake .35s ease;
+}
+.form-input.is-invalid:focus { box-shadow: 0 0 0 3px var(--danger-soft); }
+.form-helper {
+  margin-top: 6px;
+  font-size: 11.5px;
+  color: var(--text-light);
+  line-height: 1.5;
+}
+.form-error {
+  margin-top: 6px;
+  font-size: 11.5px;
+  color: var(--danger);
+  font-weight: 600;
+  line-height: 1.5;
+}
+.form-input.mono {
+  font-family: 'Plus Jakarta Sans', ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: 0;
+}
+.form-textarea { min-height: 64px; resize: vertical; }
+.form-fixed {
+  padding: 11px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-soft);
+  color: var(--text-secondary);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.form-fixed .lock {
+  font-size: 11px;
+  color: var(--text-light);
+  font-weight: 500;
+  display: flex; align-items: center; gap: 4px;
+}
+
+/* address row with check button */
+.addr-input-row {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+.addr-input-row .form-input { flex: 1; }
+.btn-check {
+  flex-shrink: 0;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  display: inline-flex; align-items: center; gap: 5px;
+  white-space: nowrap;
+  transition: all .15s ease;
+}
+.btn-check:hover:not(:disabled) {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--primary-softer);
+}
+.btn-check:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+.btn-check .spin {
+  width: 11px; height: 11px;
+  border: 1.5px solid var(--text-light);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
+
+/* address risk badge */
+.addr-risk-badge {
+  margin-top: 8px;
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+.addr-risk-badge .note {
+  color: var(--text-tertiary);
+  font-weight: 500;
+  margin-left: 4px;
+}
+.addr-risk-badge.clean { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+.addr-risk-badge.low { background: #ecfeff; color: #0e7490; border: 1px solid #a5f3fc; }
+.addr-risk-badge.mid { background: color-mix(in srgb, var(--tier-mid) 20%, white); color: color-mix(in srgb, var(--tier-mid) 70%, #111827); border: 1px solid color-mix(in srgb, var(--tier-mid) 45%, white); }
+.addr-risk-badge.high { background: color-mix(in srgb, var(--tier-high) 16%, white); color: color-mix(in srgb, var(--tier-high) 72%, #111827); border: 1px solid color-mix(in srgb, var(--tier-high) 45%, white); }
+.addr-risk-badge.severe { background: color-mix(in srgb, var(--tier-severe) 14%, white); color: color-mix(in srgb, var(--tier-severe) 72%, #111827); border: 1px solid color-mix(in srgb, var(--tier-severe) 45%, white); }
+.addr-risk-badge.invalid { background: color-mix(in srgb, var(--tier-severe) 14%, white); color: color-mix(in srgb, var(--tier-severe) 72%, #111827); border: 1px solid color-mix(in srgb, var(--tier-severe) 45%, white); }
+
+/* amount input */
+.amount-row {
+  position: relative;
+  display: flex; align-items: stretch;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-card);
+  overflow: hidden;
+  transition: all .15s ease;
+}
+.amount-row:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-soft);
+}
+.amount-row.is-invalid {
+  border-color: var(--danger);
+  animation: shake .35s ease;
+}
+.amount-row .amount-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 11px 12px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: 'Plus Jakarta Sans', ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+  background: transparent;
+}
+.amount-row .amount-suffix {
+  display: flex; align-items: center;
+  padding: 0 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  background: var(--bg-soft);
+  border-left: 1px solid var(--border);
+}
+.amount-quick { display: flex; gap: 6px; margin-top: 8px; }
+.amount-quick button {
+  flex: 1;
+  padding: 5px 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-size: 11.5px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all .2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.amount-quick button:hover, .amount-quick button.active {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--primary-softer);
+}
+.amount-quick button:active { transform: scale(0.96); }
+.amount-meta {
+  margin-top: 8px;
+  display: flex; justify-content: space-between;
+  font-size: 11.5px;
+  color: var(--text-tertiary);
+}
+.amount-meta .max-val { color: var(--primary); font-weight: 600; }
+.amount-meta .err { color: var(--danger); font-weight: 600; }
+
+/* obligation panel (right column) */
+.obligation-panel {
+  background: linear-gradient(180deg, #fffaf0, #fff);
+  border: 1px solid #fde68a;
+  border-radius: 12px;
+  padding: 16px;
+}
+.obligation-head {
+  display: flex; align-items: flex-start; gap: 10px;
+  margin-bottom: 12px;
+}
+.obligation-icon {
+  width: 30px; height: 30px;
+  border-radius: 8px;
+  background: var(--warning-soft);
+  color: var(--warning);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.obligation-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #92400e;
+  margin-bottom: 2px;
+}
+.obligation-sub {
+  font-size: 11.5px;
+  color: #b45309;
+  line-height: 1.5;
+}
+.obligation-flow {
+  background: rgba(255,255,255,.6);
+  border: 1px solid rgba(217,119,6,.18);
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 10px;
+}
+.obligation-leg {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  padding: 6px 0;
+}
+.obligation-leg .leg-num {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: var(--warning);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.obligation-leg .leg-num.done { background: var(--success); }
+.obligation-leg .leg-text { flex: 1; line-height: 1.5; }
+.obligation-leg .leg-text b { color: var(--text-primary); font-weight: 600; }
+.obligation-leg .leg-text .accent { color: var(--warning); font-weight: 600; }
+.obligation-divider {
+  height: 1px;
+  background: rgba(217,119,6,.15);
+  margin: 0 0 0 28px;
+}
+
+/* submit bar */
+.submit-bar {
+  display: flex; gap: 12px; margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px dashed var(--border);
+}
+.btn {
+  padding: 11px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all .15s ease;
+  display: inline-flex; align-items: center; gap: 6px;
+  white-space: nowrap;
+}
+.btn:disabled { opacity: .4; cursor: not-allowed; }
+.btn-primary {
+  background: var(--primary);
+  color: #fff;
+  flex: 1;
+  justify-content: center;
+}
+.btn-primary:hover:not(:disabled) {
+  background: #1d4ed8;
+  box-shadow: 0 4px 14px rgba(37,99,235,.35);
+  transform: translateY(-1px);
+}
+.btn-primary:active:not(:disabled) { transform: translateY(0); }
+.btn-ghost {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+.btn-ghost:hover { background: var(--bg-soft); }
+.btn-tbl {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11.5px;
+  font-weight: 600;
+  font-family: inherit;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all .15s ease;
+  display: inline-flex; align-items: center; gap: 4px;
+  white-space: nowrap;
+}
+.btn-tbl:hover:not(:disabled) {
+  background: var(--bg-soft);
+  border-color: var(--text-tertiary);
+  color: var(--text-primary);
+}
+.btn-tbl:disabled { opacity: .45; cursor: not-allowed; }
+.btn-tbl.is-warn { color: #b45309; border-color: #fde68a; background: #fffbeb; }
+.btn-tbl.is-warn:hover:not(:disabled) { background: #fef3c7; border-color: #f59e0b; color: #92400e; }
+.tbl-na { color: var(--text-light); font-size: 12px; }
+
+/* =========== Return address card · 方案B 步骤卡（精简版） =========== */
+.return-card-v2 {
+  padding: 16px 18px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow .2s ease, border-color .2s ease;
+}
+.return-card-v2:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--text-tertiary);
+}
+.return-content {
+  display: flex; flex-direction: column; gap: 8px;
+}
+.return-headline {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  flex-wrap: wrap;
+}
+.return-headline h3 {
+  margin: 0;
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+.return-pill {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 10px;
+  background: var(--primary-softer);
+  border: 1px solid var(--primary-soft);
+  border-radius: 999px;
+  font-size: 11.5px;
+  color: var(--primary);
+  white-space: nowrap;
+}
+.return-pill b {
+  font-family: 'Plus Jakarta Sans', ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: var(--primary);
+  font-size: 12.5px;
+  margin: 0 1px;
+}
+.return-pill .u { font-size: 10.5px; color: var(--text-tertiary); margin-left: 1px; }
+.return-sub {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  line-height: 1.55;
+}
+.return-addr-line {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-top: 2px;
+  flex-wrap: wrap;
+}
+.return-addr-line .chain-tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 9px;
+  border-radius: 5px;
+  background: #fff;
+  color: var(--text-primary);
+  font-size: 10.5px;
+  font-weight: 700;
+  flex-shrink: 0;
+  letter-spacing: 0.02em;
+  border: 1px solid var(--border);
+}
+.return-addr-line .addr {
+  flex: 1;
+  min-width: 220px;
+  font-family: 'Plus Jakarta Sans', ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 13px;
+  color: var(--text-primary);
+  font-weight: 600;
+  word-break: break-all;
+  line-height: 1.4;
+}
+.return-addr-line .ic-btn { width: 28px; height: 28px; flex-shrink: 0; }
+.ic-btn.ic-btn-qr {
+  color: var(--primary);
+  background: var(--primary-softer);
+  border-color: var(--primary-soft);
+}
+.ic-btn.ic-btn-qr:hover { background: var(--primary-soft); border-color: var(--primary); }
+
+.isolated-bar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 12px;
+  margin-top: 4px;
+  background: var(--primary-softer);
+  border: 1px solid var(--primary-soft);
+  border-radius: 8px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+.isolated-bar svg { flex-shrink: 0; color: var(--primary); }
+.isolated-bar b { color: var(--text-primary); font-weight: 700; }
+.isolated-bar .link {
+  margin-left: auto;
+  color: var(--primary);
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.isolated-bar .link:hover { color: #1d4ed8; text-decoration: underline; }
+
+@media (max-width: 720px) {
+  .return-card-v2 { padding: 14px; }
+}
+
+/* =========== QR popup =========== */
+.qr-modal { max-width: 320px; }
+.qr-modal .modal-header { padding: 16px 20px 12px; }
+.qr-modal .modal-body { padding: 8px 20px 16px; text-align: center; }
+.qr-display {
+  width: 240px; height: 240px;
+  margin: 0 auto 12px;
+  background:
+    repeating-linear-gradient(0deg, #1e293b 0 3px, #fff 3px 7px),
+    repeating-linear-gradient(90deg, #1e293b 0 3px, #fff 3px 7px);
+  background-blend-mode: difference;
+  border-radius: 6px;
+  position: relative;
+  border: 8px solid #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+}
+.qr-display::before, .qr-display::after, .qr-display .br {
+  content: '';
+  position: absolute;
+  width: 50px; height: 50px;
+  border: 7px solid #1e293b;
+  background: #fff;
+}
+.qr-display::before { top: 6px; left: 6px; }
+.qr-display::after  { top: 6px; right: 6px; }
+.qr-display .br { bottom: 6px; left: 6px; }
+.qr-addr-line {
+  font-family: 'Plus Jakarta Sans', ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11.5px;
+  color: var(--text-tertiary);
+  word-break: break-all;
+  margin-top: 8px;
+  padding: 8px 10px;
+  background: var(--bg-soft);
+  border-radius: 6px;
+  line-height: 1.5;
+}
+.qr-modal .modal-footer { padding: 12px 20px 16px; justify-content: center; border-top: none; }
+.qr-box .qr-label { font-size: 10.5px; color: var(--text-tertiary); font-weight: 500; }
+
+/* =========== Address-cell with antd icons (复用 design.md 标准) =========== */
+.addr-cell { display: inline-flex; align-items: center; gap: 6px; }
+.addr-cell .addr-text {
+  font-family: 'Plus Jakarta Sans', ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+.addr-cell .addr-text.is-hash { color: var(--primary); font-weight: 500; }
+.ic-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--text-light);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all .15s ease;
+  flex-shrink: 0;
+  text-decoration: none;
+}
+.ic-btn:hover { color: var(--primary); background: var(--primary-soft); }
+.ic-btn.copied { color: var(--success); background: var(--success-soft); }
+
+/* =========== Tables =========== */
+.tbl {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 12.5px;
+}
+.tbl th {
+  background: var(--bg-soft);
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.tbl td {
+  padding: 12px;
+  border-bottom: 1px solid var(--border-subtle);
+  vertical-align: middle;
+  color: var(--text-primary);
+}
+.tbl td:nth-child(2) {
+  white-space: nowrap;
+}
+.tbl tbody tr {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.tbl tr:last-child td { border-bottom: none; }
+.tbl tr:hover {
+  transform: translateX(4px);
+  box-shadow: -2px 0 0 var(--text-tertiary);
+}
+.tbl tr:hover td { background: rgba(248, 250, 252, .8); }
+.tbl td.mono {
+  font-family: 'Plus Jakarta Sans', ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 12.5px;
+}
+.tbl td.amount-out { color: var(--primary); font-weight: 700; }
+.tbl td.amount-in  { color: var(--success); font-weight: 700; }
+.tbl td.text-r { text-align: right; }
+.tbl .age-chip {
+  display: inline-flex; align-items: center; gap: 3px;
+  padding: 2px 7px;
+  border-radius: 5px;
+  background: var(--bg-soft);
+  color: var(--text-tertiary);
+  font-size: 10.5px;
+  font-weight: 600;
+}
+.tbl-empty {
+  padding: 64px 0;
+  text-align: center;
+  color: var(--text-tertiary);
+  font-size: 13px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.tbl-empty svg {
+  opacity: 0.6;
+  margin-bottom: 12px;
+}
+
+.tbl-tabs {
+  display: flex; gap: 4px;
+  border-bottom: 1px solid var(--border);
+  padding: 0 4px;
+  position: relative;
+}
+.tab-indicator {
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  height: 2px;
+  background: var(--primary);
+  border-radius: 2px;
+  transition: transform .4s cubic-bezier(0.34, 1.56, 0.64, 1), width .4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events: none;
+}
+.tbl-tab {
+  padding: 10px 16px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: all .15s ease;
+  background: transparent;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  font-family: inherit;
+}
+.tbl-tab:hover { color: var(--text-primary); }
+.tbl-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+.tbl-tab .count {
+  display: inline-block;
+  margin-left: 4px;
+  padding: 1px 6px;
+  background: var(--bg-soft);
+  color: var(--text-tertiary);
+  border-radius: 10px;
+  font-size: 10.5px;
+  font-weight: 600;
+}
+.tbl-tab.active .count { background: var(--primary-soft); color: var(--primary); }
+
+/* =========== Modal =========== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, .55);
+  backdrop-filter: blur(4px);
+  z-index: 100;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.modal-overlay.show { display: flex; animation: fadeUp .2s ease; }
+.modal {
+  background: var(--bg-card);
+  border-radius: 14px;
+  width: 100%;
+  max-width: 520px;
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  box-shadow: 0 24px 64px rgba(15, 23, 42, .25);
+  animation: fadeUp .4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.modal-header {
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: flex-start; gap: 12px;
+}
+.modal-header .ico {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.modal-header .title-block { flex: 1; }
+.modal-header .title { font-size: 15px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+.modal-header .sub { font-size: 12px; color: var(--text-tertiary); line-height: 1.5; }
+.modal-header .sub b { color: var(--text-primary); font-weight: 700; }
+.modal-body { padding: 18px 24px 8px; }
+
+.confirm-amount {
+  text-align: center;
+  padding: 4px 0 18px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.confirm-amount .amt-value {
+  font-size: 34px;
+  font-weight: 700;
+  color: var(--primary);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  font-family: 'Plus Jakarta Sans', ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-variant-numeric: tabular-nums;
+}
+.confirm-amount .amt-value .unit {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  margin-left: 8px;
+  letter-spacing: 0.04em;
+}
+.confirm-amount .amt-meta {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--text-tertiary);
+  font-weight: 500;
+}
+.modal-footer {
+  padding: 16px 24px 20px;
+  display: flex; gap: 10px; justify-content: flex-end;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.confirm-summary {
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 14px;
+}
+.confirm-row {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding: 6px 0;
+  font-size: 12.5px;
+}
+.confirm-row + .confirm-row { border-top: 1px dashed var(--border); }
+.confirm-row .k { color: var(--text-tertiary); font-weight: 500; }
+.confirm-row .v {
+  color: var(--text-primary);
+  font-weight: 600;
+  font-family: 'Plus Jakarta Sans', ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  word-break: break-all;
+  max-width: 70%;
+}
+.confirm-row .v.warn { color: var(--warning); }
+.confirm-row .v.primary { color: var(--primary); }
+.confirm-row .v.danger { color: var(--danger); }
+
+.otp-block {
+  background: var(--primary-soft);
+  border: 1px solid rgba(37, 99, 235, .25);
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 12px;
+}
+.otp-block .otp-head {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #1e3a8a;
+}
+.otp-block .otp-sub { font-size: 11.5px; color: #1e40af; margin-bottom: 10px; line-height: 1.55; }
+.otp-input-row { display: flex; }
+.otp-input {
+  flex: 1;
+  padding: 10px 12px;
+  font-size: 16px;
+  font-weight: 700;
+  font-family: 'Plus Jakarta Sans', ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: 0.5em;
+  border: 1px solid rgba(37, 99, 235, .3);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--text-primary);
+  text-align: center;
+}
+.otp-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-soft);
+}
+
+/* =========== Toast =========== */
+#toastWrap {
+  position: fixed;
+  top: 20px; left: 50%;
+  transform: translateX(-50%);
+  z-index: 200;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.toast {
+  background: rgba(15, 23, 42, .95);
+  color: #fff;
+  padding: 9px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  display: flex; align-items: center; gap: 8px;
+  animation: dropDown .4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: opacity .3s ease, transform .4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 12px 32px rgba(15, 23, 42, .2);
+}
+.toast.success svg { color: var(--success); }
+.toast.error svg { color: var(--danger); }
+.toast.warn svg { color: var(--warning); }
+
+/* responsive */
+@media (max-width: 960px) {
+  .summary-grid { grid-template-columns: 1fr; }
+  .sum-cell { border-right: none; border-bottom: 1px solid var(--border); }
+  .sum-cell:last-child { border-bottom: none; }
+  .withdraw-grid { grid-template-columns: 1fr; }
+}
+
+/* =========== Aesthetic Overrides (Deep Beautification) =========== */
+/* 1. Staggered Entrance Animations */
+@keyframes slideFade {
+  0% { opacity: 0; transform: translateY(12px) scale(0.99); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.page > * { animation: slideFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.page > :nth-child(1) { animation-delay: 0ms; }
+.page > :nth-child(2) { animation-delay: 40ms; }
+.page > :nth-child(3) { animation-delay: 80ms; }
+.page > :nth-child(4) { animation-delay: 120ms; }
+.page > :nth-child(5) { animation-delay: 160ms; }
+
+/* 2. Page Atmosphere Mesh */
+.page::before {
+  content: '';
+  position: absolute;
+  top: -200px; left: 50%;
+  transform: translateX(-50%);
+  width: 1400px; height: 600px;
+  background: 
+    radial-gradient(ellipse at 40% 30%, rgba(37,99,235,0.05) 0%, rgba(37,99,235,0) 50%),
+    radial-gradient(ellipse at 70% 40%, rgba(16,185,129,0.03) 0%, rgba(16,185,129,0) 40%);
+  z-index: -1;
+  pointer-events: none;
+  filter: blur(40px);
+}
+
+/* 3. Refined Summary Cards */
+.summary-grid {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(12px);
+  border-radius: var(--radius-sm);
+}
+.sum-cell {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), background 0.3s ease;
+}
+.sum-cell:hover {
+  background: linear-gradient(180deg, var(--bg-card) 0%, rgba(255,255,255,0.5) 100%);
+  box-shadow: 0 4px 24px rgba(15,23,42,0.03) inset;
+}
+.sum-cell .value {
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.sum-cell:hover .value {
+  transform: translateY(-2px) scale(1.02);
+}
+/* Elegant cell dividers */
+.sum-cell:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  right: 0; top: 20%; bottom: 20%;
+  width: 1px;
+  background: linear-gradient(180deg, transparent 0%, var(--border-subtle) 50%, transparent 100%);
+}
+@media (min-width: 721px) {
+  .sum-cell { border-right: none; }
+}
+
+/* 4. Tactile Inputs & Buttons */
+.form-input {
+  transition: border-color 0.2s ease, box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s ease;
+  background: var(--bg-card);
+  box-shadow: 0 1px 2px rgba(15,23,42,0.02) inset;
+}
+.form-input:hover { border-color: rgba(37,99,235,0.4); }
+.form-input:focus {
+  background: #fff;
+  box-shadow: 0 0 0 3px var(--primary-soft), 0 2px 4px rgba(15,23,42,0.02) inset;
+}
+.pct-btn {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.pct-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(15,23,42,0.06);
+}
+.pct-btn:active {
+  transform: translateY(1px);
+  box-shadow: none;
+}
+
+/* 5. Table & Tag Polish */
+.tbl tbody tr {
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+.tbl tbody tr:hover {
+  background: var(--bg-soft);
+  transform: scale(1.002) translateX(2px);
+}
+.tag {
+  box-shadow: 0 1px 2px rgba(15,23,42,0.03);
+}
+
+.return-addr-line {
+  box-shadow: 0 1px 3px rgba(15,23,42,0.02) inset;
+}
+
+/* =========================================================
+   Bucket Mode — Balance Strip / Bucket Cards / Drawer
+   ========================================================= */
+
+/* 顶部余额薄条 */
+.balance-strip {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px 18px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-sm);
+}
+.bs-cell { flex: 1; display: flex; flex-direction: column; justify-content: center; min-width: 0; }
+.bs-cell + .bs-cell { padding-left: 24px; }
+.bs-cell .bs-label {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  letter-spacing: 0.04em;
+  margin-bottom: 6px;
+  display: inline-flex; align-items: center; gap: 5px;
+}
+.bs-cell .bs-label .help {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: rgba(148,163,184,0.18);
+  color: var(--text-light);
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 9px; font-weight: 700; cursor: help; position: relative;
+}
+.bs-cell .bs-label .help[data-tip]:hover::after {
+  content: attr(data-tip);
+  position: absolute;
+  top: calc(100% + 6px); left: 0;
+  background: rgba(15, 23, 42, 0.95);
+  color: #fff;
+  padding: 6px 10px; border-radius: 6px;
+  font-size: 11px; white-space: nowrap;
+  z-index: 10; font-weight: 500;
+}
+.bs-cell .bs-value {
+  font-family: 'Plus Jakarta Sans', ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.1;
+  letter-spacing: -.4px;
+}
+.bs-cell .bs-value .u { font-size: 11px; color: var(--text-tertiary); font-weight: 500; margin-left: 3px; }
+.bs-cell.unsettled .bs-value { color: var(--primary); }
+.bs-divider {
+  width: 1px;
+  background: linear-gradient(180deg, transparent 0%, var(--border-subtle) 50%, transparent 100%);
+  margin: 0 4px;
+}
+
+/* 4 桶网格 */
+.buckets-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.bucket-card {
+  position: relative;
+  display: flex; flex-direction: column;
+  padding: 16px 16px 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: transform .25s cubic-bezier(0.16, 1, 0.3, 1), border-color .2s ease, box-shadow .25s ease;
+  overflow: hidden;
+  isolation: isolate;
+}
+.bucket-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--bk-color, var(--text-light));
+  opacity: 0.55;
+  transition: opacity .25s ease, height .25s ease;
+}
+.bucket-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at top right, var(--bk-soft, transparent), transparent 60%);
+  z-index: -1;
+  opacity: 0.5;
+  transition: opacity .25s ease;
+}
+.bucket-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--bk-color, var(--border));
+  box-shadow: 0 8px 24px rgba(15,23,42,0.06), 0 2px 6px var(--bk-shadow, rgba(15,23,42,0.04));
+}
+.bucket-card:hover::before { opacity: 1; height: 4px; }
+.bucket-card:hover::after { opacity: 1; }
+.bucket-card:active:not(.disabled) { transform: translateY(0) scale(0.98); }
+.bucket-card.disabled { cursor: not-allowed; }
+.bucket-card.disabled:hover { transform: none; box-shadow: var(--shadow-sm); }
+.bucket-card.disabled .bk-cta { color: var(--text-light); }
+.bk-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px;
+}
+.bk-tier {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--bk-color);
+  letter-spacing: 0.01em;
+}
+.bk-tier .dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--bk-color);
+  box-shadow: 0 0 0 3px var(--bk-soft);
+}
+.bk-range {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--text-light);
+  font-family: 'Plus Jakarta Sans', ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-variant-numeric: tabular-nums;
+  background: var(--bg-soft);
+  padding: 2px 7px;
+  border-radius: 5px;
+  border: 1px solid var(--border);
+}
+.bk-amount {
+  font-family: 'Plus Jakarta Sans', ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.15;
+  letter-spacing: -.5px;
+  display: flex; align-items: baseline;
+  margin-bottom: 10px;
+}
+.bk-amount .bk-frac {
+  color: var(--text-light);
+  font-size: 14px;
+  font-weight: 600;
+}
+.bk-amount .u { font-size: 11px; color: var(--text-tertiary); font-weight: 500; margin-left: 5px; letter-spacing: 0; }
+.bk-share {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 10px;
+}
+.bk-share-bar {
+  flex: 1;
+  height: 4px;
+  background: var(--bg-soft);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.bk-share-fill {
+  height: 100%;
+  background: var(--bk-color);
+  border-radius: 999px;
+  transition: width .6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.bk-share-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+.bk-foot {
+  display: flex; align-items: center; justify-content: flex-end;
+  padding-top: 10px;
+  border-top: 1px dashed var(--border);
+  gap: 8px;
+}
+.bk-tag {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--bk-color);
+  line-height: 1.4;
+}
+.bk-cta {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--bk-color);
+  white-space: nowrap;
+  opacity: 0.6;
+  transition: opacity .2s ease, transform .2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.bucket-card:hover .bk-cta { opacity: 1; transform: translateX(2px); }
+
+/* tier color tokens per bucket */
+.bucket-card[data-bucket="low"] {
+  --bk-color: var(--tier-low);
+  --bk-soft: color-mix(in srgb, var(--tier-low) 14%, transparent);
+  --bk-shadow: color-mix(in srgb, var(--tier-low) 24%, transparent);
+}
+.bucket-card[data-bucket="low"] .bk-share-fill {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--tier-low) 78%, #111827) 0%, var(--tier-low) 100%);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--tier-low) 45%, transparent);
+}
+.bucket-card[data-bucket="mid"] {
+  --bk-color: var(--tier-mid);
+  --bk-soft: color-mix(in srgb, var(--tier-mid) 14%, transparent);
+  --bk-shadow: color-mix(in srgb, var(--tier-mid) 24%, transparent);
+}
+.bucket-card[data-bucket="mid"] .bk-share-fill {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--tier-mid) 78%, #111827) 0%, var(--tier-mid) 100%);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--tier-mid) 45%, transparent);
+}
+.bucket-card[data-bucket="high"] {
+  --bk-color: var(--tier-high);
+  --bk-soft: color-mix(in srgb, var(--tier-high) 14%, transparent);
+  --bk-shadow: color-mix(in srgb, var(--tier-high) 24%, transparent);
+}
+.bucket-card[data-bucket="high"] .bk-share-fill {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--tier-high) 78%, #111827) 0%, var(--tier-high) 100%);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--tier-high) 45%, transparent);
+}
+.bucket-card[data-bucket="severe"] {
+  --bk-color: var(--tier-severe);
+  --bk-soft: color-mix(in srgb, var(--tier-severe) 12%, transparent);
+  --bk-shadow: color-mix(in srgb, var(--tier-severe) 22%, transparent);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--tier-severe) 14%, white) 0%, var(--bg-card) 60%);
+}
+.bucket-card[data-bucket="severe"] .bk-share-fill {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--tier-severe) 78%, #111827) 0%, var(--tier-severe) 100%);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--tier-severe) 45%, transparent);
+}
+
+/* tooltip on disabled severe card */
+.bucket-card.disabled::before { opacity: 0.85; }
+.bucket-card.disabled .bk-cta::after {
+  content: '';
+}
+.bucket-card[data-tip]:hover::before { opacity: 1; }
+.bucket-card[data-tip]::before { /* keep top color bar */ }
+.bucket-tip {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  background: rgba(15, 23, 42, 0.95);
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .15s ease, transform .15s ease;
+  z-index: 5;
+}
+.bucket-card.disabled:hover .bucket-tip {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* responsive grid */
+@media (max-width: 960px) {
+  .buckets-grid { grid-template-columns: repeat(2, 1fr); }
+  .balance-strip { flex-direction: column; gap: 12px; padding: 14px 16px; }
+  .balance-strip .bs-cell + .bs-cell { padding-left: 0; padding-top: 12px; border-top: 1px solid var(--border-subtle); }
+  .bs-divider { display: none; }
+}
+@media (max-width: 540px) {
+  .buckets-grid { grid-template-columns: 1fr; }
+}
+
+/* =========================================================
+   Drawer (slide-in withdrawal form)
+   ========================================================= */
+.drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, .3);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 90;
+  display: none;
+  opacity: 0;
+  transition: opacity .2s ease;
+}
+.drawer-overlay.show {
+  display: block;
+  opacity: 1;
+}
+.drawer {
+  position: fixed;
+  top: 0; right: 0;
+  width: 460px;
+  max-width: 100vw;
+  height: 100vh;
+  background: var(--bg-card);
+  box-shadow: -16px 0 48px rgba(15, 23, 42, .12);
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform .35s cubic-bezier(0.34, 1.32, 0.64, 1);
+}
+.drawer-overlay.show .drawer { transform: translateX(0); }
+.drawer-head {
+  padding: 20px 22px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: flex-start;
+  gap: 12px;
+  background: linear-gradient(180deg, var(--dr-soft, var(--bg-soft)), transparent);
+}
+.drawer[data-bucket="low"]    { --dr-soft: color-mix(in srgb, var(--tier-low) 10%, transparent); --dr-color: var(--tier-low); }
+.drawer[data-bucket="mid"]    { --dr-soft: color-mix(in srgb, var(--tier-mid) 10%, transparent); --dr-color: var(--tier-mid); }
+.drawer[data-bucket="high"]   { --dr-soft: color-mix(in srgb, var(--tier-high) 10%, transparent); --dr-color: var(--tier-high); }
+.drawer[data-bucket="severe"] { --dr-soft: color-mix(in srgb, var(--tier-severe) 10%, transparent); --dr-color: var(--tier-severe); }
+.drawer-tier-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 10px;
+  background: var(--bg-card);
+  border: 1px solid var(--dr-color, var(--border));
+  color: var(--dr-color, var(--text-secondary));
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.drawer-tier-tag .dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--dr-color, var(--text-secondary));
+}
+.drawer-title-block { flex: 1; }
+.drawer-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -.2px;
+  line-height: 1.3;
+  margin-bottom: 4px;
+}
+.drawer-close {
+  width: 32px; height: 32px;
+  border: none;
+  background: transparent;
+  color: var(--text-light);
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: all .15s ease;
+  font-family: inherit;
+}
+.drawer-close:hover { background: var(--bg-soft); color: var(--text-secondary); }
+.drawer-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 18px 22px 16px;
+}
+.drawer-balance {
+  display: flex; align-items: baseline; justify-content: space-between;
+  padding: 14px 16px;
+  background: linear-gradient(180deg, var(--dr-soft), transparent);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 18px;
+}
+.drawer-balance .db-label {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  letter-spacing: 0.04em;
+}
+.drawer-balance .db-amount {
+  font-family: 'Plus Jakarta Sans', ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--dr-color, var(--text-primary));
+  letter-spacing: -.3px;
+}
+.drawer-balance .db-amount .u { font-size: 11px; color: var(--text-tertiary); font-weight: 500; margin-left: 4px; letter-spacing: 0; }
+
+
+.drawer-foot {
+  padding: 14px 22px 18px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 10px;
+  background: var(--bg-card);
+}
+.drawer-foot .btn-ghost { flex: 0 0 auto; }
+.drawer-foot .btn-primary { flex: 1; }
+
+/* drawer's obligation panel reuses outer styles, just slightly compact */
+.drawer .obligation-panel { padding: 14px; }
+.drawer .obligation-flow { padding: 10px; }
+
+/* drawer's amount input uses --dr-color for accents */
+.drawer .amount-row:focus-within {
+  border-color: var(--dr-color);
+  box-shadow: 0 0 0 3px var(--dr-color, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--dr-color) 15%, transparent);
+}
+.drawer .amount-quick button:hover,
+.drawer .amount-quick button.active {
+  border-color: var(--dr-color);
+  color: var(--dr-color);
+  background: color-mix(in srgb, var(--dr-color) 6%, transparent);
+}
+.drawer .form-input:focus {
+  border-color: var(--dr-color);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--dr-color) 12%, transparent);
+}
+.drawer .btn-check:hover:not(:disabled) {
+  border-color: var(--dr-color);
+  color: var(--dr-color);
+  background: color-mix(in srgb, var(--dr-color) 5%, transparent);
+}
+.drawer .btn-primary {
+  background: var(--dr-color);
+}
+.drawer .btn-primary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--dr-color) 88%, black);
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--dr-color) 35%, transparent);
+}
+
+@media (max-width: 540px) {
+  .drawer { width: 100vw; }
+}
+
+/* =========================================================
+   Bucket filter pills above tables
+   ========================================================= */
+.bucket-filter {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(248, 250, 252, .6);
+}
+.bucket-filter .bf-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  letter-spacing: 0.04em;
+  margin-right: 4px;
+}
+.bf-pill {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  font-family: inherit;
+  transition: all .15s ease;
+  display: inline-flex; align-items: center; gap: 5px;
+}
+.bf-pill:hover { color: var(--text-primary); border-color: var(--text-tertiary); }
+.bf-pill .dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--bf-color, var(--text-light));
+}
+.bf-pill[data-bucket="low"]    { --bf-color: var(--tier-low); }
+.bf-pill[data-bucket="mid"]    { --bf-color: var(--tier-mid); }
+.bf-pill[data-bucket="high"]   { --bf-color: var(--tier-high); }
+.bf-pill[data-bucket="severe"] { --bf-color: var(--tier-severe); }
+.bf-pill.active {
+  background: var(--bf-color, var(--primary));
+  border-color: var(--bf-color, var(--primary));
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+}
+.bf-pill.active .dot { background: #fff; }
+.bf-pill[data-bucket="all"].active {
+  background: var(--text-primary);
+  border-color: var(--text-primary);
+  color: #fff;
+}
+
+/* tier-tag in tables */
+.bucket-tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 8px;
+  border-radius: 5px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  background: var(--bt-bg);
+  color: var(--bt-color);
+  border: 1px solid var(--bt-border);
+}
+.bucket-tag[data-bucket="low"]    { --bt-bg: color-mix(in srgb, var(--tier-low) 22%, white); --bt-color: color-mix(in srgb, var(--tier-low) 78%, #111827); --bt-border: color-mix(in srgb, var(--tier-low) 48%, white); }
+.bucket-tag[data-bucket="mid"]    { --bt-bg: color-mix(in srgb, var(--tier-mid) 24%, white); --bt-color: color-mix(in srgb, var(--tier-mid) 78%, #111827); --bt-border: color-mix(in srgb, var(--tier-mid) 48%, white); }
+.bucket-tag[data-bucket="high"]   { --bt-bg: color-mix(in srgb, var(--tier-high) 20%, white); --bt-color: color-mix(in srgb, var(--tier-high) 78%, #111827); --bt-border: color-mix(in srgb, var(--tier-high) 48%, white); }
+.bucket-tag[data-bucket="severe"] { --bt-bg: color-mix(in srgb, var(--tier-severe) 18%, white); --bt-color: color-mix(in srgb, var(--tier-severe) 78%, #111827); --bt-border: color-mix(in srgb, var(--tier-severe) 48%, white); }
+.bucket-tag .dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+</style>
+</head>
+<body>
+<div class="page">
+  <h1 class="title">风险余额管理</h1>
+  <p class="subtitle">
+    查看不同风险等级余额，并按需发起提款。
+  </p>
+
+  <!-- ========== 顶部余额薄条（商户总余额 / 待返还） ========== -->
+  <div class="balance-strip">
+    <div class="bs-cell">
+      <div class="bs-label">
+        商户余额
+        <span class="help" data-tip="商户在 USDT 链上的全部余额，含不同风险等级">?</span>
+      </div>
+      <div class="bs-value"><span id="sumMerchant">2,009,219</span><span class="u">USDT</span></div>
+    </div>
+    <div class="bs-divider"></div>
+    <div class="bs-cell unsettled">
+      <div class="bs-label">
+        待返还
+        <span class="help" data-tip="累计已提款但尚未返还的金额">?</span>
+      </div>
+      <div class="bs-value mono"><span id="sumUnsettled">9,000</span><span class="u">USDT</span></div>
+    </div>
+  </div>
+
+  <!-- ========== 4 个风险桶 ========== -->
+  <div class="section-header">
+    <div class="bar"></div>
+    <div class="title">风险余额</div>
+    <div class="sub">· 点击卡片发起提款</div>
+    <div class="line"></div>
+  </div>
+
+  <div class="buckets-grid" id="bucketsGrid">
+    <button type="button" class="bucket-card" data-bucket="low">
+      <div class="bk-head">
+        <span class="bk-tier"><span class="dot"></span>低风险</span>
+        <span class="bk-range">0 – 20</span>
+      </div>
+      <div class="bk-amount">
+        <span id="bkLowInt">1,615,589</span><span class="bk-frac" id="bkLowFrac">.12</span>
+        <span class="u">USDT</span>
+      </div>
+      <div class="bk-share">
+        <div class="bk-share-bar"><div class="bk-share-fill" id="bkLowFill" style="width: 80%;"></div></div>
+        <div class="bk-share-label" id="bkLowPct">占比 80%</div>
+      </div>
+      <div class="bk-foot">
+        <span class="bk-cta">发起提款 →</span>
+      </div>
+    </button>
+
+    <button type="button" class="bucket-card" data-bucket="mid">
+      <div class="bk-head">
+        <span class="bk-tier"><span class="dot"></span>中风险</span>
+        <span class="bk-range">20 – 50</span>
+      </div>
+      <div class="bk-amount">
+        <span id="bkMidInt">198,720</span><span class="bk-frac" id="bkMidFrac">.50</span>
+        <span class="u">USDT</span>
+      </div>
+      <div class="bk-share">
+        <div class="bk-share-bar"><div class="bk-share-fill" id="bkMidFill" style="width: 10%;"></div></div>
+        <div class="bk-share-label" id="bkMidPct">占比 10%</div>
+      </div>
+      <div class="bk-foot">
+        <span class="bk-cta">发起提款 →</span>
+      </div>
+    </button>
+
+    <button type="button" class="bucket-card" data-bucket="high">
+      <div class="bk-head">
+        <span class="bk-tier"><span class="dot"></span>高风险</span>
+        <span class="bk-range">50 – 80</span>
+      </div>
+      <div class="bk-amount">
+        <span id="bkHighInt">156,403</span><span class="bk-frac" id="bkHighFrac">.12</span>
+        <span class="u">USDT</span>
+      </div>
+      <div class="bk-share">
+        <div class="bk-share-bar"><div class="bk-share-fill" id="bkHighFill" style="width: 8%;"></div></div>
+        <div class="bk-share-label" id="bkHighPct">占比 8%</div>
+      </div>
+      <div class="bk-foot">
+        <span class="bk-cta">发起提款 →</span>
+      </div>
+    </button>
+
+    <button type="button" class="bucket-card" data-bucket="severe">
+      <div class="bk-head">
+        <span class="bk-tier"><span class="dot"></span>严重风险</span>
+        <span class="bk-range">80+</span>
+      </div>
+      <div class="bk-amount">
+        <span id="bkSevereInt">38,506</span><span class="bk-frac" id="bkSevereFrac">.76</span>
+        <span class="u">USDT</span>
+      </div>
+      <div class="bk-share">
+        <div class="bk-share-bar"><div class="bk-share-fill" id="bkSevereFill" style="width: 2%;"></div></div>
+        <div class="bk-share-label" id="bkSeverePct">占比 2%</div>
+      </div>
+      <div class="bk-foot">
+        <span class="bk-cta">发起提款 →</span>
+      </div>
+    </button>
+  </div>
+
+  <!-- ========== 返还地址 ========== -->
+  <section id="returnSection">
+  <div class="section-header">
+    <div class="bar"></div>
+    <div class="title">返还地址</div>
+    <div class="line"></div>
+  </div>
+
+  <div class="return-card-v2">
+    <div class="return-content">
+      <div class="return-headline">
+        <h3>返还地址</h3>
+        <span class="return-pill">待返还 <b id="sideOutstanding">9,000</b> <span class="u">USDT</span></span>
+      </div>
+      <div class="return-sub">提款后，可将等额 USDT 返还到此地址。</div>
+      <div class="return-addr-line">
+        <span class="chain-tag">●&nbsp;TRC20</span>
+        <span class="addr mono" id="returnAddr">TXrEturNaDdReSs7K8M2P4Q6RxyZab1Cd9Ef3</span>
+        <button class="ic-btn" id="copyReturnBtn" data-action="copy" aria-label="复制地址" title="复制地址">
+          <svg viewBox="64 64 896 896" width="14" height="14" fill="currentColor"><path d="M832 64H296c-4.4 0-8 3.6-8 8v56h-72c-39.8 0-72 32.2-72 72v680c0 39.8 32.2 72 72 72h440c39.8 0 72-32.2 72-72v-56h72c39.8 0 72-32.2 72-72V136c0-39.8-32.2-72-72-72zM664 880H232V256h432v624zm200-128H736V200c0-39.8-32.2-72-72-72H384V136c0-4.4 3.6-8 8-8h440c4.4 0 8 3.6 8 8v616z"/></svg>
+        </button>
+        <a class="ic-btn" target="_blank" rel="noopener" id="returnAddrLink" aria-label="链上查询" title="链上查询">
+          <svg viewBox="64 64 896 896" width="14" height="14" fill="currentColor"><path d="M574 665.4a8.03 8.03 0 00-11.3 0L446.5 781.6c-53.8 53.8-144.6 59.5-204 0-59.5-59.5-53.8-150.2 0-204l116.2-116.2c3.1-3.1 3.1-8.2 0-11.3l-39.8-39.8a8.03 8.03 0 00-11.3 0L191.4 526.5c-84.6 84.6-84.6 221.5 0 306s221.5 84.6 306 0l116.2-116.2c3.1-3.1 3.1-8.2 0-11.3L574 665.4zm258.6-474c-84.6-84.6-221.5-84.6-306 0L410.3 307.6a8.03 8.03 0 000 11.3l39.7 39.7c3.1 3.1 8.2 3.1 11.3 0l116.2-116.2c53.8-53.8 144.6-59.5 204 0 59.5 59.5 53.8 150.2 0 204L665.3 562.6a8.03 8.03 0 000 11.3l39.8 39.8c3.1 3.1 8.2 3.1 11.3 0l116.2-116.2c84.5-84.6 84.5-221.5 0-306.1zM610.1 372.3a8.03 8.03 0 00-11.3 0L372.3 598.7a8.03 8.03 0 000 11.3l39.6 39.6c3.1 3.1 8.2 3.1 11.3 0l226.4-226.4c3.1-3.1 3.1-8.2 0-11.3l-39.5-39.6z"/></svg>
+        </a>
+        <button class="ic-btn ic-btn-qr" id="qrBtn" aria-label="扫码" title="扫码查看二维码">
+          <svg viewBox="64 64 896 896" width="14" height="14" fill="currentColor"><path d="M468 128H160c-17.7 0-32 14.3-32 32v308c0 4.4 3.6 8 8 8h332c4.4 0 8-3.6 8-8V136c0-4.4-3.6-8-8-8zm-56 284H192V192h220v220zm-138-74h56c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8h-56c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm594-210H560c-4.4 0-8 3.6-8 8v332c0 4.4 3.6 8 8 8h332c4.4 0 8-3.6 8-8V160c0-17.7-14.3-32-32-32zm-32 284H612V192h220v220zm-138-74h56c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8h-56c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zM468 552H136c-4.4 0-8 3.6-8 8v332c0 17.7 14.3 32 32 32h308c4.4 0 8-3.6 8-8V560c0-4.4-3.6-8-8-8zm-56 284H192V612h220v224zm-138-74h56c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8h-56c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm398-210h-48c-4.4 0-8 3.6-8 8v134h-78V560c0-4.4-3.6-8-8-8H560c-4.4 0-8 3.6-8 8v332c0 4.4 3.6 8 8 8h114c4.4 0 8-3.6 8-8V762h78v134c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8V560c0-4.4-3.6-8-8-8zM672 836h-60v-60h60v60zm192 0h-60v-60h60v60zm0-126h-60v-60h60v60z"/></svg>
+        </button>
+      </div>
+      <div class="isolated-bar" id="isolatedBar" style="display:none;">
+        <svg viewBox="64 64 896 896" width="14" height="14" fill="currentColor"><path d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm-32 232c0-4.4 3.6-8 8-8h48c4.4 0 8 3.6 8 8v272c0 4.4-3.6 8-8 8h-48c-4.4 0-8-3.6-8-8V296zm32 440a48.01 48.01 0 010-96 48.01 48.01 0 010 96z"/></svg>
+        <span>当前有 <b id="isolatedCount">1</b> 笔返还被隔离，请处理</span>
+        <a class="link" id="goIsolated" href="javascript:;">前往处理 →</a>
+      </div>
+    </div>
+  </div>
+  </section>
+
+  <!-- ========== 流水 ========== -->
+  <div class="section-header">
+    <div class="bar"></div>
+    <div class="title">资金流水</div>
+    <div class="sub">· 提款与返还分开记录</div>
+    <div class="line"></div>
+  </div>
+
+  <div class="card no-pad">
+    <div class="tbl-tabs" id="tblTabs">
+      <button class="tbl-tab active" data-tab="out">提款记录<span class="count" id="tabOutCount">8</span></button>
+      <button class="tbl-tab" data-tab="back">返还记录<span class="count" id="tabBackCount">6</span></button>
+      <div class="tab-indicator" id="tabIndicator"></div>
+    </div>
+    <div class="bucket-filter" id="bucketFilter">
+      <span class="bf-label">风险等级</span>
+      <button type="button" class="bf-pill active" data-bucket="all">全部</button>
+      <button type="button" class="bf-pill" data-bucket="low"><span class="dot"></span>低</button>
+      <button type="button" class="bf-pill" data-bucket="mid"><span class="dot"></span>中</button>
+      <button type="button" class="bf-pill" data-bucket="high"><span class="dot"></span>高</button>
+      <button type="button" class="bf-pill" data-bucket="severe"><span class="dot"></span>严重</button>
+    </div>
+    <div id="tabPaneOut">
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th>时间</th>
+            <th>风险等级</th>
+            <th>出款地址</th>
+            <th>收款地址</th>
+            <th class="text-r">金额</th>
+            <th>风险评分</th>
+            <th>链上 hash</th>
+            <th>备注</th>
+            <th>状态</th>
+            <th>时长</th>
+          </tr>
+        </thead>
+        <tbody id="tbodyOut"></tbody>
+      </table>
+    </div>
+    <div id="tabPaneBack" style="display:none;">
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th>到账时间</th>
+            <th>风险等级</th>
+            <th>来源地址</th>
+            <th class="text-r">到账金额</th>
+            <th>风险结果</th>
+            <th>链上 hash</th>
+            <th>状态</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="tbodyBack"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ========== Drawer · 单风险等级提款表单 ========== -->
+<div class="drawer-overlay" id="bkDrawer" aria-hidden="true">
+  <aside class="drawer" data-bucket="low" id="drawerEl">
+    <header class="drawer-head">
+      <div class="drawer-title-block">
+        <div class="drawer-tier-tag"><span class="dot"></span><span id="drTierName">低风险</span> · <span id="drTierRange">0–20</span></div>
+        <div class="drawer-title">从<span id="drTierTitle">低风险</span>余额发起提款</div>
+      </div>
+      <button type="button" class="drawer-close" id="drCloseBtn" aria-label="关闭">
+        <svg viewBox="64 64 896 896" width="14" height="14" fill="currentColor"><path d="M563.8 512l262.5-312.9c4.4-5.2.7-13.1-6.1-13.1h-79.8c-4.7 0-9.2 2.1-12.3 5.7L511.6 449.8 295.1 191.7c-3-3.6-7.5-5.7-12.3-5.7H203c-6.8 0-10.5 7.9-6.1 13.1L459.4 512 196.9 824.9A7.95 7.95 0 00203 838h79.8c4.7 0 9.2-2.1 12.3-5.7l216.5-258.1 216.5 258.1c3 3.6 7.5 5.7 12.3 5.7h79.8c6.8 0 10.5-7.9 6.1-13.1L563.8 512z"/></svg>
+      </button>
+    </header>
+    <div class="drawer-body">
+      <div class="drawer-balance">
+        <div class="db-label">可提款余额</div>
+        <div class="db-amount"><span id="drMax">—</span><span class="u">USDT</span></div>
+      </div>
+
+      <!-- 表单 -->
+      <div class="form-row">
+        <div class="form-label">网络<span class="hint">仅支持 Tron</span></div>
+        <div class="form-fixed">
+          <span><b style="color:var(--success);">●</b> TRC20 · Tron</span>
+          <span class="lock">
+            <svg viewBox="64 64 896 896" width="11" height="11" fill="currentColor"><path d="M832 464H332V240c0-44.2 35.8-80 80-80h200c44.2 0 80 35.8 80 80v44c0 4.4 3.6 8 8 8h60c4.4 0 8-3.6 8-8v-44c0-83.9-68.1-152-152-152H412c-83.9 0-152 68.1-152 152v224h-68c-17.7 0-32 14.3-32 32v384c0 17.7 14.3 32 32 32h640c17.7 0 32-14.3 32-32V496c0-17.7-14.3-32-32-32zM540 701v53c0 4.4-3.6 8-8 8h-40c-4.4 0-8-3.6-8-8v-53a48.01 48.01 0 1156 0z"/></svg>
+            固定
+          </span>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-label"><span>收款地址<span class="req">*</span></span></div>
+        <div class="addr-input-row">
+          <input type="text" class="form-input mono" id="addrInput" placeholder="请输入收款地址" autocomplete="off">
+          <button type="button" class="btn-check" id="checkAddrBtn" disabled>
+            <svg viewBox="64 64 896 896" width="12" height="12" fill="currentColor"><path d="M909.6 854.5L649.9 594.8C690.2 542.7 712 479 712 412c0-80.2-31.3-155.4-87.9-212.1-56.6-56.7-132-87.9-212.1-87.9s-155.5 31.3-212.1 87.9C143.2 256.5 112 331.8 112 412c0 80.1 31.3 155.5 87.9 212.1C256.5 680.8 331.8 712 412 712c67 0 130.6-21.8 182.7-62l259.7 259.6a8.2 8.2 0 0011.6 0l43.6-43.5a8.2 8.2 0 000-11.6zM570.4 570.4C528 612.7 471.8 636 412 636s-116-23.3-158.4-65.6C211.3 528 188 471.8 188 412s23.3-116.1 65.6-158.4C296 211.3 352.2 188 412 188s116.1 23.2 158.4 65.6S636 352.2 636 412s-23.3 116.1-65.6 158.4z"/></svg>
+            <span id="checkBtnText">检查地址</span>
+          </button>
+        </div>
+        <div class="form-helper">TRC20 地址，T 开头 34 位</div>
+        <div id="addrRiskBadge" style="display:none;"></div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-label">
+          <span>提款金额<span class="req">*</span></span>
+          <span class="hint">不超过可提款余额</span>
+        </div>
+        <div class="amount-row" id="amountRow">
+          <input type="text" class="amount-input" id="amountInput" placeholder="0.00" inputmode="decimal" autocomplete="off">
+          <div class="amount-suffix">USDT</div>
+        </div>
+        <div class="amount-quick">
+          <button type="button" data-pct="0.25">25%</button>
+          <button type="button" data-pct="0.5">50%</button>
+          <button type="button" data-pct="0.75">75%</button>
+          <button type="button" data-pct="1">全部</button>
+        </div>
+        <div class="amount-meta">
+          <span>可提款 <span class="max-val mono" id="amountMax">—</span> USDT</span>
+          <span id="amountErr" class="err" style="display:none;"></span>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-label">备注</div>
+        <textarea class="form-textarea" id="memoInput" placeholder="可填写订单号或备注"></textarea>
+      </div>
+
+      <!-- 返还义务（仅中/高桶显示） -->
+      <div class="obligation-panel" id="drObligation" style="display:none; margin-top: 4px;">
+        <div class="obligation-head">
+          <div class="obligation-icon">
+            <svg viewBox="64 64 896 896" width="16" height="16" fill="currentColor"><path d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm-32 232c0-4.4 3.6-8 8-8h48c4.4 0 8 3.6 8 8v272c0 4.4-3.6 8-8 8h-48c-4.4 0-8-3.6-8-8V296zm32 440a48.01 48.01 0 010-96 48.01 48.01 0 010 96z"/></svg>
+          </div>
+          <div>
+            <div class="obligation-title">提款后需关注返还</div>
+            <div class="obligation-sub">审核通过并打款后，系统会计入待返还金额。</div>
+          </div>
+        </div>
+        <div class="obligation-flow">
+          <div class="obligation-leg">
+            <div class="leg-num">1</div>
+            <div class="leg-text">提交提款 <b class="mono"><span id="legOutAmt">—</span> USDT</b></div>
+          </div>
+          <div class="obligation-divider"></div>
+          <div class="obligation-leg">
+            <div class="leg-num">2</div>
+            <div class="leg-text">平台审核并打款</div>
+          </div>
+          <div class="obligation-divider"></div>
+          <div class="obligation-leg">
+            <div class="leg-num done">✓</div>
+            <div class="leg-text">将 <span class="accent mono"><span id="legBackAmt">—</span> USDT</span> 返还至返还地址</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <footer class="drawer-foot">
+      <button type="button" class="btn btn-ghost" id="drCancelBtn">取消</button>
+      <button type="button" class="btn btn-primary" id="submitBtn" disabled>
+        <svg viewBox="64 64 896 896" width="14" height="14" fill="currentColor"><path d="M869 487.8L491.2 159.9c-2.9-2.5-6.6-3.9-10.5-3.9h-88.5c-7.4 0-10.8 9.2-5.2 14L799.1 488 387 854c-5.6 4.9-2.2 14 5.2 14h91.5c1.9 0 3.8-.7 5.2-2L869 536.2a32.07 32.07 0 000-48.4z"/></svg>
+        <span id="drSubmitText">发起提款</span>
+      </button>
+    </footer>
+  </aside>
+</div>
+
+<!-- ========== 二次确认 Modal ========== -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="ico">
+        <!-- antd ExclamationCircleOutlined -->
+        <svg viewBox="64 64 896 896" width="18" height="18" fill="currentColor"><path d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm-32 232c0-4.4 3.6-8 8-8h48c4.4 0 8 3.6 8 8v272c0 4.4-3.6 8-8 8h-48c-4.4 0-8-3.6-8-8V296zm32 440a48.01 48.01 0 010-96 48.01 48.01 0 010 96z"/></svg>
+      </div>
+      <div class="title-block">
+        <div class="title" id="cfmTitle">提交提款申请</div>
+        <div class="sub" id="cfmSubtitle">提交后将发送至平台审核，审核通过后由平台统一打款。</div>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div class="confirm-amount">
+        <div class="amt-value"><span id="cfmAmount">—</span><span class="unit">USDT</span></div>
+        <div class="amt-meta">TRC20 · Tron</div>
+      </div>
+      <div class="confirm-summary">
+        <div class="confirm-row"><span class="k">收款地址</span><span class="v mono" id="cfmAddr">—</span></div>
+        <div class="confirm-row"><span class="k">备注</span><span class="v" id="cfmMemo">—</span></div>
+      </div>
+
+      <div class="otp-block" id="otpBlock" style="display:none;">
+        <div class="otp-head">
+          <!-- antd SafetyCertificateOutlined -->
+          <svg viewBox="64 64 896 896" width="13" height="13" fill="currentColor"><path d="M866.9 169.9L527.1 54.1C523 52.7 517.5 52 512 52s-11 .7-15.1 2.1L157.1 169.9c-8.3 2.8-15.1 12.4-15.1 21.2v482.4c0 8.8 5.7 20.4 12.6 25.9L499.3 968c3.5 2.7 8 4.1 12.6 4.1s9.2-1.4 12.6-4.1l344.7-268.6c6.9-5.4 12.6-17 12.6-25.9V191.1c.2-8.8-6.6-18.3-14.9-21.2zM792 549c0 33.4-6.5 65.8-19.4 96.3-12.4 29.5-30.2 56-52.8 78.6-22.6 22.6-49 40.4-78.6 52.8C610.8 789.5 578.4 796 545 796h-66c-33.4 0-65.8-6.5-96.3-19.4-29.5-12.4-56-30.2-78.6-52.8-22.6-22.6-40.4-49-52.8-78.6C238.5 614.8 232 582.4 232 549V274.4l280-95.4 280 95.4V549z M694.5 340.7L481.9 633.4a16.1 16.1 0 01-26 0l-126.4-174c-3.8-5.3 0-12.7 6.5-12.7h55.2c5.1 0 10 2.5 13 6.6l64.7 89.1 150.9-207.8c3-4.1 7.8-6.6 13-6.6H688c6.5 0 10.3 7.4 6.5 12.7z"/></svg>
+          大额提款 · 需要 Google 验证码
+        </div>
+        <div class="otp-sub">本次金额超过该风险等级可提款余额的 50%，请输入 Google Authenticator 的 6 位验证码。</div>
+        <div class="otp-input-row">
+          <input type="text" class="otp-input" id="otpInput" maxlength="6" placeholder="······" inputmode="numeric" autocomplete="one-time-code">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" id="cancelBtn">取消</button>
+      <button class="btn btn-primary" id="finalConfirmBtn" disabled style="flex: 0 0 auto;">发起提款</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 退款 Modal ========== -->
+<div class="modal-overlay" id="refundModal">
+  <div class="modal refund-modal">
+    <div class="modal-header">
+      <div class="ico" style="background:var(--warning-soft); color:var(--warning);">
+        <!-- antd RollbackOutlined -->
+        <svg viewBox="64 64 896 896" width="18" height="18" fill="currentColor"><path d="M793 242H366v-74c0-6.7-7.7-10.4-12.9-6.3l-142 112c-4.1 3.2-4.1 9.4 0 12.6l142 112c5.2 4.1 12.9.4 12.9-6.3v-74h415v470H175c-4.4 0-8 3.6-8 8v60c0 4.4 3.6 8 8 8h618c35.3 0 64-28.7 64-64V306c0-35.3-28.7-64-64-64z"/></svg>
+      </div>
+      <div class="title-block">
+        <div class="title">发起隔离退款</div>
+        <div class="sub">该笔返还已被隔离，未计入返还金额。可填写地址退回。</div>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div class="confirm-amount" style="border-color: rgba(217,119,6,.2);">
+        <div class="amt-value" style="color:var(--warning);"><span id="rfAmount">—</span><span class="unit">USDT</span></div>
+        <div class="amt-meta">TRC20 · Tron</div>
+      </div>
+
+      <div class="confirm-summary">
+        <div class="confirm-row"><span class="k">来源地址</span><span class="v mono" id="rfFrom">—</span></div>
+        <div class="confirm-row"><span class="k">到账时间</span><span class="v mono" id="rfTime">—</span></div>
+        <div class="confirm-row"><span class="k">风险结果</span><span class="v"><span class="tag tag-danger">风险（已隔离）</span></span></div>
+      </div>
+
+      <div class="form-row" style="margin-top: 16px;">
+        <div class="form-label">
+          <span>退款地址<span class="req">*</span></span>
+        </div>
+        <input type="text" class="form-input mono" id="rfAddrInput" placeholder="请输入退款地址" autocomplete="off">
+        <div class="form-helper">地址不做风控检查，请自行核对。</div>
+        <div id="rfAddrError" class="form-error" style="display:none;">地址格式不正确（需 TRC20，T 开头 34 位）</div>
+      </div>
+
+      <div class="form-row" style="margin-top: 12px;">
+        <div class="form-label">
+          <span>备注</span>
+        </div>
+        <input type="text" class="form-input" id="rfMemoInput" placeholder="例如：原路退回 / 客户 ABC 退款" maxlength="60">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" id="rfCancelBtn">取消</button>
+      <button class="btn btn-primary" id="rfSubmitBtn" disabled style="background:var(--warning); border-color:var(--warning);">确认发起退款</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== QR Popup ========== -->
+<div class="modal-overlay" id="qrModal">
+  <div class="modal qr-modal">
+    <div class="modal-header">
+      <div class="ico" style="background:var(--success-soft); color:var(--success);">
+        <svg viewBox="64 64 896 896" width="18" height="18" fill="currentColor"><path d="M468 128H160c-17.7 0-32 14.3-32 32v308c0 4.4 3.6 8 8 8h332c4.4 0 8-3.6 8-8V136c0-4.4-3.6-8-8-8zm-56 284H192V192h220v220zm458-284H560c-4.4 0-8 3.6-8 8v332c0 4.4 3.6 8 8 8h332c4.4 0 8-3.6 8-8V160c0-17.7-14.3-32-32-32zm-32 284H612V192h220v220zM468 552H136c-4.4 0-8 3.6-8 8v332c0 17.7 14.3 32 32 32h308c4.4 0 8-3.6 8-8V560c0-4.4-3.6-8-8-8zm-56 284H192V612h220v224z"/></svg>
+      </div>
+      <div class="title-block">
+        <div class="title">返还地址二维码</div>
+        <div class="sub">使用 TRC20 钱包扫码</div>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div class="qr-display"><div class="br"></div></div>
+      <div class="qr-addr-line" id="qrAddrText">TXrEturNaDdReSs7K8M2P4Q6RxyZab1Cd9Ef3</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" id="qrCloseBtn">关闭</button>
+      <button class="btn btn-primary" id="qrCopyBtn">复制地址</button>
+    </div>
+  </div>
+</div>
+
+<div id="toastWrap"></div>
+
+<script>
+/* ===========================================================
+   Mock data + state · 4 桶模型
+=========================================================== */
+const RETURN_ADDRESS = 'TXrEturNaDdReSs7K8M2P4Q6RxyZab1Cd9Ef3';
+
+// 商户在 Tron 上的几个提款地址（多等级/轮换示意）
+const SOURCE_ADDRESSES = {
+  'A': 'TSrcA1bC2d3E4f5G6h7J8k9L0m1N2o3P4q',
+  'B': 'TSrcB5r6S7t8U9v0W1x2Y3z4A5b6C7d8E9',
+};
+
+// 4 桶余额（含小数）
+const SUM = {
+  merchant: 2009219.50,
+  low:    1615589.12,
+  mid:    198720.50,
+  high:   156403.12,
+  severe: 38506.76,
+};
+
+// 桶配置（标签、范围、颜色 token、文案、是否需要审核）
+const BUCKET_META = {
+  low: {
+    name: '低风险',
+    range: '0–20',
+    color: 'var(--tier-low)',
+    cta: '发起提款',
+    requiresReview: false,
+    obligation: false,
+    tipClass: 'tip-low',
+    tipHTML: '该风险等级提款无需平台审核。',
+  },
+  mid: {
+    name: '中风险',
+    range: '20–50',
+    color: 'var(--tier-mid)',
+    cta: '发起提款',
+    requiresReview: true,
+    obligation: true,
+    tipClass: 'tip-mid',
+    tipHTML: '该风险等级提款需平台审核。',
+  },
+  high: {
+    name: '高风险',
+    range: '50–80',
+    color: 'var(--tier-high)',
+    cta: '发起提款',
+    requiresReview: true,
+    obligation: true,
+    tipClass: 'tip-high',
+    tipHTML: '该风险等级提款需平台审核。',
+  },
+  severe: {
+    name: '严重风险',
+    range: '80+',
+    color: 'var(--tier-severe)',
+    cta: '发起提款',
+    requiresReview: true,
+    obligation: true,
+    tipClass: 'tip-high',
+    tipHTML: '该风险等级提款需平台审核。',
+  },
+};
+
+const state = {
+  withdrawals: [
+    { time: '2026-04-01 09:14:22', bucket: 'high',   src: 'A', addr: 'TQwEr5tYuI6oP1L2k3J4h5G6f7D8s9A0bC', amount: 50000, score: 72, category: '混币器',  hash: '',                                                                  memo: 'OTC #2024-12',  age: '2 小时', status: 'reviewing' },
+    { time: '2026-03-31 16:48:51', bucket: 'mid',    src: 'B', addr: 'TKi9oP8L7m6N5b4V3c2X1z9Q8w7E6r5t4Y', amount: 30000, score: 38, category: null,      hash: 'e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6', memo: '供应商 ABC',    age: '1 天',   status: 'paid' },
+    { time: '2026-03-29 11:32:08', bucket: 'low',    src: 'A', addr: 'TPq2W3e4R5t6Y7u8I9o0p1A2s3D4f5G6h7', amount: 40000, score: 12, category: null,      hash: '12345678abcdef1234567890abcdef1234567890abcdef1234567890abcdef12', memo: '—',           age: '3 天',   status: 'paid' },
+    { time: '2026-03-22 14:05:17', bucket: 'high',   src: 'A', addr: 'TJk1L2m3N4b5V6c7X8z9Q0w1E2r3T4y5U6', amount: 25000, score: 78, category: '赌博',    hash: '',                                                                  memo: '驳回：地址命中黑名单', age: '10 天', status: 'rejected' },
+    { time: '2026-03-15 10:21:44', bucket: 'mid',    src: 'B', addr: 'TZx9C8v7B6n5M4l3K2j1H0g9F8d7S6a5Q4', amount: 60000, score: 42, category: null,      hash: 'fedcba98fedcba98fedcba98fedcba98fedcba98fedcba98fedcba98fedcba98', memo: 'OTC #2024-05',  age: '17 天',  status: 'paid' },
+    { time: '2026-03-08 19:38:55', bucket: 'low',    src: 'A', addr: 'TBn4M5x6Z7a8S9d0F1g2H3j4K5l6Q7w8E9', amount: 18000, score: 8,  category: null,      hash: '4567890ab4567890ab4567890ab4567890ab4567890ab4567890ab4567890abc', memo: '—',           age: '24 天',  status: 'paid' },
+    { time: '2026-02-26 08:11:02', bucket: 'high',   src: 'B', addr: 'TVc3X4z5A6s7D8f9G0h1J2k3L4q5w6e7R8', amount: 35000, score: 68, category: '暗网',    hash: 'cdef0123cdef0123cdef0123cdef0123cdef0123cdef0123cdef0123cdef0123', memo: '供应商 XYZ',    age: '34 天',  status: 'paid' },
+    { time: '2026-02-12 15:55:39', bucket: 'mid',    src: 'A', addr: 'TUy6T5r4E3w2Q1a0S9d8F7g6H5j4K3l2P1', amount: 22000, score: 35, category: null,      hash: '98765432987654329876543298765432987654329876543298765432987654ab', memo: '清桶 #02',     age: '48 天',  status: 'paid' },
+  ],
+  returns: [
+    { time: '2026-04-01 11:02:33', bucket: 'mid',    from: 'TBackR1aSdFgHjKlZxCvBnM2qWeRtYuI3o', amount: 45000, judgement: 'clean', hash: 'ba01ba01ba01ba01ba01ba01ba01ba01ba01ba01ba01ba01ba01ba01ba01ba01', status: 'accepted' },
+    { time: '2026-03-30 22:18:05', bucket: 'severe', from: 'TBackR8eRtYuIoPaSdFgHjKlZxCvBnM6qX', amount: 8500,  judgement: 'risk',  hash: 'ba06ba06ba06ba06ba06ba06ba06ba06ba06ba06ba06ba06ba06ba06ba06ba06', status: 'isolated' },
+    { time: '2026-03-30 09:15:48', bucket: 'low',    from: 'TBackR2pQwErTyUiOpAsDfGhJkLzXcVbN4', amount: 28000, judgement: 'clean', hash: 'ba02ba02ba02ba02ba02ba02ba02ba02ba02ba02ba02ba02ba02ba02ba02ba02', status: 'accepted' },
+    { time: '2026-03-29 17:44:10', bucket: 'high',   from: 'TBackR3mNbVcXzAsDfGhJkLpOiUyTrEwQ5', amount: 35000, judgement: 'clean', hash: 'ba03ba03ba03ba03ba03ba03ba03ba03ba03ba03ba03ba03ba03ba03ba03ba03', status: 'accepted' },
+    { time: '2026-03-25 13:28:01', bucket: 'severe', from: 'TBackR4hGfDsApLkOiUyHtErTwQzXcVbN6', amount: 12000, judgement: 'risk',  hash: 'ba04ba04ba04ba04ba04ba04ba04ba04ba04ba04ba04ba04ba04ba04ba04ba04', status: 'isolated' },
+    { time: '2026-03-18 20:51:55', bucket: 'mid',    from: 'TBackR5cVbNmAsDfGhJkLpOiUyTrEwQzX7', amount: 30000, judgement: 'clean', hash: 'ba05ba05ba05ba05ba05ba05ba05ba05ba05ba05ba05ba05ba05ba05ba05ba05', status: 'accepted' },
+  ],
+  // 当前抽屉打开的桶
+  activeBucket: null,
+  // 流水筛选
+  bucketFilter: 'all',
+  form: {
+    addr: '',
+    amount: '',
+    memo: '',
+    addrRisk: null,   // null | { invalid } | { checking } | { score, level, label }
+  },
+};
+
+/* ===========================================================
+   Utilities
+=========================================================== */
+const fmt = n => Math.round(Number(n)).toLocaleString('en-US');
+const fmtAmount = n => Number(n).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+const shortAddr = a => a && a.length > 14 ? a.slice(0, 7) + '...' + a.slice(-5) : (a || '');
+const shortHash = h => h && h.length > 16 ? h.slice(0, 8) + '...' + h.slice(-6) : (h || '');
+const tronscanAddr = a => `https://tronscan.org/#/address/${a}`;
+const tronscanTx   = h => `https://tronscan.org/#/transaction/${h}`;
+
+function showToast(text, type = 'success') {
+  const wrap = document.getElementById('toastWrap');
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  const ico = type === 'error'
+    ? `<svg width="14" height="14" viewBox="64 64 896 896" fill="currentColor"><path d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm165.4 618.2l-66-.3L512 563.4l-99.3 118.4-66.1.3c-4.4 0-8-3.5-8-8 0-1.9.7-3.7 1.9-5.2l130.1-155L340.5 359a8.32 8.32 0 01-1.9-5.2c0-4.4 3.6-8 8-8l66.1.3L512 464.6l99.3-118.4 66-.3c4.4 0 8 3.5 8 8 0 1.9-.7 3.7-1.9 5.2L553.5 514l130 155c1.2 1.5 1.9 3.3 1.9 5.2 0 4.4-3.6 8-8 8z"/></svg>`
+    : type === 'warn'
+    ? `<svg width="14" height="14" viewBox="64 64 896 896" fill="currentColor"><path d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm-32 232c0-4.4 3.6-8 8-8h48c4.4 0 8 3.6 8 8v272c0 4.4-3.6 8-8 8h-48c-4.4 0-8-3.6-8-8V296zm32 440a48.01 48.01 0 010-96 48.01 48.01 0 010 96z"/></svg>`
+    : `<svg width="14" height="14" viewBox="64 64 896 896" fill="currentColor"><path d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm193.5 301.7l-210.6 292a31.8 31.8 0 01-51.7 0L318.5 484.9c-3.8-5.3 0-12.7 6.5-12.7h46.9c10.2 0 19.9 4.9 25.9 13.3l71.2 98.8 157.2-218c6-8.3 15.6-13.3 25.9-13.3H699c6.5 0 10.3 7.4 6.5 12.7z"/></svg>`;
+  el.innerHTML = `${ico}${text}`;
+  wrap.appendChild(el);
+  setTimeout(() => el.style.opacity = '0', 2000);
+  setTimeout(() => el.remove(), 2400);
+}
+
+function copyText(value) {
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(value);
+  } else {
+    const ta = document.createElement('textarea');
+    ta.value = value;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  }
+}
+
+/* Reusable: cell with antd icons */
+function addrCell(value, type /* 'addr' | 'hash' */) {
+  const url = type === 'hash' ? tronscanTx(value) : tronscanAddr(value);
+  const display = type === 'hash' ? shortHash(value) : shortAddr(value);
+  const klass = type === 'hash' ? 'addr-text mono is-hash' : 'addr-text mono';
+  return `
+    <span class="addr-cell">
+      <span class="${klass}" title="${value}">${display}</span>
+      <button class="ic-btn" data-copy="${value}" aria-label="复制" title="复制">
+        <svg viewBox="64 64 896 896" width="13" height="13" fill="currentColor"><path d="M832 64H296c-4.4 0-8 3.6-8 8v56h-72c-39.8 0-72 32.2-72 72v680c0 39.8 32.2 72 72 72h440c39.8 0 72-32.2 72-72v-56h72c39.8 0 72-32.2 72-72V136c0-39.8-32.2-72-72-72zM664 880H232V256h432v624zm200-128H736V200c0-39.8-32.2-72-72-72H384V136c0-4.4 3.6-8 8-8h440c4.4 0 8 3.6 8 8v616z"/></svg>
+      </button>
+      <a class="ic-btn" target="_blank" rel="noopener" href="${url}" aria-label="链上查询" title="链上查询">
+        <svg viewBox="64 64 896 896" width="13" height="13" fill="currentColor"><path d="M574 665.4a8.03 8.03 0 00-11.3 0L446.5 781.6c-53.8 53.8-144.6 59.5-204 0-59.5-59.5-53.8-150.2 0-204l116.2-116.2c3.1-3.1 3.1-8.2 0-11.3l-39.8-39.8a8.03 8.03 0 00-11.3 0L191.4 526.5c-84.6 84.6-84.6 221.5 0 306s221.5 84.6 306 0l116.2-116.2c3.1-3.1 3.1-8.2 0-11.3L574 665.4zm258.6-474c-84.6-84.6-221.5-84.6-306 0L410.3 307.6a8.03 8.03 0 000 11.3l39.7 39.7c3.1 3.1 8.2 3.1 11.3 0l116.2-116.2c53.8-53.8 144.6-59.5 204 0 59.5 59.5 53.8 150.2 0 204L665.3 562.6a8.03 8.03 0 000 11.3l39.8 39.8c3.1 3.1 8.2 3.1 11.3 0l116.2-116.2c84.5-84.6 84.5-221.5 0-306.1zM610.1 372.3a8.03 8.03 0 00-11.3 0L372.3 598.7a8.03 8.03 0 000 11.3l39.6 39.6c3.1 3.1 8.2 3.1 11.3 0l226.4-226.4c3.1-3.1 3.1-8.2 0-11.3l-39.5-39.6z"/></svg>
+      </a>
+    </span>`;
+}
+
+/* ===========================================================
+   Accounting · 仅中/高桶产生「待返还」
+=========================================================== */
+function totalOutForReturn() {
+  // 只有需要审核的桶（mid/high）才记入"应返还"，低风险桶视为已结
+  return state.withdrawals
+    .filter(w => w.status === 'paid' && BUCKET_META[w.bucket]?.obligation)
+    .reduce((s, w) => s + w.amount, 0);
+}
+function totalAcceptedReturn() {
+  return state.returns.filter(r => r.status === 'accepted').reduce((s, r) => s + r.amount, 0);
+}
+function unsettled() { return Math.max(0, totalOutForReturn() - totalAcceptedReturn()); }
+
+function bucketTotal() { return SUM.low + SUM.mid + SUM.high + SUM.severe; }
+
+/* ===========================================================
+   Renderers
+=========================================================== */
+function renderBuckets() {
+  const total = bucketTotal();
+  const buckets = [
+    { key: 'low',    intId: 'bkLowInt',    fracId: 'bkLowFrac',    fillId: 'bkLowFill',    pctId: 'bkLowPct',    val: SUM.low },
+    { key: 'mid',    intId: 'bkMidInt',    fracId: 'bkMidFrac',    fillId: 'bkMidFill',    pctId: 'bkMidPct',    val: SUM.mid },
+    { key: 'high',   intId: 'bkHighInt',   fracId: 'bkHighFrac',   fillId: 'bkHighFill',   pctId: 'bkHighPct',   val: SUM.high },
+    { key: 'severe', intId: 'bkSevereInt', fracId: 'bkSevereFrac', fillId: 'bkSevereFill', pctId: 'bkSeverePct', val: SUM.severe },
+  ];
+  buckets.forEach(b => {
+    const intPart = Math.floor(b.val);
+    const fracPart = b.val - intPart;
+    document.getElementById(b.intId).textContent = intPart.toLocaleString('en-US');
+    const fracEl = document.getElementById(b.fracId);
+    if (fracPart > 0.005) {
+      fracEl.textContent = '.' + fracPart.toFixed(2).slice(2);
+      fracEl.style.display = '';
+    } else {
+      fracEl.textContent = '';
+    }
+    const pct = total > 0 ? (b.val / total * 100) : 0;
+    document.getElementById(b.fillId).style.width = Math.max(2, pct) + '%';
+    document.getElementById(b.pctId).textContent = '占比 ' + pct.toFixed(pct < 10 ? 1 : 0) + '%';
+  });
+}
+
+function renderSummary() {
+  document.getElementById('sumMerchant').textContent = fmt(SUM.merchant);
+  document.getElementById('sumUnsettled').textContent = fmt(unsettled());
+
+  document.getElementById('sideOutstanding').textContent = fmt(unsettled());
+
+  renderIsolatedBar();
+  renderBuckets();
+
+  // 返还地址区块可见性：仅当存在未返还金额或隔离记录时显示
+  const isolatedCount = state.returns.filter(r => r.status === 'isolated').length;
+  const section = document.getElementById('returnSection');
+  if (section) {
+    section.style.display = (unsettled() > 0 || isolatedCount > 0) ? '' : 'none';
+  }
+}
+
+function renderIsolatedBar() {
+  const bar = document.getElementById('isolatedBar');
+  const cnt = document.getElementById('isolatedCount');
+  if (!bar) return;
+  const isolatedCount = state.returns.filter(r => r.status === 'isolated').length;
+  if (isolatedCount > 0) {
+    cnt.textContent = isolatedCount;
+    bar.style.display = 'flex';
+  } else {
+    bar.style.display = 'none';
+  }
+}
+
+function bucketTagHTML(bucket) {
+  if (!bucket) return '<span class="tbl-na">—</span>';
+  const meta = BUCKET_META[bucket];
+  return `<span class="bucket-tag" data-bucket="${bucket}"><span class="dot"></span>${meta.name}</span>`;
+}
+
+const STATUS_MAP = {
+  reviewing: { txt: '审核中', cls: 'tag-neutral', pulse: true },
+  paid:      { txt: '已打款', cls: 'tag-success' },
+  rejected:  { txt: '已驳回', cls: 'tag-danger' },
+};
+
+const emptySvg = `<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="64" height="64" rx="16" fill="var(--bg-soft)"/><path d="M42.6667 24H21.3333C19.8606 24 18.6667 25.1939 18.6667 26.6667V42.6667C18.6667 44.1394 19.8606 45.3333 21.3333 45.3333H42.6667C44.1394 45.3333 45.3333 44.1394 45.3333 42.6667V26.6667C45.3333 25.1939 44.1394 24 42.6667 24Z" stroke="var(--border-dashed)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M26.6667 18.6667L37.3333 18.6667" stroke="var(--border-dashed)" stroke-width="2" stroke-linecap="round"/><path d="M26.6667 32L37.3333 32" stroke="var(--border-dashed)" stroke-width="2" stroke-linecap="round"/><path d="M26.6667 37.3333L32 37.3333" stroke="var(--border-dashed)" stroke-width="2" stroke-linecap="round"/></svg>`;
+
+function renderWithdrawalsTable() {
+  const tb = document.getElementById('tbodyOut');
+  const filter = state.bucketFilter;
+  const filtered = filter === 'all'
+    ? state.withdrawals
+    : state.withdrawals.filter(w => w.bucket === filter);
+  document.getElementById('tabOutCount').textContent = state.withdrawals.length;
+  if (!filtered.length) {
+    const msg = filter === 'all' ? '暂无提款记录' : `当前风险等级（${BUCKET_META[filter]?.name || filter}）暂无记录`;
+    tb.innerHTML = `<tr><td colspan="10" class="tbl-empty">${emptySvg}<div>${msg}</div></td></tr>`;
+    return;
+  }
+  tb.innerHTML = filtered.map(w => {
+    const scoreColor = w.score >= 80 ? 'var(--tier-severe)' : w.score >= 50 ? 'var(--tier-high)' : w.score >= 20 ? 'var(--tier-mid)' : 'var(--tier-low)';
+    const scoreBg    = w.score >= 80 ? '#fee2e2'             : w.score >= 50 ? '#ffedd5'             : w.score >= 20 ? '#fef9c3'             : '#dcfce7';
+    const catSegment = w.category ? ` · <b style="font-weight:700;">${w.category}</b>` : '';
+    const scoreChip = `<span class="tag" style="background:${scoreBg}; color:${scoreColor}; border:1px solid ${scoreColor}55;"><b style="font-weight:700; font-variant-numeric:tabular-nums;">${w.score}</b>${catSegment}</span>`;
+    const status = STATUS_MAP[w.status] || STATUS_MAP.paid;
+    const statusTag = `<span class="tag ${status.cls}">${status.pulse ? '<span class="pulse-dot"></span>' : ''}${status.txt}</span>`;
+    const hashCell = w.hash ? addrCell(w.hash, 'hash') : '<span style="color:var(--text-light);">—</span>';
+    const amountStyle = w.status === 'rejected' ? 'color:var(--text-light); text-decoration:line-through;' : '';
+    return `
+      <tr>
+        <td class="mono">${w.time}</td>
+        <td>${bucketTagHTML(w.bucket)}</td>
+        <td>${addrCell(SOURCE_ADDRESSES[w.src], 'addr')}</td>
+        <td>${addrCell(w.addr, 'addr')}</td>
+        <td class="mono amount-out text-r" style="${amountStyle}">${fmt(w.amount)}</td>
+        <td>${scoreChip}</td>
+        <td>${hashCell}</td>
+        <td>${w.memo}</td>
+        <td>${statusTag}</td>
+        <td><span class="age-chip">${w.age}</span></td>
+      </tr>`;
+  }).join('');
+}
+
+function renderReturnsTable() {
+  const tb = document.getElementById('tbodyBack');
+  const filter = state.bucketFilter;
+  const filtered = filter === 'all'
+    ? state.returns
+    : state.returns.filter(r => r.bucket === filter);
+  document.getElementById('tabBackCount').textContent = state.returns.length;
+  if (!filtered.length) {
+    const msg = filter === 'all' ? '暂无返还记录' : `当前风险等级（${BUCKET_META[filter]?.name || filter}）暂无返还记录`;
+    tb.innerHTML = `<tr><td colspan="8" class="tbl-empty">${emptySvg}<div>${msg}</div></td></tr>`;
+    return;
+  }
+  tb.innerHTML = filtered.map(r => {
+    const idx = state.returns.indexOf(r);
+    const isRisk = r.judgement === 'risk';
+    const judgementTag = isRisk
+      ? `<span class="tag tag-danger">风险</span>`
+      : `<span class="tag tag-success">干净</span>`;
+    let statusTag, actionCell;
+    if (r.status === 'isolated') {
+      statusTag = `<span class="tag tag-warn">已隔离 · 待退回</span>`;
+      actionCell = `<button class="btn-tbl is-warn" data-refund-idx="${idx}">发起退款</button>`;
+    } else if (r.status === 'refunding') {
+      statusTag = `<span class="tag tag-neutral"><span class="pulse-dot"></span>退款处理中</span>`;
+      actionCell = `<button class="btn-tbl" disabled>退款中</button>`;
+    } else if (r.status === 'refunded') {
+      statusTag = `<span class="tag tag-neutral">已退款</span>`;
+      actionCell = `<span class="tbl-na">—</span>`;
+    } else {
+      statusTag = `<span class="tag tag-success">已完成</span>`;
+      actionCell = `<span class="tbl-na">—</span>`;
+    }
+    return `
+      <tr>
+        <td class="mono">${r.time}</td>
+        <td>${bucketTagHTML(r.bucket)}</td>
+        <td>${addrCell(r.from, 'addr')}</td>
+        <td class="mono amount-in text-r">${fmt(r.amount)}</td>
+        <td>${judgementTag}</td>
+        <td>${addrCell(r.hash, 'hash')}</td>
+        <td>${statusTag}</td>
+        <td>${actionCell}</td>
+      </tr>`;
+  }).join('');
+  renderIsolatedBar();
+}
+
+function refundReturn(idx) {
+  const r = state.returns[idx];
+  if (!r || r.status !== 'isolated') return;
+  openRefundModal(idx);
+}
+
+let _refundIdx = -1;
+function openRefundModal(idx) {
+  const r = state.returns[idx];
+  if (!r) return;
+  _refundIdx = idx;
+  document.getElementById('rfAmount').textContent = fmt(r.amount);
+  document.getElementById('rfFrom').textContent = r.from;
+  document.getElementById('rfTime').textContent = r.time;
+  const addrInput = document.getElementById('rfAddrInput');
+  const memoInput = document.getElementById('rfMemoInput');
+  addrInput.value = '';
+  memoInput.value = '';
+  addrInput.classList.remove('is-invalid');
+  document.getElementById('rfAddrError').style.display = 'none';
+  document.getElementById('rfSubmitBtn').disabled = true;
+  document.getElementById('refundModal').classList.add('show');
+  setTimeout(() => addrInput.focus(), 50);
+}
+
+function closeRefundModal() {
+  document.getElementById('refundModal').classList.remove('show');
+  _refundIdx = -1;
+}
+
+function submitRefund() {
+  if (_refundIdx < 0) return;
+  const r = state.returns[_refundIdx];
+  if (!r || r.status !== 'isolated') return closeRefundModal();
+  const addr = document.getElementById('rfAddrInput').value.trim();
+  if (!isValidTronAddr(addr)) {
+    document.getElementById('rfAddrError').style.display = 'block';
+    document.getElementById('rfAddrInput').classList.add('is-invalid');
+    return;
+  }
+  
+  const btn = document.getElementById('rfSubmitBtn');
+  btn.disabled = true;
+  btn.innerHTML = `<svg class="spin" viewBox="64 64 896 896" width="14" height="14" fill="currentColor"><path d="M988 548c-19.9 0-36-16.1-36-36 0-59.4-11.6-117-34.6-171.3a440.45 440.45 0 00-94.3-139.9 437.71 437.71 0 00-139.9-94.3C629 83.6 571.4 72 512 72c-19.9 0-36-16.1-36-36s16.1-36 36-36c69.1 0 136.2 13.5 199.3 40.3C772.3 66 827 103 874 150c47 47 83.9 101.8 109.7 162.7 26.7 63.1 40.2 130.2 40.2 199.3.1 19.9-16 36-35.9 36z"/></svg> 提交中...`;
+
+  setTimeout(() => {
+    r.status = 'refunding';
+    r.refundTo = addr;
+    closeRefundModal();
+    btn.innerHTML = '确认发起退款'; // reset
+    renderReturnsTable();
+    showToast(`已发起退款 ${fmtAmount(r.amount)} USDT，等待处理`, 'success');
+    // mock: 5 秒后改为 refunded
+    setTimeout(() => {
+      if (r.status === 'refunding') {
+        r.status = 'refunded';
+        renderReturnsTable();
+      }
+    }, 5000);
+  }, 600);
+}
+
+/* ===========================================================
+   Address check (manual button)
+=========================================================== */
+function isValidTronAddr(s) { return /^T[A-Za-z0-9]{33}$/.test(s); }
+
+function mockAddrRisk(addr) {
+  let h = 0;
+  for (let i = 0; i < addr.length; i++) h = ((h << 5) - h) + addr.charCodeAt(i);
+  const score = Math.abs(h) % 101;
+  if (score === 0)        return { score, level: 'clean',  label: '清洁' };
+  else if (score < 20)    return { score, level: 'low',    label: '低' };
+  else if (score < 50)    return { score, level: 'mid',    label: '中' };
+  else if (score < 80)    return { score, level: 'high',   label: '高' };
+  else                    return { score, level: 'severe', label: '严重' };
+}
+
+function checkAddress() {
+  const addr = state.form.addr.trim();
+  const badge = document.getElementById('addrRiskBadge');
+  const checkBtn = document.getElementById('checkAddrBtn');
+  const checkText = document.getElementById('checkBtnText');
+  const input = document.getElementById('addrInput');
+
+  if (!isValidTronAddr(addr)) {
+    state.form.addrRisk = { invalid: true };
+    input.classList.add('is-invalid');
+    badge.className = 'addr-risk-badge invalid';
+    badge.style.display = 'inline-flex';
+    badge.innerHTML = `
+      <svg viewBox="64 64 896 896" width="11" height="11" fill="currentColor"><path d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm165.4 618.2l-66-.3L512 563.4l-99.3 118.4-66.1.3c-4.4 0-8-3.5-8-8 0-1.9.7-3.7 1.9-5.2l130.1-155L340.5 359a8.32 8.32 0 01-1.9-5.2c0-4.4 3.6-8 8-8l66.1.3L512 464.6l99.3-118.4 66-.3c4.4 0 8 3.5 8 8 0 1.9-.7 3.7-1.9 5.2L553.5 514l130 155c1.2 1.5 1.9 3.3 1.9 5.2 0 4.4-3.6 8-8 8z"/></svg>
+      地址格式无效（Tron 地址应为 T 开头 34 位）`;
+    return;
+  }
+
+  input.classList.remove('is-invalid');
+  state.form.addrRisk = { checking: true };
+  checkBtn.disabled = true;
+  checkText.textContent = '检查中…';
+  badge.className = 'addr-risk-badge';
+  badge.style.display = 'inline-flex';
+  badge.style.background = 'var(--bg-soft)';
+  badge.style.color = 'var(--text-tertiary)';
+  badge.style.borderColor = 'var(--border)';
+  badge.innerHTML = `<span style="display:inline-block; width:10px; height:10px; border:1.5px solid var(--text-light); border-top-color:transparent; border-radius:50%; animation: spin .8s linear infinite;"></span>正在检查地址风险…`;
+
+  setTimeout(() => {
+    if (state.form.addr.trim() !== addr) return;
+    const r = mockAddrRisk(addr);
+    state.form.addrRisk = r;
+    badge.removeAttribute('style');
+    badge.className = `addr-risk-badge ${r.level}`;
+    const ico = (r.level === 'clean' || r.level === 'low')
+      ? `<svg viewBox="64 64 896 896" width="11" height="11" fill="currentColor"><path d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm193.5 301.7l-210.6 292a31.8 31.8 0 01-51.7 0L318.5 484.9c-3.8-5.3 0-12.7 6.5-12.7h46.9c10.2 0 19.9 4.9 25.9 13.3l71.2 98.8 157.2-218c6-8.3 15.6-13.3 25.9-13.3H699c6.5 0 10.3 7.4 6.5 12.7z"/></svg>`
+      : `<svg viewBox="64 64 896 896" width="11" height="11" fill="currentColor"><path d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm-32 232c0-4.4 3.6-8 8-8h48c4.4 0 8 3.6 8 8v272c0 4.4-3.6 8-8 8h-48c-4.4 0-8-3.6-8-8V296zm32 440a48.01 48.01 0 010-96 48.01 48.01 0 010 96z"/></svg>`;
+    badge.innerHTML = `${ico}风险评分 <b style="margin: 0 2px;">${r.score}</b> · ${r.label}<span class="note">· 仅提示，不影响提交</span>`;
+    checkBtn.disabled = false;
+    checkText.textContent = '重新检查';
+  }, 480);
+}
+
+function currentBucketMax() {
+  const bk = state.activeBucket;
+  return bk ? (SUM[bk] || 0) : 0;
+}
+
+function renderAmountFlow() {
+  const amt = parseFloat(state.form.amount) || 0;
+  const legOut = document.getElementById('legOutAmt');
+  const legBack = document.getElementById('legBackAmt');
+  if (legOut) legOut.textContent = amt > 0 ? fmtAmount(amt) : '—';
+  if (legBack) legBack.textContent = amt > 0 ? fmtAmount(amt) : '—';
+}
+
+function validateForm() {
+  if (!state.activeBucket) return;
+  const addr = state.form.addr.trim();
+  const amt = parseFloat(state.form.amount) || 0;
+  const max = currentBucketMax();
+  const errEl = document.getElementById('amountErr');
+  const amountRow = document.getElementById('amountRow');
+
+  let amountOk = true;
+  if (state.form.amount === '') {
+    errEl.style.display = 'none';
+    amountRow.classList.remove('is-invalid');
+    amountOk = false;
+  } else if (isNaN(amt) || amt <= 0) {
+    errEl.textContent = '金额必须大于 0';
+    errEl.style.display = 'inline';
+    amountRow.classList.add('is-invalid');
+    amountOk = false;
+  } else if (amt > max) {
+    errEl.textContent = `超过可提款余额 ${fmt(max)}`;
+    errEl.style.display = 'inline';
+    amountRow.classList.add('is-invalid');
+    amountOk = false;
+  } else {
+    errEl.style.display = 'none';
+    amountRow.classList.remove('is-invalid');
+  }
+
+  const addrOk = isValidTronAddr(addr);
+  document.getElementById('submitBtn').disabled = !(addrOk && amountOk);
+
+  const checkBtn = document.getElementById('checkAddrBtn');
+  if (state.form.addrRisk?.checking) {
+    checkBtn.disabled = true;
+  } else {
+    checkBtn.disabled = !addr;
+  }
+}
+
+function resetForm() {
+  state.form = { addr: '', amount: '', memo: '', addrRisk: null };
+  document.getElementById('addrInput').value = '';
+  document.getElementById('amountInput').value = '';
+  document.getElementById('memoInput').value = '';
+  document.getElementById('addrRiskBadge').style.display = 'none';
+  document.getElementById('amountErr').style.display = 'none';
+  document.getElementById('addrInput').classList.remove('is-invalid');
+  document.getElementById('amountRow').classList.remove('is-invalid');
+  document.getElementById('checkBtnText').textContent = '检查地址';
+  renderAmountFlow();
+  validateForm();
+}
+
+/* ===========================================================
+   Confirm modal
+=========================================================== */
+function openConfirm() {
+  const addr = state.form.addr.trim();
+  const amt = parseFloat(state.form.amount);
+  const memo = state.form.memo && state.form.memo.trim() ? state.form.memo.trim() : '—';
+
+  document.getElementById('cfmAddr').textContent = addr;
+  document.getElementById('cfmAmount').textContent = fmtAmount(amt);
+  document.getElementById('cfmMemo').textContent = memo;
+
+  // 标题 / 副标题：按桶差异化文案
+  const max = currentBucketMax();
+  const meta = BUCKET_META[state.activeBucket];
+  const titleEl = document.getElementById('cfmTitle');
+  const subEl = document.getElementById('cfmSubtitle');
+  if (meta?.requiresReview) {
+    titleEl.textContent = `从${meta.name}余额发起提款`;
+    subEl.textContent = '提交后将发送至平台审核，审核通过后由平台统一打款。';
+  } else {
+    titleEl.textContent = `从${meta?.name || ''}余额发起提款`;
+    subEl.textContent = '提交后将直接打款。';
+  }
+
+  // OTP 触发：金额超过该风险等级可提款余额的 50%，且该等级需平台审核
+  const needOtp = !!(meta?.requiresReview) && max > 0 && amt >= max * 0.5;
+  document.getElementById('otpBlock').style.display = needOtp ? 'block' : 'none';
+  document.getElementById('otpInput').value = '';
+
+  updateFinalConfirmState();
+  document.getElementById('confirmModal').classList.add('show');
+}
+
+function closeConfirm() {
+  document.getElementById('confirmModal').classList.remove('show');
+}
+
+function updateFinalConfirmState() {
+  const otpRequired = document.getElementById('otpBlock').style.display !== 'none';
+  const otpVal = document.getElementById('otpInput').value.trim();
+  const otpOk = !otpRequired || /^\d{6}$/.test(otpVal);
+  document.getElementById('finalConfirmBtn').disabled = !otpOk;
+}
+
+function broadcast() {
+  const btn = document.getElementById('finalConfirmBtn');
+  btn.disabled = true;
+  btn.innerHTML = `<svg class="spin" viewBox="64 64 896 896" width="14" height="14" fill="currentColor"><path d="M988 548c-19.9 0-36-16.1-36-36 0-59.4-11.6-117-34.6-171.3a440.45 440.45 0 00-94.3-139.9 437.71 437.71 0 00-139.9-94.3C629 83.6 571.4 72 512 72c-19.9 0-36-16.1-36-36s16.1-36 36-36c69.1 0 136.2 13.5 199.3 40.3C772.3 66 827 103 874 150c47 47 83.9 101.8 109.7 162.7 26.7 63.1 40.2 130.2 40.2 199.3.1 19.9-16 36-35.9 36z"/></svg> 提交中...`;
+
+  setTimeout(() => {
+    const bk = state.activeBucket;
+    const meta = BUCKET_META[bk];
+    const addr = state.form.addr.trim();
+    const amt = parseFloat(state.form.amount);
+    const memo = state.form.memo && state.form.memo.trim() ? state.form.memo.trim() : '—';
+
+    const r = mockAddrRisk(addr);
+    // 低风险等级直接打款，无需审核；其余等级需审核
+    const status = meta?.requiresReview ? 'reviewing' : 'paid';
+
+    const newRecord = {
+      time: new Date().toISOString().slice(0, 19).replace('T', ' '),
+      bucket: bk,
+      src: Math.random() > 0.5 ? 'A' : 'B',
+      addr, amount: amt, score: r.score, category: null,
+      hash: status === 'paid' ? `${Date.now().toString(16)}${Math.random().toString(16).slice(2, 12)}`.slice(0, 64).padEnd(64, '0') : '',
+      memo, age: '刚刚',
+      status,
+    };
+    state.withdrawals.unshift(newRecord);
+    // 从对应桶扣减；商户总余额同步扣减
+    SUM[bk] = Math.max(0, (SUM[bk] || 0) - amt);
+    SUM.merchant = Math.max(0, SUM.merchant - amt);
+
+    closeConfirm();
+    closeDrawer();
+    btn.innerHTML = '发起提款';
+    renderSummary();
+    renderWithdrawalsTable();
+    resetForm();
+
+    const toastMsg = meta?.requiresReview
+      ? `已提交 ${fmtAmount(amt)} USDT 提款申请，等待平台审核`
+      : `${meta?.name || ''} ${fmtAmount(amt)} USDT 已打款`;
+    showToast(toastMsg, 'success');
+  }, 600);
+}
+
+/* ===========================================================
+   Drawer (per-bucket withdrawal form)
+=========================================================== */
+function openDrawer(bucket) {
+  const meta = BUCKET_META[bucket];
+  if (!meta) return;
+
+  state.activeBucket = bucket;
+  resetForm();
+
+  const drawer = document.getElementById('drawerEl');
+  drawer.dataset.bucket = bucket;
+
+  document.getElementById('drTierName').textContent = meta.name;
+  document.getElementById('drTierRange').textContent = meta.range;
+  document.getElementById('drTierTitle').textContent = meta.name;
+  const maxVal = SUM[bucket];
+  const maxStr = maxVal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  document.getElementById('drMax').textContent = maxStr;
+  document.getElementById('amountMax').textContent = maxStr;
+
+  // 返还义务面板
+  const obligationEl = document.getElementById('drObligation');
+  obligationEl.style.display = meta.obligation ? 'block' : 'none';
+
+  // 提交按钮文案
+  const submitText = document.getElementById('drSubmitText');
+  submitText.textContent = meta.cta || '发起提款';
+
+  document.getElementById('bkDrawer').classList.add('show');
+  document.getElementById('bkDrawer').setAttribute('aria-hidden', 'false');
+  setTimeout(() => document.getElementById('addrInput')?.focus(), 320);
+}
+
+function closeDrawer() {
+  document.getElementById('bkDrawer').classList.remove('show');
+  document.getElementById('bkDrawer').setAttribute('aria-hidden', 'true');
+  state.activeBucket = null;
+}
+
+/* ===========================================================
+   Wire up
+=========================================================== */
+document.getElementById('addrInput').addEventListener('input', e => {
+  state.form.addr = e.target.value;
+  // 输入变更后清掉旧的检查结果
+  const badge = document.getElementById('addrRiskBadge');
+  badge.style.display = 'none';
+  state.form.addrRisk = null;
+  document.getElementById('addrInput').classList.remove('is-invalid');
+  document.getElementById('checkBtnText').textContent = '检查地址';
+  validateForm();
+});
+document.getElementById('checkAddrBtn').addEventListener('click', checkAddress);
+document.getElementById('addrInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); if (!document.getElementById('checkAddrBtn').disabled) checkAddress(); }
+});
+
+function updateAmountButtons() {
+  const amt = parseFloat(state.form.amount) || 0;
+  const max = currentBucketMax();
+  document.querySelectorAll('.amount-quick button').forEach(btn => {
+    const pct = parseFloat(btn.dataset.pct);
+    const expected = Math.floor(max * pct);
+    if (amt > 0 && amt === expected && max > 0) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  });
+}
+
+document.getElementById('amountInput').addEventListener('input', e => {
+  let v = e.target.value.replace(/[^\d.]/g, '');
+  const parts = v.split('.');
+  if (parts.length > 2) v = parts[0] + '.' + parts.slice(1).join('');
+  e.target.value = v;
+  state.form.amount = v;
+  renderAmountFlow();
+  validateForm();
+  updateAmountButtons();
+});
+document.getElementById('memoInput').addEventListener('input', e => {
+  state.form.memo = e.target.value;
+});
+document.querySelectorAll('.amount-quick button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const pct = parseFloat(btn.dataset.pct);
+    const v = Math.floor(currentBucketMax() * pct);
+    document.getElementById('amountInput').value = v;
+    state.form.amount = String(v);
+    renderAmountFlow();
+    validateForm();
+    updateAmountButtons();
+  });
+});
+
+document.getElementById('submitBtn').addEventListener('click', openConfirm);
+document.getElementById('cancelBtn').addEventListener('click', closeConfirm);
+document.getElementById('finalConfirmBtn').addEventListener('click', broadcast);
+document.getElementById('confirmModal').addEventListener('click', e => {
+  if (e.target.id === 'confirmModal') closeConfirm();
+});
+
+// Bucket card click -> open drawer
+document.querySelectorAll('.bucket-card').forEach(card => {
+  card.addEventListener('click', () => {
+    const bk = card.dataset.bucket;
+    openDrawer(bk);
+  });
+});
+
+// Drawer close handlers
+document.getElementById('drCloseBtn').addEventListener('click', closeDrawer);
+document.getElementById('drCancelBtn').addEventListener('click', closeDrawer);
+document.getElementById('bkDrawer').addEventListener('click', e => {
+  if (e.target.id === 'bkDrawer') closeDrawer();
+});
+// ESC to close drawer
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && document.getElementById('bkDrawer').classList.contains('show')) {
+    closeDrawer();
+  }
+});
+
+// Bucket filter pills
+function setBucketFilter(bk) {
+  state.bucketFilter = bk;
+  document.querySelectorAll('.bf-pill').forEach(p => {
+    p.classList.toggle('active', p.dataset.bucket === bk);
+  });
+  renderWithdrawalsTable();
+  renderReturnsTable();
+}
+document.querySelectorAll('.bf-pill').forEach(pill => {
+  pill.addEventListener('click', () => setBucketFilter(pill.dataset.bucket));
+});
+
+document.getElementById('otpInput').addEventListener('input', e => {
+  e.target.value = e.target.value.replace(/\D/g, '').slice(0, 6);
+  updateFinalConfirmState();
+});
+
+// Return address card: copy + tronscan link
+document.getElementById('returnAddrLink').setAttribute('href', tronscanAddr(RETURN_ADDRESS));
+document.getElementById('copyReturnBtn').addEventListener('click', () => {
+  copyText(RETURN_ADDRESS);
+  const btn = document.getElementById('copyReturnBtn');
+  btn.classList.add('copied');
+  // swap to check icon
+  btn.innerHTML = `<svg viewBox="64 64 896 896" width="14" height="14" fill="currentColor"><path d="M912 190h-69.9c-9.8 0-19.1 4.5-25.1 12.2L404.7 724.5 207 474a32 32 0 00-25.1-12.2H112c-6.7 0-10.4 7.7-6.3 12.9l273.9 347c12.8 16.2 37.4 16.2 50.3 0l488.4-618.9c4.1-5.1.4-12.8-6.3-12.8z"/></svg>`;
+  setTimeout(() => {
+    btn.classList.remove('copied');
+    btn.innerHTML = `<svg viewBox="64 64 896 896" width="14" height="14" fill="currentColor"><path d="M832 64H296c-4.4 0-8 3.6-8 8v56h-72c-39.8 0-72 32.2-72 72v680c0 39.8 32.2 72 72 72h440c39.8 0 72-32.2 72-72v-56h72c39.8 0 72-32.2 72-72V136c0-39.8-32.2-72-72-72zM664 880H232V256h432v624zm200-128H736V200c0-39.8-32.2-72-72-72H384V136c0-4.4 3.6-8 8-8h440c4.4 0 8 3.6 8 8v616z"/></svg>`;
+  }, 1600);
+  showToast('返还地址已复制', 'success');
+});
+
+// Delegate copy clicks for inline addr-cells in tables
+document.addEventListener('click', e => {
+  const btn = e.target.closest('.ic-btn[data-copy]');
+  if (!btn) return;
+  const value = btn.getAttribute('data-copy');
+  copyText(value);
+  btn.classList.add('copied');
+  const orig = btn.innerHTML;
+  btn.innerHTML = `<svg viewBox="64 64 896 896" width="13" height="13" fill="currentColor"><path d="M912 190h-69.9c-9.8 0-19.1 4.5-25.1 12.2L404.7 724.5 207 474a32 32 0 00-25.1-12.2H112c-6.7 0-10.4 7.7-6.3 12.9l273.9 347c12.8 16.2 37.4 16.2 50.3 0l488.4-618.9c4.1-5.1.4-12.8-6.3-12.8z"/></svg>`;
+  setTimeout(() => {
+    btn.classList.remove('copied');
+    btn.innerHTML = orig;
+  }, 1500);
+  showToast('已复制', 'success');
+});
+
+// Delegate refund button clicks
+document.addEventListener('click', e => {
+  const btn = e.target.closest('button[data-refund-idx]');
+  if (!btn) return;
+  refundReturn(parseInt(btn.getAttribute('data-refund-idx'), 10));
+});
+
+// Tab switch
+function activateTab(which) {
+  document.querySelectorAll('.tbl-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.tab === which);
+  });
+  document.getElementById('tabPaneOut').style.display = which === 'out' ? 'block' : 'none';
+  document.getElementById('tabPaneBack').style.display = which === 'back' ? 'block' : 'none';
+
+  // update indicator
+  const activeTab = document.querySelector(`.tbl-tab[data-tab="${which}"]`);
+  const ind = document.getElementById('tabIndicator');
+  if (activeTab && ind) {
+    ind.style.width = activeTab.offsetWidth + 'px';
+    ind.style.transform = `translateX(${activeTab.offsetLeft}px)`;
+  }
+}
+document.querySelectorAll('.tbl-tab').forEach(tab => {
+  tab.addEventListener('click', () => activateTab(tab.dataset.tab));
+});
+
+// Initialize indicator on load and resize
+window.addEventListener('load', () => activateTab('out'));
+window.addEventListener('resize', () => {
+  const activeBtn = document.querySelector('.tbl-tab.active');
+  if (activeBtn) activateTab(activeBtn.dataset.tab);
+});
+
+// QR popup
+const qrModal = document.getElementById('qrModal');
+const qrAddrText = document.getElementById('qrAddrText');
+qrAddrText.textContent = RETURN_ADDRESS;
+function openQr()  { qrModal.classList.add('show'); }
+function closeQr() { qrModal.classList.remove('show'); }
+document.getElementById('qrBtn').addEventListener('click', openQr);
+document.getElementById('qrCloseBtn').addEventListener('click', closeQr);
+document.getElementById('qrCopyBtn').addEventListener('click', () => {
+  copyText(RETURN_ADDRESS);
+  showToast('返还地址已复制', 'success');
+  closeQr();
+});
+qrModal.addEventListener('click', e => { if (e.target.id === 'qrModal') closeQr(); });
+
+// Refund modal
+const refundModalEl = document.getElementById('refundModal');
+const rfAddrEl = document.getElementById('rfAddrInput');
+const rfSubmitBtnEl = document.getElementById('rfSubmitBtn');
+rfAddrEl.addEventListener('input', () => {
+  const v = rfAddrEl.value.trim();
+  rfSubmitBtnEl.disabled = v.length === 0;
+  rfAddrEl.classList.remove('is-invalid');
+  document.getElementById('rfAddrError').style.display = 'none';
+});
+document.getElementById('rfCancelBtn').addEventListener('click', closeRefundModal);
+document.getElementById('rfSubmitBtn').addEventListener('click', submitRefund);
+refundModalEl.addEventListener('click', e => { if (e.target.id === 'refundModal') closeRefundModal(); });
+
+// 隔离提醒条 → 跳转到「返还记录」tab 并滚动到表格
+document.getElementById('goIsolated').addEventListener('click', () => {
+  activateTab('back');
+  const target = document.getElementById('tabPaneBack');
+  if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+
+/* ===========================================================
+   Initial render
+=========================================================== */
+renderSummary();
+renderWithdrawalsTable();
+renderReturnsTable();
+renderAmountFlow();
+validateForm();
+
+// Auto open drawer if url params request it
+const params = new URLSearchParams(window.location.search);
+if (params.get('action') === 'withdraw' && params.get('bucket')) {
+  setTimeout(() => openDrawer(params.get('bucket')), 100);
+}
+</script>
+</body>
+</html>
