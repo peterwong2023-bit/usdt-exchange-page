@@ -5917,7 +5917,7 @@ function renderCfgPanel() {
               系统会根据<b>目标地址评分</b>动态选择资金来源：
               <div class="cfg-info-rules">
                 <div class="cfg-info-rule"><span class="ir-tag tag-low">目标低分</span><span class="ir-arr">→</span><span class="ir-flow">低 → 中 → 高 → 最高</span></div>
-                <div class="cfg-info-rule"><span class="ir-tag tag-mid">目标中分</span><span class="ir-arr">→</span><span class="ir-flow">中 → 低 → 高 → 最高</span></div>
+                <div class="cfg-info-rule"><span class="ir-tag tag-mid">目标中分</span><span class="ir-arr">→</span><span class="ir-flow">中 → 高 → 最高 → 低</span></div>
                 <div class="cfg-info-rule"><span class="ir-tag tag-high">目标高分</span><span class="ir-arr">→</span><span class="ir-flow">高 → 最高 → 中 → 低</span></div>
                 <div class="cfg-info-rule"><span class="ir-tag tag-severe">目标最高分</span><span class="ir-arr">→</span><span class="ir-flow">最高 → 高 → 中 → 低</span></div>
               </div>
@@ -6727,7 +6727,7 @@ function renderPreviewWithdraw(rule, rejectMeta) {
   // 出款匹配 mini 演示：按目标地址评分，结合当前拦截起点过滤
   const samples = [
     { val: 'low',    addr: '低',   color: '#7AC74F', flow: ['low', 'mid', 'high', 'severe'] },
-    { val: 'mid',    addr: '中',   color: '#FFD23F', flow: ['mid', 'low', 'high', 'severe'] },
+    { val: 'mid',    addr: '中',   color: '#FFD23F', flow: ['mid', 'high', 'severe', 'low'] },
     { val: 'high',   addr: '高',   color: '#F58A3C', flow: ['high', 'severe', 'mid', 'low'] },
     { val: 'severe', addr: '严重', color: '#E94B3D', flow: ['severe', 'high', 'mid', 'low'] },
   ];
