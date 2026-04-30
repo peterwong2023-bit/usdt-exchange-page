@@ -2857,6 +2857,22 @@ p.subtitle {
 .amount-tiers-card .atc-tab.active[data-atc-side="withdraw"] .atc-tab-count {
   background: rgba(124, 58, 237, .14); color: #7c3aed;
 }
+.amount-tiers-card .atc-gap-banner {
+  display: none;
+  align-items: center; gap: 8px;
+  padding: 8px 14px;
+  margin-bottom: 12px;
+  border-radius: 8px;
+  background: rgba(239,68,68,.06);
+  border: 1px solid rgba(239,68,68,.18);
+  font-size: 12px; color: #b91c1c; font-weight: 600;
+  cursor: pointer;
+  transition: background .15s;
+}
+.amount-tiers-card .atc-gap-banner:hover { background: rgba(239,68,68,.1); }
+.amount-tiers-card .atc-gap-banner.show { display: flex; }
+.amount-tiers-card .atc-gap-banner svg { flex-shrink: 0; color: #ef4444; }
+.amount-tiers-card .atc-gap-banner .gap-text { flex: 1; }
 
 /* 分档轴可视化 */
 .amount-tiers-card .atc-axis-wrap { margin-bottom: 14px; }
@@ -2889,6 +2905,60 @@ p.subtitle {
   font-size: 10.5px; color: var(--text-light);
   padding: 4px 4px 0;
   font-variant-numeric: tabular-nums;
+}
+
+/* 金额轴覆盖状态 */
+.atc-coverage {
+  margin: 8px 0 2px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  line-height: 1.6;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.atc-coverage-ok {
+  background: rgba(16,185,129,.06);
+  border: 1px solid rgba(16,185,129,.18);
+  color: #059669;
+}
+.atc-coverage-warn {
+  background: rgba(245,158,11,.06);
+  border: 1px solid rgba(245,158,11,.22);
+  color: #b45309;
+}
+.atc-coverage .cov-icon {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.atc-coverage .cov-body {
+  flex: 1;
+  min-width: 0;
+}
+.atc-coverage .cov-title {
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+.atc-coverage .cov-gaps {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 4px 0 6px;
+}
+.atc-coverage .cov-gap-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #92400e;
+}
+.atc-coverage .cov-gap-item::before {
+  content: '';
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: #f59e0b;
+  flex-shrink: 0;
 }
 
 /* 列表 */
@@ -2941,7 +3011,7 @@ p.subtitle {
 }
 .amount-tiers-card .atc-tier-range-pen {
   width: 11px; height: 11px;
-  opacity: 0;
+  opacity: .35;
   transition: opacity .15s;
   flex-shrink: 0;
 }
@@ -3046,126 +3116,6 @@ p.subtitle {
   .amount-tiers-card .atc-tier-actions { justify-content: flex-end; }
 }
 
-/* ============== Bucket Balance Card (Q4) ============== */
-.bucket-balance-card { padding: 16px 18px 18px; }
-.bucket-balance-card .bbc-head {
-  display: flex; align-items: baseline; justify-content: space-between;
-  gap: 12px; margin-bottom: 12px;
-}
-.bucket-balance-card .bbc-title {
-  display: flex; align-items: center; gap: 8px;
-  color: var(--text-primary); font-size: 14px; font-weight: 700;
-}
-.bucket-balance-card .bbc-title svg { color: var(--primary); }
-.bucket-balance-card .bbc-total {
-  margin-left: 8px;
-  padding: 3px 10px;
-  background: var(--bg-tertiary);
-  border-radius: 999px;
-  font-size: 11.5px; font-weight: 600;
-  color: var(--text-secondary);
-}
-.bucket-balance-card .bbc-total b {
-  font-family: 'Geist Mono', ui-monospace, monospace;
-  font-weight: 700;
-  color: var(--text-primary);
-}
-.bucket-balance-card .bbc-head-hint {
-  font-size: 12px; color: var(--text-tertiary);
-}
-.bucket-balance-card .bbc-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-}
-.bucket-balance-card .bbc-bucket {
-  position: relative;
-  display: flex; flex-direction: column; gap: 6px;
-  padding: 14px 14px 12px;
-  border: 1px solid var(--border);
-  border-left: 3px solid var(--c, #94a3b8);
-  border-radius: var(--radius-md);
-  background: linear-gradient(135deg, var(--bg-secondary), #fff);
-  text-align: left;
-  cursor: pointer;
-  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
-}
-.bucket-balance-card .bbc-bucket:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 8px 18px -10px rgba(15,23,42,.18);
-  border-color: var(--c, #94a3b8);
-}
-.bucket-balance-card .bbc-low    { --c: #7AC74F; }
-.bucket-balance-card .bbc-mid    { --c: #FFD23F; }
-.bucket-balance-card .bbc-high   { --c: #F58A3C; }
-.bucket-balance-card .bbc-severe { --c: #E94B3D; }
-/* x3: 严重桶隔离状态徽章 */
-.bucket-balance-card .bbc-bucket .bbc-iso-badge {
-  position: absolute; top: 8px; right: 10px;
-  display: none; align-items: center; gap: 3px;
-  padding: 2px 7px;
-  background: rgba(185, 28, 28, .1);
-  border: 1px solid rgba(185, 28, 28, .35);
-  border-radius: 999px;
-  font-size: 10px; font-weight: 700;
-  color: #b91c1c;
-  letter-spacing: .2px;
-}
-.bucket-balance-card .bbc-bucket .bbc-iso-badge.show { display: inline-flex; }
-.bucket-balance-card .bbc-bucket .bbc-iso-badge svg {
-  width: 9px; height: 9px;
-}
-.bucket-balance-card .bbc-tag {
-  display: inline-flex; align-items: center; gap: 5px;
-  font-size: 11.5px; font-weight: 700;
-  color: var(--c, #94a3b8);
-  text-transform: none;
-}
-.bucket-balance-card .bbc-dot {
-  width: 8px; height: 8px; border-radius: 50%;
-  display: inline-block;
-}
-.bucket-balance-card .bbc-range {
-  font-size: 10.5px;
-  color: var(--text-tertiary);
-  font-weight: 500;
-  letter-spacing: .15px;
-}
-.bucket-balance-card .bbc-amt {
-  font-family: 'Geist Mono', ui-monospace, monospace;
-  font-size: 18px; font-weight: 700;
-  color: var(--text-primary);
-  letter-spacing: -0.3px;
-  display: flex; align-items: baseline; gap: 4px;
-}
-.bucket-balance-card .bbc-amt .bbc-cents {
-  font-size: 12px; font-weight: 600; color: var(--text-tertiary);
-}
-.bucket-balance-card .bbc-amt .bbc-unit {
-  font-style: normal;
-  font-size: 10px; font-weight: 600;
-  color: var(--text-tertiary);
-  margin-left: 2px;
-}
-.bucket-balance-card .bbc-meta {
-  display: flex; align-items: center; justify-content: space-between;
-  font-size: 11px; color: var(--text-tertiary);
-}
-.bucket-balance-card .bbc-meta b {
-  color: var(--c, #94a3b8); font-weight: 700;
-}
-.bucket-balance-card .bbc-arrow {
-  color: var(--text-light);
-  transition: color .18s ease, transform .18s ease;
-}
-.bucket-balance-card .bbc-bucket:hover .bbc-arrow {
-  color: var(--c, #94a3b8);
-  transform: translateX(2px);
-}
-
-@media (max-width: 980px) {
-  .bucket-balance-card .bbc-grid { grid-template-columns: repeat(2, 1fr); }
-}
 
 /* ============== Scene Card v2 (Q2-1) ============== */
 .scene-card-v2 { padding: 16px 18px 14px; }
@@ -4166,318 +4116,6 @@ p.subtitle {
 }
 
 
-/* =========================================================
-   Drawer (slide-in withdrawal form)
-   ========================================================= */
-.drawer-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(15, 23, 42, .3);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  z-index: 90;
-  display: none;
-  opacity: 0;
-  transition: opacity .2s ease;
-}
-.drawer-overlay.show {
-  display: block;
-  opacity: 1;
-}
-.drawer {
-  position: fixed;
-  top: 0; right: 0;
-  width: 460px;
-  max-width: 100vw;
-  height: 100vh;
-  background: var(--bg-card);
-  box-shadow: -16px 0 48px rgba(15, 23, 42, .12);
-  display: flex;
-  flex-direction: column;
-  transform: translateX(100%);
-  transition: transform .35s cubic-bezier(0.34, 1.32, 0.64, 1);
-}
-.drawer-overlay.show .drawer { transform: translateX(0); }
-.drawer-head {
-  padding: 20px 22px 14px;
-  border-bottom: 1px solid var(--border);
-  display: flex; align-items: flex-start;
-  gap: 12px;
-  background: linear-gradient(180deg, var(--dr-soft, var(--bg-soft)), transparent);
-}
-.drawer[data-bucket="low"]    { --dr-soft: color-mix(in srgb, var(--tier-low) 10%, transparent); --dr-color: var(--tier-low); }
-.drawer[data-bucket="mid"]    { --dr-soft: color-mix(in srgb, var(--tier-mid) 10%, transparent); --dr-color: var(--tier-mid); }
-.drawer[data-bucket="high"]   { --dr-soft: color-mix(in srgb, var(--tier-high) 10%, transparent); --dr-color: var(--tier-high); }
-.drawer[data-bucket="severe"] { --dr-soft: color-mix(in srgb, var(--tier-severe) 10%, transparent); --dr-color: var(--tier-severe); }
-.drawer-tier-tag {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 4px 10px;
-  background: var(--bg-card);
-  border: 1px solid var(--dr-color, var(--border));
-  color: var(--dr-color, var(--text-secondary));
-  border-radius: 999px;
-  font-size: 11.5px;
-  font-weight: 700;
-  margin-bottom: 8px;
-}
-.drawer-tier-tag .dot {
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: var(--dr-color, var(--text-secondary));
-}
-.drawer-title-block { flex: 1; }
-.drawer-title {
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--text-primary);
-  letter-spacing: -.2px;
-  line-height: 1.3;
-  margin-bottom: 4px;
-}
-.drawer-close {
-  width: 32px; height: 32px;
-  border: none;
-  background: transparent;
-  color: var(--text-light);
-  border-radius: 8px;
-  cursor: pointer;
-  display: inline-flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-  transition: all .15s ease;
-  font-family: inherit;
-}
-.drawer-close:hover { background: var(--bg-soft); color: var(--text-secondary); }
-.drawer-body {
-  flex: 1;
-  overflow-y: auto;
-  padding: 18px 22px 16px;
-}
-.drawer-balance {
-  display: flex; align-items: baseline; justify-content: space-between;
-  padding: 14px 16px;
-  background: linear-gradient(180deg, var(--dr-soft), transparent);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  margin-bottom: 18px;
-}
-.drawer-balance .db-label {
-  font-size: 11.5px;
-  font-weight: 600;
-  color: var(--text-tertiary);
-  letter-spacing: 0.04em;
-}
-.drawer-balance .db-amount {
-  font-family: 'Plus Jakarta Sans', ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-variant-numeric: tabular-nums;
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--text-primary);
-  letter-spacing: -.3px;
-}
-.drawer-balance .db-amount .u { font-size: 11px; color: var(--text-tertiary); font-weight: 500; margin-left: 4px; letter-spacing: 0; }
-
-
-.drawer-foot {
-  padding: 14px 22px 18px;
-  border-top: 1px solid var(--border);
-  display: flex;
-  gap: 10px;
-  background: var(--bg-card);
-}
-.drawer-foot .btn-ghost { flex: 0 0 auto; }
-.drawer-foot .btn-primary { flex: 1; }
-
-/* drawer's obligation panel reuses outer styles, just slightly compact */
-.drawer .obligation-panel { padding: 14px; }
-.drawer .obligation-flow { padding: 10px; }
-
-/* drawer's amount input uses --dr-color for accents */
-.drawer .amount-row:focus-within {
-  border-color: var(--dr-color);
-  box-shadow: 0 0 0 3px var(--dr-color, transparent);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--dr-color) 15%, transparent);
-}
-.drawer .amount-quick button:hover,
-.drawer .amount-quick button.active {
-  border-color: var(--dr-color);
-  color: var(--dr-color);
-  background: color-mix(in srgb, var(--dr-color) 6%, transparent);
-}
-.drawer .form-input:focus {
-  border-color: var(--dr-color);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--dr-color) 12%, transparent);
-}
-.drawer .btn-check:hover:not(:disabled) {
-  border-color: var(--dr-color);
-  color: var(--dr-color);
-  background: color-mix(in srgb, var(--dr-color) 5%, transparent);
-}
-.drawer .btn-primary {
-  background: var(--dr-color);
-}
-.drawer .btn-primary:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--dr-color) 88%, black);
-  box-shadow: 0 4px 14px color-mix(in srgb, var(--dr-color) 35%, transparent);
-}
-
-@media (max-width: 540px) {
-  .drawer { width: 100vw; }
-}
-
-
-
-/* =========== Modal =========== */
-.modal .btn, .drawer .btn {
-  height: 38px;
-  padding: 0 16px;
-  font-size: 13.5px;
-  font-weight: 600;
-  border-radius: 8px;
-  gap: 6px;
-}
-.btn-ghost {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  color: var(--text-secondary);
-}
-.btn-ghost:hover { background: var(--bg-soft); }
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(15, 23, 42, .55);
-  backdrop-filter: blur(4px);
-  z-index: 100;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-}
-.modal-overlay.show { display: flex; animation: fadeUp .2s ease; }
-.modal {
-  background: var(--bg-card);
-  border-radius: 14px;
-  width: 100%;
-  max-width: 520px;
-  max-height: calc(100vh - 48px);
-  overflow-y: auto;
-  box-shadow: 0 24px 64px rgba(15, 23, 42, .25);
-  animation: fadeUp .4s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-.modal-header {
-  padding: 20px 24px 16px;
-  border-bottom: 1px solid var(--border);
-  display: flex; align-items: flex-start; gap: 12px;
-}
-.modal-header .ico {
-  width: 36px; height: 36px;
-  border-radius: 10px;
-  background: var(--primary-soft);
-  color: var(--primary);
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-}
-.modal-header .title-block { flex: 1; }
-.modal-header .title { font-size: 15px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
-.modal-header .sub { font-size: 12px; color: var(--text-tertiary); line-height: 1.5; }
-.modal-header .sub b { color: var(--text-primary); font-weight: 700; }
-.modal-body { padding: 18px 24px 8px; }
-
-.confirm-amount {
-  text-align: center;
-  padding: 4px 0 18px;
-  margin-bottom: 14px;
-  border-bottom: 1px solid var(--border-subtle);
-}
-.confirm-amount .amt-value {
-  font-size: 34px;
-  font-weight: 700;
-  color: var(--primary);
-  letter-spacing: -0.02em;
-  line-height: 1.1;
-  font-family: 'Plus Jakarta Sans', ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-variant-numeric: tabular-nums;
-}
-.confirm-amount .amt-value .unit {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-tertiary);
-  margin-left: 8px;
-  letter-spacing: 0.04em;
-}
-.confirm-amount .amt-meta {
-  margin-top: 8px;
-  font-size: 12px;
-  color: var(--text-tertiary);
-  font-weight: 500;
-}
-.modal-footer {
-  padding: 16px 24px 20px;
-  display: flex; gap: 10px; justify-content: flex-end;
-  border-top: 1px solid var(--border-subtle);
-}
-
-.confirm-summary {
-  background: var(--bg-soft);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 14px;
-  margin-bottom: 14px;
-}
-.confirm-row {
-  display: flex; justify-content: space-between; align-items: baseline;
-  padding: 6px 0;
-  font-size: 12.5px;
-}
-.confirm-row + .confirm-row { border-top: 1px dashed var(--border); }
-.confirm-row .k { color: var(--text-tertiary); font-weight: 500; }
-.confirm-row .v {
-  color: var(--text-primary);
-  font-weight: 600;
-  font-family: 'Plus Jakarta Sans', ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-variant-numeric: tabular-nums;
-  text-align: right;
-  word-break: break-all;
-  max-width: 70%;
-}
-.confirm-row .v.warn { color: var(--warning); }
-.confirm-row .v.primary { color: var(--primary); }
-.confirm-row .v.danger { color: var(--danger); }
-
-.otp-block {
-  background: var(--primary-soft);
-  border: 1px solid rgba(37, 99, 235, .25);
-  border-radius: 10px;
-  padding: 14px;
-  margin-bottom: 12px;
-}
-.otp-block .otp-head {
-  display: flex; align-items: center; gap: 8px;
-  margin-bottom: 8px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #1e3a8a;
-}
-.otp-block .otp-sub { font-size: 11.5px; color: #1e40af; margin-bottom: 10px; line-height: 1.55; }
-.otp-input-row { display: flex; }
-.otp-input {
-  flex: 1;
-  padding: 10px 12px;
-  font-size: 16px;
-  font-weight: 700;
-  font-family: 'Plus Jakarta Sans', ui-monospace, SFMono-Regular, Menlo, monospace;
-  letter-spacing: 0.5em;
-  border: 1px solid rgba(37, 99, 235, .3);
-  border-radius: 8px;
-  background: #fff;
-  color: var(--text-primary);
-  text-align: center;
-}
-.otp-input:focus {
-  outline: none;
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px var(--primary-soft);
-}
-
 
 </style>
 </head>
@@ -4634,62 +4272,13 @@ p.subtitle {
       </button>
     </div>
 
+    <div class="atc-gap-banner" id="atcGapBanner">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <span class="gap-text" id="atcGapText"></span>
+    </div>
+
     <div class="atc-axis-wrap" id="atcAxisWrap"><!-- 分档轴可视化 --></div>
     <div class="atc-tier-list" id="atcTierList"><!-- 列表项 + 末尾占位卡由 JS 渲染 --></div>
-  </div>
-
-  <!-- ========== 桶余额 (custom 模式才显示) ========== -->
-  <div class="card bucket-balance-card" id="bucketBalanceCard" hidden>
-    <div class="bbc-head">
-      <div class="bbc-title">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 7h20l-2 13H4L2 7Z"/><path d="M16 11v2"/><path d="M8 11v2"/><path d="M2 7l4-4h12l4 4"/></svg>
-        <span>桶余额</span>
-        <span class="bbc-total" id="bbcTotalLabel">总余额 <b id="bbcTotalAmt">—</b> USDT</span>
-      </div>
-      <div class="bbc-head-hint">实时反映各风险桶内可用余额 · 点击卡片可发起对应桶提现</div>
-    </div>
-    <div class="bbc-grid" id="bbcGrid"><!-- 4 个风险桶 mini-card -->
-      <button class="bbc-bucket bbc-low" data-bbc="low" onclick="openDrawer('low')">
-        <div class="bbc-tag">
-          <span class="bbc-dot" style="background:#7AC74F"></span>
-          低风险桶
-        </div>
-        <div class="bbc-range">评分 0 – 19</div>
-        <div class="bbc-amt mono"><span data-bbc-amt>1,615,589.<span class="bbc-cents">12</span></span><i class="bbc-unit">USDT</i></div>
-        <div class="bbc-meta"><span>占比 <b data-bbc-pct>80.4%</b></span><span class="bbc-arrow">提现 ›</span></div>
-      </button>
-      <button class="bbc-bucket bbc-mid" data-bbc="mid" onclick="openDrawer('mid')">
-        <div class="bbc-tag">
-          <span class="bbc-dot" style="background:#FFD23F"></span>
-          中风险桶
-        </div>
-        <div class="bbc-range">评分 20 – 49</div>
-        <div class="bbc-amt mono"><span data-bbc-amt>198,720.<span class="bbc-cents">50</span></span><i class="bbc-unit">USDT</i></div>
-        <div class="bbc-meta"><span>占比 <b data-bbc-pct>9.9%</b></span><span class="bbc-arrow">提现 ›</span></div>
-      </button>
-      <button class="bbc-bucket bbc-high" data-bbc="high" onclick="openDrawer('high')">
-        <div class="bbc-tag">
-          <span class="bbc-dot" style="background:#F58A3C"></span>
-          高风险桶
-        </div>
-        <div class="bbc-range">评分 50 – 79</div>
-        <div class="bbc-amt mono"><span data-bbc-amt>156,403.<span class="bbc-cents">12</span></span><i class="bbc-unit">USDT</i></div>
-        <div class="bbc-meta"><span>占比 <b data-bbc-pct>7.8%</b></span><span class="bbc-arrow">提现 ›</span></div>
-      </button>
-      <button class="bbc-bucket bbc-severe" data-bbc="severe" onclick="openDrawer('severe')">
-        <span class="bbc-iso-badge" id="bbcSevereBadge">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>
-          隔离退款
-        </span>
-        <div class="bbc-tag">
-          <span class="bbc-dot" style="background:#E94B3D"></span>
-          严重桶
-        </div>
-        <div class="bbc-range">评分 80 – 100</div>
-        <div class="bbc-amt mono"><span data-bbc-amt>38,506.<span class="bbc-cents">76</span></span><i class="bbc-unit">USDT</i></div>
-        <div class="bbc-meta"><span>占比 <b data-bbc-pct>1.9%</b></span><span class="bbc-arrow">提现 ›</span></div>
-      </button>
-    </div>
   </div>
 
   <!-- ========== Scenario example (基于当前配置动态联动) ========== -->
@@ -4735,7 +4324,7 @@ p.subtitle {
       </div>
     </div>
     <div class="scene-foot-note">
-      示例会跟随当前规则变化；实际处理以该笔交易的命中标签、评分桶和金额档配置为准。
+      以上为典型场景示例；实际处理以该笔交易的命中标签、评分桶和金额档配置为准。
     </div>
   </div>
 
@@ -5112,156 +4701,6 @@ p.subtitle {
   </div>
 </div>
 
-<!-- ========== Drawer · 单风险等级提款表单 ========== -->
-<div class="drawer-overlay" id="bkDrawer" aria-hidden="true">
-  <aside class="drawer" data-bucket="low" id="drawerEl">
-    <header class="drawer-head">
-      <div class="drawer-title-block">
-        <div class="drawer-tier-tag"><span class="dot"></span><span id="drTierName">低风险</span> · <span id="drTierRange">0–20</span></div>
-        <div class="drawer-title">从<span id="drTierTitle">低风险</span>余额发起提款</div>
-      </div>
-      <button type="button" class="drawer-close" id="drCloseBtn" aria-label="关闭">
-        <svg viewBox="64 64 896 896" width="14" height="14" fill="currentColor"><path d="M563.8 512l262.5-312.9c4.4-5.2.7-13.1-6.1-13.1h-79.8c-4.7 0-9.2 2.1-12.3 5.7L511.6 449.8 295.1 191.7c-3-3.6-7.5-5.7-12.3-5.7H203c-6.8 0-10.5 7.9-6.1 13.1L459.4 512 196.9 824.9A7.95 7.95 0 00203 838h79.8c4.7 0 9.2-2.1 12.3-5.7l216.5-258.1 216.5 258.1c3 3.6 7.5 5.7 12.3 5.7h79.8c6.8 0 10.5-7.9 6.1-13.1L563.8 512z"/></svg>
-      </button>
-    </header>
-    <div class="drawer-body">
-      <div class="drawer-balance">
-        <div class="db-label">可提款余额</div>
-        <div class="db-amount"><span id="drMax">—</span><span class="u">USDT</span></div>
-      </div>
-
-      <!-- 表单 -->
-      <div class="form-row">
-        <div class="form-label">网络<span class="hint">仅支持 Tron</span></div>
-        <div class="form-fixed">
-          <span><b style="color:var(--success);">●</b> TRC20 · Tron</span>
-          <span class="lock">
-            <svg viewBox="64 64 896 896" width="11" height="11" fill="currentColor"><path d="M832 464H332V240c0-44.2 35.8-80 80-80h200c44.2 0 80 35.8 80 80v44c0 4.4 3.6 8 8 8h60c4.4 0 8-3.6 8-8v-44c0-83.9-68.1-152-152-152H412c-83.9 0-152 68.1-152 152v224h-68c-17.7 0-32 14.3-32 32v384c0 17.7 14.3 32 32 32h640c17.7 0 32-14.3 32-32V496c0-17.7-14.3-32-32-32zM540 701v53c0 4.4-3.6 8-8 8h-40c-4.4 0-8-3.6-8-8v-53a48.01 48.01 0 1156 0z"/></svg>
-            固定
-          </span>
-        </div>
-      </div>
-
-      <div class="form-row">
-        <div class="form-label"><span>收款地址<span class="req">*</span></span></div>
-        <div class="addr-input-row">
-          <input type="text" class="form-input mono" id="addrInput" placeholder="请输入收款地址" autocomplete="off">
-          <button type="button" class="btn-check" id="checkAddrBtn" disabled>
-            <svg viewBox="64 64 896 896" width="12" height="12" fill="currentColor"><path d="M909.6 854.5L649.9 594.8C690.2 542.7 712 479 712 412c0-80.2-31.3-155.4-87.9-212.1-56.6-56.7-132-87.9-212.1-87.9s-155.5 31.3-212.1 87.9C143.2 256.5 112 331.8 112 412c0 80.1 31.3 155.5 87.9 212.1C256.5 680.8 331.8 712 412 712c67 0 130.6-21.8 182.7-62l259.7 259.6a8.2 8.2 0 0011.6 0l43.6-43.5a8.2 8.2 0 000-11.6zM570.4 570.4C528 612.7 471.8 636 412 636s-116-23.3-158.4-65.6C211.3 528 188 471.8 188 412s23.3-116.1 65.6-158.4C296 211.3 352.2 188 412 188s116.1 23.2 158.4 65.6S636 352.2 636 412s-23.3 116.1-65.6 158.4z"/></svg>
-            <span id="checkBtnText">检查地址</span>
-          </button>
-        </div>
-        <div class="form-helper">TRC20 地址，T 开头 34 位</div>
-        <div id="addrRiskBadge" style="display:none;"></div>
-      </div>
-
-      <div class="form-row">
-        <div class="form-label">
-          <span>提款金额<span class="req">*</span></span>
-          <span class="hint">不超过可提款余额</span>
-        </div>
-        <div class="amount-row" id="amountRow">
-          <input type="text" class="amount-input" id="amountInput" placeholder="0.00" inputmode="decimal" autocomplete="off">
-          <div class="amount-suffix">USDT</div>
-        </div>
-        <div class="amount-quick">
-          <button type="button" data-pct="0.25">25%</button>
-          <button type="button" data-pct="0.5">50%</button>
-          <button type="button" data-pct="0.75">75%</button>
-          <button type="button" data-pct="1">全部</button>
-        </div>
-        <div class="amount-meta">
-          <span>可提款 <span class="max-val mono" id="amountMax">—</span> USDT</span>
-          <span id="amountErr" class="err" style="display:none;"></span>
-        </div>
-      </div>
-
-      <div class="form-row">
-        <div class="form-label">备注</div>
-        <textarea class="form-textarea" id="memoInput" placeholder="可填写订单号或备注"></textarea>
-      </div>
-
-      <!-- 返还义务（仅中/高桶显示） -->
-      <div class="obligation-panel" id="drObligation" style="display:none; margin-top: 4px;">
-        <div class="obligation-head">
-          <div class="obligation-icon">
-            <svg viewBox="64 64 896 896" width="16" height="16" fill="currentColor"><path d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm-32 232c0-4.4 3.6-8 8-8h48c4.4 0 8 3.6 8 8v272c0 4.4-3.6 8-8 8h-48c-4.4 0-8-3.6-8-8V296zm32 440a48.01 48.01 0 010-96 48.01 48.01 0 010 96z"/></svg>
-          </div>
-          <div>
-            <div class="obligation-title">提款后需关注返还</div>
-            <div class="obligation-sub">审核通过并打款后，系统会计入待返还金额。</div>
-          </div>
-        </div>
-        <div class="obligation-flow">
-          <div class="obligation-leg">
-            <div class="leg-num">1</div>
-            <div class="leg-text">提交提款 <b class="mono"><span id="legOutAmt">—</span> USDT</b></div>
-          </div>
-          <div class="obligation-divider"></div>
-          <div class="obligation-leg">
-            <div class="leg-num">2</div>
-            <div class="leg-text">平台审核并打款</div>
-          </div>
-          <div class="obligation-divider"></div>
-          <div class="obligation-leg">
-            <div class="leg-num done">✓</div>
-            <div class="leg-text">将 <span class="accent mono"><span id="legBackAmt">—</span> USDT</span> 返还至返还地址</div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <footer class="drawer-foot">
-      <button type="button" class="btn btn-ghost" id="drCancelBtn">取消</button>
-      <button type="button" class="btn btn-primary" id="submitBtn" disabled>
-        <svg viewBox="64 64 896 896" width="14" height="14" fill="currentColor"><path d="M869 487.8L491.2 159.9c-2.9-2.5-6.6-3.9-10.5-3.9h-88.5c-7.4 0-10.8 9.2-5.2 14L799.1 488 387 854c-5.6 4.9-2.2 14 5.2 14h91.5c1.9 0 3.8-.7 5.2-2L869 536.2a32.07 32.07 0 000-48.4z"/></svg>
-        <span id="drSubmitText">发起提款</span>
-      </button>
-    </footer>
-  </aside>
-</div>
-
-<!-- ========== 二次确认 Modal ========== -->
-<div class="modal-overlay" id="confirmModal">
-  <div class="modal">
-    <div class="modal-header">
-      <div class="ico">
-        <!-- antd ExclamationCircleOutlined -->
-        <svg viewBox="64 64 896 896" width="18" height="18" fill="currentColor"><path d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm-32 232c0-4.4 3.6-8 8-8h48c4.4 0 8 3.6 8 8v272c0 4.4-3.6 8-8 8h-48c-4.4 0-8-3.6-8-8V296zm32 440a48.01 48.01 0 010-96 48.01 48.01 0 010 96z"/></svg>
-      </div>
-      <div class="title-block">
-        <div class="title" id="cfmTitle">提交提款申请</div>
-        <div class="sub" id="cfmSubtitle">提交后将发送至平台审核，审核通过后由平台统一打款。</div>
-      </div>
-    </div>
-    <div class="modal-body">
-      <div class="confirm-amount">
-        <div class="amt-value"><span id="cfmAmount">—</span><span class="unit">USDT</span></div>
-        <div class="amt-meta">TRC20 · Tron</div>
-      </div>
-      <div class="confirm-summary">
-        <div class="confirm-row"><span class="k">收款地址</span><span class="v mono" id="cfmAddr">—</span></div>
-        <div class="confirm-row"><span class="k">备注</span><span class="v" id="cfmMemo">—</span></div>
-      </div>
-
-      <div class="otp-block" id="otpBlock" style="display:none;">
-        <div class="otp-head">
-          <!-- antd SafetyCertificateOutlined -->
-          <svg viewBox="64 64 896 896" width="13" height="13" fill="currentColor"><path d="M866.9 169.9L527.1 54.1C523 52.7 517.5 52 512 52s-11 .7-15.1 2.1L157.1 169.9c-8.3 2.8-15.1 12.4-15.1 21.2v482.4c0 8.8 5.7 20.4 12.6 25.9L499.3 968c3.5 2.7 8 4.1 12.6 4.1s9.2-1.4 12.6-4.1l344.7-268.6c6.9-5.4 12.6-17 12.6-25.9V191.1c.2-8.8-6.6-18.3-14.9-21.2zM792 549c0 33.4-6.5 65.8-19.4 96.3-12.4 29.5-30.2 56-52.8 78.6-22.6 22.6-49 40.4-78.6 52.8C610.8 789.5 578.4 796 545 796h-66c-33.4 0-65.8-6.5-96.3-19.4-29.5-12.4-56-30.2-78.6-52.8-22.6-22.6-40.4-49-52.8-78.6C238.5 614.8 232 582.4 232 549V274.4l280-95.4 280 95.4V549z M694.5 340.7L481.9 633.4a16.1 16.1 0 01-26 0l-126.4-174c-3.8-5.3 0-12.7 6.5-12.7h55.2c5.1 0 10 2.5 13 6.6l64.7 89.1 150.9-207.8c3-4.1 7.8-6.6 13-6.6H688c6.5 0 10.3 7.4 6.5 12.7z"/></svg>
-          大额提款 · 需要 Google 验证码
-        </div>
-        <div class="otp-sub">本次金额超过该风险等级可提款余额的 50%，请输入 Google Authenticator 的 6 位验证码。</div>
-        <div class="otp-input-row">
-          <input type="text" class="otp-input" id="otpInput" maxlength="6" placeholder="······" inputmode="numeric" autocomplete="one-time-code">
-        </div>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" id="cancelBtn">取消</button>
-      <button class="btn btn-primary" id="finalConfirmBtn" disabled style="flex: 0 0 auto;">发起提款</button>
-    </div>
-  </div>
-</div>
-
 
 
 <script>
@@ -5440,21 +4879,17 @@ function renderStatus() {
  */
 function renderModeCards() {
   const tiersCard   = document.getElementById('amountTiersCard');
-  const balanceCard = document.getElementById('bucketBalanceCard');
   const sceneCard   = document.getElementById('sceneCard');
   const moreDetails = document.getElementById('moreDetails');
 
   if (state.wizard.completed) {
     if (tiersCard)   tiersCard.hidden   = false;
-    if (balanceCard) balanceCard.hidden = false;
     if (sceneCard)   sceneCard.hidden   = false;
     if (moreDetails) moreDetails.hidden = false;
     renderAmountTiersCard();
-    if (typeof renderBucketBalanceCard === 'function') renderBucketBalanceCard();
     if (typeof renderSceneDynamic === 'function') renderSceneDynamic();
   } else {
     if (tiersCard)   tiersCard.hidden   = true;
-    if (balanceCard) balanceCard.hidden = true;
     if (sceneCard)   sceneCard.hidden   = true;
     if (moreDetails) moreDetails.hidden = false;
     // 注意：moreDetails.open 状态由用户显式控制，不在此处写
@@ -6982,6 +6417,16 @@ function cfgSave() {
   // 保险：保存前再次同步两侧标签到对应 tier，避免任何边角情况漏同步
   syncAllLabels();
 
+  const depGaps = checkGaps(cfgDepositRanges);
+  const witGaps = checkGaps(cfgWithdrawRanges);
+  if (depGaps.length > 0 || witGaps.length > 0) {
+    const lines = [];
+    if (depGaps.length) lines.push('收款侧：' + depGaps.map(g => g.msg).join('、'));
+    if (witGaps.length) lines.push('出款侧：' + witGaps.map(g => g.msg).join('、'));
+    const ok = confirm('⚠️ 金额范围存在风控盲区\n\n' + lines.join('\n') + '\n\n未覆盖区域将回退至系统默认策略。确认保存？');
+    if (!ok) return;
+  }
+
   state.wizard.completed = true;
   state.wizard.usingDefault = false;
   state.wizard.lastUpdated = fmtNow();
@@ -7006,6 +6451,49 @@ function fmtNow() {
 }
 
 
+/* ---------- 金额范围覆盖检测 ---------- */
+function checkGaps(ranges) {
+  const gaps = [];
+  if (!ranges || ranges.length === 0) {
+    gaps.push({ type: 'empty', msg: '未配置任何金额分档' });
+    return gaps;
+  }
+  const sorted = [...ranges].sort((a, b) => a.min - b.min);
+  if (sorted[0].min > 0) {
+    gaps.push({ type: 'head', msg: `0 – ${fmtAmt(sorted[0].min)} USDT 未覆盖`, lo: 0, hi: sorted[0].min });
+  }
+  for (let i = 0; i < sorted.length - 1; i++) {
+    if (sorted[i].max < sorted[i + 1].min) {
+      gaps.push({ type: 'mid', msg: `${fmtAmt(sorted[i].max)} – ${fmtAmt(sorted[i + 1].min)} USDT 未覆盖`, lo: sorted[i].max, hi: sorted[i + 1].min });
+    }
+  }
+  const last = sorted[sorted.length - 1];
+  if (last.max !== Infinity) {
+    gaps.push({ type: 'tail', msg: `${fmtAmt(last.max)}+ USDT 未覆盖`, lo: last.max, hi: Infinity });
+  }
+  return gaps;
+}
+
+
+function renderCoverageStatus(ranges, side) {
+  const gaps = checkGaps(ranges);
+  const sideName = side === 'withdraw' ? '出款' : '收款';
+  if (gaps.length === 0) {
+    return `<div class="atc-coverage atc-coverage-ok">
+      <svg class="cov-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>
+      <span class="cov-body"><span class="cov-title">${sideName}金额轴完整覆盖 0 – ∞，无风控盲区</span></span>
+    </div>`;
+  }
+  const gapItems = gaps.map(g => `<span class="cov-gap-item">${g.msg}（将回退至系统默认策略）</span>`).join('');
+  return `<div class="atc-coverage atc-coverage-warn">
+    <svg class="cov-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    <div class="cov-body">
+      <div class="cov-title">存在${gaps.length}处风控盲区</div>
+      <div class="cov-gaps">${gapItems}</div>
+    </div>
+  </div>`;
+}
+
 /* ---------- 风控策略与金额分档（合并卡 · z4 双 tab） ---------- */
 let _atcActiveTab = 'deposit';  // 当前查看的 tab side
 
@@ -7020,6 +6508,23 @@ function renderAmountTiersCard() {
   const tabCntWit = document.getElementById('atcTabCountWithdraw');
   if (tabCntDep) tabCntDep.textContent = String(cfgDepositRanges.length);
   if (tabCntWit) tabCntWit.textContent = String(cfgWithdrawRanges.length);
+
+  // 盲区红点 + 全局提示
+  const depGapsForDot = checkGaps(cfgDepositRanges);
+  const witGapsForDot = checkGaps(cfgWithdrawRanges);
+  const banner = document.getElementById('atcGapBanner');
+  const bannerText = document.getElementById('atcGapText');
+  if (banner && bannerText) {
+    const parts = [];
+    if (depGapsForDot.length) parts.push(`收款侧 ${depGapsForDot.length} 处盲区`);
+    if (witGapsForDot.length) parts.push(`出款侧 ${witGapsForDot.length} 处盲区`);
+    if (parts.length) {
+      bannerText.textContent = parts.join('、') + ' — 建议补充配置对应金额范围的风控策略';
+      banner.classList.add('show');
+    } else {
+      banner.classList.remove('show');
+    }
+  }
 
   // 当前 tab 的数据集
   const side = _atcActiveTab;
@@ -7057,6 +6562,7 @@ function renderAmountTiersCard() {
         <span>0 USDT</span>
         <span>${fmtAmt(maxAxis)}${last.max === Infinity ? '+' : ''}</span>
       </div>
+      ${renderCoverageStatus(ranges, side)}
     `;
   }
 
@@ -7476,56 +6982,7 @@ function confirmRangePicker() {
   openWizard({ side, rangeIdx: newIdx });
 }
 
-/* ---------- 桶余额卡片渲染（Q4 / x3） ---------- */
-/* mock 数据：4 个风险评级桶（低/中/高/严重），后续接入实际余额 API */
-const _mockBucketBalances = {
-  low:    { amt: 1615589.12, pct: 80.4 },
-  mid:    { amt:  198720.50, pct:  9.9 },
-  high:   { amt:  156403.12, pct:  7.8 },
-  severe: { amt:   38506.76, pct:  1.9 },
-};
-function renderBucketBalanceCard() {
-  const card = document.getElementById('bucketBalanceCard');
-  if (!card) return;
-  const total = Object.values(_mockBucketBalances).reduce((s, b) => s + b.amt, 0);
-  const totalAmtEl = document.getElementById('bbcTotalAmt');
-  if (totalAmtEl) totalAmtEl.textContent = fmtAmt(Math.round(total));
-
-  // 根据当前收款第 1 档 refundFrom 计算被隔离的桶
-  // 收款隔离退款起点 ≥ 严重 → 严重桶；≥ 高 → 高+严重；≥ 中 → 中/高/严重；不隔离 → 空集
-  const rule = cfgDepositRanges[0]?.rule;
-  if (!rule) return;
-  const refundFrom = rule.refundFrom;
-  const isolatedSet = new Set();
-  if (refundFrom === 'severe') { isolatedSet.add('severe'); }
-  if (refundFrom === 'high')   { isolatedSet.add('severe'); isolatedSet.add('high'); }
-  if (refundFrom === 'mid')    { isolatedSet.add('severe'); isolatedSet.add('high'); isolatedSet.add('mid'); }
-
-  card.querySelectorAll('.bbc-bucket').forEach(btn => {
-    const k = btn.dataset.bbc;
-    const data = _mockBucketBalances[k];
-    if (!data) return;
-    const amtSpan = btn.querySelector('[data-bbc-amt]');
-    const pctSpan = btn.querySelector('[data-bbc-pct]');
-    if (amtSpan) {
-      const intPart = Math.floor(data.amt);
-      const cents = Math.round((data.amt - intPart) * 100).toString().padStart(2, '0');
-      amtSpan.innerHTML = `${fmtAmt(intPart)}.<span class="bbc-cents">${cents}</span>`;
-    }
-    if (pctSpan) pctSpan.textContent = `${data.pct.toFixed(1)}%`;
-
-    btn.style.opacity = isolatedSet.has(k) ? '0.62' : '1';
-    btn.title = isolatedSet.has(k)
-      ? '该桶按当前收款规则已进入隔离退款，仍可在合规审批后发起提现'
-      : '点击对该桶余额发起提现';
-  });
-
-  // 严重桶状态徽章：当前规则触发隔离时显示「🔒 隔离退款」
-  const severeBadge = document.getElementById('bbcSevereBadge');
-  if (severeBadge) {
-    severeBadge.classList.toggle('show', isolatedSet.has('severe'));
-  }
-}
+/* renderBucketBalanceCard removed — replaced by lightweight summary bar */
 
 /* ---------- 场景举例 (Q2-1)
  * 用单笔交易示例解释：金额、命中标签、评分桶、处理结果。
@@ -8076,367 +7533,8 @@ renderAll();
   const md = document.getElementById('moreDetails');
   if (md) md.removeAttribute('open');
 })();
-// === INJECTED DRAWER LOGIC ===
-const fmt = n => Math.round(Number(n)).toLocaleString('en-US');
-const fmtAmount = n => Number(n).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
-const shortAddr = a => a && a.length > 14 ? a.slice(0, 7) + '...' + a.slice(-5) : (a || '');
-const shortHash = h => h && h.length > 16 ? h.slice(0, 8) + '...' + h.slice(-6) : (h || '');
 
-const SUM = {
-  merchant: 1982512.60,
-  severe:   11800.00,
-  high:     156403.12,
-  mid:      198720.50,
-  low:      1615589.12
-};
 
-const BUCKET_META = {
-  severe: { name: "隔离退款", range: "隔离期间，仅可退款给原付款方", requiresReview: true, cta: "仅可退款至付款方", obligation: true },
-  high:   { name: "高风险桶", range: "评分 50 – 79", requiresReview: true, cta: "提交提款申请" },
-  mid:    { name: "中风险桶", range: "评分 20 – 49", requiresReview: true, cta: "提交提款申请" },
-  low:    { name: "低风险桶", range: "评分 0 – 19", requiresReview: false, cta: "发起提款" }
-};
-
-const stateDrawer = {
-  activeBucket: null,
-  form: { addr: "", amount: "", memo: "", addrRisk: null }
-};
-function isValidTronAddr(s) { return /^T[A-Za-z0-9]{33}$/.test(s); }
-
-function mockAddrRisk(addr) {
-  let h = 0;
-  for (let i = 0; i < addr.length; i++) h = ((h << 5) - h) + addr.charCodeAt(i);
-  const score = Math.abs(h) % 101;
-  if (score === 0)        return { score, level: 'clean',  label: '清洁' };
-  else if (score < 20)    return { score, level: 'low',    label: '低' };
-  else if (score < 50)    return { score, level: 'mid',    label: '中' };
-  else if (score < 80)    return { score, level: 'high',   label: '高' };
-  else                    return { score, level: 'severe', label: '严重' };
-}
-
-function checkAddress() {
-  const addr = stateDrawer.form.addr.trim();
-  const badge = document.getElementById('addrRiskBadge');
-  const checkBtn = document.getElementById('checkAddrBtn');
-  const checkText = document.getElementById('checkBtnText');
-  const input = document.getElementById('addrInput');
-
-  if (!isValidTronAddr(addr)) {
-    stateDrawer.form.addrRisk = { invalid: true };
-    input.classList.add('is-invalid');
-    badge.className = 'addr-risk-badge invalid';
-    badge.style.display = 'inline-flex';
-    badge.innerHTML = `
-      <svg viewBox="64 64 896 896" width="11" height="11" fill="currentColor"><path d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm165.4 618.2l-66-.3L512 563.4l-99.3 118.4-66.1.3c-4.4 0-8-3.5-8-8 0-1.9.7-3.7 1.9-5.2l130.1-155L340.5 359a8.32 8.32 0 01-1.9-5.2c0-4.4 3.6-8 8-8l66.1.3L512 464.6l99.3-118.4 66-.3c4.4 0 8 3.5 8 8 0 1.9-.7 3.7-1.9 5.2L553.5 514l130 155c1.2 1.5 1.9 3.3 1.9 5.2 0 4.4-3.6 8-8 8z"/></svg>
-      地址格式无效（Tron 地址应为 T 开头 34 位）`;
-    return;
-  }
-
-  input.classList.remove('is-invalid');
-  stateDrawer.form.addrRisk = { checking: true };
-  checkBtn.disabled = true;
-  checkText.textContent = '检查中…';
-  badge.className = 'addr-risk-badge';
-  badge.style.display = 'inline-flex';
-  badge.style.background = 'var(--bg-soft)';
-  badge.style.color = 'var(--text-tertiary)';
-  badge.style.borderColor = 'var(--border)';
-  badge.innerHTML = `<span style="display:inline-block; width:10px; height:10px; border:1.5px solid var(--text-light); border-top-color:transparent; border-radius:50%; animation: spin .8s linear infinite;"></span>正在检查地址风险…`;
-
-  setTimeout(() => {
-    if (stateDrawer.form.addr.trim() !== addr) return;
-    const r = mockAddrRisk(addr);
-    stateDrawer.form.addrRisk = r;
-    badge.removeAttribute('style');
-    badge.className = `addr-risk-badge ${r.level}`;
-    const ico = (r.level === 'clean' || r.level === 'low')
-      ? `<svg viewBox="64 64 896 896" width="11" height="11" fill="currentColor"><path d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm193.5 301.7l-210.6 292a31.8 31.8 0 01-51.7 0L318.5 484.9c-3.8-5.3 0-12.7 6.5-12.7h46.9c10.2 0 19.9 4.9 25.9 13.3l71.2 98.8 157.2-218c6-8.3 15.6-13.3 25.9-13.3H699c6.5 0 10.3 7.4 6.5 12.7z"/></svg>`
-      : `<svg viewBox="64 64 896 896" width="11" height="11" fill="currentColor"><path d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm-32 232c0-4.4 3.6-8 8-8h48c4.4 0 8 3.6 8 8v272c0 4.4-3.6 8-8 8h-48c-4.4 0-8-3.6-8-8V296zm32 440a48.01 48.01 0 010-96 48.01 48.01 0 010 96z"/></svg>`;
-    badge.innerHTML = `${ico}风险评分 <b style="margin: 0 2px;">${r.score}</b> · ${r.label}<span class="note">· 仅提示，不影响提交</span>`;
-    checkBtn.disabled = false;
-    checkText.textContent = '重新检查';
-  }, 480);
-}
-
-function currentBucketMax() {
-  const bk = stateDrawer.activeBucket;
-  return bk ? (SUM[bk] || 0) : 0;
-}
-
-function renderAmountFlow() {
-  const amt = parseFloat(stateDrawer.form.amount) || 0;
-  const legOut = document.getElementById('legOutAmt');
-  const legBack = document.getElementById('legBackAmt');
-  if (legOut) legOut.textContent = amt > 0 ? fmtAmount(amt) : '—';
-  if (legBack) legBack.textContent = amt > 0 ? fmtAmount(amt) : '—';
-}
-
-function validateForm() {
-  if (!stateDrawer.activeBucket) return;
-  const addr = stateDrawer.form.addr.trim();
-  const amt = parseFloat(stateDrawer.form.amount) || 0;
-  const max = currentBucketMax();
-  const errEl = document.getElementById('amountErr');
-  const amountRow = document.getElementById('amountRow');
-
-  let amountOk = true;
-  if (stateDrawer.form.amount === '') {
-    errEl.style.display = 'none';
-    amountRow.classList.remove('is-invalid');
-    amountOk = false;
-  } else if (isNaN(amt) || amt <= 0) {
-    errEl.textContent = '金额必须大于 0';
-    errEl.style.display = 'inline';
-    amountRow.classList.add('is-invalid');
-    amountOk = false;
-  } else if (amt > max) {
-    errEl.textContent = `超过可提款余额 ${fmt(max)}`;
-    errEl.style.display = 'inline';
-    amountRow.classList.add('is-invalid');
-    amountOk = false;
-  } else {
-    errEl.style.display = 'none';
-    amountRow.classList.remove('is-invalid');
-  }
-
-  const addrOk = isValidTronAddr(addr);
-  document.getElementById('submitBtn').disabled = !(addrOk && amountOk);
-
-  const checkBtn = document.getElementById('checkAddrBtn');
-  if (stateDrawer.form.addrRisk?.checking) {
-    checkBtn.disabled = true;
-  } else {
-    checkBtn.disabled = !addr;
-  }
-}
-
-function resetForm() {
-  stateDrawer.form = { addr: '', amount: '', memo: '', addrRisk: null };
-  document.getElementById('addrInput').value = '';
-  document.getElementById('amountInput').value = '';
-  document.getElementById('memoInput').value = '';
-  document.getElementById('addrRiskBadge').style.display = 'none';
-  document.getElementById('amountErr').style.display = 'none';
-  document.getElementById('addrInput').classList.remove('is-invalid');
-  document.getElementById('amountRow').classList.remove('is-invalid');
-  document.getElementById('checkBtnText').textContent = '检查地址';
-  renderAmountFlow();
-  validateForm();
-}
-
-/* ===========================================================
-   Confirm modal
-=========================================================== */
-function openConfirm() {
-  const addr = stateDrawer.form.addr.trim();
-  const amt = parseFloat(stateDrawer.form.amount);
-  const memo = stateDrawer.form.memo && stateDrawer.form.memo.trim() ? stateDrawer.form.memo.trim() : '—';
-
-  document.getElementById('cfmAddr').textContent = addr;
-  document.getElementById('cfmAmount').textContent = fmtAmount(amt);
-  document.getElementById('cfmMemo').textContent = memo;
-
-  // 标题 / 副标题：按桶差异化文案
-  const max = currentBucketMax();
-  const meta = BUCKET_META[stateDrawer.activeBucket];
-  const titleEl = document.getElementById('cfmTitle');
-  const subEl = document.getElementById('cfmSubtitle');
-  if (meta?.requiresReview) {
-    titleEl.textContent = `从${meta.name}余额发起提款`;
-    subEl.textContent = '提交后将发送至平台审核，审核通过后由平台统一打款。';
-  } else {
-    titleEl.textContent = `从${meta?.name || ''}余额发起提款`;
-    subEl.textContent = '提交后将直接打款。';
-  }
-
-  // OTP 触发：金额超过该风险等级可提款余额的 50%，且该等级需平台审核
-  const needOtp = !!(meta?.requiresReview) && max > 0 && amt >= max * 0.5;
-  document.getElementById('otpBlock').style.display = needOtp ? 'block' : 'none';
-  document.getElementById('otpInput').value = '';
-
-  updateFinalConfirmState();
-  document.getElementById('confirmModal').classList.add('show');
-}
-
-function closeConfirm() {
-  document.getElementById('confirmModal').classList.remove('show');
-}
-
-function updateFinalConfirmState() {
-  const otpRequired = document.getElementById('otpBlock').style.display !== 'none';
-  const otpVal = document.getElementById('otpInput').value.trim();
-  const otpOk = !otpRequired || /^\d{6}$/.test(otpVal);
-  document.getElementById('finalConfirmBtn').disabled = !otpOk;
-}
-
-function broadcast() {
-  const btn = document.getElementById('finalConfirmBtn');
-  btn.disabled = true;
-  btn.innerHTML = `<svg class="spin" viewBox="64 64 896 896" width="14" height="14" fill="currentColor"><path d="M988 548c-19.9 0-36-16.1-36-36 0-59.4-11.6-117-34.6-171.3a440.45 440.45 0 00-94.3-139.9 437.71 437.71 0 00-139.9-94.3C629 83.6 571.4 72 512 72c-19.9 0-36-16.1-36-36s16.1-36 36-36c69.1 0 136.2 13.5 199.3 40.3C772.3 66 827 103 874 150c47 47 83.9 101.8 109.7 162.7 26.7 63.1 40.2 130.2 40.2 199.3.1 19.9-16 36-35.9 36z"/></svg> 提交中...`;
-
-  setTimeout(() => {
-    const bk = stateDrawer.activeBucket;
-    const meta = BUCKET_META[bk];
-    const addr = stateDrawer.form.addr.trim();
-    const amt = parseFloat(stateDrawer.form.amount);
-    const memo = stateDrawer.form.memo && stateDrawer.form.memo.trim() ? stateDrawer.form.memo.trim() : '—';
-
-    const r = mockAddrRisk(addr);
-    // 低风险等级直接打款，无需审核；其余等级需审核
-    const status = meta?.requiresReview ? 'reviewing' : 'paid';
-
-    const newRecord = {
-      time: new Date().toISOString().slice(0, 19).replace('T', ' '),
-      bucket: bk,
-      src: Math.random() > 0.5 ? 'A' : 'B',
-      addr, amount: amt, score: r.score, category: null,
-      hash: status === 'paid' ? `${Date.now().toString(16)}${Math.random().toString(16).slice(2, 12)}`.slice(0, 64).padEnd(64, '0') : '',
-      memo, age: '刚刚',
-      status,
-    };
-    
-    // 从对应桶扣减；商户总余额同步扣减
-    SUM[bk] = Math.max(0, (SUM[bk] || 0) - amt);
-    SUM.merchant = Math.max(0, SUM.merchant - amt);
-
-    closeConfirm();
-    closeDrawer();
-    btn.innerHTML = '发起提款';
-    
-    
-    resetForm();
-
-    const toastMsg = meta?.requiresReview
-      ? `已提交 ${fmtAmount(amt)} USDT 提款申请，等待平台审核`
-      : `${meta?.name || ''} ${fmtAmount(amt)} USDT 已打款`;
-    showToast(toastMsg, 'success');
-  }, 600);
-}
-
-/* ===========================================================
-   Drawer (per-bucket withdrawal form)
-=========================================================== */
-function openDrawer(bucket) {
-  const meta = BUCKET_META[bucket];
-  if (!meta) return;
-
-  stateDrawer.activeBucket = bucket;
-  resetForm();
-
-  const drawer = document.getElementById('drawerEl');
-  drawer.dataset.bucket = bucket;
-
-  document.getElementById('drTierName').textContent = meta.name;
-  document.getElementById('drTierRange').textContent = meta.range;
-  document.getElementById('drTierTitle').textContent = meta.name;
-  const maxVal = SUM[bucket];
-  const maxStr = maxVal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  document.getElementById('drMax').textContent = maxStr;
-  document.getElementById('amountMax').textContent = maxStr;
-
-  // 返还义务面板
-  const obligationEl = document.getElementById('drObligation');
-  obligationEl.style.display = meta.obligation ? 'block' : 'none';
-
-  // 提交按钮文案
-  const submitText = document.getElementById('drSubmitText');
-  submitText.textContent = meta.cta || '发起提款';
-
-  document.getElementById('bkDrawer').classList.add('show');
-  document.getElementById('bkDrawer').setAttribute('aria-hidden', 'false');
-  setTimeout(() => document.getElementById('addrInput')?.focus(), 320);
-}
-
-function closeDrawer() {
-  document.getElementById('bkDrawer').classList.remove('show');
-  document.getElementById('bkDrawer').setAttribute('aria-hidden', 'true');
-  stateDrawer.activeBucket = null;
-}
-
-/* ===========================================================
-   Wire up
-=========================================================== */
-document.getElementById('addrInput').addEventListener('input', e => {
-  stateDrawer.form.addr = e.target.value;
-  // 输入变更后清掉旧的检查结果
-  const badge = document.getElementById('addrRiskBadge');
-  badge.style.display = 'none';
-  stateDrawer.form.addrRisk = null;
-  document.getElementById('addrInput').classList.remove('is-invalid');
-  document.getElementById('checkBtnText').textContent = '检查地址';
-  validateForm();
-});
-document.getElementById('checkAddrBtn').addEventListener('click', checkAddress);
-document.getElementById('addrInput').addEventListener('keydown', e => {
-  if (e.key === 'Enter') { e.preventDefault(); if (!document.getElementById('checkAddrBtn').disabled) checkAddress(); }
-});
-
-function updateAmountButtons() {
-  const amt = parseFloat(stateDrawer.form.amount) || 0;
-  const max = currentBucketMax();
-  document.querySelectorAll('.amount-quick button').forEach(btn => {
-    const pct = parseFloat(btn.dataset.pct);
-    const expected = Math.floor(max * pct);
-    if (amt > 0 && amt === expected && max > 0) {
-      btn.classList.add('active');
-    } else {
-      btn.classList.remove('active');
-    }
-  });
-}
-
-document.getElementById('amountInput').addEventListener('input', e => {
-  let v = e.target.value.replace(/[^\d.]/g, '');
-  const parts = v.split('.');
-  if (parts.length > 2) v = parts[0] + '.' + parts.slice(1).join('');
-  e.target.value = v;
-  stateDrawer.form.amount = v;
-  renderAmountFlow();
-  validateForm();
-  updateAmountButtons();
-});
-document.getElementById('memoInput').addEventListener('input', e => {
-  stateDrawer.form.memo = e.target.value;
-});
-document.querySelectorAll('.amount-quick button').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const pct = parseFloat(btn.dataset.pct);
-    const v = Math.floor(currentBucketMax() * pct);
-    document.getElementById('amountInput').value = v;
-    stateDrawer.form.amount = String(v);
-    renderAmountFlow();
-    validateForm();
-    updateAmountButtons();
-  });
-});
-
-document.getElementById('submitBtn').addEventListener('click', openConfirm);
-document.getElementById('cancelBtn').addEventListener('click', closeConfirm);
-document.getElementById('finalConfirmBtn').addEventListener('click', broadcast);
-document.getElementById('confirmModal').addEventListener('click', e => {
-  if (e.target.id === 'confirmModal') closeConfirm();
-});
-
-// Bucket card click -> open drawer
-document.querySelectorAll('.bucket-card').forEach(card => {
-  card.addEventListener('click', () => {
-    const bk = card.dataset.bucket;
-    openDrawer(bk);
-  });
-});
-
-// Drawer close handlers
-document.getElementById('drCloseBtn').addEventListener('click', closeDrawer);
-document.getElementById('drCancelBtn').addEventListener('click', closeDrawer);
-document.getElementById('bkDrawer').addEventListener('click', e => {
-  if (e.target.id === 'bkDrawer') closeDrawer();
-});
-// ESC to close drawer
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && document.getElementById('bkDrawer').classList.contains('show')) {
-    closeDrawer();
-  }
-});
 
 </script>
 
