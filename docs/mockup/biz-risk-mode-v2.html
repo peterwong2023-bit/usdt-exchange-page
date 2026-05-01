@@ -726,7 +726,7 @@ p.subtitle {
   border: 1px solid var(--border-light);
   color: var(--text-secondary);
 }
-/* 各 tier 配色：S0/S1 红 · S2 橙 · S3 黄 · S4 灰（虚线） */
+/* 各 tier 配色：S0/S1 红 · S2 橙 · S3 黄 */
 .details-more .doc-tier-S0 .doc-tier-chip,
 .details-more .doc-tier-S1 .doc-tier-chip {
   background: rgba(220,38,38,.05); border-color: rgba(220,38,38,.22); color: #b91c1c;
@@ -736,20 +736,6 @@ p.subtitle {
 }
 .details-more .doc-tier-S3 .doc-tier-chip {
   background: rgba(234,179,8,.06); border-color: rgba(234,179,8,.3); color: #a16207;
-}
-.details-more .doc-tier-S4 .doc-tier-chip {
-  background: #fff;
-  border: 1px dashed rgba(100,116,139,.45);
-  color: #475569;
-}
-.details-more .doc-tier-S4 .doc-tier-chip::before {
-  content: '标';
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 12px; height: 12px;
-  margin-right: 4px;
-  background: rgba(100,116,139,.18); color: #334155;
-  font-size: 9.5px; font-weight: 800;
-  border-radius: 3px;
 }
 @media (max-width: 720px) {
   .details-more .doc-tier-grid { grid-template-columns: 1fr; }
@@ -3037,7 +3023,7 @@ p.subtitle {
   color: var(--text-secondary);
   border-color: var(--border-subtle);
 }
-/* 主页分档行：S0 强制 / S4 打标 mini-badge */
+/* 主页分档行：S0 强制 mini-badge */
 .amount-tiers-card .atc-rule-mini {
   display: inline-flex; align-items: center;
   height: 18px; padding: 0 6px; border-radius: 999px;
@@ -3050,11 +3036,6 @@ p.subtitle {
   background: rgba(220, 38, 38, .08);
   color: #b91c1c;
   border-color: rgba(220, 38, 38, .2);
-}
-.amount-tiers-card .atc-rule-mini-mark {
-  background: rgba(100, 116, 139, .1);
-  color: #475569;
-  border-color: rgba(100, 116, 139, .25);
 }
 .amount-tiers-card .atc-tier-actions {
   display: flex; gap: 6px;
@@ -3417,7 +3398,7 @@ p.subtitle {
   .match-pairs .mp-arrow { display: none; }
 }
 
-/* ============== Risk Label Step · 5 tier 分组（S0–S4） ============== */
+/* ============== Risk Label Step · 4 tier 分组（S0–S3） ============== */
 .cfg-label-section .cls-section {
   margin-bottom: 14px;
   border-radius: 10px;
@@ -3475,11 +3456,6 @@ p.subtitle {
   border-color: rgba(234,179,8,.22);
 }
 .cfg-label-section .cls-tier-opt .cls-badge { background: rgba(234,179,8,.12); color: #a16207; }
-.cfg-label-section .cls-tier-mark {
-  background: repeating-linear-gradient(135deg, rgba(100,116,139,.04) 0 6px, rgba(100,116,139,.02) 6px 12px);
-  border: 1px dashed rgba(100,116,139,.4);
-}
-.cfg-label-section .cls-tier-mark .cls-badge { background: rgba(100,116,139,.12); color: #475569; }
 
 .cfg-label-section .cls-head .cls-toggle {
   margin-left: 6px;
@@ -3500,35 +3476,7 @@ p.subtitle {
   border-radius: 6px;
 }
 
-/* S4 展示态 chip：灰虚线 + 「标」角标 + 灰锁；不可点击，永远显示已启用 */
-.cfg-label-chip.chip-tier-mark {
-  background: rgba(100,116,139,.06);
-  border-style: dashed;
-  border-color: rgba(100,116,139,.45);
-  color: #475569;
-  cursor: default;
-}
-.cfg-label-chip.chip-tier-mark:hover {
-  border-color: rgba(100,116,139,.45);
-  color: #475569;
-}
-.cfg-label-chip.chip-tier-mark.locked {
-  /* 覆盖通用 .locked 的红色，保持灰色展示态 */
-  background: rgba(100,116,139,.06);
-  border-color: rgba(100,116,139,.45);
-  color: #475569;
-  cursor: not-allowed;
-  font-weight: 500;
-}
-.cfg-label-chip .chip-mark-flag {
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 14px; height: 14px;
-  border-radius: 4px;
-  background: rgba(100,116,139,.22);
-  color: #334155;
-  font-size: 9.5px; font-weight: 800;
-  margin-right: 1px;
-}
+
 /* S1 高危：未选保持红色描边作为危险性视觉锚点；选中走通用蓝 */
 .cfg-label-chip.chip-tier-lock:not(.checked) {
   background: #fff;
@@ -3652,7 +3600,7 @@ p.subtitle {
 }
 
 /* ============================================================
- * P1 平台基线区（S0 + S4 合并折叠）
+ * P1 平台基线区（S0 折叠）
  * ============================================================ */
 .cls-section.cls-baseline {
   margin-top: 4px;
@@ -3715,7 +3663,7 @@ p.subtitle {
 }
 
 /* ============================================================
- * Compact collapsed style for S4 仅记录 + S0 平台强制拦截
+ * Compact collapsed style for S0 平台强制拦截
  * Goal: reduce vertical footprint when both sections are collapsed
  * (these are auxiliary/secondary info, not primary configuration)
  * ============================================================ */
@@ -3777,7 +3725,7 @@ p.subtitle {
   color: #94a3b8;
   margin-right: 2px;
 }
-.cfg-label-section .cls-section.cls-tier-mark.cls-baseline.collapsed .cls-head.cls-baseline-head > svg {
+.cfg-label-section .cls-section.cls-baseline.collapsed .cls-head.cls-baseline-head > svg {
   width: 11px;
   height: 11px;
   padding: 0;
@@ -3801,12 +3749,6 @@ p.subtitle {
 /* Hover state slightly different */
 .cfg-label-section .cls-section.cls-baseline.collapsed .cls-baseline-head:hover {
   background: rgba(100,116,139,.04);
-}
-/* Also override the dashed/striped tier-mark background when collapsed */
-.cfg-label-section .cls-section.cls-tier-mark.cls-baseline.collapsed {
-  background: #fafbfc;
-  background-image: none;
-  border: 1px solid var(--border-light);
 }
 .cls-baseline-row {
   background: #fff;
@@ -3922,20 +3864,7 @@ p.subtitle {
 .psl-side-dep { background: #2563eb; }
 .psl-side-wit { background: #7c3aed; }
 
-/* preview 中 S4 chip 区分（仅打标） */
-.preview-selected-labels .psl-chip-mark {
-  background: #fff;
-  border: 1px dashed rgba(100,116,139,.5);
-  color: #475569;
-}
-.preview-selected-labels .psl-chip-mark .psl-mark-flag {
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 12px; height: 12px;
-  background: rgba(100,116,139,.2); color: #334155;
-  border-radius: 3px;
-  font-size: 9px; font-weight: 800;
-  margin-right: 3px;
-}
+
 @media (max-width: 720px) {
   .preview-selected-split { grid-template-columns: 1fr; }
 }
@@ -4417,7 +4346,7 @@ p.subtitle {
         </div>
       </div>
 
-      <!-- Section 3: 风险标签 5 级分级（S0-S4，由 JS 按 RISK_LABELS 动态渲染） -->
+      <!-- Section 3: 风险标签 4 级分级（S0-S3，由 JS 按 RISK_LABELS 动态渲染） -->
       <div class="detail-section" id="docRiskLabels"></div>
 
       <!-- Section 3b: 推送告警场景 -->
@@ -4755,12 +4684,11 @@ function closeLightbox(e) {
 }
 
 /* =========== Data =========== */
-/* 风险标签 5 级分级（S0–S4）—— 与"了解更多"展示的分类一致
+/* 风险标签 4 级分级（S0–S3）
  * S0  处置硬红线 · 命中即归严重桶并隔离退款（平台强制，不可关闭）
  * S1  高危      · 命中即拦截资金（默认开启，可关闭放行）
  * S2  高风险    · 命中即拦截资金（默认关闭，可按业务开启）
  * S3  敏感      · 命中即拦截资金（默认关闭，可按业务开启）
- * S4  中性身份  · 仅打标，不影响桶分配与处置（默认关闭，可按业务开启）
  */
 const RISK_LABELS = [
   // S0 · 处置硬红线（命中即退）
@@ -4799,14 +4727,6 @@ const RISK_LABELS = [
   { key: 'goreRelated',           name: '暴力血腥',     desc: '涉及血腥、暴力或极端不适内容，主要是内容治理和声誉风险，通常建议人工复核。',                                                     tier: 'S3' },
   { key: 'religionRelated',       name: '宗教',         desc: '涉及宗教敏感议题、组织或相关活动，主要属于敏感内容与声誉风险场景。',                                                             tier: 'S3' },
 
-  // S4 · 中性身份（不影响等级，仅打标）
-  { key: 'financialServices',     name: '金融服务',     desc: '银行、券商、支付机构等正规金融服务主体，仅打标用于识别，不改变桶分配与处置。',                                                   tier: 'S4' },
-  { key: 'blockchainInfra',       name: '区块链基础设施', desc: '验证节点、区块浏览器、协议合约等基础设施类主体，仅打标用于识别，不改变桶分配与处置。',                                         tier: 'S4' },
-  { key: 'businessServices',      name: '商业服务',     desc: '正常商业服务、SaaS、电商等中性商户主体，仅打标用于识别，不改变桶分配与处置。',                                                   tier: 'S4' },
-  { key: 'compliantExchange',     name: '合规交易所',   desc: '具备完善 KYC/KYT 及监管牌照的合规中心化交易所，仅打标用于识别，不改变桶分配与处置。',                                             tier: 'S4' },
-  { key: 'compliantWallet',       name: '合规钱包',     desc: '具备合规能力或托管资质的钱包服务商，仅打标用于识别，不改变桶分配与处置。',                                                       tier: 'S4' },
-  { key: 'onchainNft',            name: '链上 NFT',     desc: '链上 NFT 铸造、交易或市场相关地址，仅打标用于识别，不改变桶分配与处置。',                                                         tier: 'S4' },
-  { key: 'gaming',                name: '游戏',         desc: '链上游戏、GameFi 等娱乐场景相关地址，仅打标用于识别，不改变桶分配与处置。',                                                       tier: 'S4' },
 ];
 
 /* =========== State =========== */
@@ -4909,14 +4829,13 @@ function renderAll() {
 function renderDocRiskLabels() {
   const root = document.getElementById('docRiskLabels');
   if (!root) return;
-  const tierOrder = ['S0', 'S1', 'S2', 'S3', 'S4'];
+  const tierOrder = ['S0', 'S1', 'S2', 'S3'];
   /* 与配置弹窗 TIER_META 保持一致：业务词主名 + S 编号副名 + 三段式 hint */
   const meta = {
     S0: { label: '平台必拦',     code: 'S0', color: '#dc2626', hint: '始终生效 · 命中即拦截并进入隔离退款',                                   bgIcon: 'lock'  },
     S1: { label: '默认拦截',     code: 'S1', color: '#dc2626', hint: '默认开启 · 命中即拦截 · 可手动关闭',                                   bgIcon: 'lock'  },
     S2: { label: '可选拦截',     code: 'S2', color: '#f59e0b', hint: '默认关闭 · 按业务需要开启',                                           bgIcon: 'flame' },
     S3: { label: '可选拦截',     code: 'S3', color: '#f59e0b', hint: '默认关闭 · 按业务需要开启',                                           bgIcon: 'flame' },
-    S4: { label: '仅记录',       code: 'S4', color: '#64748b', hint: '默认关闭 · 不影响收款/出款处置',                         bgIcon: 'tag'   },
   };
   const iconSvg = {
     lock:  '<rect x="5" y="11" width="14" height="10" rx="2" stroke="currentColor" stroke-width="2"/><path d="M8 11V7a4 4 0 018 0v4" stroke="currentColor" stroke-width="2"/>',
@@ -4949,7 +4868,7 @@ function renderDocRiskLabels() {
   root.innerHTML = `
     <div class="detail-head">
       <div class="bar" style="background:#f59e0b"></div>
-      <span class="title">风险标签 · 5 组标签（S0–S4）</span>
+      <span class="title">风险标签 · 4 组标签（S0–S3）</span>
       <span style="margin-left:auto;font-size:11px;color:#475569;background:#f1f5f9;border:1px solid #e2e8f0;padding:2px 8px;border-radius:10px;font-weight:500">命中后按收款 / 出款规则同步处置</span>
     </div>
     <div class="doc-tier-grid" style="margin-bottom:0;">${tierCards}</div>
@@ -4998,33 +4917,27 @@ function renderDocPushAlerts() {
  * Wizard · 引导式分桶配置（手工配置弹窗）
  * ========================================================= */
 
-/* 风险标签 5 级分类（与 RISK_LABELS.tier 字段一一对应）
+/* 风险标签 4 级分类（与 RISK_LABELS.tier 字段一一对应）
  *   S0 / lockHard —— 平台硬红线（默认开启，不可关闭）
  *   S1 / lock     —— 高危拦截    （默认开启，可关闭放行）
  *   S2 / rec      —— 高风险拦截  （默认关闭，可按业务开启）
  *   S3 / opt      —— 敏感拦截    （默认关闭，可按业务开启）
- *   S4 / mark     —— 身份打标    （默认关闭，可按业务开启 · 命中仅打标不改变处置）
  */
 const TIER_OF = (l) => {
   if (l.tier === 'S0') return 'lockHard';
   if (l.tier === 'S1') return 'lock';
   if (l.tier === 'S2') return 'rec';
   if (l.tier === 'S3') return 'opt';
-  if (l.tier === 'S4') return 'mark';
   return 'rec';
 };
-/* S1 高危 默认 OFF：商户需主动评估后启用（关闭=放行洗钱/暗网类资金，需明示同意） */
-const TIER_DEFAULT_ON = { lockHard: true, lock: true, rec: false, opt: false, mark: false };
-/* TIER_META 三段式 hint：[默认状态] · [命中后果] · [典型场景] —— 让商户一眼看清后果 */
+const TIER_DEFAULT_ON = { lockHard: true, lock: true, rec: false, opt: false };
 const TIER_META = {
   lockHard: { name: '平台必拦',     short: 'S0', hint: '始终拦截 · 平台维护 · 合规底线',                                      color: '#dc2626' },
   lock:     { name: '默认拦截',     short: 'S1', hint: '默认开启 · 可手动关闭',                                                color: '#dc2626' },
   rec:      { name: '可选拦截',     short: 'S2', hint: '默认关闭 · 按业务需要开启',                                          color: '#f59e0b' },
   opt:      { name: '可选拦截',     short: 'S3', hint: '默认关闭 · 按业务需要开启',                                          color: '#f59e0b' },
-  mark:     { name: '仅记录',       short: 'S4', hint: '默认关闭 · 不影响收款/出款处置',                          color: '#64748b' },
 };
-/* 锁定策略：仅 S0 平台强锁（红锁），其余 S1/S2/S3/S4 全部商户可选 */
-const TIER_LOCKED = { lockHard: true, lock: false, rec: false, opt: false, mark: false };
+const TIER_LOCKED = { lockHard: true, lock: false, rec: false, opt: false };
 
 /* ----------------------------------------------------------------
  * 新数据模型（按 4 区间）
@@ -5119,14 +5032,13 @@ function isBucketHit(fromVal, bucketVal) {
   return order.indexOf(bucketVal) >= order.indexOf(fromVal);
 }
 
-/* 标签摘要计数（5 tier） */
+/* 标签摘要计数（4 tier） */
 function countLabelsByTier(rule) {
   const buckets = {
     lockHard: { on: 0, total: 0 },
     lock:     { on: 0, total: 0 },
     rec:      { on: 0, total: 0 },
     opt:      { on: 0, total: 0 },
-    mark:     { on: 0, total: 0 },
   };
   RISK_LABELS.forEach(l => {
     const t = TIER_OF(l);
@@ -5135,8 +5047,7 @@ function countLabelsByTier(rule) {
   });
   return buckets;
 }
-/* 计数辅助：商户可控拦截档（lock + rec + opt = S1 + S2 + S3）的已选 / 总量
- *   注意：本函数仅返回拦截语义档；S4 打标用 countMarkLabels() 单独取，避免语义混淆 */
+/* 计数辅助：商户可控拦截档（lock + rec + opt = S1 + S2 + S3）的已选 / 总量 */
 function countSelectableLabels(rule) {
   const c = countLabelsByTier(rule);
   return {
@@ -5148,11 +5059,6 @@ function countSelectableLabels(rule) {
 function countLockedLabels(rule) {
   const c = countLabelsByTier(rule);
   return c.lockHard.on;
-}
-/* 计数辅助：S4 商户可选打标的已启用数量（命中仅打标，不改变处置） */
-function countMarkLabels(rule) {
-  const c = countLabelsByTier(rule);
-  return c.mark.on;
 }
 
 /* z4: 收款 / 出款金额分档完全独立的两套数据结构。
@@ -5266,8 +5172,6 @@ function fmtAmt(v) {
 let _cfgLabelsExpanded = false;
 /* 平台强制段折叠状态（默认折叠 · 仅 S0 一档） */
 let _lockSecCollapsed = true;
-/* S4 仅记录段折叠状态（默认折叠） */
-let _markSecCollapsed = true;
 
 /* ---------- 左侧：双 flow 配置面板（init = 3 步，singleSide = 2 步） ---------- */
 function renderCfgPanel() {
@@ -5361,47 +5265,35 @@ function renderCfgPanel() {
         </div>
       `;
 
-  // ----- 步骤 2/3：风险标签 · 5 级分组（S0/S1/S2/S3/S4）-----
-  // 计数口径：可选 = S1 + S2 + S3 + S4（lock + rec + opt + mark）；强制 = 仅 S0
+  // ----- 步骤 2/3：风险标签 · 4 级分组（S0/S1/S2/S3）-----
   const c = countLabelsByTier(rule);
-  const totalSelectable = c.lock.total + c.rec.total + c.opt.total + c.mark.total;
-  const onSelectable    = c.lock.on    + c.rec.on    + c.opt.on    + c.mark.on;
+  const totalSelectable = c.lock.total + c.rec.total + c.opt.total;
+  const onSelectable    = c.lock.on    + c.rec.on    + c.opt.on;
   const onLocked        = c.lockHard.on;
   const lockSecCollapsed = (typeof _lockSecCollapsed === 'boolean') ? _lockSecCollapsed : true;
-  const markSecCollapsed = (typeof _markSecCollapsed === 'boolean') ? _markSecCollapsed : true;
 
   // 标签 chip 渲染：根据 tier 决定样式 + 是否可点
-  // S0：红锁强制（lockHard）·  S1/S2/S3：商户可选拦截 ·  S4：商户可选打标（不影响处置）
   const renderChip = (l) => {
     const t = TIER_OF(l);
     const locked = TIER_LOCKED[t];
-    const isMark = t === 'mark';
     const on = !!rule.labels[l.key];
     const cls = ['cfg-label-chip', `chip-tier-${t}`];
     if (on) cls.push('checked');
     if (locked) cls.push('locked');
-    if (isMark) cls.push('mark');
-    const titleStr = isMark
-      ? `${l.name} · ${l.desc} · 命中仅打标，不改变桶分配与处置`
-      : l.desc;
-    const titleAttr = `title="${titleStr.replace(/"/g, '&quot;')}"`;
+    const titleAttr = `title="${l.desc.replace(/"/g, '&quot;')}"`;
     const dataAttr  = locked ? '' : `data-label-key="${l.key}"`;
-    // S0/S1/S2/S3/S4 全部按 on 状态渲染对勾；只有 S0 是 always on（locked）
     const checkSvg  = on
       ? '<svg class="chip-check" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m5 12 5 5L20 7"/></svg>'
       : '';
-    // 锁图标：仅 S0 红锁；其余商户可控档不显示锁
     const lockSvg = (t === 'lockHard')
       ? '<svg class="chip-lock" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>'
       : '';
-    // S4 永远显示「标」角标作为视觉身份标志，区分"开启 = 打标 ≠ 拦截"
-    const markFlag = isMark ? '<span class="chip-mark-flag">标</span>' : '';
-    return `<span class="${cls.join(' ')}" ${dataAttr} ${titleAttr}>${checkSvg}${lockSvg}${markFlag}${l.name}</span>`;
+    return `<span class="${cls.join(' ')}" ${dataAttr} ${titleAttr}>${checkSvg}${lockSvg}${l.name}</span>`;
   };
 
-  // 顺序：S1 默认拦截 → 可选拦截（S2+S3 合并）→ 仅记录（S4，默认折叠）→ 平台必拦（S0，默认折叠）
-  const baselineTiers = ['lockHard']; // S0 红锁单独成区
-  const tierItems = Object.fromEntries(['lock', 'rec', 'opt', 'mark', 'lockHard'].map(t => [t, RISK_LABELS.filter(l => TIER_OF(l) === t)]));
+  // 顺序：S1 默认拦截 → 可选拦截（S2+S3 合并）→ 平台必拦（S0，默认折叠）
+  const baselineTiers = ['lockHard'];
+  const tierItems = Object.fromEntries(['lock', 'rec', 'opt', 'lockHard'].map(t => [t, RISK_LABELS.filter(l => TIER_OF(l) === t)]));
 
   /* 单个 tier 的 chip 列表（含 on/off divider） */
   const buildChipNodes = (items, isInterceptTier) => {
@@ -5485,31 +5377,6 @@ function renderCfgPanel() {
       </div>`;
   };
 
-  /* S4 仅记录区（默认折叠） */
-  const renderMarkBlock = () => {
-    const meta = TIER_META['mark'];
-    const cnt  = c['mark'];
-    const collapsed = markSecCollapsed;
-    const headIcon = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h13l5 5-5 5H3V7Z"/><path d="M7 12h.01"/></svg>';
-    return `
-      <div class="cls-section cls-tier-mark cls-baseline ${collapsed ? 'collapsed' : ''}">
-        <div class="cls-head cls-baseline-head" data-action="toggle-mark-sec" role="button" tabindex="0" aria-expanded="${!collapsed}" style="--tier-color:${meta.color};">
-          <span class="cls-tier-bar"></span>${headIcon}
-          <span class="cls-head-name">${meta.name}</span>
-          <span class="cls-head-code">${meta.short}</span>
-          <span class="cls-head-hint">${meta.hint}</span>
-          <span class="cls-badge">${cnt.on}/${cnt.total}</span>
-          <span class="cls-toggle ${collapsed ? 'collapsed' : ''}">
-            <span>${collapsed ? '展开' : '折叠'}</span>
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
-          </span>
-        </div>
-        <div class="cls-baseline-body ${collapsed ? 'collapsed' : ''}">
-          <div class="cls-body"><div class="cfg-tier-grid">${buildChipNodes(tierItems['mark'], false)}</div></div>
-        </div>
-      </div>`;
-  };
-
   /* 平台强制区：仅 S0 一档，默认展开
    *   「平台强制拦截 6 项 · 命中即归入严重桶并隔离退款」
    */
@@ -5574,7 +5441,7 @@ function renderCfgPanel() {
   const labelTip = `
     <div class="cfg-label-tip">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v5"/><path d="M12 16h.01"/></svg>
-      <span>${syncPrefix}默认仅 <b>默认拦截</b> 开启 · <b>可选拦截</b>可按业务需要开启 · 仅记录不影响处置 · 平台必拦始终生效</span>
+      <span>${syncPrefix}默认仅 <b>默认拦截</b> 开启 · <b>可选拦截</b>可按业务需要开启 · 平台必拦始终生效</span>
     </div>
   `;
 
@@ -5593,8 +5460,6 @@ function renderCfgPanel() {
           ${renderLockBlock()}
           <!-- 可选拦截：S2 + S3 合并 -->
           ${renderOptionalBlock()}
-          <!-- 仅记录：S4（默认折叠） -->
-          ${renderMarkBlock()}
           <!-- 平台强制区：S0（默认折叠） -->
           ${renderBaselineBlock()}
         </div>
@@ -5706,10 +5571,7 @@ function bindCfgEvents(container) {
         else syncDepositLabels();
       }
       // P8 实时反馈：告诉商户「这一下做了什么」
-      const tier = TIER_OF(label);
-      const action = (tier === 'mark')
-        ? '仅打标，不改变处置'
-        : (nextOn ? '命中后将拦截' : '已放行该类资金');
+      const action = nextOn ? '命中后将拦截' : '已放行该类资金';
       showToast(`${nextOn ? '✓ 启用' : '○ 关闭'}「${label.name}」· ${action}`);
       renderCfgPanel();
       renderCfgPreview();
@@ -5725,14 +5587,6 @@ function bindCfgEvents(container) {
     });
   });
 
-  // Q5b: S4 仅记录 折叠/展开
-  container.querySelectorAll('[data-action="toggle-mark-sec"]').forEach(el => {
-    el.addEventListener('click', (e) => {
-      e.stopPropagation();
-      _markSecCollapsed = !_markSecCollapsed;
-      renderCfgPanel();
-    });
-  });
 
 }
 
@@ -5895,7 +5749,7 @@ function renderPreviewInitSummary(rng) {
 
   // z5: 收款 / 出款标签按 side 独立计数
   const countMap = (map) => {
-    const buckets = { lockHard: 0, lock: 0, rec: 0, opt: 0, mark: 0 };
+    const buckets = { lockHard: 0, lock: 0, rec: 0, opt: 0 };
     let totalOn = 0;
     RISK_LABELS.forEach(l => {
       if (map[l.key]) { buckets[TIER_OF(l)] += 1; totalOn += 1; }
@@ -5908,29 +5762,24 @@ function renderPreviewInitSummary(rng) {
   const lockedTotal = dCount.buckets.lockHard; // 仅 S0 强制锁定
 
   const buildChips = (map) => {
-    // 用户实际可控档命中（lock/rec/opt 三档）；S4 走 display 态独立 chip
     const userPicked = RISK_LABELS.filter(l => {
       const t = TIER_OF(l);
       return (t === 'lock' || t === 'rec' || t === 'opt') && map[l.key];
     });
     const lockedOn = RISK_LABELS.filter(l => TIER_OF(l) === 'lockHard' && map[l.key]).length;
-    const markOn   = RISK_LABELS.filter(l => TIER_OF(l) === 'mark'     && map[l.key]).length;
     const chips = userPicked.map(l => {
       return `<span class="psl-chip">${l.name}</span>`;
     }).join('');
     const lockedChip = lockedOn > 0
       ? `<span class="psl-chip" style="background:rgba(220,38,38,.06);border-color:rgba(220,38,38,.2);color:#b91c1c;"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>平台强制 ×${lockedOn}</span>`
       : '';
-    const markChip = markOn > 0
-      ? `<span class="psl-chip psl-chip-mark"><span class="psl-mark-flag">标</span>仅打标 ×${markOn}</span>`
-      : '';
-    if (!chips && !lockedChip && !markChip) return `<span class="psl-empty">未勾选额外拦截标签</span>`;
-    return chips + lockedChip + markChip;
+    if (!chips && !lockedChip) return `<span class="psl-empty">未勾选额外拦截标签</span>`;
+    return chips + lockedChip;
   };
 
   // P9 白话总结：把 (refund + reject + 标签数) 翻译成一句通俗描述
-  const dEffective = dCount.buckets.lock + dCount.buckets.rec + dCount.buckets.opt + dCount.buckets.lockHard + dCount.buckets.mark;
-  const wEffective = wCount.buckets.lock + wCount.buckets.rec + wCount.buckets.opt + wCount.buckets.lockHard + wCount.buckets.mark;
+  const dEffective = dCount.buckets.lock + dCount.buckets.rec + dCount.buckets.opt + dCount.buckets.lockHard;
+  const wEffective = wCount.buckets.lock + wCount.buckets.rec + wCount.buckets.opt + wCount.buckets.lockHard;
   // 同步态时入 = 出，只用一组数；分开态时显示两组
   const isSyncPreview = (cfgFlow === 'init');
   const refundSummary = refundMeta.val === 'none'
@@ -5946,7 +5795,7 @@ function renderPreviewInitSummary(rng) {
     ? '全放行'
     : rejectMeta.label;
   const summarySentence = isSyncPreview
-    ? `按当前配置：有 <b>${dEffective}/${RISK_LABELS.length}</b> 项标签会触发风控（平台必拦 <b>${dCount.buckets.lockHard}</b> / 商户可选拦截 <b>${dCount.buckets.lock + dCount.buckets.rec + dCount.buckets.opt}</b> / 仅记录 <b>${dCount.buckets.mark}</b>）。${refundSummary}${rejectSummary}`
+    ? `按当前配置：有 <b>${dEffective}/${RISK_LABELS.length}</b> 项标签会触发风控（平台必拦 <b>${dCount.buckets.lockHard}</b> / 商户可选拦截 <b>${dCount.buckets.lock + dCount.buckets.rec + dCount.buckets.opt}</b>）。${refundSummary}${rejectSummary}`
     : `收款生效 <b>${dEffective}/${RISK_LABELS.length}</b> 项 · 出款生效 <b>${wEffective}/${RISK_LABELS.length}</b> 项 · 收款 ${refundBrief} · 出款 ${rejectBrief}。`;
 
   // P11 同步态合并标签为一列；分开态保持两列
@@ -5956,12 +5805,8 @@ function renderPreviewInitSummary(rng) {
       const t = TIER_OF(l);
       return (t === 'lock' || t === 'rec' || t === 'opt') && map[l.key];
     });
-    const markOn = RISK_LABELS.filter(l => TIER_OF(l) === 'mark' && map[l.key]).length;
     const chips = userPicked.map(l => `<span class="psl-chip">${l.name}</span>`).join('');
-    const markChip = markOn > 0
-      ? `<span class="psl-chip psl-chip-mark"><span class="psl-mark-flag">标</span>仅打标 ×${markOn}</span>`
-      : '';
-    return (chips + markChip) || `<span class="psl-empty">未勾选额外拦截标签</span>`;
+    return chips || `<span class="psl-empty">未勾选额外拦截标签</span>`;
   };
   const selectedLabelsBlock = isSyncPreview
     ? `
@@ -6042,7 +5887,7 @@ function renderPreviewInitSummary(rng) {
           </div>
           <div class="di-body">
             <div class="di-title">风险标签 · 收 ${dCount.buckets.lock + dCount.buckets.rec + dCount.buckets.opt} / 出 ${wCount.buckets.lock + wCount.buckets.rec + wCount.buckets.opt}</div>
-            <div class="di-desc">可选拦截 22 · 仅记录 7 · 平台必拦 ${lockedTotal}</div>
+            <div class="di-desc">可选拦截标签 · 平台必拦 ${lockedTotal}</div>
           </div>
         </div>
       </div>
@@ -6229,16 +6074,14 @@ function renderPreviewSummary(rng, rule, meta, side) {
   const c = countLabelsByTier(rule);
   const sel = countSelectableLabels(rule);
   const lockedOn = countLockedLabels(rule);
-  const markOn   = countMarkLabels(rule);
   const totalAll = RISK_LABELS.length;
-  const onAll = sel.on + lockedOn + markOn;
+  const onAll = sel.on + lockedOn;
   const rangeStr = rng.max === Infinity ? `${fmtAmt(rng.min)} USDT 起` : `${fmtAmt(rng.min)} – ${fmtAmt(rng.max)} USDT`;
   const isDeposit = side === 'deposit';
   const sideName = isDeposit ? '收款' : '出款';
   const list = isDeposit ? cfgDepositRanges : cfgWithdrawRanges;
   const tierIdx = cfgEditing.idx;
 
-  // 商户实际勾选的可控档（lock + rec + opt）；S0 强制 / S4 仅打标 走独立 chip
   const userPicked = RISK_LABELS.filter(l => {
     const t = TIER_OF(l);
     return (t === 'lock' || t === 'rec' || t === 'opt') && rule.labels[l.key];
@@ -6246,12 +6089,9 @@ function renderPreviewSummary(rng, rule, meta, side) {
   const lockedChip = lockedOn > 0
     ? `<span class="psl-chip" style="background:rgba(220,38,38,.06);border-color:rgba(220,38,38,.2);color:#b91c1c;"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>平台强制 ×${lockedOn}</span>`
     : '';
-  const markChip = markOn > 0
-    ? `<span class="psl-chip psl-chip-mark"><span class="psl-mark-flag">标</span>仅打标 ×${markOn}</span>`
-    : '';
   const selectedChips = userPicked.length
-    ? userPicked.map(l => `<span class="psl-chip">${l.name}</span>`).join('') + lockedChip + markChip
-    : ((lockedChip + markChip) || `<span class="psl-empty">未勾选额外拦截标签</span>`);
+    ? userPicked.map(l => `<span class="psl-chip">${l.name}</span>`).join('') + lockedChip
+    : (lockedChip || `<span class="psl-empty">未勾选额外拦截标签</span>`);
 
   // 第 2 子卡：仅展示当前正在编辑这一侧的规则；另一侧用注脚说明独立配置
   const otherSideName = isDeposit ? '出款' : '收款';
@@ -6291,7 +6131,7 @@ function renderPreviewSummary(rng, rule, meta, side) {
           </div>
           <div class="di-body">
             <div class="di-title">${sideName}标签 · 启用 ${onAll} / ${totalAll}</div>
-            <div class="di-desc">商户已选拦截 ${sel.on}/${sel.total} · 已选记录 ${markOn}/${c.mark.total} · 平台必拦 ${lockedOn}</div>
+            <div class="di-desc">商户已选拦截 ${sel.on}/${sel.total} · 平台必拦 ${lockedOn}</div>
           </div>
         </div>
       </div>
@@ -6570,10 +6410,9 @@ function renderAmountTiersCard() {
   if (list) {
     const rowsHtml = ranges.map((r, i) => {
       const meta = isDeposit ? REFUND_BY_VAL[r.rule.refundFrom] : REJECT_BY_VAL[r.rule.rejectFrom];
-      // 标签计数口径：仅可选档（S1+S2+S3）；S0 强制 + S4 打标用 mini-badge 提示
+      // 标签计数口径：仅可选档（S1+S2+S3）；S0 强制用 mini-badge 提示
       const sel = countSelectableLabels(r.rule);
       const forcedOn = countLockedLabels(r.rule);
-      const markOn = countMarkLabels(r.rule);
       const rangeStr = r.max === Infinity
         ? `${fmtAmt(r.min)} USDT 起`
         : `${fmtAmt(r.min)} – ${fmtAmt(r.max)} USDT`;
@@ -6595,7 +6434,6 @@ function renderAmountTiersCard() {
               <span class="atc-rule-lbl">标签</span>
               <span class="atc-rule-val atc-rule-neutral" title="可选拦截标签已启用 / 总量">已选 ${sel.on}/${sel.total}</span>
               <span class="atc-rule-mini atc-rule-mini-forced" title="平台必拦标签 · 始终生效">+${forcedOn} 必拦</span>
-              <span class="atc-rule-mini atc-rule-mini-mark" title="仅记录标签 · 不改变资金处置">+${markOn} 记录</span>
             </span>
           </div>
           <div class="atc-tier-actions">
@@ -7443,7 +7281,7 @@ function renderSceneDynamic() {
 
   // ====================================================================
   // Tag：当前档位 + 标签启用数
-  // 仅统计商户可调的 S1/S2/S3 标签（共 22 项）；S0 强制 / S4 打标 不计入
+  // 仅统计商户可调的 S1/S2/S3 标签；S0 强制不计入
   // ====================================================================
   const cfgTag = document.getElementById('sceneCfgTag');
   if (cfgTag) {
